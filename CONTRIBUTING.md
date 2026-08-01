@@ -2,8 +2,13 @@
 
 ## Yêu cầu
 
-- Flutter **3.32.0** (stable) — xem `FLUTTER_VERSION` trong `.github/workflows/ci.yml`
-- Dart 3.8
+- Flutter **3.44.8** (stable) — xem `FLUTTER_VERSION` trong `.github/workflows/ci.yml`
+- Dart 3.12
+
+Đừng để SDK tụt lại quá xa bản stable. Ngoài lý do thông thường, `flutter build windows`
+hỏng khi SDK cũ hơn Visual Studio trên máy build: Flutter chỉ ánh xạ được những phiên bản
+VS nó biết, gặp bản mới hơn thì im lặng rơi về generator `Visual Studio 16 2019` và CMake
+báo không tìm thấy Visual Studio nào.
 
 ## Chạy lần đầu
 
@@ -15,6 +20,8 @@ flutter run -d <thiết-bị>
 
 `flutter gen-l10n` sinh ra `lib/core/l10n/gen/` từ file ARB. Thư mục này nằm trong
 `.gitignore` nên **clone xong phải chạy lệnh này**, không thì IDE báo lỗi thiếu `L10n`.
+
+Build desktop trên Linux cần thêm: `ninja-build libgtk-3-dev pkg-config clang cmake`.
 
 ## Trước khi commit
 

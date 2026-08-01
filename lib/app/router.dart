@@ -12,7 +12,13 @@ abstract final class Routes {
   static const stats = '/stats';
   static const settings = '/settings';
 
-  static const shellBranches = [home, tasks, rewards, stats, settings];
+  static const List<String> shellBranches = [
+    home,
+    tasks,
+    rewards,
+    stats,
+    settings,
+  ];
 }
 
 /// Router của app.

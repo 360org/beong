@@ -23,7 +23,7 @@ native riêng từng nền tảng (gấp 3 chi phí).
 ---
 
 ## ADR-003: Riverpod thay vì BLoC
-**Quyết định:** Riverpod 2 + codegen.
+**Quyết định:** Riverpod 3 + codegen.
 **Lý do:** ít boilerplate hơn BLoC cho app cỡ này; provider tổ hợp tốt cho dữ liệu dẫn xuất
 (số dư, tiến độ hôm nay); test không cần widget tree; không phụ thuộc `BuildContext` — hợp
 với background sync.

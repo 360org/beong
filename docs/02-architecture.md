@@ -29,11 +29,11 @@ lớp đồng bộ. Mọi thao tác ghi local trước → UI phản hồi tức
 
 | Hạng mục | Chọn | Lý do |
 |---|---|---|
-| Framework | Flutter 3.3x (stable) | Một codebase cho iOS/Android/macOS/Windows |
-| Ngôn ngữ | Dart 3, sound null-safety | — |
-| State | **Riverpod 2** (codegen) | Test được, không phụ thuộc BuildContext, hợp desktop |
+| Framework | Flutter 3.44.x (stable) | Một codebase cho iOS/Android/macOS/Windows |
+| Ngôn ngữ | Dart 3.12, sound null-safety | — |
+| State | **Riverpod 3** (codegen) | Test được, không phụ thuộc BuildContext, hợp desktop |
 | Điều hướng | **go_router** | Deep link, hỗ trợ tốt desktop/web, khai báo tường minh |
-| DB local | **Drift** (SQLite) | Type-safe, migration rõ ràng, chạy mọi nền tảng |
+| DB local | **Drift** (SQLite, qua `sqlite3` 3.x) | Type-safe, migration rõ ràng, chạy mọi nền tảng |
 | Backend | **Supabase** | Postgres + RLS + Auth + Realtime + Storage; self-host được |
 | Model/DTO | freezed + json_serializable | Immutable, copyWith, union type cho state |
 | DI | Riverpod providers | Không cần get_it |

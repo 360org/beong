@@ -6,7 +6,10 @@ on:
   pull_request:
 
 env:
-  FLUTTER_VERSION: "3.32.0"
+  # Giữ sát bản stable mới nhất. SDK cũ hỏng build Windows: Flutter chỉ ánh xạ
+  # được các phiên bản Visual Studio nó biết, gặp bản mới hơn thì rơi về generator
+  # mặc định "Visual Studio 16 2019" và CMake không tìm thấy trình biên dịch nào.
+  FLUTTER_VERSION: "3.44.8"
 
 jobs:
   analyze:

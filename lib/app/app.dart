@@ -4,6 +4,7 @@ import 'package:dailychildren/core/theme/app_theme.dart';
 import 'package:dailychildren/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class DailyChildrenApp extends ConsumerStatefulWidget {
   const DailyChildrenApp({super.key});
@@ -13,7 +14,7 @@ class DailyChildrenApp extends ConsumerStatefulWidget {
 }
 
 class _DailyChildrenAppState extends ConsumerState<DailyChildrenApp> {
-  late final _router = createRouter();
+  late final GoRouter _router = createRouter();
 
   @override
   Widget build(BuildContext context) {
