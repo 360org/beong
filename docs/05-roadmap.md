@@ -3,16 +3,23 @@
 Ước lượng theo **1 dev full-time**. Có 2 dev thì chia Sprint 3–6 song song (một người backend/sync,
 một người UI).
 
-## Sprint 0 — Nền móng (1 tuần)
-- [ ] `flutter create` với 4 platform (ios, android, macos, windows)
-- [ ] Cấu hình lint (`very_good_analysis`), format, pre-commit
-- [ ] Theme + design tokens từ `04-design-system.md`, thư viện component dùng chung
-- [ ] i18n (vi/en) với ARB
-- [ ] go_router + shell route (bottom nav / sidebar)
-- [ ] `ResponsiveScaffold` + golden test 3 breakpoint
-- [ ] CI: analyze + test + build android/macos
+## Sprint 0 — Nền móng ✅ XONG
+- [x] `flutter create` với 5 platform (ios, android, macos, windows, **linux**)
+- [x] Cấu hình lint (`very_good_analysis`), format
+- [x] Theme + design tokens từ `04-design-system.md`
+- [x] i18n (vi/en) với ARB + trần phóng chữ 1.6
+- [x] go_router + `StatefulShellRoute` (mỗi tab giữ lịch sử riêng)
+- [x] `ResponsiveScaffold` + test 3 breakpoint
+- [x] CI: analyze + format + test + build 5 nền tảng
+- [ ] Pre-commit hook (hoãn — CI đã chặn đủ, thêm sau nếu thấy cần)
 
-**Xong khi:** app chạy trên 4 nền tảng, hiển thị 5 màn hình rỗng đúng theme, CI xanh.
+**Ghi chú:** thêm Linux ngoài kế hoạch vì build/test được ngay trong CI (Ubuntu runner
+rẻ và nhanh hơn macOS/Windows) — không phải nền tảng phát hành.
+
+**Phát hiện khi làm:** bảng màu hồ sơ trẻ trong `04-design-system.md` chỉ đạt contrast
+2.7–3.9:1 với chữ trắng, không đạt WCAG AA như tài liệu đã ghi. Đã tính lại và bổ sung test
+tự động. Bài học: **mọi ràng buộc khả dụng ghi trong tài liệu phải có test tương ứng**,
+nếu không nó chỉ là ước muốn.
 
 ## Sprint 1 — Dữ liệu local (1.5 tuần)
 - [ ] Drift schema đầy đủ theo `03-data-model.md` (gồm `routines`, `streaks`, `badges_earned`)

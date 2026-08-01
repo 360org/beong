@@ -10,7 +10,18 @@ và tiếng Việt.
 **Miễn phí hoàn toàn** — không thuê bao, không mua trong app, không quảng cáo, không giới hạn
 số trẻ hay số task.
 
-> **Trạng thái:** đang ở Sprint 0 (dựng nền). Xem `docs/05-roadmap.md`.
+> **Trạng thái:** Sprint 0 xong (nền dự án, design system, điều hướng, i18n, CI).
+> Sprint 1 (dữ liệu local) là bước tiếp theo — xem `docs/05-roadmap.md`.
+
+## Chạy thử
+
+```bash
+flutter pub get
+flutter gen-l10n
+flutter run
+```
+
+Chi tiết quy ước phát triển: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Tài liệu
 
