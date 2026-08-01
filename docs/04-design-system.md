@@ -20,8 +20,13 @@ mở rộng được cho desktop.
 | `gem` | `#FFC53D` | `#FFD166` | Biểu tượng điểm |
 
 **Màu hồ sơ trẻ** (dùng cho avatar, viền card, biểu đồ): 8 màu
-`#6B4EFF #FF6B9D #22C55E #F59E0B #06B6D4 #A855F7 #EF4444 #14B8A6`.
-Ràng buộc: mọi màu hồ sơ đạt contrast ≥ 4.5:1 với chữ trắng khi làm nền đậm.
+`#6B4EFF #E3004D #17833F #9E6606 #047D92 #9B3CF6 #E31313 #0E8074`.
+
+Ràng buộc: mọi màu hồ sơ đạt contrast **≥ 4.8:1 với chữ trắng** khi làm nền đậm (ngưỡng WCAG AA
+là 4.5, chừa biên an toàn). Giá trị trên là bảng màu thiết kế ban đầu (`#FF6B9D #22C55E #F59E0B
+#06B6D4 #A855F7 #EF4444 #14B8A6`) đã **hạ độ sáng, giữ nguyên hue/saturation** cho tới khi đạt
+ngưỡng — bảng gốc chỉ đạt 2.7–3.9:1, không dùng được với chữ trắng.
+`test/unit/app_theme_test.dart` kiểm tra lại ràng buộc này ở mỗi lần chạy CI.
 
 ## 2. Chữ
 

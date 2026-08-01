@@ -1,0 +1,15 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "lib/core/l10n/gen/**"
+
+linter:
+  rules:
+    # very_good_analysis bật sẵn public_member_api_docs — quá nặng cho code app.
+    # Yêu cầu doc ở tầng domain giữ bằng review thay vì lint.
+    public_member_api_docs: false
+    lines_longer_than_80_chars: false
+    flutter_style_todos: true
