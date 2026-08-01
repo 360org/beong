@@ -85,7 +85,7 @@ Xem lại chỉ số này sau beta; nếu tỷ lệ duyệt trễ cao, cân nh�
 **Quyết định:** không tích hợp SDK quảng cáo/attribution. Analytics (nếu có) là PostHog self-host,
 opt-in, không log nội dung do người dùng nhập.
 **Lý do:** đối tượng là trẻ em; đây cũng là điểm khác biệt marketing so với đối thủ.
-**Hệ quả:** doanh thu phải đến từ mua một lần hoặc thuê bao (quyết định ở bản sau).
+**Hệ quả:** doanh thu không thể đến từ quảng cáo. Ở v1 thì không có doanh thu nào cả — xem ADR-014.
 
 ---
 
