@@ -7,7 +7,10 @@ Lấy cảm hứng từ ChoreReward, mở rộng thêm: **offline-first** (Chore
 Internet), app desktop cho phụ huynh, nhiều phụ huynh, bằng chứng hoàn thành, thống kê xuất được
 và tiếng Việt.
 
-> **Trạng thái:** giai đoạn kế hoạch & thiết kế. Chưa có code.
+**Miễn phí hoàn toàn** — không thuê bao, không mua trong app, không quảng cáo, không giới hạn
+số trẻ hay số task.
+
+> **Trạng thái:** đang ở Sprint 0 (dựng nền). Xem `docs/05-roadmap.md`.
 
 ## Tài liệu
 
@@ -17,8 +20,8 @@ và tiếng Việt.
 | [`docs/02-architecture.md`](docs/02-architecture.md) | Kiến trúc, tech stack, cấu trúc thư mục, sync, bảo mật, CI |
 | [`docs/03-data-model.md`](docs/03-data-model.md) | Schema, quan hệ, RLS, chỉ mục, migration |
 | [`docs/04-design-system.md`](docs/04-design-system.md) | Màu, chữ, component, 24 preset, mô tả từng màn hình |
-| [`docs/05-roadmap.md`](docs/05-roadmap.md) | 7 sprint, ~8.5 tuần tới v1.0, kế hoạch sau v1 |
-| [`docs/06-decisions.md`](docs/06-decisions.md) | 13 ADR + câu hỏi còn mở |
+| [`docs/05-roadmap.md`](docs/05-roadmap.md) | 7 sprint, ~9 tuần tới v1.0, kế hoạch sau v1 |
+| [`docs/06-decisions.md`](docs/06-decisions.md) | 14 ADR + câu hỏi còn mở |
 | [`docs/07-competitive-analysis.md`](docs/07-competitive-analysis.md) | Phân tích ChoreReward từ App Store listing + việc phải làm |
 
 ## Ý tưởng cốt lõi

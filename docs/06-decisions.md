@@ -127,13 +127,34 @@ không đo *sự hoàn hảo*.
 
 ---
 
+## ADR-014: v1 miễn phí hoàn toàn, không giới hạn tính năng
+**Bối cảnh:** ChoreReward bán thuê bao tự gia hạn. Câu hỏi doanh thu (mục 1, 3 trong danh sách
+mở trước đây) đã được chốt.
+**Quyết định:** **v1 miễn phí toàn bộ.** Không thuê bao, không mua trong app, không quảng cáo,
+không giới hạn số trẻ / số task / số routine. Chuyện tính phí để sau, quyết định riêng ở bản sau.
+**Lý do:** ChoreReward còn rất mới và chưa có product-market fit rõ (chưa đủ rating). Miễn phí
+hoàn toàn là cách nhanh nhất để lấy người dùng và học từ thực tế, đồng thời là điểm khác biệt
+sắc bén khi đối thủ trực tiếp thu tiền.
+**Hệ quả:**
+- (+) Không phải làm StoreKit / Google Play Billing, không màn hình paywall, không quản lý
+  gói/hoá đơn/khôi phục mua hàng → **tiết kiệm ~1 tuần trong MVP**.
+- (+) Không có logic "tính năng khoá" rải khắp code.
+- (−) Chi phí hạ tầng do ta chịu → phải theo dõi chi phí Supabase theo số gia đình hoạt động;
+  kiến trúc offline-first giúp giảm mạnh lượng gọi server, đây là lợi thế thật về chi phí.
+- **Ràng buộc bắt buộc cho code:** không đưa bất kỳ khái niệm `isPremium`, `plan`, `entitlement`
+  nào vào domain hay database ở v1. Khi nào tính phí thì thêm mới, không để lại "chỗ trống"
+  nửa vời gây nợ kỹ thuật.
+
+---
+
 ## Câu hỏi còn mở
 
 | # | Câu hỏi | Cần chốt trước |
 |---|---|---|
-| 1 | Mô hình doanh thu. **Benchmark:** ChoreReward dùng thuê bao tự gia hạn qua iTunes, không quảng cáo. Ta theo thuê bao, mua 1 lần, hay freemium? | Sprint 6 |
 | 2 | Có cho phép trừ điểm (penalty) không? Nhiều chuyên gia nuôi dạy phản đối | v1.1 |
-| 3 | Giới hạn số trẻ / số task ở bản miễn phí? | Sprint 6 |
 | 4 | Tên & thương hiệu chính thức (DailyChildren chỉ là tên tạm) | Sprint 5 |
 | 5 | Self-host Supabase ngay từ đầu hay dùng cloud rồi chuyển sau? | Sprint 4 |
 | 6 | Tiền tiêu vặt: chỉ ghi sổ "bố mẹ nợ con", hay v2 nối ví điện tử (MoMo/ZaloPay)? Nối ví kéo theo KYC và quy định tài chính — nặng | v2 |
+| 7 | Mô hình doanh thu cho bản sau v1 (nếu cần) — đã hoãn theo ADR-014 | sau v1 |
+
+> Mục 1 và 3 đã chốt tại ADR-014: miễn phí hoàn toàn ở v1.

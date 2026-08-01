@@ -83,7 +83,7 @@ Chưa đủ rating → còn kịp để vào. Nhưng cũng nghĩa là **chưa c�
 | Thống kê cho phụ huynh | Cơ bản | ✅ + xuất CSV/PDF |
 | Tiếng Việt | ❌ | ✅ |
 | Quảng cáo | Không | Không |
-| Doanh thu | Thuê bao | Chưa chốt (xem ADR-013) |
+| Doanh thu | Thuê bao tự gia hạn | **Miễn phí hoàn toàn ở v1** (ADR-014) |
 
 ## 7. Việc phải làm rút ra từ phân tích này
 

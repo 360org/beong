@@ -83,6 +83,8 @@ Phân tích đối thủ đầy đủ: [`07-competitive-analysis.md`](07-competi
 - Trừ điểm (penalty) cho task bỏ lỡ — tùy chọn, mặc định tắt
 
 ### Ngoài phạm vi (v1)
+- **Mọi thứ liên quan đến thu tiền**: thuê bao, mua trong app, paywall, giới hạn tính năng.
+  v1 miễn phí hoàn toàn, không giới hạn số trẻ/task/routine — xem ADR-014
 - **Cưỡng chế screen time bằng kỹ thuật** (khóa/mở app trên máy trẻ). Phần thưởng "screen time"
   ở v1 chỉ là *phiếu*: phụ huynh duyệt rồi tự cho phép. Xem ADR-012 để biết vì sao
 - Xử lý thanh toán thật cho tiền tiêu vặt (chỉ ghi nhận "bố mẹ nợ con 50k", không chuyển tiền)

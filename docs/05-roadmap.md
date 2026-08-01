@@ -69,12 +69,15 @@ toàn bộ offline.
 ## Sprint 6 — Phát hành v1.0 (1 tuần)
 - [ ] Icon app, splash, ảnh chụp store
 - [ ] Chính sách quyền riêng tư + điều khoản (bắt buộc cho app trẻ em)
+- [ ] Khai báo store: **không mua trong app, không quảng cáo** (ADR-014)
 - [ ] Khai báo App Store "Kids Category" / Play "Teacher Approved" nếu áp dụng
 - [ ] Fastlane → TestFlight + Play Internal
 - [ ] Beta 10 gia đình, thu phản hồi 2 tuần
 
-**Tổng MVP: ~10 tuần** (tăng 1.5 tuần so với bản đầu do đôn Routines, phần thưởng phân loại,
-streak và huy hiệu lên MVP — xem `07-competitive-analysis.md` §7).
+**Tổng MVP: ~9 tuần.**
+Tăng 1.5 tuần so với bản đầu do đôn Routines, phần thưởng phân loại, streak và huy hiệu lên MVP
+(`07-competitive-analysis.md` §7); bù lại giảm ~1 tuần vì **v1 miễn phí hoàn toàn** nên không
+phải làm StoreKit / Play Billing / paywall / khôi phục mua hàng (ADR-014).
 
 ## Sau v1.0
 
