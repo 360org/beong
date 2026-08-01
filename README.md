@@ -3,8 +3,9 @@
 App quản lý việc nhà & phần thưởng hằng ngày cho gia đình và trẻ em.
 Viết bằng **Flutter**, chạy trên **iOS, Android, macOS, Windows**.
 
-Lấy cảm hứng từ ChoreReward, mở rộng thêm: offline-first, đồng bộ nhiều thiết bị,
-app desktop cho phụ huynh, streak/huy hiệu, kho phần thưởng tự định nghĩa và thống kê tiến độ.
+Lấy cảm hứng từ ChoreReward, mở rộng thêm: **offline-first** (ChoreReward bắt buộc phải có
+Internet), app desktop cho phụ huynh, nhiều phụ huynh, bằng chứng hoàn thành, thống kê xuất được
+và tiếng Việt.
 
 > **Trạng thái:** giai đoạn kế hoạch & thiết kế. Chưa có code.
 
@@ -17,16 +18,17 @@ app desktop cho phụ huynh, streak/huy hiệu, kho phần thưởng tự địn
 | [`docs/03-data-model.md`](docs/03-data-model.md) | Schema, quan hệ, RLS, chỉ mục, migration |
 | [`docs/04-design-system.md`](docs/04-design-system.md) | Màu, chữ, component, 24 preset, mô tả từng màn hình |
 | [`docs/05-roadmap.md`](docs/05-roadmap.md) | 7 sprint, ~8.5 tuần tới v1.0, kế hoạch sau v1 |
-| [`docs/06-decisions.md`](docs/06-decisions.md) | 10 ADR + câu hỏi còn mở |
+| [`docs/06-decisions.md`](docs/06-decisions.md) | 13 ADR + câu hỏi còn mở |
+| [`docs/07-competitive-analysis.md`](docs/07-competitive-analysis.md) | Phân tích ChoreReward từ App Store listing + việc phải làm |
 
 ## Ý tưởng cốt lõi
 
 ```
-Phụ huynh tạo task  →  Trẻ hoàn thành  →  Phụ huynh duyệt
-                                              ↓
-                                        Điểm vào ví trẻ
-                                              ↓
-                                       Đổi lấy phần thưởng
+Phụ huynh tạo routine/task  →  Trẻ hoàn thành  →  Phụ huynh duyệt
+                                                       ↓
+                                          Điểm vào ví trẻ (+ bonus trọn bộ, streak)
+                                                       ↓
+                                                Đổi lấy phần thưởng
 ```
 
 ## Bắt đầu từ đâu

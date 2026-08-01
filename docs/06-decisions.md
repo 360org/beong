@@ -89,12 +89,51 @@ opt-in, không log nội dung do người dùng nhập.
 
 ---
 
+## ADR-011: Routine là thực thể bậc nhất, không phải nhãn dán lên task
+**Bối cảnh:** ChoreReward bán "routines" (morning/bedtime routine) như luồng cốt lõi. Có thể làm
+rẻ tiền bằng cách thêm trường `tag` vào task và nhóm khi hiển thị.
+**Quyết định:** `routines` là bảng riêng, sở hữu lịch lặp và danh sách người được gán;
+task con kế thừa, không tự đặt lịch.
+**Lý do:** cái mang lại giá trị là **thưởng trọn bộ** và **tiến độ theo nhóm** — hai thứ cần
+routine có danh tính riêng. Nếu chỉ là nhãn, sửa lịch một routine 5 task phải sửa 5 chỗ và
+dễ lệch nhau.
+**Hệ quả:** (+) mô hình đúng, UI kéo thả thứ tự tự nhiên. (−) bộ sinh instance phải rẽ nhánh
+theo `routine_id`; thêm quy tắc "task trong routine bỏ qua lịch riêng" — phải test kỹ.
+
+---
+
+## ADR-012: Phần thưởng "screen time" là phiếu, không cưỡng chế kỹ thuật ở v1
+**Bối cảnh:** ChoreReward cho đổi điểm lấy screen time. Họ làm được vì nhà phát triển là
+**Kidslox** — một app parental control đã có sẵn hạ tầng khóa/mở thiết bị. Ta không có.
+**Quyết định:** `reward_type = screen_time` chỉ tạo **phiếu** ("30 phút xem TV"); phụ huynh
+duyệt rồi tự cho phép. App không khóa hay mở khóa gì.
+**Lý do:** cưỡng chế thật đòi hỏi Family Controls / Screen Time API trên iOS (entitlement phải
+xin riêng từ Apple, duyệt lâu, ràng buộc chặt) và Device Admin / UsageStats trên Android — cộng
+lại là một sản phẩm riêng, không phải một tính năng. Đưa vào MVP sẽ nuốt trọn lộ trình.
+**Hệ quả:** (−) yếu hơn họ đúng ở một điểm; bù lại nói thẳng trong UI để không hứa hão.
+Nếu sau beta thấy đây là lý do chính người dùng bỏ đi → mở lại ở v2 như một dự án riêng.
+
+---
+
+## ADR-013: Streak có "ngày ân hạn", ngày không có task không làm đứt streak
+**Bối cảnh:** streak là cơ chế giữ chân mạnh nhất, nhưng cũng dễ phản tác dụng — trẻ ốm một hôm,
+mất chuỗi 40 ngày, rồi bỏ hẳn app.
+**Quyết định:** ngày không có task nào đến hạn là **ngày trung tính** (không cộng, không đứt);
+mỗi tháng có 1 **ngày ân hạn** tự động dùng khi hụt.
+**Lý do:** mục tiêu sản phẩm là xây thói quen, không phải trừng phạt. Streak nên đo *xu hướng*,
+không đo *sự hoàn hảo*.
+**Hệ quả:** streak "dễ" hơn đối thủ — chấp nhận, vì con số đó dùng để động viên chứ không phải
+để xếp hạng giữa các gia đình.
+
+---
+
 ## Câu hỏi còn mở
 
 | # | Câu hỏi | Cần chốt trước |
 |---|---|---|
-| 1 | Mô hình doanh thu: miễn phí / mua 1 lần / thuê bao? | Sprint 6 |
+| 1 | Mô hình doanh thu. **Benchmark:** ChoreReward dùng thuê bao tự gia hạn qua iTunes, không quảng cáo. Ta theo thuê bao, mua 1 lần, hay freemium? | Sprint 6 |
 | 2 | Có cho phép trừ điểm (penalty) không? Nhiều chuyên gia nuôi dạy phản đối | v1.1 |
 | 3 | Giới hạn số trẻ / số task ở bản miễn phí? | Sprint 6 |
 | 4 | Tên & thương hiệu chính thức (DailyChildren chỉ là tên tạm) | Sprint 5 |
 | 5 | Self-host Supabase ngay từ đầu hay dùng cloud rồi chuyển sau? | Sprint 4 |
+| 6 | Tiền tiêu vặt: chỉ ghi sổ "bố mẹ nợ con", hay v2 nối ví điện tử (MoMo/ZaloPay)? Nối ví kéo theo KYC và quy định tài chính — nặng | v2 |

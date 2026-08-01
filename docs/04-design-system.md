@@ -58,6 +58,12 @@ Giao diện trẻ dùng cỡ ≥ 16; tôn trọng `textScaleFactor` hệ thống
 | `TaskCard` | Icon tròn màu · tên · điểm · checkbox lớn; vuốt trái = sửa, phải = xong |
 | `KidHeader` | Avatar + tên + số dư gem + vòng tiến độ ngày |
 | `ApprovalCard` | Ảnh/tên task · trẻ · nút Duyệt / Từ chối |
+| `RoutineCard` | Icon + tên routine + thanh tiến độ "2/4" + danh sách task con thu gọn được |
+| `RoutineProgressRing` | Vòng tròn tiến độ routine; đầy 100% → hiệu ứng phát sáng + hiện điểm bonus |
+| `RewardCard` | Icon theo `reward_type` + tên + giá gem; nếu chưa đủ điểm hiện "còn thiếu 30 💎" |
+| `StreakFlame` | Ngọn lửa + số ngày; xám khi streak = 0; nhấp nháy nhẹ khi hôm nay chưa đạt |
+| `BadgeGrid` | Lưới huy hiệu, cái chưa đạt hiện dạng bóng mờ + điều kiện đạt |
+| `VoucherCard` | Phiếu đã đổi: loại, nội dung, ngày, nút "Đã dùng" |
 | `EmptyState` | Minh họa + 1 câu + 1 nút hành động |
 | `ResponsiveScaffold` | 1 cột + bottom nav / 2 cột / 3 cột theo breakpoint |
 
@@ -101,7 +107,11 @@ nhưng 5 preset đầu được xếp theo tần suất dùng của gia đình t
 ### 6.1 Onboarding (3 bước, < 3 phút)
 1. Đặt tên gia đình + múi giờ (tự nhận)
 2. Thêm trẻ: tên, tuổi, avatar, màu → có thể thêm nhiều
-3. Chọn nhanh 3–5 task gợi ý theo tuổi → xong, vào Home
+3. Chọn **routine dựng sẵn** (Buổi sáng / Sau giờ học / Trước khi ngủ) — mỗi cái đã có 3–4 task
+   phù hợp độ tuổi, bỏ tick task nào không cần → xong, vào Home
+
+> Chọn routine thay vì chọn từng task lẻ: nhanh hơn, và ngay từ phút đầu đã dạy người dùng
+> khái niệm cốt lõi của sản phẩm là *thói quen*, không phải *danh sách việc*.
 
 ### 6.2 Parent Home
 - Header: lời chào + ngày
@@ -111,11 +121,20 @@ nhưng 5 preset đầu được xếp theo tần suất dùng của gia đình t
 - Bottom nav: Home · Tasks · Rewards · Thống kê · Cài đặt
 
 ### 6.3 Child Home
-- `KidHeader`: avatar to, "Chào An!", số gem, streak 🔥
-- Tab theo buổi: Sáng / Chiều / Tối (chỉ hiện buổi có task)
-- Danh sách `TaskCard` với checkbox lớn; bấm xong → animation confetti + âm thanh + haptic
+- `KidHeader`: avatar to, "Chào An!", số gem, `StreakFlame`
+- Tab theo buổi: Sáng / Chiều / Tối (chỉ hiện buổi có việc)
+- Nội dung mỗi buổi: **`RoutineCard` trước, task lẻ sau**
+- `TaskCard` với checkbox lớn; bấm xong → animation confetti + âm thanh + haptic
 - Thẻ "Mục tiêu của con": phần thưởng đang tiết kiệm + thanh tiến độ
-- Nút **Đổi thưởng**
+- Nút **Đổi thưởng** · **Huy hiệu của con**
+
+### 6.3b Routine Editor (phụ huynh)
+1. Tên + icon
+2. Buổi trong ngày + giờ bắt đầu (dùng để nhắc)
+3. Lịch lặp (Daily / Custom)
+4. **Danh sách task** — kéo thả đổi thứ tự, thêm từ preset, sửa điểm ngay tại chỗ
+5. Điểm thưởng trọn bộ (mặc định 10, đặt 0 để tắt)
+6. Gán cho trẻ nào
 
 ### 6.4 Task Editor (kế thừa Edit Task của app gốc)
 Thứ tự khối, từ trên xuống:
@@ -129,8 +148,14 @@ Thứ tự khối, từ trên xuống:
 8. Nút `SAVE` cố định đáy; icon thùng rác ở header khi đang sửa
 
 ### 6.5 Rewards
-- Lưới thẻ phần thưởng: icon, tên, giá gem, nút "Đổi" (mờ nếu chưa đủ điểm — vẫn hiện để tạo động lực, kèm "còn thiếu 30 💎")
-- Phụ huynh: thêm/sửa phần thưởng, xử lý yêu cầu đổi
+- Lưới `RewardCard`, **nhóm theo `reward_type`** với icon + màu riêng:
+  📺 Thời gian giải trí · 💰 Tiền tiêu vặt · 🎡 Trải nghiệm · 🎁 Đồ vật · ⭐ Khác
+- Nút "Đổi" mờ nếu chưa đủ điểm — **vẫn hiện thẻ** để tạo động lực, kèm "còn thiếu 30 💎"
+- Tab **Phiếu của con**: `VoucherCard` các phần thưởng đã được duyệt, nút "Đã dùng"
+- Phụ huynh: thêm/sửa phần thưởng, xử lý yêu cầu đổi (hiện rõ số dư còn lại của trẻ sau khi trừ)
+
+> Phần thưởng `screen_time` hiển thị kèm dòng nhỏ *"Bố mẹ sẽ bật cho con"* — nói rõ đây là
+> thỏa thuận giữa người với người, app không tự khóa/mở máy (xem ADR-012).
 
 ### 6.6 Thống kê (phụ huynh)
 - Biểu đồ cột 7 ngày: task hoàn thành theo trẻ
@@ -144,8 +169,10 @@ Thứ tự khối, từ trên xuống:
 |---|---|
 | Hoàn thành task | Checkbox nảy (scale 1→1.2→1), confetti 1.2s, haptic `mediumImpact`, tiếng "ting" |
 | Được duyệt | Gem bay từ card vào ví, số dư đếm tăng |
+| Xong task cuối của routine | Vòng tiến độ đầy → phát sáng → banner "+10 💎 trọn bộ!" |
 | Đủ điểm đổi thưởng | Thẻ phần thưởng phát sáng nhẹ |
 | Đạt streak 7 ngày | Full-screen badge |
+| Nhận huy hiệu mới | Huy hiệu lật từ bóng mờ sang màu, 1 lần |
 
 Thời lượng chuẩn: 150ms (chuyển trạng thái nhỏ), 250ms (chuyển màn), 1200ms (ăn mừng).
 Tôn trọng `MediaQuery.disableAnimations` / Reduce Motion → tắt confetti, giữ haptic.

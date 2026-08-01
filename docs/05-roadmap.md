@@ -14,29 +14,35 @@ một người UI).
 
 **Xong khi:** app chạy trên 4 nền tảng, hiển thị 5 màn hình rỗng đúng theme, CI xanh.
 
-## Sprint 1 — Dữ liệu local (1 tuần)
-- [ ] Drift schema đầy đủ theo `03-data-model.md`
+## Sprint 1 — Dữ liệu local (1.5 tuần)
+- [ ] Drift schema đầy đủ theo `03-data-model.md` (gồm `routines`, `streaks`, `badges_earned`)
 - [ ] DAO + repository implementation (local-only)
-- [ ] Bộ sinh `task_instances` + logic ngày theo timezone/rollover
+- [ ] Bộ sinh `task_instances` + logic ngày theo timezone/rollover + kế thừa lịch từ routine
 - [ ] Ledger + tính số dư
-- [ ] Seed 24 preset
-- [ ] Unit test: scheduler (once/daily/custom), ledger, đổi ngày
+- [ ] Thưởng trọn bộ routine (idempotent bằng UUID v5)
+- [ ] Tính streak (ngày trung tính + ngày ân hạn)
+- [ ] Seed 24 preset + 3 routine dựng sẵn
+- [ ] Unit test: scheduler (once/daily/custom/routine), ledger, đổi ngày, streak, routine bonus
 
-**Xong khi:** tạo task → sinh instance đúng 7 ngày tới → đánh dấu xong → số dư tăng, toàn bộ offline.
+**Xong khi:** tạo routine → sinh instance đúng 7 ngày tới → tick hết → cộng điểm + bonus trọn bộ,
+toàn bộ offline.
 
-## Sprint 2 — Luồng cốt lõi UI (1.5 tuần)
-- [ ] Onboarding 3 bước
+## Sprint 2 — Luồng cốt lõi UI (2 tuần)
+- [ ] Onboarding 3 bước (bước 3 = chọn routine dựng sẵn)
 - [ ] Task Editor (đầy đủ 8 khối)
-- [ ] Child Home + hoàn thành task + animation ăn mừng
+- [ ] **Routine Editor** + kéo thả đổi thứ tự task
+- [ ] Child Home: routine trước, task lẻ sau + animation ăn mừng + vòng tiến độ routine
 - [ ] Parent Home + hàng đợi duyệt
 - [ ] Chuyển hồ sơ + PIN phụ huynh
-- [ ] Integration test luồng: tạo → xong → duyệt
+- [ ] Integration test luồng: tạo routine → trẻ làm hết → duyệt → nhận bonus
 
 **Xong khi:** dùng được thật trên 1 thiết bị, không cần mạng.
 
-## Sprint 3 — Phần thưởng (1 tuần)
-- [ ] CRUD phần thưởng
+## Sprint 3 — Phần thưởng, streak, huy hiệu (1.5 tuần)
+- [ ] CRUD phần thưởng **có phân loại** (5 `reward_type`, trường riêng theo loại)
 - [ ] Đổi thưởng + hàng chờ duyệt + hoàn điểm khi từ chối
+- [ ] Màn "Phiếu của con" + nút "Đã dùng"
+- [ ] `StreakFlame` + màn huy hiệu (8 huy hiệu MVP)
 - [ ] "Mục tiêu của con" + thanh tiến độ
 - [ ] Lịch sử giao dịch điểm
 
@@ -53,7 +59,9 @@ một người UI).
 
 ## Sprint 5 — Thông báo & hoàn thiện (1 tuần)
 - [ ] FCM push (mobile) + local notification (desktop)
-- [ ] 5 loại thông báo trong bảng ở `01-product-spec.md` §4.5
+- [ ] 7 loại thông báo trong bảng ở `01-product-spec.md` §4.7
+- [ ] Bộ điều tiết "nhắc nhẹ, không cằn nhằn": trần 2 thông báo/ngày cho trẻ, gộp sự kiện,
+      chặn gửi sau giờ đi ngủ — có unit test riêng
 - [ ] Cài đặt: ngôn ngữ, chủ đề sáng/tối, giờ đổi ngày, âm thanh
 - [ ] Trang trống, trạng thái lỗi, màn hình mất mạng
 - [ ] Rà soát khả dụng (TalkBack/VoiceOver, contrast, text scale)
@@ -65,14 +73,15 @@ một người UI).
 - [ ] Fastlane → TestFlight + Play Internal
 - [ ] Beta 10 gia đình, thu phản hồi 2 tuần
 
-**Tổng MVP: ~8.5 tuần.**
+**Tổng MVP: ~10 tuần** (tăng 1.5 tuần so với bản đầu do đôn Routines, phần thưởng phân loại,
+streak và huy hiệu lên MVP — xem `07-competitive-analysis.md` §7).
 
 ## Sau v1.0
 
 | Phiên bản | Nội dung |
 |---|---|
-| v1.1 | Streak, huy hiệu, level; bằng chứng ảnh/ghi chú |
-| v1.2 | Thống kê tuần/tháng, xuất CSV/PDF; thử thách tuần |
+| v1.1 | Level, thêm huy hiệu; bằng chứng ảnh/ghi chú; weekly goals |
+| v1.2 | Thống kê tuần/tháng, xuất CSV/PDF; bảng thành tích in được |
 | v1.3 | Desktop 3 cột tối ưu, phím tắt; widget màn hình chính iOS/Android |
 | v1.4 | Nhiều gia đình / ly thân (trẻ ở 2 nhà); chia sẻ task giữa 2 hộ |
 | v2.0 | Web app; mục tiêu tiết kiệm dài hạn; gợi ý task bằng AI theo độ tuổi |
