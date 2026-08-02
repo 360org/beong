@@ -147,6 +147,41 @@ sắc bén khi đối thủ trực tiếp thu tiền.
 
 ---
 
+## ADR-015: Đơn vị điểm gọi là "xu", không phải "điểm" hay "gem"
+**Bối cảnh:** ChoreReward dùng gem (đá quý). Mục tiêu của Bé Ong có thêm trụ giáo dục tài chính.
+**Quyết định:** đơn vị trong app là **xu**, hiển thị kèm quy đổi ra tiền thật nếu gia đình bật.
+**Lý do:** đá quý là đồ chơi, không dạy được gì về tiền. Xu là thứ trẻ hiểu được là có giá trị,
+để dành được, tiêu hết được. Đơn vị phải khớp với bài học.
+**Hệ quả:** phải cẩn thận về ranh giới — app **không** chạm vào tiền thật, không ví điện tử,
+không KYC. Tiền tiêu vặt chỉ là ghi sổ giữa bố mẹ và con.
+
+---
+
+## ADR-016: Ba hũ Tiêu / Để dành / Cho đi, chia tự động ngay khi kiếm được
+**Bối cảnh:** cách dạy tài chính cho trẻ phổ biến nhất là chia thu nhập thành nhiều phần ngay
+khi nhận, thay vì tiêu trước rồi để dành phần còn lại.
+**Quyết định:** mỗi lần duyệt task, xu chia vào ba hũ theo tỷ lệ (mặc định 50/40/10) — sinh
+ba dòng ledger, không phải một. Hũ **Để dành** không tiêu được cho đồ vặt.
+**Lý do:** chia sau thì hũ Để dành luôn rỗng — đó là lý do người lớn cũng không tiết kiệm được.
+Ràng buộc "không tiêu được" chính là chỗ dạy dỗ, bỏ nó đi thì ba hũ chỉ còn là trang trí.
+**Hệ quả:** (−) mô hình ledger phức tạp hơn: mọi truy vấn số dư phải theo hũ, mọi giao dịch
+phải khai báo hũ. (+) Đổi lại có sẵn nền cho mục tiêu tiết kiệm và lãi tượng trưng.
+Trẻ lớn được tự đặt tỷ lệ — một bước của tự lập.
+
+---
+
+## ADR-017: Quy đổi ra tiền thật là tùy chọn, mặc định tắt
+**Bối cảnh:** gắn việc nhà với tiền là chủ đề gây tranh cãi trong nuôi dạy con. Nhiều chuyên gia
+cho rằng trả tiền cho việc nhà cơ bản làm mất động lực nội tại — trẻ ngừng giúp đỡ khi không
+được trả.
+**Quyết định:** `exchange_rate_xu` mặc định NULL (tắt). Gia đình nào muốn thì tự bật.
+**Lý do:** ta không đứng về phía nào trong tranh luận nuôi dạy con. Nhưng mặc định là một lời
+khuyên ngầm, nên mặc định phải là phương án an toàn hơn.
+**Hệ quả:** trụ giáo dục tài chính vẫn chạy khi tắt quy đổi — ba hũ, mục tiêu tiết kiệm và sổ
+chi tiêu đều hoạt động với xu thuần, không cần tiền thật.
+
+---
+
 ## Câu hỏi còn mở
 
 | # | Câu hỏi | Cần chốt trước |

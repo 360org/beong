@@ -25,7 +25,7 @@ nếu không nó chỉ là ước muốn.
 - [ ] Drift schema đầy đủ theo `03-data-model.md` (gồm `routines`, `streaks`, `badges_earned`)
 - [ ] DAO + repository implementation (local-only)
 - [ ] Bộ sinh `task_instances` + logic ngày theo timezone/rollover + kế thừa lịch từ routine
-- [ ] Ledger + tính số dư
+- [ ] Ledger **theo ba hũ** + tính số dư từng hũ (ADR-016)
 - [ ] Thưởng trọn bộ routine (idempotent bằng UUID v5)
 - [ ] Tính streak (ngày trung tính + ngày ân hạn)
 - [ ] Seed 24 preset + 3 routine dựng sẵn
@@ -45,13 +45,15 @@ toàn bộ offline.
 
 **Xong khi:** dùng được thật trên 1 thiết bị, không cần mạng.
 
-## Sprint 3 — Phần thưởng, streak, huy hiệu (1.5 tuần)
+## Sprint 3 — Phần thưởng, tài chính, streak, huy hiệu (2 tuần)
 - [ ] CRUD phần thưởng **có phân loại** (5 `reward_type`, trường riêng theo loại)
 - [ ] Đổi thưởng + hàng chờ duyệt + hoàn điểm khi từ chối
 - [ ] Màn "Phiếu của con" + nút "Đã dùng"
 - [ ] `StreakFlame` + màn huy hiệu (8 huy hiệu MVP)
-- [ ] "Mục tiêu của con" + thanh tiến độ
-- [ ] Lịch sử giao dịch điểm
+- [ ] `JarTrio` — ba hũ Tiêu / Để dành / Cho đi
+- [ ] Tỷ giá quy đổi ra tiền thật (mặc định tắt — ADR-017)
+- [ ] Mục tiêu tiết kiệm + thanh tiến độ
+- [ ] **Sổ của con** — lịch sử đầy đủ, `manual_adjust` bắt buộc có lý do
 
 ## Sprint 4 — Backend & sync (2 tuần)
 - [ ] Dự án Supabase, migration SQL, RLS policy
@@ -81,7 +83,7 @@ toàn bộ offline.
 - [ ] Fastlane → TestFlight + Play Internal
 - [ ] Beta 10 gia đình, thu phản hồi 2 tuần
 
-**Tổng MVP: ~9 tuần.**
+**Tổng MVP: ~9.5 tuần** (thêm 0.5 tuần cho trụ giáo dục tài chính).
 Tăng 1.5 tuần so với bản đầu do đôn Routines, phần thưởng phân loại, streak và huy hiệu lên MVP
 (`07-competitive-analysis.md` §7); bù lại giảm ~1 tuần vì **v1 miễn phí hoàn toàn** nên không
 phải làm StoreKit / Play Billing / paywall / khôi phục mua hàng (ADR-014).
@@ -90,7 +92,7 @@ phải làm StoreKit / Play Billing / paywall / khôi phục mua hàng (ADR-014)
 
 | Phiên bản | Nội dung |
 |---|---|
-| v1.1 | Level, thêm huy hiệu; bằng chứng ảnh/ghi chú; weekly goals |
+| v1.1 | Level, thêm huy hiệu; bằng chứng ảnh/ghi chú; weekly goals; **lãi tượng trưng cho hũ Để dành** |
 | v1.2 | Thống kê tuần/tháng, xuất CSV/PDF; bảng thành tích in được |
 | v1.3 | Desktop 3 cột tối ưu, phím tắt; widget màn hình chính iOS/Android |
 | v1.4 | Nhiều gia đình / ly thân (trẻ ở 2 nhà); chia sẻ task giữa 2 hộ |

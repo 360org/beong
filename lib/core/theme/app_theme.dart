@@ -132,7 +132,7 @@ abstract final class AppTheme {
   }
 }
 
-/// Truy cập nhanh màu ngữ nghĩa: `context.semantic.gem`.
+/// Truy cập nhanh màu ngữ nghĩa: `context.semantic.xu`.
 extension AppThemeContext on BuildContext {
   AppSemanticColors get semantic =>
       Theme.of(this).extension<AppSemanticColors>() ?? AppSemanticColors.light;

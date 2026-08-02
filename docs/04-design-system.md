@@ -17,7 +17,7 @@ mở rộng được cho desktop.
 | `success` | `#22C55E` | `#4ADE80` | Đã duyệt, streak |
 | `warning` | `#F59E0B` | `#FBBF24` | Chờ duyệt, gem |
 | `danger` | `#EF4444` | `#F87171` | Xóa, từ chối, missed |
-| `gem` | `#FFC53D` | `#FFD166` | Biểu tượng điểm |
+| `xu` | `#FFC53D` | `#FFD166` | Đồng xu — cũng là màu mật ong, khớp với Bé Ong |
 
 **Màu hồ sơ trẻ** (dùng cho avatar, viền card, biểu đồ): 8 màu
 `#6B4EFF #E3004D #17833F #9E6606 #047D92 #9B3CF6 #E31313 #0E8074`.
@@ -44,6 +44,15 @@ Fallback hệ thống: SF Pro / Roboto / Segoe UI.
 
 Giao diện trẻ dùng cỡ ≥ 16; tôn trọng `textScaleFactor` hệ thống, giới hạn trần 1.6 để không vỡ layout.
 
+### Motif lục giác
+Ô lục giác của tổ ong là dấu hiệu nhận diện của Bé Ong. Dùng có chừng mực, chỉ ở ba chỗ:
+
+- **Huy hiệu** — khung lục giác thay vì tròn
+- **Lưới nhiệm vụ trên desktop** — các thẻ xếp so le kiểu tổ ong ở breakpoint rộng
+- **Hoa văn nền mờ** — opacity ≤ 4%, chỉ ở màn hình trống và màn ăn mừng
+
+Không lục giác hoá nút bấm, avatar hay ô nhập — vùng chạm phải dễ đoán, hình lạ làm trẻ khựng lại.
+
 ## 3. Khoảng cách & hình khối
 
 - Thang khoảng cách: `4, 8, 12, 16, 20, 24, 32, 40, 56`
@@ -66,6 +75,9 @@ Giao diện trẻ dùng cỡ ≥ 16; tôn trọng `textScaleFactor` hệ thống
 | `RoutineCard` | Icon + tên routine + thanh tiến độ "2/4" + danh sách task con thu gọn được |
 | `RoutineProgressRing` | Vòng tròn tiến độ routine; đầy 100% → hiệu ứng phát sáng + hiện điểm bonus |
 | `RewardCard` | Icon theo `reward_type` + tên + giá gem; nếu chưa đủ điểm hiện "còn thiếu 30 💎" |
+| `XuBadge` | Đồng xu vàng + số; nếu gia đình bật quy đổi thì hiện thêm `≈ 35.000đ` cỡ nhỏ |
+| `JarTrio` | Ba hũ Tiêu · Để dành · Cho đi, mỗi hũ một cột mật đầy dần |
+| `GoalCard` | Ảnh món con muốn + thanh tiến độ + "còn 120 xu nữa" |
 | `StreakFlame` | Ngọn lửa + số ngày; xám khi streak = 0; nhấp nháy nhẹ khi hôm nay chưa đạt |
 | `BadgeGrid` | Lưới huy hiệu, cái chưa đạt hiện dạng bóng mờ + điều kiện đạt |
 | `VoucherCard` | Phiếu đã đổi: loại, nội dung, ngày, nút "Đã dùng" |
@@ -130,8 +142,9 @@ nhưng 5 preset đầu được xếp theo tần suất dùng của gia đình t
 - Tab theo buổi: Sáng / Chiều / Tối (chỉ hiện buổi có việc)
 - Nội dung mỗi buổi: **`RoutineCard` trước, task lẻ sau**
 - `TaskCard` với checkbox lớn; bấm xong → animation confetti + âm thanh + haptic
-- Thẻ "Mục tiêu của con": phần thưởng đang tiết kiệm + thanh tiến độ
-- Nút **Đổi thưởng** · **Huy hiệu của con**
+- `JarTrio` — ba hũ của con, bấm vào từng hũ xem chi tiết
+- `GoalCard` — món con đang để dành, thanh tiến độ
+- Nút **Đổi thưởng** · **Sổ của con** · **Huy hiệu của con**
 
 ### 6.3b Routine Editor (phụ huynh)
 1. Tên + icon
@@ -161,6 +174,14 @@ Thứ tự khối, từ trên xuống:
 
 > Phần thưởng `screen_time` hiển thị kèm dòng nhỏ *"Bố mẹ sẽ bật cho con"* — nói rõ đây là
 > thỏa thuận giữa người với người, app không tự khóa/mở máy (xem ADR-012).
+
+### 6.5b Sổ của con
+Hiện thân của giá trị **minh bạch** (`00-brand-values.md`). Danh sách giao dịch theo thời gian:
+
+- Mỗi dòng: ngày · việc gì · vào hũ nào · +/- bao nhiêu xu · ai duyệt
+- Lọc theo hũ, theo tháng. **Không giới hạn thời gian** — con xem lại được từ ngày đầu
+- Giao dịch `manual_adjust` **luôn hiện lý do bố mẹ ghi**. Không có lý do thì không lưu được
+- Không có nút xóa. Sổ cái là append-only (ADR-005), sửa sai bằng cách ghi một dòng bù
 
 ### 6.6 Thống kê (phụ huynh)
 - Biểu đồ cột 7 ngày: task hoàn thành theo trẻ

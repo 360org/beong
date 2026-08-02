@@ -32,8 +32,10 @@ abstract final class AppColors {
   static const warningDark = Color(0xFFFBBF24);
   static const dangerLight = Color(0xFFEF4444);
   static const dangerDark = Color(0xFFF87171);
-  static const gemLight = Color(0xFFFFC53D);
-  static const gemDark = Color(0xFFFFD166);
+
+  /// Màu đồng xu — cũng là màu mật ong. Đơn vị điểm gọi là "xu" (ADR-015).
+  static const xuLight = Color(0xFFFFC53D);
+  static const xuDark = Color(0xFFFFD166);
 
   /// Màu hồ sơ trẻ — dùng làm nền avatar, viền card, cột biểu đồ.
   ///
@@ -69,21 +71,21 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.success,
     required this.warning,
     required this.danger,
-    required this.gem,
+    required this.xu,
     required this.onSurfaceMuted,
   });
 
   final Color success;
   final Color warning;
   final Color danger;
-  final Color gem;
+  final Color xu;
   final Color onSurfaceMuted;
 
   static const light = AppSemanticColors(
     success: AppColors.successLight,
     warning: AppColors.warningLight,
     danger: AppColors.dangerLight,
-    gem: AppColors.gemLight,
+    xu: AppColors.xuLight,
     onSurfaceMuted: AppColors.onSurfaceMutedLight,
   );
 
@@ -91,7 +93,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     success: AppColors.successDark,
     warning: AppColors.warningDark,
     danger: AppColors.dangerDark,
-    gem: AppColors.gemDark,
+    xu: AppColors.xuDark,
     onSurfaceMuted: AppColors.onSurfaceMutedDark,
   );
 
@@ -100,14 +102,14 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? success,
     Color? warning,
     Color? danger,
-    Color? gem,
+    Color? xu,
     Color? onSurfaceMuted,
   }) {
     return AppSemanticColors(
       success: success ?? this.success,
       warning: warning ?? this.warning,
       danger: danger ?? this.danger,
-      gem: gem ?? this.gem,
+      xu: xu ?? this.xu,
       onSurfaceMuted: onSurfaceMuted ?? this.onSurfaceMuted,
     );
   }
@@ -119,7 +121,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       success: Color.lerp(success, other.success, t)!,
       warning: Color.lerp(warning, other.warning, t)!,
       danger: Color.lerp(danger, other.danger, t)!,
-      gem: Color.lerp(gem, other.gem, t)!,
+      xu: Color.lerp(xu, other.xu, t)!,
       onSurfaceMuted: Color.lerp(onSurfaceMuted, other.onSurfaceMuted, t)!,
     );
   }

@@ -2,6 +2,7 @@
 
 Nguồn: trang App Store của **ChoreReward** (nhà phát triển **Kidslox inc**), chụp 2026-08.
 
+
 ---
 
 ## 1. Định vị của họ
@@ -78,6 +79,7 @@ Chưa đủ rating → còn kịp để vào. Nhưng cũng nghĩa là **chưa c�
 | Routine | ✅ | ✅ (bổ sung sau phân tích này) |
 | Screen time reward | ✅ (nhờ Kidslox) | ⚠️ dạng phiếu, không cưỡng chế kỹ thuật ở v1 |
 | Tiền tiêu vặt | ✅ | ✅ (theo dõi, không xử lý thanh toán) |
+| **Giáo dục tài chính** (ba hũ, mục tiêu, sổ chi tiêu) | ❌ | ✅ **trụ riêng, MVP** |
 | Bằng chứng hoàn thành | ❌ | ✅ v1.1 (ảnh/ghi chú) |
 | Nhiều phụ huynh | ? | ✅ |
 | Thống kê cho phụ huynh | Cơ bản | ✅ + xuất CSV/PDF |
