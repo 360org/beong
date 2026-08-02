@@ -1,6 +1,6 @@
 # 01 — Đặc tả sản phẩm (PRD)
 
-**Sản phẩm:** DailyChildren — app quản lý việc nhà & phần thưởng cho gia đình
+**Sản phẩm:** Bé Ong — app quản lý việc nhà & phần thưởng cho gia đình
 **Nền tảng:** Flutter (iOS, Android, macOS, Windows) + web (tùy chọn giai đoạn sau)
 **Trạng thái:** Bản kế hoạch v1 — chưa viết code
 
@@ -25,7 +25,7 @@ Phân tích đối thủ đầy đủ: [`07-competitive-analysis.md`](07-competi
 
 ### Điểm yếu quan sát được (cơ hội cải tiến)
 
-| Vấn đề | Cải tiến của DailyChildren |
+| Vấn đề | Cải tiến của Bé Ong |
 |---|---|
 | **Bắt buộc có Internet mới chạy được** (họ tự khai trong App Store listing) | **Offline-first** — dùng đầy đủ khi mất mạng, sync sau. Đây là điểm khác biệt số 1 |
 | Chỉ có mobile | Thêm desktop (macOS/Windows) cho phụ huynh quản lý |

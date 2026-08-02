@@ -1,4 +1,4 @@
-import 'package:dailychildren/core/widgets/responsive_scaffold.dart';
+import 'package:beong/core/widgets/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

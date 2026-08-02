@@ -1,7 +1,7 @@
-import 'package:dailychildren/core/l10n/gen/app_localizations.dart';
-import 'package:dailychildren/core/theme/app_spacing.dart';
-import 'package:dailychildren/core/theme/app_theme.dart';
-import 'package:dailychildren/core/widgets/responsive_scaffold.dart';
+import 'package:beong/core/l10n/gen/app_localizations.dart';
+import 'package:beong/core/theme/app_spacing.dart';
+import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/widgets/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
 
 /// Khung màn hình tạm cho Sprint 0.

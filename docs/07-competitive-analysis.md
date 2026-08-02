@@ -52,7 +52,7 @@ Với đúng đối tượng người dùng — trẻ em, thiết bị cũ, wifi
 "mất mạng là app chết" phá vỡ toàn bộ vòng lặp động lực: trẻ làm xong mà không tick được thì
 lần sau không buồn làm nữa.
 
-→ **Thông điệp marketing chính của DailyChildren: "Hoạt động cả khi mất mạng."**
+→ **Thông điệp marketing chính của Bé Ong: "Hoạt động cả khi mất mạng."**
 
 ### 5.2 Chỉ có mobile
 Không có bản desktop. Phụ huynh thiết lập tuần và xem báo cáo trên máy tính thoải mái hơn nhiều.
@@ -71,7 +71,7 @@ Chưa đủ rating → còn kịp để vào. Nhưng cũng nghĩa là **chưa c�
 
 ## 6. Bảng đối chiếu
 
-| | ChoreReward | DailyChildren (kế hoạch) |
+| | ChoreReward | Bé Ong (kế hoạch) |
 |---|---|---|
 | Nền tảng | iOS (+Android) | iOS, Android, **macOS, Windows** |
 | Mất mạng | **Không dùng được** | **Dùng đầy đủ, sync sau** |

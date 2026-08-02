@@ -1,19 +1,19 @@
-import 'package:dailychildren/app/router.dart';
-import 'package:dailychildren/core/l10n/gen/app_localizations.dart';
-import 'package:dailychildren/core/theme/app_theme.dart';
-import 'package:dailychildren/core/theme/app_typography.dart';
+import 'package:beong/app/router.dart';
+import 'package:beong/core/l10n/gen/app_localizations.dart';
+import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class DailyChildrenApp extends ConsumerStatefulWidget {
-  const DailyChildrenApp({super.key});
+class BeOngApp extends ConsumerStatefulWidget {
+  const BeOngApp({super.key});
 
   @override
-  ConsumerState<DailyChildrenApp> createState() => _DailyChildrenAppState();
+  ConsumerState<BeOngApp> createState() => _BeOngAppState();
 }
 
-class _DailyChildrenAppState extends ConsumerState<DailyChildrenApp> {
+class _BeOngAppState extends ConsumerState<BeOngApp> {
   late final GoRouter _router = createRouter();
 
   @override

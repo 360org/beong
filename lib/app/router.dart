@@ -1,6 +1,6 @@
-import 'package:dailychildren/core/l10n/gen/app_localizations.dart';
-import 'package:dailychildren/core/widgets/placeholder_screen.dart';
-import 'package:dailychildren/core/widgets/responsive_scaffold.dart';
+import 'package:beong/core/l10n/gen/app_localizations.dart';
+import 'package:beong/core/widgets/placeholder_screen.dart';
+import 'package:beong/core/widgets/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 

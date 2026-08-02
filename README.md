@@ -1,4 +1,4 @@
-# DailyChildren
+# Bé Ong
 
 App quản lý việc nhà & phần thưởng hằng ngày cho gia đình và trẻ em.
 Viết bằng **Flutter**, chạy trên **iOS, Android, macOS, Windows**.

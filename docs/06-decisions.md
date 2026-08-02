@@ -152,7 +152,7 @@ sắc bén khi đối thủ trực tiếp thu tiền.
 | # | Câu hỏi | Cần chốt trước |
 |---|---|---|
 | 2 | Có cho phép trừ điểm (penalty) không? Nhiều chuyên gia nuôi dạy phản đối | v1.1 |
-| 4 | Tên & thương hiệu chính thức (DailyChildren chỉ là tên tạm) | Sprint 5 |
+| 4 | Tên & thương hiệu chính thức (Bé Ong chỉ là tên tạm) | Sprint 5 |
 | 5 | Self-host Supabase ngay từ đầu hay dùng cloud rồi chuyển sau? | Sprint 4 |
 | 6 | Tiền tiêu vặt: chỉ ghi sổ "bố mẹ nợ con", hay v2 nối ví điện tử (MoMo/ZaloPay)? Nối ví kéo theo KYC và quy định tài chính — nặng | v2 |
 | 7 | Mô hình doanh thu cho bản sau v1 (nếu cần) — đã hoãn theo ADR-014 | sau v1 |

@@ -1,6 +1,6 @@
-import 'package:dailychildren/core/theme/app_colors.dart';
-import 'package:dailychildren/core/theme/app_spacing.dart';
-import 'package:dailychildren/core/theme/app_typography.dart';
+import 'package:beong/core/theme/app_colors.dart';
+import 'package:beong/core/theme/app_spacing.dart';
+import 'package:beong/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 
 /// Dựng [ThemeData] sáng/tối từ design token.

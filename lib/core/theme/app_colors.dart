@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Bảng màu của DailyChildren.
+/// Bảng màu của Bé Ong.
 ///
 /// Token lấy từ `docs/04-design-system.md` §1. Không hard-code màu ở nơi khác —
 /// mọi widget đọc màu qua [Theme.of] hoặc [AppColors].

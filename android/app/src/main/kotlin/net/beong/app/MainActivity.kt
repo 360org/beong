@@ -1,4 +1,4 @@
-package net.dailychildren.dailychildren
+package net.beong.app
 
 import io.flutter.embedding.android.FlutterActivity
 
