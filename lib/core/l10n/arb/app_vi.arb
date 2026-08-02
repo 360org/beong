@@ -1,0 +1,70 @@
+{
+  "@@locale": "vi",
+
+  "appTitle": "DailyChildren",
+  "@appTitle": {
+    "description": "Tên ứng dụng, hiển thị ở trình chuyển ứng dụng"
+  },
+
+  "navHome": "Trang chính",
+  "navTasks": "Việc nhà",
+  "navRewards": "Phần thưởng",
+  "navStats": "Thống kê",
+  "navSettings": "Cài đặt",
+
+  "parentHomeTitle": "Trang chính",
+  "childHomeTitle": "Việc của con",
+  "tasksTitle": "Việc nhà",
+  "rewardsTitle": "Phần thưởng",
+  "statsTitle": "Thống kê",
+  "settingsTitle": "Cài đặt",
+
+  "comingSoon": "Sắp có",
+  "@comingSoon": {
+    "description": "Nhãn tạm cho màn hình chưa dựng xong"
+  },
+
+  "sectionQuickPresets": "Việc có sẵn",
+  "sectionPoints": "Điểm",
+  "sectionTaskName": "Tên việc",
+  "sectionRepeat": "Lặp lại",
+  "sectionTimeOfDay": "Buổi trong ngày (không bắt buộc)",
+  "sectionAssignTo": "Giao cho",
+  "sectionApproval": "Duyệt",
+
+  "repeatOnce": "Một lần",
+  "repeatDaily": "Hằng ngày",
+  "repeatCustom": "Tuỳ chọn",
+
+  "timeMorning": "Sáng",
+  "timeAfternoon": "Chiều",
+  "timeEvening": "Tối",
+
+  "approvalAuto": "Tự động",
+  "approvalManual": "Bố mẹ duyệt",
+
+  "actionSave": "Lưu",
+  "actionCancel": "Huỷ",
+  "actionDelete": "Xoá",
+  "actionApprove": "Duyệt",
+  "actionReject": "Từ chối",
+
+  "pointsUnit": "{count, plural, other{{count} điểm}}",
+  "@pointsUnit": {
+    "description": "Số điểm thưởng",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "streakDays": "{count, plural, other{{count} ngày liên tiếp}}",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
+}

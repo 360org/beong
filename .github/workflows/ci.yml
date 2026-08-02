@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  # Giữ sát bản stable mới nhất. SDK cũ hỏng build Windows: Flutter chỉ ánh xạ
+  # được các phiên bản Visual Studio nó biết, gặp bản mới hơn thì rơi về generator
+  # mặc định "Visual Studio 16 2019" và CMake không tìm thấy trình biên dịch nào.
+  FLUTTER_VERSION: "3.44.8"
+
+jobs:
+  analyze:
+    name: Phân tích tĩnh & định dạng
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter gen-l10n
+      - run: dart format --set-exit-if-changed lib test
+      - run: flutter analyze --fatal-infos
+
+  test:
+    name: Kiểm thử
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter gen-l10n
+      - run: flutter test --coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/lcov.info
+
+  build:
+    name: Build ${{ matrix.target }}
+    needs: [analyze, test]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: android
+            os: ubuntu-latest
+            cmd: flutter build apk --debug
+          - target: linux
+            os: ubuntu-latest
+            cmd: flutter build linux --debug
+          - target: ios
+            os: macos-latest
+            cmd: flutter build ios --debug --no-codesign
+          - target: macos
+            os: macos-latest
+            cmd: flutter build macos --debug
+          - target: windows
+            os: windows-latest
+            cmd: flutter build windows --debug
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        if: matrix.target == 'android'
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Cài thư viện hệ thống cho Linux desktop
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libgtk-3-dev
+      - run: flutter pub get
+      - run: flutter gen-l10n
+      - run: ${{ matrix.cmd }}

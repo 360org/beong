@@ -1,0 +1,63 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "DailyChildren",
+
+  "navHome": "Home",
+  "navTasks": "Tasks",
+  "navRewards": "Rewards",
+  "navStats": "Stats",
+  "navSettings": "Settings",
+
+  "parentHomeTitle": "Home",
+  "childHomeTitle": "My tasks",
+  "tasksTitle": "Tasks",
+  "rewardsTitle": "Rewards",
+  "statsTitle": "Stats",
+  "settingsTitle": "Settings",
+
+  "comingSoon": "Coming soon",
+
+  "sectionQuickPresets": "Quick presets",
+  "sectionPoints": "Points",
+  "sectionTaskName": "Task name",
+  "sectionRepeat": "Repeat",
+  "sectionTimeOfDay": "Time of the day (optional)",
+  "sectionAssignTo": "Assign to",
+  "sectionApproval": "Approval",
+
+  "repeatOnce": "Once",
+  "repeatDaily": "Daily",
+  "repeatCustom": "Custom",
+
+  "timeMorning": "Morning",
+  "timeAfternoon": "Afternoon",
+  "timeEvening": "Evening",
+
+  "approvalAuto": "Automatic",
+  "approvalManual": "Parent approves",
+
+  "actionSave": "Save",
+  "actionCancel": "Cancel",
+  "actionDelete": "Delete",
+  "actionApprove": "Approve",
+  "actionReject": "Reject",
+
+  "pointsUnit": "{count, plural, one{{count} point} other{{count} points}}",
+  "@pointsUnit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "streakDays": "{count, plural, one{{count} day streak} other{{count} day streak}}",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
+}
