@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 
 class TaskCard extends StatelessWidget {
   const TaskCard({
-    super.key,
     required this.title,
     required this.points,
     required this.isCompleted,
     required this.onToggle,
+    super.key,
     this.colorIndex = 0,
     this.isPending = false,
     this.isMissed = false,

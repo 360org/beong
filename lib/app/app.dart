@@ -16,7 +16,10 @@ class BeOngApp extends ConsumerStatefulWidget {
 
 class _BeOngAppState extends ConsumerState<BeOngApp> {
   final _sessionNotifier = _SessionChangeNotifier();
-  GoRouter? _router;
+  late final GoRouter _router = createRouter(
+    getSession: () => ref.read(sessionProvider),
+    refreshListenable: _sessionNotifier,
+  );
 
   @override
   void dispose() {
@@ -30,11 +33,6 @@ class _BeOngAppState extends ConsumerState<BeOngApp> {
       _sessionNotifier.notify();
     });
 
-    _router ??= createRouter(
-      getSession: () => ref.read(sessionProvider),
-      refreshListenable: _sessionNotifier,
-    );
-
     return MaterialApp.router(
       onGenerateTitle: (context) => L10n.of(context).appTitle,
       debugShowCheckedModeBanner: false,
@@ -42,7 +40,7 @@ class _BeOngAppState extends ConsumerState<BeOngApp> {
       darkTheme: AppTheme.dark(),
       localizationsDelegates: L10n.localizationsDelegates,
       supportedLocales: L10n.supportedLocales,
-      routerConfig: _router!,
+      routerConfig: _router,
       builder: (context, child) {
         final scale = MediaQuery.textScalerOf(
           context,

@@ -21,6 +21,7 @@ class Session extends _$Session {
   @override
   AppSession? build() => null;
 
+  // ignore: use_setters_to_change_properties, kept as method for call-site clarity
   void login(AppSession session) => state = session;
 
   void switchMember(String memberId, {required bool isParent}) {

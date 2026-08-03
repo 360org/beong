@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
@@ -267,7 +269,7 @@ class _InstanceCardState extends State<_InstanceCard> {
   @override
   void initState() {
     super.initState();
-    _loadTask();
+    unawaited(_loadTask());
   }
 
   Future<void> _loadTask() async {

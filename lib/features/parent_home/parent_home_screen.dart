@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
@@ -105,16 +107,17 @@ class _PendingReviewSectionState extends State<_PendingReviewSection> {
   @override
   void initState() {
     super.initState();
-    _load();
+    unawaited(_load());
   }
 
   Future<void> _load() async {
     final pending = await widget.taskDao.pendingReview(widget.familyId);
-    if (mounted)
+    if (mounted) {
       setState(() {
         _pending = pending;
         _loaded = true;
       });
+    }
   }
 
   @override
@@ -211,7 +214,7 @@ class _PendingCardState extends State<_PendingCard> {
   @override
   void initState() {
     super.initState();
-    _loadTask();
+    unawaited(_loadTask());
   }
 
   Future<void> _loadTask() async {

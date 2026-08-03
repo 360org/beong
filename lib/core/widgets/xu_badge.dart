@@ -2,7 +2,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class XuBadge extends StatelessWidget {
-  const XuBadge({super.key, required this.amount, this.large = false});
+  const XuBadge({required this.amount, super.key, this.large = false});
 
   final int amount;
   final bool large;
