@@ -270,6 +270,20 @@ class SavingsGoals extends Table with FamilyScoped {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+/// Cache streak — tính lại được từ `task_instances`, chỉ để không quét lịch sử
+/// mỗi lần mở app.
+class Streaks extends Table {
+  TextColumn get memberId => text()();
+  IntColumn get currentLen => integer().withDefault(const Constant(0))();
+  IntColumn get bestLen => integer().withDefault(const Constant(0))();
+  TextColumn get lastQualifiedDate => text().nullable()();
+  TextColumn get graceUsedMonth => text().nullable()();
+  IntColumn get graceCount => integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {memberId};
+}
+
 class BadgesEarned extends Table with FamilyScoped {
   TextColumn get memberId => text()();
   TextColumn get badgeKey => text()();

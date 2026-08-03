@@ -24,6 +24,7 @@ part 'database.g.dart';
     Rewards,
     Redemptions,
     SavingsGoals,
+    Streaks,
     BadgesEarned,
     Outbox,
   ],
