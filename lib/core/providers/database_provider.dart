@@ -18,13 +18,10 @@ AppDatabase appDatabase(Ref ref) {
 TaskDao taskDao(Ref ref) => TaskDao(ref.watch(appDatabaseProvider));
 
 @riverpod
-WalletDao walletDao(Ref ref) =>
-    WalletDao(ref.watch(appDatabaseProvider));
+WalletDao walletDao(Ref ref) => WalletDao(ref.watch(appDatabaseProvider));
 
 @riverpod
-RewardDao rewardDao(Ref ref) =>
-    RewardDao(ref.watch(appDatabaseProvider));
+RewardDao rewardDao(Ref ref) => RewardDao(ref.watch(appDatabaseProvider));
 
 @riverpod
-MemberDao memberDao(Ref ref) =>
-    MemberDao(ref.watch(appDatabaseProvider));
+MemberDao memberDao(Ref ref) => MemberDao(ref.watch(appDatabaseProvider));

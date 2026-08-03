@@ -56,21 +56,25 @@ class ChildHomeScreen extends ConsumerWidget {
 
           final instances = snap.data ?? [];
           if (instances.isEmpty) {
-            return _EmptyState(onGenerate: () async {
-              await taskDao.generateInstances(
-                familyId: session.familyId,
-                today: today,
-              );
-            });
+            return _EmptyState(
+              onGenerate: () async {
+                await taskDao.generateInstances(
+                  familyId: session.familyId,
+                  today: today,
+                );
+              },
+            );
           }
 
           final scheduled = instances
               .where((i) => i.status == InstanceStatus.scheduled.name)
               .toList();
           final done = instances
-              .where((i) =>
-                  i.status == InstanceStatus.approved.name ||
-                  i.status == InstanceStatus.pendingReview.name)
+              .where(
+                (i) =>
+                    i.status == InstanceStatus.approved.name ||
+                    i.status == InstanceStatus.pendingReview.name,
+              )
               .toList();
           final missed = instances
               .where((i) => i.status == InstanceStatus.missed.name)
@@ -93,37 +97,43 @@ class ChildHomeScreen extends ConsumerWidget {
               if (scheduled.isNotEmpty) ...[
                 _SectionHeader(title: 'Can lam', count: scheduled.length),
                 const SizedBox(height: AppSpacing.sm),
-                ...scheduled.map((instance) => Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: _InstanceCard(
-                        instance: instance,
-                        taskDao: taskDao,
-                      ),
-                    )),
+                ...scheduled.map(
+                  (instance) => Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: _InstanceCard(
+                      instance: instance,
+                      taskDao: taskDao,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: AppSpacing.xl),
               ],
               if (done.isNotEmpty) ...[
                 _SectionHeader(title: 'Da xong', count: done.length),
                 const SizedBox(height: AppSpacing.sm),
-                ...done.map((instance) => Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: _InstanceCard(
-                        instance: instance,
-                        taskDao: taskDao,
-                      ),
-                    )),
+                ...done.map(
+                  (instance) => Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: _InstanceCard(
+                      instance: instance,
+                      taskDao: taskDao,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: AppSpacing.xl),
               ],
               if (missed.isNotEmpty) ...[
                 _SectionHeader(title: 'Bo lo', count: missed.length),
                 const SizedBox(height: AppSpacing.sm),
-                ...missed.map((instance) => Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: _InstanceCard(
-                        instance: instance,
-                        taskDao: taskDao,
-                      ),
-                    )),
+                ...missed.map(
+                  (instance) => Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: _InstanceCard(
+                      instance: instance,
+                      taskDao: taskDao,
+                    ),
+                  ),
+                ),
               ],
             ],
           );

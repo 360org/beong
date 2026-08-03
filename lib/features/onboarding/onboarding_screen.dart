@@ -117,12 +117,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       );
     }
 
-    ref.read(sessionProvider.notifier).login(
-      const AppSession(
-        familyId: familyId,
-        activeMemberId: parentId,
-      ),
-    );
+    ref
+        .read(sessionProvider.notifier)
+        .login(
+          const AppSession(
+            familyId: familyId,
+            activeMemberId: parentId,
+          ),
+        );
 
     if (mounted) context.go('/');
   }
@@ -200,9 +202,7 @@ class _StepIndicator extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 3),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(3),
-            color: active
-                ? context.colors.primary
-                : context.colors.outline,
+            color: active ? context.colors.primary : context.colors.outline,
           ),
         );
       }),
@@ -331,9 +331,7 @@ class _RoutineStep extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.md),
             child: Card(
-              color: isSelected
-                  ? context.colors.primaryContainer
-                  : null,
+              color: isSelected ? context.colors.primaryContainer : null,
               child: InkWell(
                 onTap: () => onToggle(preset.key),
                 borderRadius: BorderRadius.circular(AppRadius.card),
@@ -382,9 +380,9 @@ class _RoutineStep extends StatelessWidget {
   }
 
   IconData _routineIcon(String dayPart) => switch (dayPart) {
-        'morning' => Icons.wb_sunny_rounded,
-        'afternoon' => Icons.wb_cloudy_rounded,
-        'evening' => Icons.nightlight_round,
-        _ => Icons.schedule,
-      };
+    'morning' => Icons.wb_sunny_rounded,
+    'afternoon' => Icons.wb_cloudy_rounded,
+    'evening' => Icons.nightlight_round,
+    _ => Icons.schedule,
+  };
 }

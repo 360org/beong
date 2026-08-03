@@ -51,14 +51,16 @@ class ParentHomeScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.xxl),
               Text('Con cua ban', style: context.text.titleMedium),
               const SizedBox(height: AppSpacing.md),
-              ...children.map((child) => Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                    child: _ChildSummaryCard(
-                      child: child,
-                      taskDao: taskDao,
-                      walletDao: walletDao,
-                    ),
-                  )),
+              ...children.map(
+                (child) => Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  child: _ChildSummaryCard(
+                    child: child,
+                    taskDao: taskDao,
+                    walletDao: walletDao,
+                  ),
+                ),
+              ),
               if (children.isEmpty)
                 Center(
                   child: Padding(
@@ -108,7 +110,11 @@ class _PendingReviewSectionState extends State<_PendingReviewSection> {
 
   Future<void> _load() async {
     final pending = await widget.taskDao.pendingReview(widget.familyId);
-    if (mounted) setState(() { _pending = pending; _loaded = true; });
+    if (mounted)
+      setState(() {
+        _pending = pending;
+        _loaded = true;
+      });
   }
 
   @override
@@ -163,16 +169,18 @@ class _PendingReviewSectionState extends State<_PendingReviewSection> {
           ],
         ),
         const SizedBox(height: AppSpacing.md),
-        ..._pending.map((instance) => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: _PendingCard(
-                instance: instance,
-                taskDao: widget.taskDao,
-                walletDao: widget.walletDao,
-                reviewerId: widget.reviewerId,
-                onActioned: _load,
-              ),
-            )),
+        ..._pending.map(
+          (instance) => Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: _PendingCard(
+              instance: instance,
+              taskDao: widget.taskDao,
+              walletDao: widget.walletDao,
+              reviewerId: widget.reviewerId,
+              onActioned: _load,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -338,9 +346,11 @@ class _ChildSummaryCard extends StatelessWidget {
                     builder: (context, snap) {
                       final instances = snap.data ?? [];
                       final done = instances
-                          .where((i) =>
-                              i.status == InstanceStatus.approved.name ||
-                              i.status == InstanceStatus.pendingReview.name)
+                          .where(
+                            (i) =>
+                                i.status == InstanceStatus.approved.name ||
+                                i.status == InstanceStatus.pendingReview.name,
+                          )
                           .length;
                       return Text(
                         '$done / ${instances.length} viec hom nay',
