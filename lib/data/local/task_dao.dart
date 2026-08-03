@@ -20,6 +20,10 @@ part 'task_dao.g.dart';
 class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
   TaskDao(super.attachedDatabase);
 
+  Future<Task> getTaskById(String taskId) {
+    return (select(tasks)..where((t) => t.id.equals(taskId))).getSingle();
+  }
+
   /// Tất cả task active của một gia đình, gồm cả task thuộc routine.
   Future<List<Task>> activeTasks(String familyId) {
     return (select(tasks)..where(

@@ -1,5 +1,6 @@
 import 'package:beong/app/router.dart';
 import 'package:beong/core/l10n/gen/app_localizations.dart';
+import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
@@ -14,10 +15,26 @@ class BeOngApp extends ConsumerStatefulWidget {
 }
 
 class _BeOngAppState extends ConsumerState<BeOngApp> {
-  late final GoRouter _router = createRouter();
+  final _sessionNotifier = _SessionChangeNotifier();
+  GoRouter? _router;
+
+  @override
+  void dispose() {
+    _sessionNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(sessionProvider, (prev, next) {
+      _sessionNotifier.notify();
+    });
+
+    _router ??= createRouter(
+      getSession: () => ref.read(sessionProvider),
+      refreshListenable: _sessionNotifier,
+    );
+
     return MaterialApp.router(
       onGenerateTitle: (context) => L10n.of(context).appTitle,
       debugShowCheckedModeBanner: false,
@@ -25,9 +42,8 @@ class _BeOngAppState extends ConsumerState<BeOngApp> {
       darkTheme: AppTheme.dark(),
       localizationsDelegates: L10n.localizationsDelegates,
       supportedLocales: L10n.supportedLocales,
-      routerConfig: _router,
+      routerConfig: _router!,
       builder: (context, child) {
-        // Tôn trọng cỡ chữ hệ thống nhưng chặn trần để layout của trẻ không vỡ.
         final scale = MediaQuery.textScalerOf(
           context,
         ).clamp(maxScaleFactor: AppTypography.maxTextScale);
@@ -38,4 +54,8 @@ class _BeOngAppState extends ConsumerState<BeOngApp> {
       },
     );
   }
+}
+
+class _SessionChangeNotifier extends ChangeNotifier {
+  void notify() => notifyListeners();
 }

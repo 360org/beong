@@ -1,16 +1,21 @@
 import 'package:beong/core/l10n/gen/app_localizations.dart';
+import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/widgets/placeholder_screen.dart';
 import 'package:beong/core/widgets/responsive_scaffold.dart';
+import 'package:beong/features/child_home/child_home_screen.dart';
+import 'package:beong/features/onboarding/onboarding_screen.dart';
+import 'package:beong/features/parent_home/parent_home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Đường dẫn của các màn hình chính. Dùng hằng số, không rải chuỗi thô.
 abstract final class Routes {
   static const home = '/';
   static const tasks = '/tasks';
   static const rewards = '/rewards';
   static const stats = '/stats';
   static const settings = '/settings';
+  static const onboarding = '/onboarding';
 
   static const List<String> shellBranches = [
     home,
@@ -21,19 +26,46 @@ abstract final class Routes {
   ];
 }
 
-/// Router của app.
-///
-/// Dùng [StatefulShellRoute] để mỗi tab giữ được lịch sử điều hướng riêng —
-/// quan trọng trên desktop, nơi người dùng nhảy qua lại giữa các mục nhiều hơn.
-GoRouter createRouter() {
+GoRouter createRouter({
+  required AppSession? Function() getSession,
+  required Listenable refreshListenable,
+}) {
   return GoRouter(
     initialLocation: Routes.home,
+    refreshListenable: refreshListenable,
+    redirect: (context, state) {
+      final session = getSession();
+      final isOnboarding = state.matchedLocation == Routes.onboarding;
+
+      if (session == null && !isOnboarding) return Routes.onboarding;
+      if (session != null && isOnboarding) return Routes.home;
+      return null;
+    },
     routes: [
+      GoRoute(
+        path: Routes.onboarding,
+        builder: (context, state) => const OnboardingScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             _AppShell(navigationShell: navigationShell),
         branches: [
-          for (final branch in _branches)
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.home,
+                builder: (context, state) => Consumer(
+                  builder: (context, ref, _) {
+                    final session = ref.watch(sessionProvider);
+                    if (session == null) return const SizedBox.shrink();
+                    if (session.isParent) return const ParentHomeScreen();
+                    return const ChildHomeScreen();
+                  },
+                ),
+              ),
+            ],
+          ),
+          for (final branch in _branches.skip(1))
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -118,7 +150,6 @@ class _AppShell extends StatelessWidget {
       selectedIndex: navigationShell.currentIndex,
       onDestinationSelected: (index) => navigationShell.goBranch(
         index,
-        // Bấm lại tab đang mở → quay về gốc của tab đó.
         initialLocation: index == navigationShell.currentIndex,
       ),
       destinations: [
