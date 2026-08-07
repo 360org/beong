@@ -1,10 +1,13 @@
 import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/session_provider.dart';
-import 'package:beong/core/widgets/placeholder_screen.dart';
 import 'package:beong/core/widgets/responsive_scaffold.dart';
 import 'package:beong/features/child_home/child_home_screen.dart';
 import 'package:beong/features/onboarding/onboarding_screen.dart';
 import 'package:beong/features/parent_home/parent_home_screen.dart';
+import 'package:beong/features/rewards/rewards_screen.dart';
+import 'package:beong/features/settings/settings_screen.dart';
+import 'package:beong/features/stats/stats_screen.dart';
+import 'package:beong/features/tasks/tasks_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -65,18 +68,38 @@ GoRouter createRouter({
               ),
             ],
           ),
-          for (final branch in _branches.skip(1))
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: branch.path,
-                  builder: (context, state) => PlaceholderScreen(
-                    title: branch.title(context),
-                    icon: branch.icon,
-                  ),
-                ),
-              ],
-            ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.tasks,
+                builder: (context, state) => const TasksScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.rewards,
+                builder: (context, state) => const RewardsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.stats,
+                builder: (context, state) => const StatsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.settings,
+                builder: (context, state) => const SettingsScreen(),
+              ),
+            ],
+          ),
         ],
       ),
     ],
