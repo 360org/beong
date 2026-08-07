@@ -1,0 +1,28 @@
+default_platform(:android)
+
+# App bundle được Flutter build sẵn trước khi gọi lane này — xem
+# `.github/workflows/release.yml`. Fastlane ở đây chỉ lo việc upload.
+platform :android do
+  desc "Đẩy AAB lên Play Console track internal (kiểm thử nội bộ)"
+  lane :internal do
+    upload_to_play_store(
+      track: "internal",
+      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+    )
+  end
+
+  desc "Đẩy AAB lên Play Console track production"
+  lane :production do
+    upload_to_play_store(
+      track: "production",
+      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      rollout: "1.0",
+    )
+  end
+end

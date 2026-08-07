@@ -27,6 +27,10 @@ Flutter/flutter_export_environment.sh
 ServiceDefinitions.json
 Runner/GeneratedPluginRegistrant.*
 
+# Sinh ra lúc CI chạy release, từ ExportOptions.plist.template — chứa team ID
+# thật, không commit.
+ExportOptions.plist
+
 # Exceptions to above rules.
 !default.mode1v3
 !default.mode2v3

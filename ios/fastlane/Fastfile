@@ -1,0 +1,40 @@
+default_platform(:ios)
+
+# IPA được Flutter build sẵn trước khi gọi lane này — xem
+# `.github/workflows/release.yml`. Fastlane ở đây chỉ lo việc upload.
+platform :ios do
+  desc "Đẩy IPA lên TestFlight"
+  lane :beta do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+      key_filepath: ENV["APP_STORE_CONNECT_KEY_PATH"],
+      in_house: false,
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      ipa: ENV["IPA_PATH"],
+      skip_waiting_for_build_processing: true,
+    )
+  end
+
+  desc "Đẩy build đã có trên TestFlight lên App Store (chờ Apple duyệt)"
+  lane :release do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+      key_filepath: ENV["APP_STORE_CONNECT_KEY_PATH"],
+      in_house: false,
+    )
+
+    upload_to_app_store(
+      api_key: api_key,
+      ipa: ENV["IPA_PATH"],
+      skip_screenshots: true,
+      skip_metadata: true,
+      submit_for_review: false,
+      automatic_release: false,
+    )
+  end
+end
