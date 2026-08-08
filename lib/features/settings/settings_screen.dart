@@ -3,6 +3,7 @@ import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:flutter/material.dart';
@@ -128,14 +129,12 @@ class _FamilyInfoCard extends StatelessWidget {
             Container(
               width: 48,
               height: 48,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: context.colors.primaryContainer,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.family_restroom_rounded,
-                color: context.colors.primary,
-              ),
+              child: const Text('🏡', style: TextStyle(fontSize: 24)),
             ),
             const SizedBox(width: AppSpacing.lg),
             Expanded(
@@ -187,17 +186,17 @@ class _MemberTile extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Row(
             children: [
-              CircleAvatar(
-                backgroundColor: color,
-                radius: 20,
+              Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.18),
+                  shape: BoxShape.circle,
+                ),
                 child: Text(
-                  member.displayName.isNotEmpty
-                      ? member.displayName[0].toUpperCase()
-                      : '?',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
+                  isParent ? '🧑' : avatarForKey(member.avatarKey),
+                  style: const TextStyle(fontSize: 20),
                 ),
               ),
               const SizedBox(width: AppSpacing.lg),

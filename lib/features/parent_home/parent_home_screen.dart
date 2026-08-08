@@ -5,6 +5,7 @@ import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/task_dao.dart';
@@ -130,10 +131,7 @@ class _PendingReviewSectionState extends State<_PendingReviewSection> {
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Row(
             children: [
-              Icon(
-                Icons.check_circle_outline,
-                color: context.semantic.success,
-              ),
+              const Text('📖', style: TextStyle(fontSize: 22)),
               const SizedBox(width: AppSpacing.md),
               Text(
                 'Khong co viec nao cho duyet',
@@ -320,18 +318,17 @@ class _ChildSummaryCard extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(
           children: [
-            CircleAvatar(
-              backgroundColor: color,
-              radius: 24,
+            Container(
+              width: 48,
+              height: 48,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.18),
+                shape: BoxShape.circle,
+              ),
               child: Text(
-                child.displayName.isNotEmpty
-                    ? child.displayName[0].toUpperCase()
-                    : '?',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
-                ),
+                avatarForKey(child.avatarKey),
+                style: const TextStyle(fontSize: 24),
               ),
             ),
             const SizedBox(width: AppSpacing.lg),

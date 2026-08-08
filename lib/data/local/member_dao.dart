@@ -57,6 +57,12 @@ class MemberDao extends DatabaseAccessor<AppDatabase> with _$MemberDaoMixin {
     return (select(members)..where((m) => m.id.equals(memberId))).getSingle();
   }
 
+  Stream<Member> watchMember(String memberId) {
+    return (select(
+      members,
+    )..where((m) => m.id.equals(memberId))).watchSingle();
+  }
+
   Future<void> updateMember(String id, MembersCompanion companion) {
     return (update(members)..where((m) => m.id.equals(id))).write(companion);
   }

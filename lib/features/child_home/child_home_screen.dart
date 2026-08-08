@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
+import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/task_card.dart';
-import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
@@ -23,6 +24,7 @@ class ChildHomeScreen extends ConsumerWidget {
     if (session == null) return const SizedBox.shrink();
 
     final memberId = session.activeMemberId;
+    final memberDao = ref.watch(memberDaoProvider);
     final walletDao = ref.watch(walletDaoProvider);
     final taskDao = ref.watch(taskDaoProvider);
 
@@ -31,182 +33,314 @@ class ChildHomeScreen extends ConsumerWidget {
     ).today();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Viec cua con', style: context.text.titleLarge),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.lg),
-            child: StreamBuilder<WalletBalance>(
-              stream: walletDao.watchBalance(memberId),
-              builder: (context, snap) {
-                final balance = snap.data ?? WalletBalance.zero;
-                return XuBadge(amount: balance.total);
-              },
-            ),
+      body: SafeArea(
+        child: StreamBuilder<List<TaskInstance>>(
+          stream: taskDao.watchInstancesForMember(
+            memberId: memberId,
+            date: today,
           ),
-        ],
-      ),
-      body: StreamBuilder<List<TaskInstance>>(
-        stream: taskDao.watchInstancesForMember(
-          memberId: memberId,
-          date: today,
-        ),
-        builder: (context, snap) {
-          if (snap.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+          builder: (context, instSnap) {
+            final instances = instSnap.data ?? [];
+            final total = instances.length;
+            final completedCount = instances
+                .where(
+                  (i) =>
+                      i.status == InstanceStatus.approved.name ||
+                      i.status == InstanceStatus.pendingReview.name,
+                )
+                .length;
 
-          final instances = snap.data ?? [];
-          if (instances.isEmpty) {
-            return _EmptyState(
-              onGenerate: () async {
-                await taskDao.generateInstances(
-                  familyId: session.familyId,
-                  today: today,
-                );
-              },
-            );
-          }
-
-          final scheduled = instances
-              .where((i) => i.status == InstanceStatus.scheduled.name)
-              .toList();
-          final done = instances
-              .where(
-                (i) =>
-                    i.status == InstanceStatus.approved.name ||
-                    i.status == InstanceStatus.pendingReview.name,
-              )
-              .toList();
-          final missed = instances
-              .where((i) => i.status == InstanceStatus.missed.name)
-              .toList();
-
-          final total = instances.length;
-          final completedCount = done.length;
-
-          return ListView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.screenPaddingMobile,
-              vertical: AppSpacing.lg,
-            ),
-            children: [
-              _ProgressHeader(
-                completed: completedCount,
-                total: total,
+            return ListView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPaddingMobile,
+                vertical: AppSpacing.lg,
               ),
-              const SizedBox(height: AppSpacing.xxl),
-              if (scheduled.isNotEmpty) ...[
-                _SectionHeader(title: 'Can lam', count: scheduled.length),
-                const SizedBox(height: AppSpacing.sm),
-                ...scheduled.map(
-                  (instance) => Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                    child: _InstanceCard(
-                      instance: instance,
-                      taskDao: taskDao,
-                    ),
-                  ),
+              children: [
+                StreamBuilder<Member>(
+                  stream: memberDao.watchMember(memberId),
+                  builder: (context, memberSnap) {
+                    final member = memberSnap.data;
+                    return _ChildHeader(member: member);
+                  },
                 ),
-                const SizedBox(height: AppSpacing.xl),
-              ],
-              if (done.isNotEmpty) ...[
-                _SectionHeader(title: 'Da xong', count: done.length),
-                const SizedBox(height: AppSpacing.sm),
-                ...done.map(
-                  (instance) => Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                    child: _InstanceCard(
-                      instance: instance,
-                      taskDao: taskDao,
-                    ),
-                  ),
+                const SizedBox(height: AppSpacing.lg),
+                StreamBuilder<WalletBalance>(
+                  stream: walletDao.watchBalance(memberId),
+                  builder: (context, balSnap) {
+                    final balance = balSnap.data ?? WalletBalance.zero;
+                    return StreamBuilder<Streak?>(
+                      stream: memberDao.watchStreak(memberId),
+                      builder: (context, streakSnap) {
+                        return _DashboardCard(
+                          points: balance.total,
+                          streak: streakSnap.data?.currentLen ?? 0,
+                          completed: completedCount,
+                          total: total,
+                        );
+                      },
+                    );
+                  },
                 ),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: AppSpacing.xxl),
+                if (instSnap.connectionState == ConnectionState.waiting)
+                  const Padding(
+                    padding: EdgeInsets.only(top: AppSpacing.xxxl),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (instances.isEmpty)
+                  _EmptyState(
+                    onGenerate: () async {
+                      await taskDao.generateInstances(
+                        familyId: session.familyId,
+                        today: today,
+                      );
+                    },
+                  )
+                else
+                  ..._buildTaskSections(instances, taskDao),
               ],
-              if (missed.isNotEmpty) ...[
-                _SectionHeader(title: 'Bo lo', count: missed.length),
-                const SizedBox(height: AppSpacing.sm),
-                ...missed.map(
-                  (instance) => Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                    child: _InstanceCard(
-                      instance: instance,
-                      taskDao: taskDao,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          );
-        },
+            );
+          },
+        ),
       ),
+    );
+  }
+
+  List<Widget> _buildTaskSections(
+    List<TaskInstance> instances,
+    TaskDao taskDao,
+  ) {
+    final scheduled = instances
+        .where((i) => i.status == InstanceStatus.scheduled.name)
+        .toList();
+    final done = instances
+        .where(
+          (i) =>
+              i.status == InstanceStatus.approved.name ||
+              i.status == InstanceStatus.pendingReview.name,
+        )
+        .toList();
+    final missed = instances
+        .where((i) => i.status == InstanceStatus.missed.name)
+        .toList();
+
+    return [
+      if (scheduled.isNotEmpty) ...[
+        _SectionHeader(title: 'Can lam', count: scheduled.length),
+        const SizedBox(height: AppSpacing.sm),
+        ...scheduled.map(
+          (instance) => Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: _InstanceCard(instance: instance, taskDao: taskDao),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+      ],
+      if (done.isNotEmpty) ...[
+        _SectionHeader(title: 'Da xong', count: done.length),
+        const SizedBox(height: AppSpacing.sm),
+        ...done.map(
+          (instance) => Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: _InstanceCard(instance: instance, taskDao: taskDao),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+      ],
+      if (missed.isNotEmpty) ...[
+        _SectionHeader(title: 'Bo lo', count: missed.length),
+        const SizedBox(height: AppSpacing.sm),
+        ...missed.map(
+          (instance) => Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: _InstanceCard(instance: instance, taskDao: taskDao),
+          ),
+        ),
+      ],
+    ];
+  }
+}
+
+class _ChildHeader extends StatelessWidget {
+  const _ChildHeader({required this.member});
+
+  final Member? member;
+
+  @override
+  Widget build(BuildContext context) {
+    final member = this.member;
+    final color = member == null
+        ? context.colors.primary
+        : AppColors.profileColor(member.colorIndex);
+
+    return Row(
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.18),
+            shape: BoxShape.circle,
+          ),
+          child: Text(
+            avatarForKey(member?.avatarKey),
+            style: const TextStyle(fontSize: 26),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Text(
+          member?.displayName ?? '',
+          style: context.text.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+        ),
+      ],
     );
   }
 }
 
-class _ProgressHeader extends StatelessWidget {
-  const _ProgressHeader({
+class _DashboardCard extends StatelessWidget {
+  const _DashboardCard({
+    required this.points,
+    required this.streak,
     required this.completed,
     required this.total,
   });
 
+  final int points;
+  final int streak;
   final int completed;
   final int total;
 
   @override
   Widget build(BuildContext context) {
-    final progress = total > 0 ? completed / total : 0.0;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '$completed / $total viec',
-                  style: context.text.titleMedium,
-                ),
-                if (completed == total && total > 0)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.xs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: context.semantic.success,
-                      borderRadius: BorderRadius.circular(AppRadius.pill),
-                    ),
-                    child: Text(
-                      'Hoan thanh!',
-                      style: context.text.labelSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-              ],
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      decoration: BoxDecoration(
+        gradient: context.dashboardGradient,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'DASHBOARD',
+            style: context.text.labelSmall?.copyWith(
+              color: Colors.white.withValues(alpha: 0.85),
+              letterSpacing: 1.2,
             ),
-            const SizedBox(height: AppSpacing.md),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 10,
-                backgroundColor: context.colors.outlineVariant,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  completed == total && total > 0
-                      ? context.semantic.success
-                      : context.colors.primary,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: _StatTile(
+                  label: 'DIEM',
+                  child: XuBadgeStat(amount: points),
                 ),
               ),
-            ),
-          ],
-        ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _StatTile(
+                  label: 'STREAK',
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('🔥', style: TextStyle(fontSize: 18)),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$streak',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _StatTile(
+                  label: 'HOM NAY',
+                  child: Text(
+                    '$completed/$total',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class _StatTile extends StatelessWidget {
+  const _StatTile({required this.child, required this.label});
+
+  final Widget child;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(AppRadius.field),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          child,
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.6,
+              color: Colors.white.withValues(alpha: 0.85),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Số điểm hiển thị trắng trên nền gradient — dùng emoji 💎 giống XuBadge
+/// nhưng cỡ chữ lớn hơn cho thẻ dashboard.
+class XuBadgeStat extends StatelessWidget {
+  const XuBadgeStat({required this.amount, super.key});
+
+  final int amount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text('💎', style: TextStyle(fontSize: 20)),
+        const SizedBox(width: 4),
+        Text(
+          '$amount',
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -307,11 +441,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.task_alt_rounded,
-              size: 64,
-              color: context.semantic.onSurfaceMuted,
-            ),
+            const Text('🎉', style: TextStyle(fontSize: 56)),
             const SizedBox(height: AppSpacing.xl),
             Text(
               'Chua co viec nao hom nay',

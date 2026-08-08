@@ -4,10 +4,13 @@ import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/preset_chip.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/reward_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
+import 'package:beong/data/seed/reward_presets.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
@@ -127,13 +130,14 @@ class _RewardCard extends StatelessWidget {
             Container(
               width: 48,
               height: 48,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: context.colors.primaryContainer,
                 borderRadius: BorderRadius.circular(AppRadius.field),
               ),
-              child: Icon(
-                _rewardIcon(reward.rewardType),
-                color: context.colors.primary,
+              child: Text(
+                iconForKey(reward.iconKey),
+                style: const TextStyle(fontSize: 24),
               ),
             ),
             const SizedBox(width: AppSpacing.lg),
@@ -141,11 +145,16 @@ class _RewardCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(reward.title, style: context.text.titleSmall),
+                  Text(
+                    reward.title,
+                    style: context.text.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                   const SizedBox(height: AppSpacing.xs),
                   Row(
                     children: [
-                      XuBadge(amount: reward.costPoints),
+                      XuBadge(amount: reward.costPoints, pill: true),
                       if (reward.stock != null) ...[
                         const SizedBox(width: AppSpacing.md),
                         Text(
@@ -181,14 +190,6 @@ class _RewardCard extends StatelessWidget {
       ),
     );
   }
-
-  IconData _rewardIcon(String type) => switch (type) {
-    'screenTime' => Icons.tv_rounded,
-    'pocketMoney' => Icons.payments_rounded,
-    'experience' => Icons.celebration_rounded,
-    'item' => Icons.redeem_rounded,
-    _ => Icons.card_giftcard_rounded,
-  };
 }
 
 class _RedeemButton extends StatefulWidget {
@@ -286,11 +287,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.card_giftcard_rounded,
-              size: 64,
-              color: context.semantic.onSurfaceMuted,
-            ),
+            const Text('🎁', style: TextStyle(fontSize: 56)),
             const SizedBox(height: AppSpacing.xl),
             Text(
               'Chua co phan thuong nao',
@@ -336,29 +333,32 @@ class _AddRewardSheet extends StatefulWidget {
 
 class _AddRewardSheetState extends State<_AddRewardSheet> {
   final _titleController = TextEditingController();
-  final _costController = TextEditingController(text: '50');
+  int _cost = 50;
   String _type = RewardType.custom.name;
+  String? _selectedPreset;
 
   @override
   void dispose() {
     _titleController.dispose();
-    _costController.dispose();
     super.dispose();
   }
 
   Future<void> _save() async {
     final title = _titleController.text.trim();
-    final cost = int.tryParse(_costController.text.trim()) ?? 0;
-    if (title.isEmpty || cost <= 0) return;
+    if (title.isEmpty || _cost <= 0) return;
 
+    final preset = _selectedPreset == null
+        ? null
+        : rewardPresetByKey(_selectedPreset!);
     final id = 'reward-${DateTime.now().millisecondsSinceEpoch}';
     await widget.rewardDao.createReward(
       RewardsCompanion.insert(
         id: id,
         familyId: widget.familyId,
         title: title,
-        costPoints: cost,
+        costPoints: _cost,
         rewardType: Value(_type),
+        iconKey: Value(preset?.iconKey),
       ),
     );
 
@@ -374,57 +374,80 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
         top: AppSpacing.xxl,
         bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.xxl,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Them phan thuong', style: context.text.titleLarge),
-          const SizedBox(height: AppSpacing.xxl),
-          TextField(
-            controller: _titleController,
-            decoration: const InputDecoration(hintText: 'Ten phan thuong'),
-            textCapitalization: TextCapitalization.sentences,
-            autofocus: true,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          TextField(
-            controller: _costController,
-            decoration: const InputDecoration(
-              hintText: 'Gia (xu)',
-              suffixText: 'xu',
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Them phan thuong', style: context.text.titleLarge),
+            const SizedBox(height: AppSpacing.lg),
+            Text('Chon nhanh', style: context.text.titleSmall),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: kRewardPresets.map((preset) {
+                final selected = _selectedPreset == preset.key;
+                return PresetChip(
+                  emoji: iconForKey(preset.iconKey),
+                  label: preset.titleVi,
+                  selected: selected,
+                  onTap: () {
+                    setState(() {
+                      _selectedPreset = selected ? null : preset.key;
+                      if (!selected) {
+                        _titleController.text = preset.titleVi;
+                        _cost = preset.defaultCost;
+                        _type = preset.rewardType;
+                      }
+                    });
+                  },
+                );
+              }).toList(),
             ),
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Wrap(
-            spacing: AppSpacing.sm,
-            children: RewardType.values.map((t) {
-              final selected = t.name == _type;
-              return ChoiceChip(
-                label: Text(_typeLabel(t)),
-                selected: selected,
-                onSelected: (_) => setState(() => _type = t.name),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: AppSpacing.xxl),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _save,
-              child: const Text('LUU'),
+            const SizedBox(height: AppSpacing.xl),
+            Text('Gia (xu)', style: context.text.titleSmall),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton.filledTonal(
+                  onPressed: _cost > 10
+                      ? () => setState(() => _cost -= 10)
+                      : null,
+                  icon: const Icon(Icons.remove_rounded),
+                ),
+                SizedBox(
+                  width: 100,
+                  child: Center(
+                    child: XuBadge(amount: _cost, large: true),
+                  ),
+                ),
+                IconButton.filledTonal(
+                  onPressed: () => setState(() => _cost += 10),
+                  icon: const Icon(Icons.add_rounded),
+                ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: AppSpacing.xl),
+            Text('Ten phan thuong', style: context.text.titleSmall),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(hintText: 'Ten phan thuong'),
+              textCapitalization: TextCapitalization.sentences,
+            ),
+            const SizedBox(height: AppSpacing.xxl),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _save,
+                child: const Text('LUU'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
-
-  String _typeLabel(RewardType t) => switch (t) {
-    RewardType.screenTime => 'Thoi gian man hinh',
-    RewardType.pocketMoney => 'Tien tieu vat',
-    RewardType.experience => 'Trai nghiem',
-    RewardType.item => 'Do vat',
-    RewardType.custom => 'Khac',
-  };
 }
