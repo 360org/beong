@@ -203,6 +203,25 @@ Test tốt còn chặn được cả việc **tiền đề bị đổi trôi**:
 Với danh sách động, test luôn: **sau khi item chuyển mục/xoá, mỗi tên còn xuất
 hiện đúng một lần** — đó chính là bẫy thiếu `key`.
 
+### Ngân sách hiệu năng — đo được, không tuyên bố suông
+
+App mobile bị giới hạn bởi pin, RAM và mạng, nên đặt ngưỡng **kèm cách đo**.
+Ngưỡng không có lệnh đo đi cùng thì cũng chỉ là ước muốn, giống ràng buộc không
+có test:
+
+| Chỉ tiêu | Ngưỡng khởi điểm | Cách đo |
+|---|---|---|
+| Thời gian mở app (lạnh) | < 3 giây | `flutter run --profile --trace-startup` → đọc `timeToFirstFrameMicros` trong `build/start_up_info.json` |
+| Cỡ bản cài | theo dõi mỗi release | `flutter build apk --release --analyze-size --target-platform android-arm64` |
+| Nhịp khung hình | không jank ở luồng chính | `flutter run --profile` + Performance overlay / DevTools |
+| RAM | không tăng đơn điệu khi điều hướng qua lại | DevTools → Memory, chuyển tab 10 lần rồi xem có nhả không |
+
+Hai lưu ý về `--analyze-size`: chỉ chạy được với `--release`, và trên Android
+phải chỉ định đúng **một** ABI bằng `--target-platform`.
+
+Đừng đo hiệu năng ở bản `debug` — debug chậm hơn nhiều lần, số liệu vô nghĩa.
+Luôn dùng `--profile` (hoặc `--release` cho cỡ bản cài).
+
 ## Bước 8 — Sửa gốc, nói thật, rồi commit từng phần
 
 **Sửa gốc, không hạ ngưỡng.** Khi test đỏ vì thực tế chưa đạt, sửa thực tế.
@@ -228,6 +247,44 @@ lý do không chọn cách hiển nhiên hơn.
 flutter analyze --fatal-infos && flutter test && dart format --set-exit-if-changed lib test
 git add -A && git commit -m "..." && git push -u origin <branch>
 ```
+
+---
+
+## Mẫu báo cáo khi giao việc
+
+Kết thúc một phần việc, báo lại theo khung này. Mục **Chưa làm / chưa kiểm** là
+mục quan trọng nhất và không được bỏ trống bằng chữ "không có" nếu thực tế có:
+
+```markdown
+## Đã làm
+- [thay đổi, kèm lý do nếu có chọn lựa đáng nói]
+
+## Kiểm chứng thế nào
+- analyze --fatal-infos: [sạch / còn gì]
+- test: [n pass, có test mới nào]
+- Chạy app thật: [cỡ màn hình, luồng đã đi, ảnh chụp]
+
+## Lỗi phát hiện thêm (nếu có)
+- [lỗi, nguyên nhân gốc, đã sửa chưa]
+
+## Chưa làm / chưa kiểm
+- [phần bỏ lại và **vì sao**, nhất là chỗ không có test tự động]
+```
+
+Vì sao có mục cuối: người đọc cần biết ranh giới của thứ đã được kiểm. Báo cáo
+chỉ toàn phần thành công tạo cảm giác an toàn giả, và người sau sẽ tin vào chỗ
+chưa từng được kiểm.
+
+## Tiêu chí "xong" cho một phần việc
+
+Đủ cả sáu, không phải năm:
+
+1. `flutter analyze --fatal-infos` sạch
+2. `flutter test` xanh, **và** mọi ràng buộc vừa tuyên bố đều có test tương ứng
+3. `dart format --set-exit-if-changed lib test` sạch
+4. Đã chạy app thật ở **đúng cỡ thiết bị** và đã *nhìn* ảnh chụp
+5. Chuỗi hiển thị nằm trong ARB, màu/khoảng cách đi qua token
+6. Đã nói rõ phần nào chưa có test và vì sao
 
 ---
 
