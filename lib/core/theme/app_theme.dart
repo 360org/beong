@@ -14,10 +14,15 @@ abstract final class AppTheme {
     // outlineVariant là đen thuần, không phải màu thương hiệu.
     ctaBackground: AppColors.xuLight,
     ctaForeground: AppColors.onSurfaceLight,
+    navLabel: AppColors.navLabelLight,
     scheme: const ColorScheme.light(
       primary: AppColors.primaryLight,
       primaryContainer: AppColors.primaryContainerLight,
       onPrimaryContainer: AppColors.onSurfaceLight,
+      secondary: AppColors.secondaryLight,
+      onSecondary: AppColors.onSecondaryLight,
+      secondaryContainer: AppColors.secondaryContainerLight,
+      onSecondaryContainer: AppColors.onSecondaryContainerLight,
       onSurface: AppColors.onSurfaceLight,
       surfaceContainerHighest: AppColors.surfaceVariantLight,
       outlineVariant: AppColors.outlineLight,
@@ -30,11 +35,16 @@ abstract final class AppTheme {
     brightness: Brightness.dark,
     ctaBackground: AppColors.xuDark,
     ctaForeground: AppColors.onPrimaryDark,
+    navLabel: AppColors.navLabelDark,
     scheme: const ColorScheme.dark(
       primary: AppColors.primaryDark,
       onPrimary: AppColors.onPrimaryDark,
       primaryContainer: AppColors.primaryContainerDark,
       onPrimaryContainer: AppColors.onSurfaceDark,
+      secondary: AppColors.secondaryDark,
+      onSecondary: AppColors.onSecondaryDark,
+      secondaryContainer: AppColors.secondaryContainerDark,
+      onSecondaryContainer: AppColors.onSecondaryContainerDark,
       surface: AppColors.surfaceDark,
       onSurface: AppColors.onSurfaceDark,
       surfaceContainerHighest: AppColors.surfaceVariantDark,
@@ -49,6 +59,7 @@ abstract final class AppTheme {
     required AppSemanticColors semantic,
     required Color ctaBackground,
     required Color ctaForeground,
+    required Color navLabel,
     Brightness brightness = Brightness.light,
   }) {
     final textTheme = AppTypography.textTheme(scheme.onSurface);
@@ -90,6 +101,63 @@ abstract final class AppTheme {
             fontWeight: FontWeight.w800,
             letterSpacing: 0.5,
           ),
+        ),
+      ),
+
+      // Thanh điều hướng — hình học gọn, không dùng viên thuốc mặc định của
+      // Material. Viên nền bo 14 (squircle) đọc "công nghệ" hơn pill tròn hẳn,
+      // và icon đang chọn dùng dương 360 nên khớp bộ màu thương hiệu.
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: scheme.surface,
+        elevation: 0,
+        height: 68,
+        indicatorColor: scheme.primaryContainer,
+        indicatorShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(14)),
+        ),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return IconThemeData(
+            size: 24,
+            color: selected ? scheme.primary : navLabel,
+          );
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return TextStyle(
+            fontFamily: AppTypography.fontFamily,
+            fontSize: 11,
+            fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+            letterSpacing: 0.2,
+            color: selected ? scheme.primary : navLabel,
+          );
+        }),
+      ),
+
+      // Rail trên desktop dùng cùng ngôn ngữ hình học với thanh dưới.
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: scheme.surface,
+        elevation: 0,
+        indicatorColor: scheme.primaryContainer,
+        indicatorShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(14)),
+        ),
+        selectedIconTheme: IconThemeData(size: 24, color: scheme.primary),
+        unselectedIconTheme: IconThemeData(size: 24, color: navLabel),
+        selectedLabelTextStyle: TextStyle(
+          fontFamily: AppTypography.fontFamily,
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.2,
+          color: scheme.primary,
+        ),
+        unselectedLabelTextStyle: TextStyle(
+          fontFamily: AppTypography.fontFamily,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.2,
+          color: navLabel,
         ),
       ),
 

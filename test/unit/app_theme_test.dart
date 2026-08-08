@@ -233,6 +233,55 @@ void main() {
       }
     });
 
+    // ---- Thanh điều hướng ----
+
+    test('secondaryContainer phải được khai báo, không để Material suy ra', () {
+      // Bỏ trống thì ColorScheme của Material 3 trả về màu teal, và nó lọt vào
+      // viên nền icon đang chọn ở thanh nav — teal không thuộc bộ màu nào của
+      // Bé Ong hay 360. Lỗi này từng có thật từ Sprint 0.
+      final teal = const ColorScheme.light().secondaryContainer;
+      expect(AppTheme.light().colorScheme.secondaryContainer, isNot(teal));
+      expect(
+        AppTheme.dark().colorScheme.secondaryContainer,
+        isNot(const ColorScheme.dark().secondaryContainer),
+      );
+    });
+
+    test('icon nav đang chọn đủ tương phản trên viên nền', () {
+      for (final theme in [AppTheme.light(), AppTheme.dark()]) {
+        final scheme = theme.colorScheme;
+        expect(
+          _contrast(scheme.primary, scheme.primaryContainer),
+          greaterThanOrEqualTo(3),
+          reason: 'icon nav (${theme.brightness.name})',
+        );
+      }
+    });
+
+    test('nhãn nav 11px đạt ngưỡng chữ thường, không dùng ngưỡng nhãn mờ', () {
+      // Nhãn nav nhỏ hơn 13px nên phải đạt 4.5:1, không được mượn ngưỡng 3:1
+      // của onSurfaceMuted.
+      expect(
+        _contrast(AppColors.navLabelLight, AppColors.surfaceLight),
+        greaterThanOrEqualTo(4.5),
+      );
+      expect(
+        _contrast(AppColors.navLabelDark, AppColors.surfaceDark),
+        greaterThanOrEqualTo(4.5),
+      );
+    });
+
+    test('nhãn nav đang chọn đủ tương phản trên nền thanh', () {
+      expect(
+        _contrast(AppColors.primaryLight, AppColors.surfaceLight),
+        greaterThanOrEqualTo(4.5),
+      );
+      expect(
+        _contrast(AppColors.primaryDark, AppColors.surfaceDark),
+        greaterThanOrEqualTo(4.5),
+      );
+    });
+
     test('profileColor lặp vòng khi chỉ số vượt quá bảng màu', () {
       expect(AppColors.profileColor(0), AppColors.profilePalette[0]);
       expect(AppColors.profileColor(8), AppColors.profilePalette[0]);

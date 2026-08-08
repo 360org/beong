@@ -39,6 +39,21 @@ abstract final class AppColors {
   static const Color primaryLight = brand360Blue;
   static const onPrimaryLight = Color(0xFFFFFFFF);
   static const primaryContainerLight = Color(0xFFE3F2FD);
+
+  /// Phải khai báo tường minh: ColorScheme của Material 3 tự suy ra
+  /// `secondaryContainer` màu **teal** khi bỏ trống, và màu đó lọt vào viên nền
+  /// icon đang chọn ở thanh điều hướng — không thuộc bộ màu nào của Bé Ong hay
+  /// 360. Bỏ hai dòng này là teal quay lại.
+  static const Color secondaryLight = successLight;
+  static const onSecondaryLight = Color(0xFFFFFFFF);
+  static const secondaryContainerLight = Color(0xFFD3E9FA);
+  static const Color onSecondaryContainerLight = onSurfaceLight;
+
+  /// Nhãn thanh điều hướng khi **chưa** chọn.
+  ///
+  /// Không dùng [onSurfaceMutedLight]: nhãn nav chỉ 11px nên cần >= 4.5:1, mà
+  /// màu mờ kia chỉ đạt 3.31:1 — ngưỡng 3:1 của nó chỉ dành cho chữ đậm >= 13px.
+  static const navLabelLight = Color(0xFF757195);
   static const surfaceLight = Color(0xFFFFFFFF);
   static const surfaceVariantLight = Color(0xFFF6F5FC);
   static const onSurfaceLight = Color(0xFF1B1046);
@@ -51,6 +66,13 @@ abstract final class AppColors {
   static const primaryDark = Color(0xFF3AA0E8);
   static const onPrimaryDark = Color(0xFF12082E);
   static const primaryContainerDark = Color(0xFF10365C);
+  static const Color secondaryDark = successDark;
+  static const onSecondaryDark = Color(0xFF12082E);
+  static const secondaryContainerDark = Color(0xFF16406B);
+  static const Color onSecondaryContainerDark = onSurfaceDark;
+
+  /// Xem [navLabelLight]. Trên nền tối màu mờ sẵn đã đạt 5.58:1 nên dùng lại.
+  static const Color navLabelDark = onSurfaceMutedDark;
   static const surfaceDark = Color(0xFF14102A);
   static const surfaceVariantDark = Color(0xFF1E1940);
   static const onSurfaceDark = Color(0xFFF2F0FF);
