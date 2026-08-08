@@ -7,6 +7,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+/// Ngôn ngữ mặc định khi máy không dùng ngôn ngữ nào app hỗ trợ.
+const Locale kFallbackLocale = Locale('vi');
+
+/// Chọn ngôn ngữ: ưu tiên theo thứ tự người dùng đặt trên máy, hết thì về
+/// tiếng Việt.
+///
+/// Tách ra ngoài để test được mà không cần dựng cả cây widget.
+Locale resolveAppLocale(
+  List<Locale>? deviceLocales,
+  Iterable<Locale> supported,
+) {
+  for (final wanted in deviceLocales ?? const <Locale>[]) {
+    for (final candidate in supported) {
+      if (candidate.languageCode == wanted.languageCode) return candidate;
+    }
+  }
+  return kFallbackLocale;
+}
+
 class BeOngApp extends ConsumerStatefulWidget {
   const BeOngApp({super.key});
 
@@ -40,6 +59,10 @@ class _BeOngAppState extends ConsumerState<BeOngApp> {
       darkTheme: AppTheme.dark(),
       localizationsDelegates: L10n.localizationsDelegates,
       supportedLocales: L10n.supportedLocales,
+      // Máy đặt ngôn ngữ ngoài danh sách hỗ trợ thì rơi về tiếng Việt, không
+      // phải tiếng Anh: Bé Ong là app cho gia đình Việt, và mặc định của
+      // Flutter là lấy locale đầu danh sách — dễ ra tiếng Anh ngoài ý muốn.
+      localeListResolutionCallback: resolveAppLocale,
       routerConfig: _router,
       builder: (context, child) {
         final scale = MediaQuery.textScalerOf(
