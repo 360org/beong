@@ -198,15 +198,26 @@ trị tự điền đó sai với thương hiệu:
 ```bash
 # Màn hình ảo đúng cỡ điện thoại — không phải cỡ desktop
 nohup Xvfb :98 -screen 0 412x900x24 >/dev/null 2>&1 & disown
-sleep 4
+sleep 2
+# BẮT BUỘC: không có window manager thì cửa sổ Flutter vẫn nằm ở 1280x720
+nohup env DISPLAY=:98 matchbox-window-manager -use_titlebar no \
+  >/dev/null 2>&1 & disown
+sleep 2
 nohup env DISPLAY=:98 LANG=vi_VN.UTF-8 ./build/linux/x64/debug/bundle/<app> \
   > /tmp/app.log 2>&1 & disown
-sleep 6
-# Cửa sổ Flutter mặc định 1280 rộng -> phải resize về đúng cỡ máy
-WID=$(DISPLAY=:98 xdotool search --class <app> | tail -1)
-DISPLAY=:98 xdotool windowsize "$WID" 412 900
+sleep 8
 DISPLAY=:98 import -window root /tmp/shot.png
 ```
+
+Chỗ này mất thời gian nhất nếu làm sai: `gtk_window_set_default_size` trong
+`linux/runner/my_application.cc` là **1280x720**, và trên Xvfb trống không có
+window manager thì `xdotool windowsize` chỉ đổi cửa sổ X — Flutter không nhận
+configure event nên surface vẫn 1280 rộng. Ảnh chụp ra là **layout desktop bị
+cắt còn 412px**, trông rất giống mobile: cùng một màn hình, cùng font, chỉ lệch
+lề và mất thanh trên. Dấu hiệu nhận biết: `xdotool getwindowgeometry` báo đúng
+412x900 nhưng nội dung vẫn tràn khỏi mép phải, và phần dưới y=720 là **đen**.
+Cách chắc chắn: cài `matchbox-window-manager` rồi để WM tự map cửa sổ full
+screen — không cần resize tay nữa.
 
 Rồi **đọc ảnh bằng công cụ đọc ảnh**, và zoom vào chi tiết đáng ngờ:
 
