@@ -15,6 +15,35 @@ nhiều lỗi nhất — đừng bỏ.
 
 ---
 
+## Hiến pháp dự án — thứ không thương lượng
+
+Trước 8 bước, phải biết đâu là **ràng buộc không được thoả hiệp**. Trong repo
+Flutter, hiến pháp thường nằm rải ở:
+
+- **ADR** (`docs/06-decisions.md` hoặc tương đương) — quyết định kiến trúc kèm lý do
+- **Ràng buộc khả dụng** trong design system — ngưỡng tương phản, vùng chạm, trần phóng chữ
+- **Cổng CI** — `--fatal-infos`, format, test phải xanh
+- **Ràng buộc nền tảng** — offline-first, quyền riêng tư trẻ em, không quảng cáo
+
+Điều luật quan trọng nhất, và cũng là chỗ dễ sai nhất khi đang gấp:
+
+> **Xung đột với hiến pháp thì sửa việc đang làm, không pha loãng nguyên tắc.**
+> Nếu bản thân nguyên tắc cần đổi, đó phải là **một hành động riêng, tường minh**
+> — không bao giờ là tác dụng phụ của việc làm cho công việc hôm nay chạy được.
+
+Ba dạng pha loãng hay gặp, đều phải nhận ra và từ chối:
+
+| Dạng pha loãng | Ví dụ thật |
+|---|---|
+| **Hạ ngưỡng test** | Test đòi 3:1, thực tế 2.94:1 → sửa assertion xuống 2.9. Đúng: thêm viền cho linh vật để đạt 3:1 thật. |
+| **Diễn giải lại** | "Ngưỡng 3:1 kia chắc chỉ áp cho chữ thôi" — trong khi hình mang nghĩa cũng thuộc phạm vi. |
+| **Im lặng bỏ qua** | Commit test bị `skip` mà không nói, hoặc bỏ ràng buộc mà không sửa tài liệu. |
+
+Khi thật sự cần đổi nguyên tắc: đổi nó trong một commit riêng, ghi rõ vì sao, rồi
+mới làm việc phụ thuộc vào nó.
+
+---
+
 ## Bước 1 — Đọc tài liệu sẵn có trước khi viết dòng code nào
 
 Trước khi làm, tìm xem quyết định đã được chốt chưa:
@@ -40,6 +69,20 @@ Nếu yêu cầu mới **ngược** với quyết định cũ, đừng im lặng
 > tròn hiện đại nhưng đổi ký hiệu trừu tượng (lưới dashboard, sliders) sang vật
 > thể cụ thể (nhà, bánh răng), vì bé chưa đọc được nhãn thì icon là nội dung duy
 > nhất. Nói rõ trade-off này thay vì lặng lẽ đổi qua đổi lại.
+
+### Làm rõ chỗ chưa rõ **trước** khi thiết kế, không phải sau
+
+Nếu yêu cầu còn mơ hồ ở mức **đổi cách làm**, hỏi trước. Nếu mơ hồ ở mức không
+ảnh hưởng kết quả, tự quyết rồi nói rõ mình đã giả định gì. Phân biệt hai loại
+này là việc phải làm ngay ở bước 1 — phát hiện muộn thì phải làm lại.
+
+Cách tách: *"nếu đoán sai điều này, tôi có phải viết lại không?"* Có → hỏi.
+Không → quyết và ghi lại giả định.
+
+> **Ví dụ thật:** luồng ghép cặp QR kéo theo câu hỏi "đôn backend lên trước
+> Sprint 3, hay ra v1.0 một-thiết-bị rồi ghép cặp ở v1.1?". Đoán sai thì cả thứ
+> tự sprint sai — đây là quyết định sản phẩm, phải hỏi. Ngược lại "dùng
+> `mobile_scanner` hay gói quét QR khác" thì tự quyết được, chỉ cần ghi lý do.
 
 ## Bước 2 — Tính ràng buộc, đừng ước lượng bằng mắt
 
@@ -76,7 +119,7 @@ Tương tự, đừng tin tài liệu của thư viện — **kiểm bằng dữ
 > nhiều font thiếu dấu hoặc đặt dấu sai. Đã kiểm bằng `fontTools`: đủ 134/134 ký
 > tự riêng của tiếng Việt ở cả ba file weight.
 
-## Bước 3 — Ghi quyết định có hệ quả thành ADR
+## Bước 3 — Ghi quyết định, và giữ tài liệu khớp với code
 
 Nếu quyết định sẽ khiến người sau hỏi "sao lại làm thế?", ghi lại ngay: bối cảnh
 → quyết định → lý do → hệ quả → đã cân nhắc gì. Đặc biệt ghi **lý do phủ định**
@@ -87,6 +130,22 @@ Nếu quyết định sẽ khiến người sau hỏi "sao lại làm thế?", g
 > QR bị chụp lại là chuyện thường, mà ảnh đã chụp thì không rút lại được. Hệ quả
 > kéo theo rất lớn: **ghép cặp bắt buộc cần backend**, đôn cả lộ trình. Không ghi
 > lại thì 3 tháng sau có người "tối ưu" bằng cách nhét dữ liệu vào QR.
+
+### Đối chiếu chéo: code, tài liệu, lộ trình có nói khác nhau không?
+
+Trước khi implement, rà một lượt **chỉ đọc** xem ba nguồn có mâu thuẫn:
+
+```bash
+grep -rn "<token/quyết định vừa đổi>" docs/ lib/ | head -20
+```
+
+Tài liệu lệch với code còn tệ hơn không có tài liệu: người sau tin vào nó và làm
+sai. Nên **đổi ràng buộc thì cập nhật tài liệu trong cùng commit**, đừng để dồn.
+
+> **Ví dụ thật:** sau khi đổi bảng màu sang màu thương hiệu 360, `docs/04-design-system.md`
+> §1 vẫn ghi bảng màu tím cũ — tài liệu tự mâu thuẫn với chính code nó mô tả. Và
+> luồng ghép cặp mới khiến `05-roadmap.md` (backend ở Sprint 4) không còn đúng.
+> Cả hai đều phải sửa cùng lúc, không phải "để sau".
 
 ## Bước 4 — Sinh code trước khi làm bất cứ gì khác
 
