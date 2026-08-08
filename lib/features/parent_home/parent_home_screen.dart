@@ -174,6 +174,9 @@ class _PendingReviewSectionState extends State<_PendingReviewSection> {
           (instance) => Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: _PendingCard(
+              // Key theo id: không có key, Flutter tái dùng State theo vị trí
+              // khi hàng đợi duyệt ngắn lại và thẻ hiện tên của việc cũ.
+              key: ValueKey(instance.id),
               instance: instance,
               taskDao: widget.taskDao,
               walletDao: widget.walletDao,
@@ -194,6 +197,7 @@ class _PendingCard extends StatefulWidget {
     required this.walletDao,
     required this.reviewerId,
     required this.onActioned,
+    super.key,
   });
 
   final TaskInstance instance;
@@ -213,6 +217,15 @@ class _PendingCardState extends State<_PendingCard> {
   void initState() {
     super.initState();
     unawaited(_loadTask());
+  }
+
+  @override
+  void didUpdateWidget(_PendingCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Xem chú thích cùng loại ở `_InstanceCardState`.
+    if (oldWidget.instance.taskId != widget.instance.taskId) {
+      unawaited(_loadTask());
+    }
   }
 
   Future<void> _loadTask() async {

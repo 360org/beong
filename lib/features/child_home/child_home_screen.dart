@@ -151,7 +151,13 @@ class ChildHomeScreen extends ConsumerWidget {
         ...scheduled.map(
           (instance) => Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: _InstanceCard(instance: instance, taskDao: taskDao),
+            child: _InstanceCard(
+              // Key theo id: không có key, Flutter tái dùng State theo
+              // vị trí khi việc chuyển mục và thẻ hiện tên của việc cũ.
+              key: ValueKey(instance.id),
+              instance: instance,
+              taskDao: taskDao,
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
@@ -162,7 +168,13 @@ class ChildHomeScreen extends ConsumerWidget {
         ...done.map(
           (instance) => Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: _InstanceCard(instance: instance, taskDao: taskDao),
+            child: _InstanceCard(
+              // Key theo id: không có key, Flutter tái dùng State theo
+              // vị trí khi việc chuyển mục và thẻ hiện tên của việc cũ.
+              key: ValueKey(instance.id),
+              instance: instance,
+              taskDao: taskDao,
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
@@ -173,7 +185,13 @@ class ChildHomeScreen extends ConsumerWidget {
         ...missed.map(
           (instance) => Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: _InstanceCard(instance: instance, taskDao: taskDao),
+            child: _InstanceCard(
+              // Key theo id: không có key, Flutter tái dùng State theo
+              // vị trí khi việc chuyển mục và thẻ hiện tên của việc cũ.
+              key: ValueKey(instance.id),
+              instance: instance,
+              taskDao: taskDao,
+            ),
           ),
         ),
       ],
@@ -480,6 +498,7 @@ class _InstanceCard extends StatefulWidget {
   const _InstanceCard({
     required this.instance,
     required this.taskDao,
+    super.key,
   });
 
   final TaskInstance instance;
@@ -496,6 +515,17 @@ class _InstanceCardState extends State<_InstanceCard> {
   void initState() {
     super.initState();
     unawaited(_loadTask());
+  }
+
+  @override
+  void didUpdateWidget(_InstanceCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Phòng vệ tầng hai bên cạnh key ở chỗ dựng widget: nếu State bị tái dùng
+    // cho instance khác thì `initState` không chạy lại, phải tự nạp lại task —
+    // nếu không thẻ sẽ hiện tên của việc cũ.
+    if (oldWidget.instance.taskId != widget.instance.taskId) {
+      unawaited(_loadTask());
+    }
   }
 
   Future<void> _loadTask() async {
