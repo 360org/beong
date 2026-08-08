@@ -12,6 +12,8 @@ import 'package:beong/core/widgets/responsive_scaffold.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/seed/presets.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/services/age_band.dart';
+import 'package:beong/domain/services/family_clock.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,6 +35,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _childNameController = TextEditingController();
   int _childColorIndex = 0;
   String _childAvatar = kAvatarEmojis.first;
+
+  /// Không chọn sẵn năm nào: đoán tuổi của trẻ là bịa dữ liệu, và
+  /// [ageBandFor] đã có sẵn nhóm mặc định cho trường hợp `null`.
+  int? _childBirthYear;
   final _selectedRoutines = <String>{'morning', 'bedtime'};
 
   @override
@@ -92,6 +98,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         displayName: childName,
         colorIndex: Value(_childColorIndex),
         avatarKey: Value(_childAvatar),
+        birthYear: Value(_childBirthYear),
       ),
     );
 
@@ -166,6 +173,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           setState(() => _childColorIndex = i),
                       avatar: _childAvatar,
                       onAvatarChanged: (a) => setState(() => _childAvatar = a),
+                      birthYear: _childBirthYear,
+                      onBirthYearChanged: (y) =>
+                          setState(() => _childBirthYear = y),
                     ),
                     _RoutineStep(
                       selected: _selectedRoutines,
@@ -293,6 +303,8 @@ class _ChildStep extends StatelessWidget {
     required this.onColorChanged,
     required this.avatar,
     required this.onAvatarChanged,
+    required this.birthYear,
+    required this.onBirthYearChanged,
   });
 
   final TextEditingController controller;
@@ -300,6 +312,8 @@ class _ChildStep extends StatelessWidget {
   final ValueChanged<int> onColorChanged;
   final String avatar;
   final ValueChanged<String> onAvatarChanged;
+  final int? birthYear;
+  final ValueChanged<int?> onBirthYearChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -312,7 +326,7 @@ class _ChildStep extends StatelessWidget {
           Text('Thêm bé', style: context.text.titleLarge),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Nhập tên, chọn màu và con vật cho bé.',
+            'Nhập tên, tuổi, chọn màu và con vật cho bé.',
             style: context.text.bodyMedium?.copyWith(
               color: context.semantic.onSurfaceMuted,
             ),
@@ -336,6 +350,27 @@ class _ChildStep extends StatelessWidget {
             decoration: const InputDecoration(hintText: 'Tên bé'),
             textCapitalization: TextCapitalization.words,
             autofocus: true,
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          Text(
+            'BÉ MẤY TUỔI',
+            style: context.text.labelSmall?.copyWith(
+              color: context.semantic.onSurfaceMuted,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Giao diện tự điều chỉnh theo tuổi: bé nhỏ thì chữ và icon to hơn, '
+            'bé lớn thì gọn gàng hơn.',
+            style: context.text.bodySmall?.copyWith(
+              color: context.semantic.onSurfaceMuted,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          _AgePicker(
+            birthYear: birthYear,
+            onChanged: onBirthYearChanged,
+            color: color,
           ),
           const SizedBox(height: AppSpacing.xl),
           Text(
@@ -407,6 +442,81 @@ class _ChildStep extends StatelessWidget {
             }),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Hàng chip chọn tuổi, cuộn ngang. Lưu **năm sinh** chứ không lưu tuổi.
+///
+/// Lưu tuổi thì sang năm dữ liệu sai; lưu năm sinh thì nhóm tuổi tự chuyển khi
+/// bé lớn lên — xem `ageBandFor`. Bố mẹ nghĩ theo tuổi nên chip hiện tuổi, còn
+/// năm sinh chỉ là thứ được lưu xuống DB.
+class _AgePicker extends StatelessWidget {
+  const _AgePicker({
+    required this.birthYear,
+    required this.onChanged,
+    required this.color,
+  });
+
+  final int? birthYear;
+  final ValueChanged<int?> onChanged;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final currentYear = FamilyClock(
+      timeZoneOffset: DateTime.now().timeZoneOffset,
+    ).today().year;
+    final years = birthYearOptions(currentYear: currentYear);
+
+    return SizedBox(
+      height: 72,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: years.length,
+        separatorBuilder: (context, index) =>
+            const SizedBox(width: AppSpacing.sm),
+        itemBuilder: (context, index) {
+          final year = years[index];
+          final selected = year == birthYear;
+
+          return GestureDetector(
+            // Bấm lại chip đang chọn để bỏ chọn — bố mẹ không muốn khai tuổi
+            // thì vẫn đi tiếp được.
+            onTap: () => onChanged(selected ? null : year),
+            child: Container(
+              width: 60,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: selected
+                    ? color.withValues(alpha: 0.25)
+                    : context.colors.primaryContainer,
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(AppRadius.field),
+                ),
+                border: selected ? Border.all(color: color, width: 2.5) : null,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '${currentYear - year}',
+                    style: context.text.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  Text(
+                    'tuổi',
+                    style: context.text.labelSmall?.copyWith(
+                      color: context.semantic.onSurfaceMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

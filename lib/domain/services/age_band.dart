@@ -60,3 +60,13 @@ AgeBand ageBandForAge(int age) {
   if (age <= 12) return AgeBand.middle;
   return AgeBand.teen;
 }
+
+/// Các năm sinh để bố mẹ chọn khi tạo profile con, **trẻ nhất trước**.
+///
+/// Chỉ liệt kê dải app nhắm tới ([kMinSupportedAge]..[kMaxSupportedAge]) thay
+/// vì mở date picker cả trăm năm: bố mẹ chọn một lần bằng một cú chạm, và danh
+/// sách ngắn thì không cần bàn phím — quan trọng với onboarding trên điện thoại.
+List<int> birthYearOptions({required int currentYear}) => [
+  for (var age = kMinSupportedAge; age <= kMaxSupportedAge; age++)
+    currentYear - age,
+];

@@ -145,4 +145,39 @@ void main() {
       expect(KidScale.little.hashCode, KidScale.of(AgeBand.little).hashCode);
     });
   });
+
+  group('birthYearOptions', () {
+    test('phủ đúng dải tuổi app nhắm tới, trẻ nhất trước', () {
+      final years = birthYearOptions(currentYear: 2026);
+
+      expect(years.length, kMaxSupportedAge - kMinSupportedAge + 1);
+      expect(years.first, 2026 - kMinSupportedAge);
+      expect(years.last, 2026 - kMaxSupportedAge);
+    });
+
+    test('không có năm trùng', () {
+      final years = birthYearOptions(currentYear: 2026);
+      expect(years.toSet().length, years.length);
+    });
+
+    test(
+      'mọi năm trong danh sách đều xếp được nhóm thật, không rơi mặc định',
+      () {
+        // Nếu một lựa chọn nào cũng cho ra nhóm mặc định thì picker vô nghĩa:
+        // chọn hay không chọn đều như nhau.
+        for (final year in birthYearOptions(currentYear: 2026)) {
+          final band = ageBandFor(birthYear: year, currentYear: 2026);
+          expect(band, ageBandForAge(2026 - year), reason: 'năm $year');
+        }
+      },
+    );
+
+    test('cả ba nhóm tuổi đều chọn được từ picker', () {
+      final bands = birthYearOptions(
+        currentYear: 2026,
+      ).map((y) => ageBandFor(birthYear: y, currentYear: 2026)).toSet();
+
+      expect(bands, AgeBand.values.toSet());
+    });
+  });
 }
