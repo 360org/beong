@@ -43,7 +43,7 @@ class XuBadge extends StatelessWidget {
             fontWeight: FontWeight.w800,
             color:
                 color ??
-                (pill ? context.semantic.xu : context.colors.onSurface),
+                (pill ? context.semantic.xuText : context.colors.onSurface),
           ),
         ),
       ],

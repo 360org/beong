@@ -12,6 +12,8 @@ abstract final class AppTheme {
     // `surface` và `onPrimary` trùng mặc định của ColorScheme.light nên bỏ qua.
     // Các trường còn lại phải khai báo — mặc định của Material cho onSurface và
     // outlineVariant là đen thuần, không phải màu thương hiệu.
+    ctaBackground: AppColors.xuLight,
+    ctaForeground: AppColors.onSurfaceLight,
     scheme: const ColorScheme.light(
       primary: AppColors.primaryLight,
       primaryContainer: AppColors.primaryContainerLight,
@@ -26,6 +28,8 @@ abstract final class AppTheme {
 
   static ThemeData dark() => _build(
     brightness: Brightness.dark,
+    ctaBackground: AppColors.xuDark,
+    ctaForeground: AppColors.onPrimaryDark,
     scheme: const ColorScheme.dark(
       primary: AppColors.primaryDark,
       onPrimary: AppColors.onPrimaryDark,
@@ -43,6 +47,8 @@ abstract final class AppTheme {
   static ThemeData _build({
     required ColorScheme scheme,
     required AppSemanticColors semantic,
+    required Color ctaBackground,
+    required Color ctaForeground,
     Brightness brightness = Brightness.light,
   }) {
     final textTheme = AppTypography.textTheme(scheme.onSurface);
@@ -67,10 +73,14 @@ abstract final class AppTheme {
       ),
 
       // Nút chính: full-width, cao 56, bo tròn — §4 design system.
+      //
+      // Nền vàng mật + chữ đậm, **không** dùng trắng-trên-primary: nút là khối
+      // màu lớn nhất màn hình nên để vàng ở đây thì màu Bé Ong mới thật sự chủ
+      // đạo, và cặp này đạt 11.00:1 so với 4.65:1 của trắng-trên-dương.
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: scheme.primary,
-          foregroundColor: scheme.onPrimary,
+          backgroundColor: ctaBackground,
+          foregroundColor: ctaForeground,
           minimumSize: const Size.fromHeight(AppSpacing.giant),
           elevation: 0,
           shape: const RoundedRectangleBorder(
@@ -144,7 +154,6 @@ extension AppThemeContext on BuildContext {
 
   TextTheme get text => Theme.of(this).textTheme;
 
-  Gradient get dashboardGradient => Theme.of(this).brightness == Brightness.dark
-      ? AppColors.dashboardGradientDark
-      : AppColors.dashboardGradientLight;
+  /// Một gradient cho cả hai chế độ — xem [AppColors.dashboardGradient].
+  Gradient get dashboardGradient => AppColors.dashboardGradient;
 }

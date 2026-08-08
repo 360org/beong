@@ -1,5 +1,6 @@
 import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/widgets/bee_mascot.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -92,6 +93,142 @@ void main() {
           _contrast(Colors.white, color),
           greaterThanOrEqualTo(4.5),
           reason: 'Màu hồ sơ $color không đủ tương phản với chữ trắng',
+        );
+      }
+    });
+
+    // ---- Màu thương hiệu 360 Corp + Bé Ong ----
+    //
+    // Vai của từng màu suy ra từ ràng buộc tương phản, nên các test dưới đây là
+    // hợp đồng của hệ màu, không phải sở thích: đổi màu mà không đổi vai sẽ làm
+    // chữ không đọc được.
+
+    test('giữ đúng mã màu thương hiệu, không bị chỉnh trôi', () {
+      expect(AppColors.brand360Blue, const Color(0xFF0077CD));
+      expect(AppColors.brand360Green, const Color(0xFF00CE2C));
+      expect(AppColors.beOngHoney, const Color(0xFFFFC53D));
+    });
+
+    test('xanh dương 360 làm primary vì nó gánh được chữ trắng', () {
+      expect(AppColors.primaryLight, AppColors.brand360Blue);
+      expect(
+        _contrast(AppColors.onPrimaryLight, AppColors.primaryLight),
+        greaterThanOrEqualTo(4.5),
+      );
+    });
+
+    test('vàng mật và lá 360 KHÔNG gánh được chữ trắng — cơ sở của hệ màu', () {
+      // Nếu ngày nào hai màu này bỗng đạt ngưỡng thì tức là mã màu đã bị đổi,
+      // và toàn bộ lý do chia vai ở AppColors không còn đúng.
+      expect(_contrast(Colors.white, AppColors.beOngHoney), lessThan(4.5));
+      expect(_contrast(Colors.white, AppColors.brand360Green), lessThan(4.5));
+    });
+
+    test(
+      'nút chính vàng mật + chữ đậm đạt ngưỡng, và hơn trắng-trên-primary',
+      () {
+        final honeyWithInk = _contrast(
+          AppColors.onSurfaceLight,
+          AppColors.xuLight,
+        );
+        expect(honeyWithInk, greaterThanOrEqualTo(4.5));
+        expect(
+          honeyWithInk,
+          greaterThan(
+            _contrast(AppColors.onPrimaryLight, AppColors.primaryLight),
+          ),
+        );
+      },
+    );
+
+    test('chữ số xu đọc được trên nền badge xu pha mờ 15%', () {
+      // Badge xu là `xu` pha alpha 0.15; viết số bằng chính `xu` thì mờ tịt.
+      for (final (name, surface, semantic) in [
+        ('sáng/trắng', AppColors.surfaceLight, AppSemanticColors.light),
+        ('sáng/card', AppColors.surfaceVariantLight, AppSemanticColors.light),
+        ('tối/card', AppColors.surfaceVariantDark, AppSemanticColors.dark),
+      ]) {
+        final pill = Color.alphaBlend(
+          semantic.xu.withValues(alpha: 0.15),
+          surface,
+        );
+        expect(
+          _contrast(semantic.xuText, pill),
+          greaterThanOrEqualTo(4.5),
+          reason: 'chữ số xu trên nền badge ($name)',
+        );
+      }
+    });
+
+    test('mọi màu ngữ nghĩa nền sáng gánh được chữ trắng', () {
+      // Các màu này đều được dùng làm nền nút hoặc chữ trên nền trắng.
+      const light = AppSemanticColors.light;
+      for (final (name, color) in [
+        ('success', light.success),
+        ('warning', light.warning),
+        ('danger', light.danger),
+      ]) {
+        expect(
+          _contrast(Colors.white, color),
+          greaterThanOrEqualTo(4.5),
+          reason: '$name nền sáng',
+        );
+      }
+    });
+
+    test('mọi màu ngữ nghĩa nền tối nổi trên nền tối', () {
+      const dark = AppSemanticColors.dark;
+      for (final (name, color) in [
+        ('success', dark.success),
+        ('warning', dark.warning),
+        ('danger', dark.danger),
+        ('xu', dark.xu),
+      ]) {
+        expect(
+          _contrast(color, AppColors.surfaceDark),
+          greaterThanOrEqualTo(4.5),
+          reason: '$name nền tối',
+        );
+      }
+    });
+
+    test('cảnh báo tách rõ khỏi vàng xu để không lẫn hai ý nghĩa', () {
+      // "Chờ duyệt" và "xu" cạnh nhau trên cùng màn hình bố mẹ.
+      expect(
+        _contrast(AppSemanticColors.light.warning, AppColors.xuLight),
+        greaterThanOrEqualTo(3),
+      );
+    });
+
+    test('mọi điểm dọc gradient dashboard gánh được chữ trắng', () {
+      // Thẻ dashboard chạy dương 360 -> lá 360 và có chữ trắng đè lên; chỉ kiểm
+      // hai đầu là không đủ, phải kiểm cả dọc đường.
+      final colors = AppColors.dashboardGradient.colors;
+      for (var i = 0; i <= 10; i++) {
+        final stop = Color.lerp(colors.first, colors.last, i / 10)!;
+        expect(
+          _contrast(Colors.white, stop),
+          greaterThanOrEqualTo(4.5),
+          reason: 'gradient tại t=${i / 10}',
+        );
+      }
+    });
+
+    test('gradient dashboard dùng đúng hai màu công ty', () {
+      expect(AppColors.dashboardGradient.colors.first, AppColors.brand360Blue);
+      // Đầu xanh lá là bản đã hạ độ sáng của lá 360 để gánh được chữ trắng.
+      expect(AppColors.dashboardGradient.colors.last, AppColors.successLight);
+    });
+
+    test('linh vật tách khỏi nền gradient nhờ viền sticker', () {
+      // Thân vàng mật chỉ đạt ~2.94:1 với gradient xanh — dưới ngưỡng 3:1 của
+      // WCAG 1.4.11 cho hình mang nghĩa. Viền kem là thứ tiếp giáp nền nên nó
+      // phải đạt ngưỡng; nếu ai bỏ viền đi thì test này đỏ.
+      for (final stop in AppColors.dashboardGradient.colors) {
+        expect(
+          _contrast(BeeMascot.outlineColor, stop),
+          greaterThanOrEqualTo(3),
+          reason: 'viền ong trên $stop',
         );
       }
     });

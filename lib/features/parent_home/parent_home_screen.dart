@@ -252,7 +252,7 @@ class _PendingCardState extends State<_PendingCard> {
                   Text(
                     '+${task.points} xu',
                     style: context.text.bodySmall?.copyWith(
-                      color: context.semantic.xu,
+                      color: context.semantic.xuText,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

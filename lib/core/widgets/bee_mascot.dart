@@ -41,6 +41,15 @@ class BeeMascot extends StatefulWidget {
     this.size = 72,
   });
 
+  /// Màu viền ngoài thân ong.
+  ///
+  /// Thân ong màu vàng mật chỉ đạt 2.94:1 với nền gradient xanh của thẻ
+  /// dashboard — dưới ngưỡng 3:1 mà WCAG 1.4.11 đòi cho hình mang nghĩa (mặt
+  /// ong chính là cách báo tiến độ cho trẻ chưa đọc số). Viền kem kiểu sticker
+  /// này là thứ tiếp giáp nền, và nó đạt ngưỡng, nên linh vật tách khỏi nền ở
+  /// mọi màu nền. `app_theme_test.dart` kiểm lại ràng buộc đó.
+  static const outlineColor = Color(0xFFFFF6E2);
+
   final BeeMood mood;
   final double size;
 
@@ -176,8 +185,18 @@ class _BeePainter extends CustomPainter {
 
   void _paintBody(Canvas canvas, Rect bodyRect, double s) {
     canvas
+      // Viền kem kiểu sticker, vẽ trước và dày hơn thân nên nhô ra thành đường
+      // bao — đây là thứ tách linh vật khỏi nền, xem [BeeMascot.outlineColor].
+      ..drawOval(
+        bodyRect,
+        Paint()
+          ..color = BeeMascot.outlineColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 0.075 * s
+          ..strokeJoin = StrokeJoin.round,
+      )
       ..drawOval(bodyRect, Paint()..color = _bodyColor)
-      // Viền mảnh để thân tách khỏi nền sáng.
+      // Viền tối rất mảnh cho thân có nét, không thay vai của viền kem.
       ..drawOval(
         bodyRect,
         Paint()
