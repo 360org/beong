@@ -6,7 +6,10 @@ import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/theme/kid_scale.dart';
 import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/bee_mascot.dart';
+import 'package:beong/core/widgets/progress_ring.dart';
 import 'package:beong/core/widgets/task_card.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/task_dao.dart';
@@ -61,24 +64,40 @@ class ChildHomeScreen extends ConsumerWidget {
                   stream: memberDao.watchMember(memberId),
                   builder: (context, memberSnap) {
                     final member = memberSnap.data;
-                    return _ChildHeader(member: member);
-                  },
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                StreamBuilder<WalletBalance>(
-                  stream: walletDao.watchBalance(memberId),
-                  builder: (context, balSnap) {
-                    final balance = balSnap.data ?? WalletBalance.zero;
-                    return StreamBuilder<Streak?>(
-                      stream: memberDao.watchStreak(memberId),
-                      builder: (context, streakSnap) {
-                        return _DashboardCard(
-                          points: balance.total,
-                          streak: streakSnap.data?.currentLen ?? 0,
-                          completed: completedCount,
-                          total: total,
-                        );
-                      },
+                    // Giao diện điều chỉnh theo tuổi của chính bé đang xem —
+                    // xem `core/theme/kid_scale.dart`.
+                    final scale = KidScale.forBirthYear(
+                      member?.birthYear,
+                      currentYear: today.year,
+                    );
+
+                    return KidScaleScope(
+                      scale: scale,
+                      child: Column(
+                        children: [
+                          _ChildHeader(member: member),
+                          const SizedBox(height: AppSpacing.lg),
+                          StreamBuilder<WalletBalance>(
+                            stream: walletDao.watchBalance(memberId),
+                            builder: (context, balSnap) {
+                              final balance =
+                                  balSnap.data ?? WalletBalance.zero;
+                              return StreamBuilder<Streak?>(
+                                stream: memberDao.watchStreak(memberId),
+                                builder: (context, streakSnap) {
+                                  return _DashboardCard(
+                                    scale: scale,
+                                    points: balance.total,
+                                    streak: streakSnap.data?.currentLen ?? 0,
+                                    completed: completedCount,
+                                    total: total,
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -201,12 +220,14 @@ class _ChildHeader extends StatelessWidget {
 
 class _DashboardCard extends StatelessWidget {
   const _DashboardCard({
+    required this.scale,
     required this.points,
     required this.streak,
     required this.completed,
     required this.total,
   });
 
+  final KidScale scale;
   final int points;
   final int streak;
   final int completed;
@@ -217,68 +238,94 @@ class _DashboardCard extends StatelessWidget {
     // Danh hiệu chỉ hiện khi thật sự xong hết — `total > 0` chặn trường hợp
     // ngày chưa có việc nào cũng được khen.
     final allDone = total > 0 && completed == total;
+    final progress = total > 0 ? completed / total : 0.0;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
         gradient: context.dashboardGradient,
-        borderRadius: BorderRadius.circular(AppRadius.card),
+        borderRadius: BorderRadius.circular(scale.cardRadius),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (allDone)
-            _BusyBeeBadge(label: L10n.of(context).badgeBusyBee)
-          else
-            Text(
-              'DASHBOARD',
-              style: context.text.labelSmall?.copyWith(
-                color: Colors.white.withValues(alpha: 0.85),
-                letterSpacing: 1.2,
-              ),
-            ),
-          const SizedBox(height: AppSpacing.md),
+          if (allDone) ...[
+            _BusyBeeBadge(label: L10n.of(context).badgeBusyBee),
+            const SizedBox(height: AppSpacing.md),
+          ],
           Row(
             children: [
-              Expanded(
-                child: _StatTile(
-                  label: 'ĐIỂM',
-                  child: XuBadgeStat(amount: points),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: _StatTile(
-                  label: 'STREAK',
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text('🔥', style: TextStyle(fontSize: 18)),
-                      const SizedBox(width: 4),
-                      Text(
-                        '$streak',
+              // Tiến độ là hình tròn, không phải con số: bé chưa đọc số vẫn
+              // thấy được vòng đã đầy tới đâu.
+              ProgressRing(
+                progress: progress,
+                size: scale.showMascot ? 104 : 84,
+                strokeWidth: scale.showMascot ? 11 : 9,
+                trackColor: Colors.white.withValues(alpha: 0.25),
+                valueColor: Colors.white,
+                child: scale.showMascot
+                    ? BeeMascot(
+                        mood: BeeMood.fromProgress(
+                          completed: completed,
+                          total: total,
+                        ),
+                        size: 62,
+                      )
+                    : Text(
+                        '$completed/$total',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
                         ),
                       ),
-                    ],
-                  ),
-                ),
               ),
-              const SizedBox(width: AppSpacing.sm),
+              const SizedBox(width: AppSpacing.lg),
               Expanded(
-                child: _StatTile(
-                  label: 'HÔM NAY',
-                  child: Text(
-                    '$completed/$total',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
+                child: Column(
+                  // Hai ô thống kê phải bằng chiều rộng nhau, không co theo
+                  // độ dài nội dung.
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _StatTile(
+                      label: 'ĐIỂM',
+                      child: XuBadgeStat(amount: points),
                     ),
-                  ),
+                    if (scale.showStreakFlame) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      _StatTile(
+                        label: 'NGÀY LIÊN TIẾP',
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('🔥', style: TextStyle(fontSize: 18)),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$streak',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ] else ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      _StatTile(
+                        label: 'HÔM NAY',
+                        child: Text(
+                          '$completed/$total',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ],

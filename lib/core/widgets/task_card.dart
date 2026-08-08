@@ -1,6 +1,7 @@
 import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/theme/kid_scale.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:flutter/material.dart';
@@ -31,43 +32,58 @@ class TaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = KidScaleScope.of(context);
     final profileColor = AppColors.profileColor(colorIndex);
     final isDone = isCompleted || isPending;
+    final avatarSize = scale.tapTarget - AppSpacing.lg;
 
     return Card(
       child: InkWell(
         onTap: isDone || isMissed ? null : onToggle,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          child: Row(
-            children: [
-              _EmojiAvatar(emoji: iconForKey(iconKey), faded: isDone),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(
-                  title,
-                  style: context.text.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    decoration: isDone ? TextDecoration.lineThrough : null,
-                    color: isDone
-                        ? context.semantic.onSurfaceMuted
-                        : context.colors.onSurface,
+        borderRadius: BorderRadius.circular(scale.cardRadius),
+        child: ConstrainedBox(
+          // Vùng chạm rộng theo tuổi — ngón tay trẻ nhỏ kém chính xác.
+          constraints: BoxConstraints(minHeight: scale.tapTarget),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            child: Row(
+              children: [
+                _EmojiAvatar(
+                  emoji: iconForKey(iconKey),
+                  faded: isDone,
+                  boxSize: avatarSize,
+                  emojiSize: scale.taskEmojiSize,
+                  radius: scale.cardRadius * 0.7,
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: context.text.bodyLarge?.copyWith(
+                      fontSize:
+                          (context.text.bodyLarge?.fontSize ?? 16) *
+                          scale.textScale,
+                      fontWeight: FontWeight.w700,
+                      decoration: isDone ? TextDecoration.lineThrough : null,
+                      color: isDone
+                          ? context.semantic.onSurfaceMuted
+                          : context.colors.onSurface,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              XuBadge(amount: points, pill: true),
-              const SizedBox(width: AppSpacing.sm),
-              _Checkbox(
-                checked: isDone,
-                missed: isMissed,
-                color: profileColor,
-              ),
-            ],
+                const SizedBox(width: AppSpacing.sm),
+                XuBadge(amount: points, pill: true),
+                const SizedBox(width: AppSpacing.sm),
+                _Checkbox(
+                  checked: isDone,
+                  missed: isMissed,
+                  color: profileColor,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -76,24 +92,33 @@ class TaskCard extends StatelessWidget {
 }
 
 class _EmojiAvatar extends StatelessWidget {
-  const _EmojiAvatar({required this.emoji, required this.faded});
+  const _EmojiAvatar({
+    required this.emoji,
+    required this.faded,
+    required this.boxSize,
+    required this.emojiSize,
+    required this.radius,
+  });
 
   final String emoji;
   final bool faded;
+  final double boxSize;
+  final double emojiSize;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
     return Opacity(
       opacity: faded ? 0.5 : 1,
       child: Container(
-        width: 44,
-        height: 44,
+        width: boxSize,
+        height: boxSize,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: context.colors.primaryContainer,
-          borderRadius: BorderRadius.circular(AppRadius.field),
+          borderRadius: BorderRadius.circular(radius),
         ),
-        child: Text(emoji, style: const TextStyle(fontSize: 22)),
+        child: Text(emoji, style: TextStyle(fontSize: emojiSize)),
       ),
     );
   }
