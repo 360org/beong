@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
@@ -213,6 +214,10 @@ class _DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Danh hiệu chỉ hiện khi thật sự xong hết — `total > 0` chặn trường hợp
+    // ngày chưa có việc nào cũng được khen.
+    final allDone = total > 0 && completed == total;
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
@@ -222,13 +227,16 @@ class _DashboardCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'DASHBOARD',
-            style: context.text.labelSmall?.copyWith(
-              color: Colors.white.withValues(alpha: 0.85),
-              letterSpacing: 1.2,
+          if (allDone)
+            _BusyBeeBadge(label: L10n.of(context).badgeBusyBee)
+          else
+            Text(
+              'DASHBOARD',
+              style: context.text.labelSmall?.copyWith(
+                color: Colors.white.withValues(alpha: 0.85),
+                letterSpacing: 1.2,
+              ),
             ),
-          ),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
@@ -274,6 +282,43 @@ class _DashboardCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Danh hiệu "Ong chăm chỉ" — slogan của app dùng làm phần thưởng tinh thần
+/// khi bé làm xong hết việc trong ngày.
+class _BusyBeeBadge extends StatelessWidget {
+  const _BusyBeeBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: context.semantic.xu,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('🐝', style: TextStyle(fontSize: 14)),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF1B1046),
+            ),
           ),
         ],
       ),

@@ -6,6 +6,16 @@
     "description": "Tên ứng dụng, hiển thị ở trình chuyển ứng dụng"
   },
 
+  "appSlogan": "Ong chăm chỉ mỗi ngày",
+  "@appSlogan": {
+    "description": "Slogan dưới tên app ở màn hình chào"
+  },
+
+  "badgeBusyBee": "Ong chăm chỉ hôm nay!",
+  "@badgeBusyBee": {
+    "description": "Danh hiệu khi bé làm xong hết việc trong ngày"
+  },
+
   "navHome": "Trang chính",
   "navTasks": "Việc nhà",
   "navRewards": "Phần thưởng",

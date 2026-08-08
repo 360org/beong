@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
@@ -230,25 +231,49 @@ class _FamilyStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Màn hình đầu tiên là chỗ duy nhất trong app hiện tên thương hiệu
+        // kèm slogan — các màn sau chỉ nói việc của gia đình.
+        Center(
+          child: Column(
+            children: [
+              const Text('🐝', style: TextStyle(fontSize: 56)),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                l10n.appTitle,
+                style: context.text.displayLarge,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                l10n.appSlogan,
+                style: context.text.bodyMedium?.copyWith(
+                  color: context.semantic.onSurfaceMuted,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xxxl),
         Text(
-          'Dat ten gia dinh',
+          'Đặt tên gia đình',
           style: context.text.titleLarge,
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Ten nay se hien thi trong app cua ca nha.',
+          'Tên này sẽ hiển thị trong app của cả nhà.',
           style: context.text.bodyMedium?.copyWith(
             color: context.semantic.onSurfaceMuted,
           ),
         ),
-        const SizedBox(height: AppSpacing.xxl),
+        const SizedBox(height: AppSpacing.xl),
         TextField(
           controller: controller,
           decoration: const InputDecoration(
-            hintText: 'Nha minh',
+            hintText: 'Nhà mình',
           ),
           textCapitalization: TextCapitalization.words,
           autofocus: true,
