@@ -309,3 +309,20 @@ class Outbox extends Table {
   IntColumn get retryCount => integer().withDefault(const Constant(0))();
   TextColumn get lastError => text().nullable()();
 }
+
+/// Cấu hình của **thiết bị này**, dạng khoá–giá trị. Chỉ ở local, không đồng bộ.
+///
+/// Dùng cho những thứ thuộc về cái máy đang cầm chứ không thuộc về gia đình:
+/// đang mở hồ sơ nào, vai đã chọn. Cấu hình gia đình thì nằm ở tài khoản bố mẹ
+/// (ADR-021), không ở đây.
+///
+/// **Không** đặt bí mật vào bảng này. Token ghép cặp phải nằm ở Keychain /
+/// Keystore (`09-onboarding-pairing.md` §4), vì file SQLite đọc được trên máy
+/// đã root hoặc qua bản sao lưu.
+class DeviceSettings extends Table {
+  TextColumn get settingKey => text()();
+  TextColumn get settingValue => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {settingKey};
+}

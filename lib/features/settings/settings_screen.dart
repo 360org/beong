@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
@@ -52,12 +54,16 @@ class SettingsScreen extends ConsumerWidget {
                     member: member,
                     isActive: member.id == session.activeMemberId,
                     onTap: () {
-                      ref
-                          .read(sessionProvider.notifier)
-                          .switchMember(
-                            member.id,
-                            isParent: member.kind == MemberKind.parent.name,
-                          );
+                      // Không chờ: state đổi ngay trong bộ nhớ, việc ghi xuống
+                      // DB chạy nền — không nên chặn UI chỉ để lưu vai.
+                      unawaited(
+                        ref
+                            .read(sessionProvider.notifier)
+                            .switchMember(
+                              member.id,
+                              isParent: member.kind == MemberKind.parent.name,
+                            ),
+                      );
                     },
                   ),
                 ),
@@ -90,7 +96,7 @@ class SettingsScreen extends ConsumerWidget {
                 width: double.infinity,
                 child: OutlinedButton(
                   onPressed: () {
-                    ref.read(sessionProvider.notifier).logout();
+                    unawaited(ref.read(sessionProvider.notifier).logout());
                   },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: context.semantic.danger,

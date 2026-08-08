@@ -70,8 +70,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final taskDao = ref.read(taskDaoProvider);
 
     // UUID sinh ở client, không dùng ID cứng — mỗi lần onboarding phải tạo
-    // được family mới (ADR-002). Onboarding lặp lại xảy ra thật: session hiện
-    // chưa lưu lại giữa các lần mở app.
+    // được family mới (ADR-002). Onboarding lặp lại vẫn xảy ra sau khi đăng
+    // xuất, nên không được dùng ID cố định.
     const uuid = Uuid();
     final familyId = uuid.v4();
     final parentId = uuid.v4();
@@ -138,7 +138,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       );
     }
 
-    ref
+    await ref
         .read(sessionProvider.notifier)
         .login(
           AppSession(

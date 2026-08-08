@@ -27,6 +27,7 @@ part 'database.g.dart';
     Streaks,
     BadgesEarned,
     Outbox,
+    DeviceSettings,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -36,7 +37,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -48,8 +49,14 @@ class AppDatabase extends _$AppDatabase {
       // Bắt buộc: SQLite tắt khoá ngoại theo mặc định.
       await customStatement('PRAGMA foreign_keys = ON');
     },
-    // Chưa có bước nâng cấp nào. Mỗi lần tăng schemaVersion phải thêm một bước
-    // ở đây kèm test dựng DB phiên bản cũ rồi migrate — xem docs/03 §6.
+    onUpgrade: (m, from, to) async {
+      // v1 -> v2: bảng cấu hình thiết bị, để session sống qua lần mở app sau.
+      if (from < 2) {
+        await m.createTable(deviceSettings);
+      }
+    },
+    // Mỗi lần tăng schemaVersion phải thêm một bước ở đây kèm test dựng DB
+    // phiên bản cũ rồi migrate — xem docs/03 §6.
   );
 
   /// Chỉ mục theo `docs/03-data-model.md` §4.

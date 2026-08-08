@@ -189,9 +189,22 @@ Unique `(member_id, badge_key)` — huy hiệu chỉ nhận một lần.
 ### outbox (chỉ local)
 `id, op, entity, entity_id, payload_json, client_op_id, created_at, retry_count, last_error`
 
+### device_settings (chỉ local, không đồng bộ)
+`setting_key (PK), setting_value`
+
+Cấu hình thuộc về **cái máy này**, không thuộc về gia đình: đang mở hồ sơ nào, vai đã chọn. Cấu
+hình gia đình nằm ở tài khoản bố mẹ (ADR-021). Khoá session dùng tiền tố `session.`.
+
+**Không đặt bí mật vào bảng này.** Token ghép cặp phải nằm ở Keychain / Keystore
+(`09-onboarding-pairing.md` §4) — file SQLite đọc được trên máy đã root hoặc qua bản sao lưu.
+
 ## 3. Sinh task_instances
 
 Chạy khi: mở app, đổi ngày, sửa task.
+
+> **Lệch với code hiện tại:** `TaskDao.generateInstances` chỉ được gọi từ nút "Tạo việc hôm nay"
+> trên màn hình con, không chạy lúc mở app. Hệ quả thấy được: bố mẹ mở app sau khi tạo routine thì
+> thấy "0 / 0 việc hôm nay", tưởng routine chưa lưu. Việc còn lại nằm ở `05-roadmap.md` Sprint 3.
 
 ```
 Với mỗi task active của family:
@@ -260,5 +273,6 @@ create policy tasks_rw on tasks
 ## 6. Migration
 
 - Drift: `schemaVersion` tăng dần, mỗi bước có test dựng DB phiên bản cũ rồi migrate.
+  - v1 → v2: thêm `device_settings`. Test: `test/unit/data/migration_v1_to_v2_test.dart`.
 - Supabase: file SQL đánh số trong `supabase/migrations/`, chạy qua CLI trong CI.
 - Quy tắc: chỉ thêm cột nullable hoặc có default; đổi tên = thêm mới + backfill + xóa ở release sau.

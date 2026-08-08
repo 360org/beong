@@ -41,16 +41,19 @@ Luồng trên cần bốn khối hạ tầng mà bản hiện tại chưa có kh
 | Khối | Trạng thái | Ghi chú |
 |---|---|---|
 | Chọn vai + ghi nhớ | ✗ chưa có | App hiện luôn vào onboarding bố mẹ |
-| Lưu session bền vững | ✗ **đang lỗi** | Mở lại app là mất session, phải onboarding lại từ đầu |
+| Lưu session bền vững | ✓ đã có | `device_settings` local + `SessionStore`, nạp trước khung hình đầu |
 | Auth (Google/Apple) | ✗ chưa có | Chưa có tầng auth nào |
 | Backend + RLS | ✗ chưa có | Supabase đã chọn (ADR-004), chưa dựng |
 
 Từ ADR-021, cả bốn khối này là **điều kiện của v1.0**, không phải việc để dành: cấu hình sống trên
 tài khoản bố mẹ nên không còn đường phát hành "một thiết bị, không cần tài khoản".
 
-Session không được lưu là **lỗi đang chặn đường**, không phải thiếu tính năng: hiện tại mở lại
-app thì `sessionProvider` về `null` → router đẩy về onboarding → tạo lại gia đình mới. Phải sửa
-trước mọi thứ khác, vì cả hai vai đều dựa vào nó.
+Session không được lưu từng là **lỗi chặn đường** — mở lại app thì `sessionProvider` về `null` →
+router đẩy về onboarding → tạo lại một gia đình mới mỗi lần. Đã sửa: session của thiết bị nằm ở
+bảng `device_settings` local và được nạp **trước** `runApp`, nên khung hình đầu đã đúng vai (nạp
+sau thì người dùng thấy onboarding nháy lên rồi mới về đúng chỗ).
+
+Ba khoá còn lại vẫn là điều kiện của v1.0 theo ADR-021.
 
 ## 3. Ràng buộc kiến trúc
 
@@ -195,11 +198,11 @@ Chia pha theo thứ tự phụ thuộc. Pha 0 chặn tất cả phần còn lạ
 
 ### Pha 0 — Gỡ chặn (không có thì không làm được gì tiếp)
 
-- [ ] **Lưu session bền vững** — hiện mở lại app là mất, phải onboarding lại (§2)
+- [x] **Lưu session bền vững** — `device_settings` + `SessionStore`, nạp trước `runApp`
 - [ ] Màn chọn vai Bố mẹ / Con ở lần mở đầu, ghi nhớ vĩnh viễn
 - [ ] Tách điều hướng theo vai: app con không có tab Việc nhà/Cài đặt của bố mẹ
 - [ ] Onboarding hiện tại tách làm hai: nhánh bố mẹ và nhánh con
-- [ ] Test: mở lại app giữ đúng vai và đúng hồ sơ đang chọn
+- [x] Test: mở lại app giữ đúng vai và đúng hồ sơ đang chọn
 
 ### Pha 1 — Tài khoản bố mẹ
 

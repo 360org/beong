@@ -59,7 +59,9 @@ này đã chuyển sang Sprint 3 (Pha 0 và phần tài khoản), vì chúng là
 > tải hồ sơ về → đồng bộ) không chạy được, và v1.0 không phát hành được.
 
 **Pha 0 — gỡ chặn, làm trước tiên và không cần backend:**
-- [ ] **Lưu session bền vững** — hiện mở lại app là mất session, quay về onboarding
+- [ ] Sinh `task_instances` lúc **mở app** và khi đổi ngày, không chỉ khi bấm nút ở màn hình con
+      (`03-data-model.md` §3 đã tả đúng, code chưa làm — bố mẹ đang thấy "0 / 0 việc hôm nay")
+- [x] **Lưu session bền vững** — `device_settings` + `SessionStore` (làm trước, ngoài kế hoạch)
 - [ ] Màn chọn vai Bố mẹ / Con ở lần mở đầu, ghi nhớ vĩnh viễn (ADR-018)
 - [ ] Tách điều hướng theo vai; onboarding tách hai nhánh
 
