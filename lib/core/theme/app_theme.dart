@@ -104,22 +104,26 @@ abstract final class AppTheme {
         ),
       ),
 
-      // Thanh điều hướng — hình học gọn, không dùng viên thuốc mặc định của
-      // Material. Viên nền bo 14 (squircle) đọc "công nghệ" hơn pill tròn hẳn,
-      // và icon đang chọn dùng dương 360 nên khớp bộ màu thương hiệu.
+      // Thanh điều hướng — icon cỡ lớn, nét bo tròn, viên nền squircle.
+      //
+      // Icon to hơn mặc định Material (30 vs 24) vì với bé chưa đọc được nhãn
+      // thì icon là **nội dung duy nhất**, không phải trang trí. Kích thước lấy
+      // từ AppNavMetrics để test giữ được, không rải số magic ở đây.
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: scheme.surface,
         elevation: 0,
-        height: 68,
+        height: AppNavMetrics.barHeight,
         indicatorColor: scheme.primaryContainer,
         indicatorShape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(14)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(AppNavMetrics.indicatorRadius),
+          ),
         ),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
-            size: 24,
+            size: AppNavMetrics.iconSize,
             color: selected ? scheme.primary : navLabel,
           );
         }),
@@ -127,7 +131,7 @@ abstract final class AppTheme {
           final selected = states.contains(WidgetState.selected);
           return TextStyle(
             fontFamily: AppTypography.fontFamily,
-            fontSize: 11,
+            fontSize: AppNavMetrics.labelSize,
             fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
             letterSpacing: 0.2,
             color: selected ? scheme.primary : navLabel,
@@ -141,20 +145,28 @@ abstract final class AppTheme {
         elevation: 0,
         indicatorColor: scheme.primaryContainer,
         indicatorShape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(14)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(AppNavMetrics.indicatorRadius),
+          ),
         ),
-        selectedIconTheme: IconThemeData(size: 24, color: scheme.primary),
-        unselectedIconTheme: IconThemeData(size: 24, color: navLabel),
+        selectedIconTheme: IconThemeData(
+          size: AppNavMetrics.iconSize,
+          color: scheme.primary,
+        ),
+        unselectedIconTheme: IconThemeData(
+          size: AppNavMetrics.iconSize,
+          color: navLabel,
+        ),
         selectedLabelTextStyle: TextStyle(
           fontFamily: AppTypography.fontFamily,
-          fontSize: 12,
+          fontSize: AppNavMetrics.railLabelSize,
           fontWeight: FontWeight.w800,
           letterSpacing: 0.2,
           color: scheme.primary,
         ),
         unselectedLabelTextStyle: TextStyle(
           fontFamily: AppTypography.fontFamily,
-          fontSize: 12,
+          fontSize: AppNavMetrics.railLabelSize,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.2,
           color: navLabel,

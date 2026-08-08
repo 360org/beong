@@ -129,8 +129,8 @@ final _branches = <_Branch>[
     path: Routes.home,
     title: (c) => L10n.of(c).parentHomeTitle,
     label: (c) => L10n.of(c).navHome,
-    icon: Icons.space_dashboard_outlined,
-    selectedIcon: Icons.space_dashboard_rounded,
+    icon: Icons.home_outlined,
+    selectedIcon: Icons.home_rounded,
   ),
   _Branch(
     path: Routes.tasks,
@@ -150,15 +150,15 @@ final _branches = <_Branch>[
     path: Routes.stats,
     title: (c) => L10n.of(c).statsTitle,
     label: (c) => L10n.of(c).navStats,
-    icon: Icons.analytics_outlined,
-    selectedIcon: Icons.analytics_rounded,
+    icon: Icons.bar_chart_outlined,
+    selectedIcon: Icons.bar_chart_rounded,
   ),
   _Branch(
     path: Routes.settings,
     title: (c) => L10n.of(c).settingsTitle,
     label: (c) => L10n.of(c).navSettings,
-    icon: Icons.tune_outlined,
-    selectedIcon: Icons.tune_rounded,
+    icon: Icons.settings_outlined,
+    selectedIcon: Icons.settings_rounded,
   ),
 ];
 

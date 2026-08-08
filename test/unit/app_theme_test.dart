@@ -1,4 +1,5 @@
 import 'package:beong/core/theme/app_colors.dart';
+import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/widgets/bee_mascot.dart';
 import 'package:flutter/material.dart';
@@ -279,6 +280,38 @@ void main() {
       expect(
         _contrast(AppColors.primaryDark, AppColors.surfaceDark),
         greaterThanOrEqualTo(4.5),
+      );
+    });
+
+    test('icon nav to hơn mặc định Material vì nó phải tự mang nghĩa', () {
+      // Với bé chưa đọc được nhãn, icon là nội dung duy nhất — 24dp mặc định
+      // của Material quá nhỏ cho việc đó.
+      expect(AppNavMetrics.iconSize, greaterThan(24));
+
+      for (final theme in [AppTheme.light(), AppTheme.dark()]) {
+        final bar = theme.navigationBarTheme;
+        expect(bar.height, AppNavMetrics.barHeight);
+        for (final states in [
+          <WidgetState>{},
+          {WidgetState.selected},
+        ]) {
+          expect(
+            bar.iconTheme?.resolve(states)?.size,
+            AppNavMetrics.iconSize,
+            reason: 'icon nav (${theme.brightness.name}, $states)',
+          );
+        }
+        final rail = theme.navigationRailTheme;
+        expect(rail.selectedIconTheme?.size, AppNavMetrics.iconSize);
+        expect(rail.unselectedIconTheme?.size, AppNavMetrics.iconSize);
+      }
+    });
+
+    test('thanh nav đủ cao để mỗi mục đạt vùng chạm tối thiểu', () {
+      // Mỗi mục cao bằng cả thanh, nên chỉ cần thanh đạt ngưỡng.
+      expect(
+        AppNavMetrics.barHeight,
+        greaterThanOrEqualTo(AppSpacing.minTouchTarget),
       );
     });
 
