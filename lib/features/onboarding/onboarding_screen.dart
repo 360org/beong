@@ -7,6 +7,7 @@ import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/bee_mascot.dart';
 import 'package:beong/core/widgets/responsive_scaffold.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/seed/presets.dart';
@@ -241,7 +242,9 @@ class _FamilyStep extends StatelessWidget {
         Center(
           child: Column(
             children: [
-              const Text('🐝', style: TextStyle(fontSize: 56)),
+              // Linh vật vẽ tay, không dùng emoji 🐝: emoji đổi hình theo nền
+              // tảng nên không dùng được ở chỗ nhận diện thương hiệu.
+              const BeeMascot(mood: BeeMood.happy, size: 84),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 l10n.appTitle,

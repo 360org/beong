@@ -52,6 +52,9 @@ abstract final class AppTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor: scheme.surface,
       textTheme: textTheme,
+      // Đặt cả ở đây để `TextStyle(...)` viết tay trong widget (không dựa vào
+      // textTheme) vẫn thừa hưởng Nunito qua DefaultTextStyle.
+      fontFamily: AppTypography.fontFamily,
       extensions: [semantic],
 
       appBarTheme: AppBarTheme(
