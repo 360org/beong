@@ -35,6 +35,17 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
         .get();
   }
 
+  /// Tất cả routine active của một gia đình.
+  Future<List<Routine>> activeRoutines(String familyId) {
+    return (select(routines)..where(
+          (r) =>
+              r.familyId.equals(familyId) &
+              r.active.equals(true) &
+              r.deletedAt.isNull(),
+        ))
+        .get();
+  }
+
   /// Danh sách người được giao cho một task lẻ.
   Future<List<String>> assigneesOf(String taskId) async {
     final rows = await (select(

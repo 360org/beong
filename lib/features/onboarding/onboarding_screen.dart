@@ -13,6 +13,7 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:uuid/uuid.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -58,9 +59,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final memberDao = ref.read(memberDaoProvider);
     final taskDao = ref.read(taskDaoProvider);
 
-    const familyId = 'fam-default';
-    const parentId = 'parent-default';
-    final childId = 'child-${childName.toLowerCase()}';
+    // UUID sinh ở client, không dùng ID cứng — mỗi lần onboarding phải tạo
+    // được family mới (ADR-002). Onboarding lặp lại xảy ra thật: session hiện
+    // chưa lưu lại giữa các lần mở app.
+    const uuid = Uuid();
+    final familyId = uuid.v4();
+    final parentId = uuid.v4();
+    final childId = uuid.v4();
 
     await memberDao.createFamily(
       FamiliesCompanion.insert(id: familyId, name: familyName),
@@ -87,7 +92,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     for (final routineKey in _selectedRoutines) {
       final preset = kRoutinePresets.firstWhere((r) => r.key == routineKey);
-      final routineId = 'routine-$routineKey';
+      final routineId = uuid.v4();
 
       final routineTasks = <TasksCompanion>[];
       for (var i = 0; i < preset.taskKeys.length; i++) {
@@ -124,7 +129,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     ref
         .read(sessionProvider.notifier)
         .login(
-          const AppSession(
+          AppSession(
             familyId: familyId,
             activeMemberId: parentId,
           ),

@@ -72,6 +72,7 @@ class _TaskList extends StatefulWidget {
 
 class _TaskListState extends State<_TaskList> {
   List<Task> _tasks = [];
+  Map<String, Routine> _routinesById = {};
   bool _loaded = false;
 
   @override
@@ -82,9 +83,11 @@ class _TaskListState extends State<_TaskList> {
 
   Future<void> _load() async {
     final tasks = await widget.taskDao.activeTasks(widget.familyId);
+    final routines = await widget.taskDao.activeRoutines(widget.familyId);
     if (mounted) {
       setState(() {
         _tasks = tasks;
+        _routinesById = {for (final r in routines) r.id: r};
         _loaded = true;
       });
     }
@@ -154,7 +157,7 @@ class _TaskListState extends State<_TaskList> {
             (entry) => Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.md),
               child: _RoutineGroupCard(
-                routineId: entry.key,
+                title: _routinesById[entry.key]?.title ?? entry.key,
                 tasks: entry.value,
               ),
             ),
@@ -178,11 +181,11 @@ class _TaskListState extends State<_TaskList> {
 
 class _RoutineGroupCard extends StatelessWidget {
   const _RoutineGroupCard({
-    required this.routineId,
+    required this.title,
     required this.tasks,
   });
 
-  final String routineId;
+  final String title;
   final List<Task> tasks;
 
   @override
@@ -201,7 +204,7 @@ class _RoutineGroupCard extends StatelessWidget {
                 Icon(Icons.list_alt_rounded, color: context.colors.primary),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
-                  child: Text(routineId, style: context.text.titleSmall),
+                  child: Text(title, style: context.text.titleSmall),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
