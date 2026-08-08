@@ -18,7 +18,8 @@ native riêng từng nền tảng (gấp 3 chi phí).
 **Bối cảnh:** trẻ dùng app ở nhà, trên xe, chỗ sóng yếu. Mọi độ trễ đều phá vỡ cảm giác thưởng.
 **Quyết định:** ghi Drift trước, UI đọc từ Drift, SyncEngine đẩy/kéo nền.
 **Hệ quả:** (+) app luôn tức thì, dùng được offline. (−) phải tự xử lý xung đột, phức tạp hơn
-đáng kể so với gọi API trực tiếp; chi phí này dồn vào Sprint 4.
+đáng kể so với gọi API trực tiếp. Chi phí này nằm ở sprint backend & sync, mà theo ADR-021 sprint
+đó đã đôn lên trước phần thưởng.
 
 ---
 
@@ -235,15 +236,59 @@ thiết bị đã ghép cặp không tự xếp lại được, phải bố mẹ
 
 ---
 
+## ADR-021: Cấu hình gia đình sống trên tài khoản bố mẹ; máy con là bản sao đồng bộ
+
+**Bối cảnh:** câu hỏi mở #8 hỏi có đôn backend lên trước Sprint 3 hay ra v1.0 một-thiết-bị rồi
+ghép cặp ở v1.1. Câu hỏi thật nằm dưới nó: **nơi cư trú của cấu hình** (gia đình, hồ sơ con, task,
+phần thưởng) là máy bố mẹ hay là tài khoản bố mẹ.
+
+**Quyết định:** cấu hình cư trú trên **tài khoản bố mẹ** ở server. Bố mẹ cấu hình xong thì cấu
+hình thuộc về tài khoản, không thuộc về cái máy đã nhập nó. Máy con quét QR → tải về **hồ sơ của
+đúng bé đó** → từ đó đồng bộ hai chiều với tài khoản bố mẹ.
+
+Hệ quả về thứ tự: **backend + auth lên trước phần thưởng/streak** (chọn hướng A của `09` §8).
+
+**Lý do:** đây là điều kiện của ba thứ đã hứa ở chỗ khác và không thể làm local-only:
+- Ghép cặp bằng QR (ADR-019 — QR không mang dữ liệu, nên dữ liệu phải tới từ server).
+- "Mỗi bé một máy" — điểm bán chính, chứ không phải tính năng phụ.
+- Đổi/mất máy bố mẹ mà không mất cả nhà. Nếu cấu hình chỉ nằm ở máy bố mẹ thì mất máy là mất
+  toàn bộ lịch sử xu của con — hỏng đúng thứ app hứa giữ.
+
+**Điều này không lật ADR-002.** Hai câu nói về hai thứ khác nhau, và đừng để chúng bị đọc lẫn:
+
+| | Nguồn sự thật | Vì sao |
+|---|---|---|
+| **Cấu hình** (gia đình, hồ sơ con, task, phần thưởng, tỷ giá) | Tài khoản bố mẹ trên server | Phải sống lâu hơn cái máy, phải tới được máy con |
+| **Hoạt động lúc chạy** (tick việc, cộng xu, tiến độ) | Drift local trên chính máy đó | Bé tick lúc mất mạng phải được cộng xu **ngay** (ADR-002) |
+
+Nghĩa là máy con vẫn ghi Drift trước rồi đẩy lên sau, đúng như ADR-002; nó chỉ không còn là nơi
+**khai sinh** cấu hình.
+
+**Hệ quả:**
+- (+) Câu hỏi mở #8 đóng lại; `05-roadmap.md` đảo thứ tự Sprint 3 ↔ Sprint 4.
+- (+) Máy con cài lại app vẫn lấy lại được dữ liệu bằng cách ghép lại — không mất lịch sử.
+- (−) Không còn đường ra hàng "một thiết bị, không cần tài khoản". v1.0 **bắt buộc** có auth, nên
+  ngày phát hành lùi lại và phần thưởng/streak (Sprint 3 cũ) đi sau.
+- (−) Bắt buộc phải có mạng ở hai thời điểm: bố mẹ đăng ký, và máy con quét QR một lần.
+- (−) Sinh ra nghĩa vụ dữ liệu trẻ em thật sự (không còn "mọi thứ chỉ ở local nên không phải lo") —
+  ADR-020 (server chỉ giữ nhóm tuổi) và ADR-010 (không analytics bên thứ ba) từ chỗ là lựa chọn
+  tốt trở thành **ràng buộc phải giữ**.
+
+**Đã cân nhắc:** hướng B — v1.0 một-thiết-bị, ghép cặp ở v1.1. Bỏ vì nó hoãn đúng điểm bán chính,
+và vì đổi nơi cư trú của cấu hình **sau khi** đã có người dùng thật là việc di trú dữ liệu đau hơn
+nhiều so với làm đúng từ đầu.
+
+---
+
 ## Câu hỏi còn mở
 
 | # | Câu hỏi | Cần chốt trước |
 |---|---|---|
 | 2 | Có cho phép trừ điểm (penalty) không? Nhiều chuyên gia nuôi dạy phản đối | v1.1 |
 | 4 | Tên & thương hiệu chính thức (Bé Ong chỉ là tên tạm) | Sprint 5 |
-| 5 | Self-host Supabase ngay từ đầu hay dùng cloud rồi chuyển sau? | Sprint 4 |
+| 5 | Self-host Supabase ngay từ đầu hay dùng cloud rồi chuyển sau? | Sprint 3 (sprint backend, đã đôn lên — ADR-021) |
 | 6 | Tiền tiêu vặt: chỉ ghi sổ "bố mẹ nợ con", hay v2 nối ví điện tử (MoMo/ZaloPay)? Nối ví kéo theo KYC và quy định tài chính — nặng | v2 |
 | 7 | Mô hình doanh thu cho bản sau v1 (nếu cần) — đã hoãn theo ADR-014 | sau v1 |
-| 8 | Đôn backend lên trước Sprint 3 để có ghép cặp trong v1.0, hay ra v1.0 một-thiết-bị rồi ghép cặp ở v1.1? Xem `09-onboarding-pairing.md` §8 | trước Pha 1 của `09` |
 
 > Mục 1 và 3 đã chốt tại ADR-014: miễn phí hoàn toàn ở v1.
+> Mục 8 đã chốt tại ADR-021: cấu hình sống trên tài khoản bố mẹ, backend lên trước phần thưởng.

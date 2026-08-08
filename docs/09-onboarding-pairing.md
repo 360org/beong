@@ -27,7 +27,7 @@ một app nhưng hai vai khác nhau, giữ dữ liệu khác nhau, quyền khác
 | 8 | Tải app, mở lần đầu | |
 | 9 | Chọn vai **Con** | |
 | 10 | Quét QR trên máy bố mẹ | Cần mạng đúng một lần ở bước này |
-| 11 | Nhận credential phạm vi hẹp, tải dữ liệu của mình | Chỉ dữ liệu của chính bé đó |
+| 11 | Nhận credential phạm vi hẹp, **tải hồ sơ của mình về máy** | Chỉ dữ liệu của chính bé đó; từ đây đồng bộ hai chiều với tài khoản bố mẹ |
 | 12 | Bắt đầu tick checklist | Từ đây chạy offline được |
 
 Bước 6 đứng trước bước 7 là **đúng và nên giữ**: bé mở app lần đầu thấy việc ngay, không thấy
@@ -44,6 +44,9 @@ Luồng trên cần bốn khối hạ tầng mà bản hiện tại chưa có kh
 | Lưu session bền vững | ✗ **đang lỗi** | Mở lại app là mất session, phải onboarding lại từ đầu |
 | Auth (Google/Apple) | ✗ chưa có | Chưa có tầng auth nào |
 | Backend + RLS | ✗ chưa có | Supabase đã chọn (ADR-004), chưa dựng |
+
+Từ ADR-021, cả bốn khối này là **điều kiện của v1.0**, không phải việc để dành: cấu hình sống trên
+tài khoản bố mẹ nên không còn đường phát hành "một thiết bị, không cần tài khoản".
 
 Session không được lưu là **lỗi đang chặn đường**, không phải thiếu tính năng: hiện tại mở lại
 app thì `sessionProvider` về `null` → router đẩy về onboarding → tạo lại gia đình mới. Phải sửa
@@ -70,15 +73,21 @@ Dễ nghĩ là nhét `family_id` + tên con vào QR cho gọn. Không được, 
 QR chỉ chứa **một mã dùng một lần**, tự nó vô nghĩa. Mọi dữ liệu đi qua server sau khi mã được
 xác thực.
 
-### 3.3 Ghép cặp bắt buộc cần backend
+### 3.3 Cấu hình cư trú trên tài khoản bố mẹ, không trên máy bố mẹ
 
-Hệ quả trực tiếp của §3.2: **không có backend thì không ghép cặp được**. Đây là điểm cần chú ý
-với lộ trình hiện tại — `05-roadmap.md` đặt backend ở Sprint 4, sau Sprint 3 (phần thưởng). Nếu
-coi luồng này là yêu cầu của v1 thì backend phải lên trước Sprint 3, hoặc luồng phải chia pha
-(xem §7).
+Đây là quyết định gốc của cả tài liệu này (ADR-021). Bố mẹ cấu hình xong hồ sơ con thì cấu hình
+thuộc về **tài khoản**, không thuộc về cái máy đã nhập nó. Máy con quét QR là để **tải hồ sơ của
+đúng bé đó về máy mình**, rồi đồng bộ hai chiều với tài khoản bố mẹ.
+
+Hệ quả trực tiếp, cộng với §3.2: **không có backend thì không ghép cặp được**, nên backend + auth
+lên trước phần thưởng/streak trong `05-roadmap.md`.
 
 Không có cách nào ghép cặp "local-only" cho ra sản phẩm thật. Ghép qua LAN/Bluetooth thì hỏng
 ngay khi hai máy không cùng mạng, mà đó là trường hợp thường gặp (bố mẹ ở cơ quan, con ở nhà).
+
+Chỗ dễ đọc lẫn: quyết định này **không** lật ADR-002. Cấu hình khai sinh ở tài khoản bố mẹ; còn
+lúc chạy thì mỗi máy vẫn ghi Drift local trước rồi đẩy lên sau, nên bé tick việc khi mất mạng vẫn
+được cộng xu ngay. Bảng phân biệt hai loại nguồn sự thật nằm ở ADR-021.
 
 ### 3.4 Sau khi ghép, thiết bị con chạy offline
 
@@ -206,7 +215,7 @@ Chia pha theo thứ tự phụ thuộc. Pha 0 chặn tất cả phần còn lạ
 - [ ] Tạo **nhiều** con (onboarding hiện chỉ tạo được 1)
 - [ ] Sửa / xoá / vô hiệu hồ sơ con
 - [ ] Chọn con khi thêm task (hiện gán cho tất cả)
-- [ ] Hỏi năm sinh để chọn nhóm tuổi giao diện (hiện mọi bé rơi vào nhóm giữa)
+- [x] Hỏi tuổi bé để chọn nhóm tuổi giao diện — `_AgePicker` trong onboarding, lưu năm sinh
 - [ ] Test: task gán cho con A không hiện ở con B
 
 ### Pha 3 — Ghép cặp QR
@@ -224,7 +233,7 @@ Chia pha theo thứ tự phụ thuộc. Pha 0 chặn tất cả phần còn lạ
 
 ### Pha 4 — Đồng bộ
 
-- [ ] Outbox + SyncEngine + retry/backoff + idempotency (đã có trong Sprint 4)
+- [ ] Outbox + SyncEngine + retry/backoff + idempotency (sprint backend & sync)
 - [ ] Realtime theo `family_id`
 - [ ] Test: bé tick lúc mất mạng → có mạng thì bố mẹ thấy
 
@@ -237,12 +246,23 @@ Chia pha theo thứ tự phụ thuộc. Pha 0 chặn tất cả phần còn lạ
 
 ## 8. Ảnh hưởng tới lộ trình
 
-Luồng này khiến **backend không còn là việc của Sprint 4** nếu coi nó là yêu cầu v1. Hai hướng:
+**Đã chốt: hướng A** (ADR-021). Cấu hình sống trên tài khoản bố mẹ, nên backend + auth phải có
+trước khi luồng này chạy được, và `05-roadmap.md` đảo thứ tự: **backend & sync đi trước phần
+thưởng/streak/huy hiệu**.
 
-**A. Đôn backend lên trước Sprint 3.** Luồng đầy đủ có sớm, đổi lại phần thưởng/streak lùi lại.
+Hướng B (v1.0 một thiết bị, ghép cặp ở v1.1) đã bỏ: nó hoãn đúng điểm bán chính, và đổi nơi cư trú
+của cấu hình sau khi đã có người dùng thật là việc di trú dữ liệu đau hơn nhiều so với làm đúng từ
+đầu.
 
-**B. Chia pha phát hành.** v1.0 chỉ một thiết bị (bố mẹ và con dùng chung máy — đã chạy được hôm
-nay), v1.1 thêm tài khoản + ghép cặp. Ra hàng sớm hơn, nhưng "mỗi bé một máy" là điểm bán chính
-nên hoãn nó cũng là hoãn giá trị lớn.
+Thứ tự sprint sau khi đảo:
 
-Việc chọn A hay B là quyết định sản phẩm, không phải kỹ thuật — cần chốt trước khi bắt Pha 1.
+| Thứ tự | Nội dung | Ghi chú |
+|---|---|---|
+| Sprint 3 (mới) | Backend, auth, ghép cặp QR, sync | Pha 0–4 của §7 |
+| Sprint 4 (mới) | Phần thưởng, ba hũ, streak, huy hiệu | Nội dung Sprint 3 cũ, không đổi |
+
+Cái phải trả cho việc đảo: ngày phát hành v1.0 lùi lại, vì v1.0 giờ **bắt buộc** có auth. Đổi lại
+không phải làm hai lần luồng khởi tạo, và không phải di trú dữ liệu của người dùng thật.
+
+Việc đầu tiên vẫn là **Pha 0** — lưu session bền vững. Không liên quan gì tới backend, và không có
+nó thì không kiểm được bất cứ thứ gì phía sau: mở lại app là mất session, quay về onboarding.
