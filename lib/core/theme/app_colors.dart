@@ -59,6 +59,19 @@ abstract final class AppColors {
 
   static Color profileColor(int index) =>
       profilePalette[index % profilePalette.length];
+
+  /// Gradient thẻ "Dashboard" — điểm nhấn chính của trang chủ trẻ em.
+  static const dashboardGradientLight = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF7C5CFF), Color(0xFF9B85FF)],
+  );
+
+  static const dashboardGradientDark = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF6B4EFF), Color(0xFF8B72FF)],
+  );
 }
 
 /// Màu không nằm trong [ColorScheme] của Material nhưng dùng xuyên suốt app.

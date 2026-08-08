@@ -1,6 +1,8 @@
 import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:flutter/material.dart';
 
 class TaskCard extends StatelessWidget {
@@ -10,6 +12,7 @@ class TaskCard extends StatelessWidget {
     required this.isCompleted,
     required this.onToggle,
     super.key,
+    this.iconKey,
     this.colorIndex = 0,
     this.isPending = false,
     this.isMissed = false,
@@ -21,6 +24,9 @@ class TaskCard extends StatelessWidget {
   final bool isPending;
   final bool isMissed;
   final int colorIndex;
+
+  /// Khoá emoji trong `task_icons.dart`. NULL → icon mặc định ⭐.
+  final String? iconKey;
   final VoidCallback onToggle;
 
   @override
@@ -39,16 +45,13 @@ class TaskCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              _Checkbox(
-                checked: isDone,
-                missed: isMissed,
-                color: profileColor,
-              ),
+              _EmojiAvatar(emoji: iconForKey(iconKey), faded: isDone),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
                   title,
                   style: context.text.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
                     decoration: isDone ? TextDecoration.lineThrough : null,
                     color: isDone
                         ? context.semantic.onSurfaceMuted
@@ -56,27 +59,41 @@ class TaskCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: context.semantic.xu.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                ),
-                child: Text(
-                  '+$points',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: context.semantic.xu,
-                  ),
-                ),
+              const SizedBox(width: AppSpacing.sm),
+              XuBadge(amount: points, pill: true),
+              const SizedBox(width: AppSpacing.sm),
+              _Checkbox(
+                checked: isDone,
+                missed: isMissed,
+                color: profileColor,
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _EmojiAvatar extends StatelessWidget {
+  const _EmojiAvatar({required this.emoji, required this.faded});
+
+  final String emoji;
+  final bool faded;
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: faded ? 0.5 : 1,
+      child: Container(
+        width: 44,
+        height: 44,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: context.colors.primaryContainer,
+          borderRadius: BorderRadius.circular(AppRadius.field),
+        ),
+        child: Text(emoji, style: const TextStyle(fontSize: 22)),
       ),
     );
   }

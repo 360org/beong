@@ -4,6 +4,8 @@ import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/preset_chip.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/task_dao.dart';
@@ -201,10 +203,24 @@ class _RoutineGroupCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.list_alt_rounded, color: context.colors.primary),
+                Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: context.colors.primaryContainer,
+                    borderRadius: BorderRadius.circular(AppRadius.field),
+                  ),
+                  child: const Text('📋', style: TextStyle(fontSize: 18)),
+                ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
-                  child: Text(title, style: context.text.titleSmall),
+                  child: Text(
+                    title,
+                    style: context.text.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -227,19 +243,18 @@ class _RoutineGroupCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             ...sorted.map(
               (task) => Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.circle,
-                      size: 6,
-                      color: context.semantic.onSurfaceMuted,
+                    Text(
+                      iconForKey(task.iconKey),
+                      style: const TextStyle(fontSize: 16),
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(task.title, style: context.text.bodyMedium),
                     ),
-                    XuBadge(amount: task.points),
+                    XuBadge(amount: task.points, pill: true),
                   ],
                 ),
               ),
@@ -266,11 +281,30 @@ class _TaskTile extends StatelessWidget {
         ),
         child: Row(
           children: [
+            Container(
+              width: 44,
+              height: 44,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: context.colors.primaryContainer,
+                borderRadius: BorderRadius.circular(AppRadius.field),
+              ),
+              child: Text(
+                iconForKey(task.iconKey),
+                style: const TextStyle(fontSize: 22),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(task.title, style: context.text.bodyLarge),
+                  Text(
+                    task.title,
+                    style: context.text.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     _repeatLabel(task),
@@ -281,7 +315,7 @@ class _TaskTile extends StatelessWidget {
                 ],
               ),
             ),
-            XuBadge(amount: task.points),
+            XuBadge(amount: task.points, pill: true),
           ],
         ),
       ),
@@ -340,6 +374,9 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
     if (title.isEmpty || _selectedChildren.isEmpty) return;
 
     final id = 'task-${DateTime.now().millisecondsSinceEpoch}';
+    final preset = _selectedPreset == null
+        ? null
+        : presetByKey(_selectedPreset!);
     await widget.taskDao.createTask(
       TasksCompanion.insert(
         id: id,
@@ -347,6 +384,7 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
         title: title,
         points: Value(points),
         presetKey: Value(_selectedPreset),
+        iconKey: Value(preset?.iconKey),
       ),
       _selectedChildren.toList(),
     );
@@ -372,31 +410,27 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
             const SizedBox(height: AppSpacing.lg),
             Text('Chon nhanh', style: context.text.titleSmall),
             const SizedBox(height: AppSpacing.sm),
-            SizedBox(
-              height: 40,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: kTaskPresets.map((preset) {
-                  final selected = _selectedPreset == preset.key;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: AppSpacing.sm),
-                    child: ChoiceChip(
-                      label: Text(preset.titleVi),
-                      selected: selected,
-                      onSelected: (_) {
-                        setState(() {
-                          _selectedPreset = selected ? null : preset.key;
-                          if (!selected) {
-                            _titleController.text = preset.titleVi;
-                            _pointsController.text = preset.defaultPoints
-                                .toString();
-                          }
-                        });
-                      },
-                    ),
-                  );
-                }).toList(),
-              ),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: kTaskPresets.map((preset) {
+                final selected = _selectedPreset == preset.key;
+                return PresetChip(
+                  emoji: iconForKey(preset.iconKey),
+                  label: preset.titleVi,
+                  selected: selected,
+                  onTap: () {
+                    setState(() {
+                      _selectedPreset = selected ? null : preset.key;
+                      if (!selected) {
+                        _titleController.text = preset.titleVi;
+                        _pointsController.text = preset.defaultPoints
+                            .toString();
+                      }
+                    });
+                  },
+                );
+              }).toList(),
             ),
             const SizedBox(height: AppSpacing.xl),
             TextField(

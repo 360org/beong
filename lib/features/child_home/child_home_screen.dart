@@ -285,6 +285,7 @@ class _InstanceCardState extends State<_InstanceCard> {
     return TaskCard(
       title: task.title,
       points: task.points,
+      iconKey: task.iconKey,
       isCompleted: widget.instance.status == InstanceStatus.approved.name,
       isPending: widget.instance.status == InstanceStatus.pendingReview.name,
       isMissed: widget.instance.status == InstanceStatus.missed.name,

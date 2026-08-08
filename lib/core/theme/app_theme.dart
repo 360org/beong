@@ -140,4 +140,8 @@ extension AppThemeContext on BuildContext {
   ColorScheme get colors => Theme.of(this).colorScheme;
 
   TextTheme get text => Theme.of(this).textTheme;
+
+  Gradient get dashboardGradient => Theme.of(this).brightness == Brightness.dark
+      ? AppColors.dashboardGradientDark
+      : AppColors.dashboardGradientLight;
 }
