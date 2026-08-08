@@ -182,6 +182,59 @@ chi tiêu đều hoạt động với xu thuần, không cần tiền thật.
 
 ---
 
+## ADR-018: Vai (bố mẹ / con) được ghi nhớ ở local nhưng không cấp quyền
+
+**Bối cảnh:** luồng ở `09-onboarding-pairing.md` bắt đầu bằng việc chọn vai ngay lần mở app đầu.
+Nếu quyền suy ra từ lựa chọn đó thì trẻ chỉ cần vào Cài đặt đổi vai là thành bố mẹ.
+
+**Quyết định:** vai lưu ở local **chỉ để biết mở màn hình nào**. Mọi quyền suy ra từ credential:
+thiết bị bố mẹ có session auth user, thiết bị con có credential phạm vi hẹp gắn với đúng một
+`member_id`.
+
+**Hệ quả:** (+) đổi vai là thao tác vô hại, không cần khoá bằng PIN, không tạo đường leo thang
+quyền. (+) mất/mượn máy con cũng không thành máy bố mẹ. (−) phải cẩn thận không bao giờ để logic
+nghiệp vụ đọc cờ vai local thay vì đọc credential — dễ sai khi code nhanh.
+
+---
+
+## ADR-019: QR ghép cặp chỉ chứa mã dùng một lần, không chứa dữ liệu
+
+**Bối cảnh:** thiết bị con cần biết nó thuộc gia đình nào và là bé nào. Cách gọn nhất là nhét
+`family_id` + `member_id` + tên vào QR.
+
+**Quyết định:** QR chỉ chứa một mã ngẫu nhiên 128 bit, hạn 10 phút, dùng một lần
+(`beong://pair?v=1&c=<code>`). Server lưu hash của mã. Mọi dữ liệu đi qua server sau khi mã được
+xác thực, và server cấp credential phạm vi hẹp chứ không phải session đầy đủ.
+
+**Lý do:** QR bị chụp lại là chuyện thường (ảnh chụp màn hình, camera người khác). Nếu QR mang dữ
+liệu thì thông tin của trẻ rò rỉ **vĩnh viễn** và không có đường thu hồi — ảnh đã chụp thì không
+rút lại được. Mã vô nghĩa sau 10 phút thì ảnh chụp cũng vô giá trị.
+
+**Hệ quả:** (−) **ghép cặp bắt buộc cần backend**, không có cách nào làm local-only cho ra sản
+phẩm thật; điều này đôn Supabase lên trước trong lộ trình (xem `09` §8). (+) thu hồi được: xoá
+thiết bị là credential vô hiệu.
+
+**Đã cân nhắc:** ghép qua LAN/Bluetooth — hỏng ngay khi hai máy không cùng mạng, mà đó là trường
+hợp thường gặp (bố mẹ ở cơ quan, con ở nhà).
+
+---
+
+## ADR-020: Server chỉ giữ nhóm tuổi của trẻ, không giữ năm sinh
+
+**Bối cảnh:** `members.birthYear` dùng để chọn nhóm tuổi giao diện (`domain/services/age_band.dart`
+— 5–8 / 9–12 / 13–15). Giao diện chỉ cần **nhóm**, không cần năm chính xác.
+
+**Quyết định:** đồng bộ nhóm tuổi (`little` / `middle` / `teen`); năm sinh chính xác chỉ nằm ở
+local máy bố mẹ, không lên server.
+
+**Lý do:** năm sinh là dữ liệu cá nhân của trẻ vị thành niên. Không thu thập lên server thì giảm
+được nghĩa vụ COPPA/GDPR-K đáng kể, mà mất gần như không có gì — cùng lý do với ADR-006.
+
+**Hệ quả:** (+) bề mặt dữ liệu trẻ em trên server nhỏ hơn. (−) đổi ranh giới nhóm tuổi sau này thì
+thiết bị đã ghép cặp không tự xếp lại được, phải bố mẹ nhập lại năm sinh.
+
+---
+
 ## Câu hỏi còn mở
 
 | # | Câu hỏi | Cần chốt trước |
@@ -191,5 +244,6 @@ chi tiêu đều hoạt động với xu thuần, không cần tiền thật.
 | 5 | Self-host Supabase ngay từ đầu hay dùng cloud rồi chuyển sau? | Sprint 4 |
 | 6 | Tiền tiêu vặt: chỉ ghi sổ "bố mẹ nợ con", hay v2 nối ví điện tử (MoMo/ZaloPay)? Nối ví kéo theo KYC và quy định tài chính — nặng | v2 |
 | 7 | Mô hình doanh thu cho bản sau v1 (nếu cần) — đã hoãn theo ADR-014 | sau v1 |
+| 8 | Đôn backend lên trước Sprint 3 để có ghép cặp trong v1.0, hay ra v1.0 một-thiết-bị rồi ghép cặp ở v1.1? Xem `09-onboarding-pairing.md` §8 | trước Pha 1 của `09` |
 
 > Mục 1 và 3 đã chốt tại ADR-014: miễn phí hoàn toàn ở v1.

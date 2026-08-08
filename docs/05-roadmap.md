@@ -45,6 +45,10 @@ toàn bộ offline.
 
 **Xong khi:** dùng được thật trên 1 thiết bị, không cần mạng.
 
+**Còn thiếu so với luồng ở `09-onboarding-pairing.md`:** chọn vai bố mẹ/con lần mở đầu, lưu session
+bền vững (đang lỗi — mở lại app là mất session), tạo nhiều con, chọn con khi thêm task. Đây là Pha 0
+và Pha 2 của `09` §7.
+
 ## Sprint 3 — Phần thưởng, tài chính, streak, huy hiệu (2 tuần)
 - [ ] CRUD phần thưởng **có phân loại** (5 `reward_type`, trường riêng theo loại)
 - [ ] Đổi thưởng + hàng chờ duyệt + hoàn điểm khi từ chối
@@ -56,9 +60,15 @@ toàn bộ offline.
 - [ ] **Sổ của con** — lịch sử đầy đủ, `manual_adjust` bắt buộc có lý do
 
 ## Sprint 4 — Backend & sync (2 tuần)
+
+> **Cần chốt thứ tự trước khi bắt tay.** Luồng khởi tạo ở `09-onboarding-pairing.md` (bố mẹ đăng
+> ký → tạo hồ sơ con → ghép cặp máy con bằng QR) **bắt buộc cần backend** (ADR-019), nên nếu coi
+> luồng đó là yêu cầu v1.0 thì sprint này phải lên trước Sprint 3. Xem `09` §8 và câu hỏi mở #8.
+
 - [ ] Dự án Supabase, migration SQL, RLS policy
 - [ ] Auth phụ huynh (email magic link, Sign in with Apple/Google)
-- [ ] Mời phụ huynh thứ hai vào gia đình (mã mời)
+- [ ] **Ghép cặp thiết bị con bằng QR** — chi tiết ở `09-onboarding-pairing.md` §4
+- [ ] Mời phụ huynh thứ hai vào gia đình (dùng lại hạ tầng QR, cấp vai `parent`)
 - [ ] Outbox + SyncEngine + retry/backoff + idempotency
 - [ ] Realtime subscribe theo `family_id`
 - [ ] Test xung đột: 2 thiết bị offline cùng sửa → kết quả hội tụ
