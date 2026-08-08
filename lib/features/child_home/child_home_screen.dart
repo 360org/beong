@@ -127,7 +127,7 @@ class ChildHomeScreen extends ConsumerWidget {
 
     return [
       if (scheduled.isNotEmpty) ...[
-        _SectionHeader(title: 'Can lam', count: scheduled.length),
+        _SectionHeader(title: 'Cần làm', count: scheduled.length),
         const SizedBox(height: AppSpacing.sm),
         ...scheduled.map(
           (instance) => Padding(
@@ -138,7 +138,7 @@ class ChildHomeScreen extends ConsumerWidget {
         const SizedBox(height: AppSpacing.xl),
       ],
       if (done.isNotEmpty) ...[
-        _SectionHeader(title: 'Da xong', count: done.length),
+        _SectionHeader(title: 'Đã xong', count: done.length),
         const SizedBox(height: AppSpacing.sm),
         ...done.map(
           (instance) => Padding(
@@ -149,7 +149,7 @@ class ChildHomeScreen extends ConsumerWidget {
         const SizedBox(height: AppSpacing.xl),
       ],
       if (missed.isNotEmpty) ...[
-        _SectionHeader(title: 'Bo lo', count: missed.length),
+        _SectionHeader(title: 'Bỏ lỡ', count: missed.length),
         const SizedBox(height: AppSpacing.sm),
         ...missed.map(
           (instance) => Padding(
@@ -242,7 +242,7 @@ class _DashboardCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _StatTile(
-                  label: 'DIEM',
+                  label: 'ĐIỂM',
                   child: XuBadgeStat(amount: points),
                 ),
               ),
@@ -270,7 +270,7 @@ class _DashboardCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: _StatTile(
-                  label: 'HOM NAY',
+                  label: 'HÔM NAY',
                   child: Text(
                     '$completed/$total',
                     style: const TextStyle(
@@ -489,13 +489,13 @@ class _EmptyState extends StatelessWidget {
             const Text('🎉', style: TextStyle(fontSize: 56)),
             const SizedBox(height: AppSpacing.xl),
             Text(
-              'Chua co viec nao hom nay',
+              'Chưa có việc nào hôm nay',
               style: context.text.titleMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Bam nut ben duoi de tao viec moi.',
+              'Bấm nút bên dưới để tạo việc mới.',
               style: context.text.bodyMedium?.copyWith(
                 color: context.semantic.onSurfaceMuted,
               ),
@@ -504,7 +504,7 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: AppSpacing.xxl),
             ElevatedButton(
               onPressed: onGenerate,
-              child: const Text('TAO VIEC HOM NAY'),
+              child: const Text('TẠO VIỆC HÔM NAY'),
             ),
           ],
         ),

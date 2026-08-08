@@ -21,7 +21,7 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cai dat', style: context.text.titleLarge),
+        title: Text('Cài đặt', style: context.text.titleLarge),
       ),
       body: StreamBuilder<List<Member>>(
         stream: memberDao.watchMembers(session.familyId),
@@ -43,7 +43,7 @@ class SettingsScreen extends ConsumerWidget {
                 },
               ),
               const SizedBox(height: AppSpacing.xxl),
-              Text('Thanh vien', style: context.text.titleMedium),
+              Text('Thành viên', style: context.text.titleMedium),
               const SizedBox(height: AppSpacing.md),
               ...members.map(
                 (member) => Padding(
@@ -67,19 +67,19 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   _SettingsTile(
                     icon: Icons.dark_mode_outlined,
-                    title: 'Giao dien',
-                    subtitle: 'Theo he thong',
+                    title: 'Giao diện',
+                    subtitle: 'Theo hệ thống',
                     onTap: () {},
                   ),
                   _SettingsTile(
                     icon: Icons.notifications_outlined,
-                    title: 'Thong bao',
-                    subtitle: 'Bat',
+                    title: 'Thông báo',
+                    subtitle: 'Bật',
                     onTap: () {},
                   ),
                   _SettingsTile(
                     icon: Icons.info_outline,
-                    title: 'Phien ban',
+                    title: 'Phiên bản',
                     subtitle: '0.2.0',
                     onTap: () {},
                   ),
@@ -102,7 +102,7 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  child: const Text('DANG XUAT'),
+                  child: const Text('ĐĂNG XUẤT'),
                 ),
               ),
               const SizedBox(height: AppSpacing.xxxl),
@@ -144,7 +144,7 @@ class _FamilyInfoCard extends StatelessWidget {
                   Text(family.name, style: context.text.titleMedium),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    'Mui gio: ${family.timezone}',
+                    'Múi giờ: ${family.timezone}',
                     style: context.text.bodySmall?.copyWith(
                       color: context.semantic.onSurfaceMuted,
                     ),
@@ -206,7 +206,7 @@ class _MemberTile extends StatelessWidget {
                   children: [
                     Text(member.displayName, style: context.text.titleSmall),
                     Text(
-                      isParent ? 'Bo me' : 'Tre',
+                      isParent ? 'Bố mẹ' : 'Trẻ',
                       style: context.text.bodySmall?.copyWith(
                         color: context.semantic.onSurfaceMuted,
                       ),

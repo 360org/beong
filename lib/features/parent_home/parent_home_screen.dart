@@ -29,7 +29,7 @@ class ParentHomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Trang chinh', style: context.text.titleLarge),
+        title: Text('Trang chính', style: context.text.titleLarge),
       ),
       body: StreamBuilder<List<Member>>(
         stream: memberDao.watchMembers(session.familyId),
@@ -52,7 +52,7 @@ class ParentHomeScreen extends ConsumerWidget {
                 reviewerId: session.activeMemberId,
               ),
               const SizedBox(height: AppSpacing.xxl),
-              Text('Con cua ban', style: context.text.titleMedium),
+              Text('Con của bạn', style: context.text.titleMedium),
               const SizedBox(height: AppSpacing.md),
               ...children.map(
                 (child) => Padding(
@@ -69,7 +69,7 @@ class ParentHomeScreen extends ConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.xxxl),
                     child: Text(
-                      'Chua them be nao.',
+                      'Chưa thêm bé nào.',
                       style: context.text.bodyMedium?.copyWith(
                         color: context.semantic.onSurfaceMuted,
                       ),
@@ -134,7 +134,7 @@ class _PendingReviewSectionState extends State<_PendingReviewSection> {
               const Text('📖', style: TextStyle(fontSize: 22)),
               const SizedBox(width: AppSpacing.md),
               Text(
-                'Khong co viec nao cho duyet',
+                'Không có việc nào chờ duyệt',
                 style: context.text.bodyLarge,
               ),
             ],
@@ -148,7 +148,7 @@ class _PendingReviewSectionState extends State<_PendingReviewSection> {
       children: [
         Row(
           children: [
-            Text('Cho duyet', style: context.text.titleMedium),
+            Text('Chờ duyệt', style: context.text.titleMedium),
             const SizedBox(width: AppSpacing.sm),
             Container(
               padding: const EdgeInsets.symmetric(
@@ -258,7 +258,7 @@ class _PendingCardState extends State<_PendingCard> {
                 Icons.close_rounded,
                 color: context.semantic.danger,
               ),
-              tooltip: 'Tu choi',
+              tooltip: 'Từ chối',
             ),
             const SizedBox(width: AppSpacing.xs),
             IconButton.filled(
@@ -285,7 +285,7 @@ class _PendingCardState extends State<_PendingCard> {
                 backgroundColor: context.semantic.success,
                 foregroundColor: Colors.white,
               ),
-              tooltip: 'Duyet',
+              tooltip: 'Duyệt',
             ),
           ],
         ),
@@ -353,7 +353,7 @@ class _ChildSummaryCard extends StatelessWidget {
                           )
                           .length;
                       return Text(
-                        '$done / ${instances.length} viec hom nay',
+                        '$done / ${instances.length} việc hôm nay',
                         style: context.text.bodySmall?.copyWith(
                           color: context.semantic.onSurfaceMuted,
                         ),

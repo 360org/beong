@@ -29,7 +29,7 @@ class RewardsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Phan thuong', style: context.text.titleLarge),
+        title: Text('Phần thưởng', style: context.text.titleLarge),
         actions: [
           if (!session.isParent)
             Padding(
@@ -158,7 +158,7 @@ class _RewardCard extends StatelessWidget {
                       if (reward.stock != null) ...[
                         const SizedBox(width: AppSpacing.md),
                         Text(
-                          'Con ${reward.stock}',
+                          'Còn ${reward.stock}',
                           style: context.text.bodySmall?.copyWith(
                             color: context.semantic.onSurfaceMuted,
                           ),
@@ -183,7 +183,7 @@ class _RewardCard extends StatelessWidget {
                   Icons.delete_outline,
                   color: context.semantic.onSurfaceMuted,
                 ),
-                tooltip: 'Xoa',
+                tooltip: 'Xoá',
               ),
           ],
         ),
@@ -242,7 +242,7 @@ class _RedeemButtonState extends State<_RedeemButton> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Da doi "${widget.reward.title}"!')),
+          SnackBar(content: Text('Đã đổi "${widget.reward.title}"!')),
         );
       }
     } on WalletException catch (e) {
@@ -268,7 +268,7 @@ class _RedeemButtonState extends State<_RedeemButton> {
 
     return FilledButton.tonal(
       onPressed: _redeem,
-      child: const Text('Doi'),
+      child: const Text('Đổi'),
     );
   }
 }
@@ -290,15 +290,15 @@ class _EmptyState extends StatelessWidget {
             const Text('🎁', style: TextStyle(fontSize: 56)),
             const SizedBox(height: AppSpacing.xl),
             Text(
-              'Chua co phan thuong nao',
+              'Chưa có phần thưởng nào',
               style: context.text.titleMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               isParent
-                  ? 'Tao phan thuong de be co dong luc!'
-                  : 'Bo me chua tao phan thuong.',
+                  ? 'Tạo phần thưởng để bé có động lực!'
+                  : 'Bố mẹ chưa tạo phần thưởng.',
               style: context.text.bodyMedium?.copyWith(
                 color: context.semantic.onSurfaceMuted,
               ),
@@ -308,7 +308,7 @@ class _EmptyState extends StatelessWidget {
               const SizedBox(height: AppSpacing.xxl),
               ElevatedButton(
                 onPressed: onAdd,
-                child: const Text('THEM PHAN THUONG'),
+                child: const Text('THÊM PHẦN THƯỞNG'),
               ),
             ],
           ],
@@ -379,9 +379,9 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Them phan thuong', style: context.text.titleLarge),
+            Text('Thêm phần thưởng', style: context.text.titleLarge),
             const SizedBox(height: AppSpacing.lg),
-            Text('Chon nhanh', style: context.text.titleSmall),
+            Text('Chọn nhanh', style: context.text.titleSmall),
             const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: AppSpacing.sm,
@@ -406,7 +406,7 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
               }).toList(),
             ),
             const SizedBox(height: AppSpacing.xl),
-            Text('Gia (xu)', style: context.text.titleSmall),
+            Text('Giá (xu)', style: context.text.titleSmall),
             const SizedBox(height: AppSpacing.sm),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -430,11 +430,11 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
               ],
             ),
             const SizedBox(height: AppSpacing.xl),
-            Text('Ten phan thuong', style: context.text.titleSmall),
+            Text('Tên phần thưởng', style: context.text.titleSmall),
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(hintText: 'Ten phan thuong'),
+              decoration: const InputDecoration(hintText: 'Tên phần thưởng'),
               textCapitalization: TextCapitalization.sentences,
             ),
             const SizedBox(height: AppSpacing.xxl),
@@ -442,7 +442,7 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _save,
-                child: const Text('LUU'),
+                child: const Text('LƯU'),
               ),
             ),
           ],

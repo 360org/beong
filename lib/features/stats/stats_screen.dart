@@ -52,7 +52,7 @@ class _ParentStats extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Thong ke', style: context.text.titleLarge),
+        title: Text('Thống kê', style: context.text.titleLarge),
       ),
       body: StreamBuilder<List<Member>>(
         stream: memberDao.watchMembers(session.familyId),
@@ -65,7 +65,7 @@ class _ParentStats extends StatelessWidget {
           if (children.isEmpty) {
             return Center(
               child: Text(
-                'Chua co be nao.',
+                'Chưa có bé nào.',
                 style: context.text.bodyMedium?.copyWith(
                   color: context.semantic.onSurfaceMuted,
                 ),
@@ -149,7 +149,7 @@ class _ChildStats extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('So cua con', style: context.text.titleLarge),
+        title: Text('Sổ của con', style: context.text.titleLarge),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(
@@ -174,7 +174,7 @@ class _ChildStats extends StatelessWidget {
             },
           ),
           const SizedBox(height: AppSpacing.xxl),
-          Text('Lich su', style: context.text.titleMedium),
+          Text('Lịch sử', style: context.text.titleMedium),
           const SizedBox(height: AppSpacing.md),
           StreamBuilder<List<PointTransaction>>(
             stream: walletDao.watchHistory(memberId),
@@ -185,7 +185,7 @@ class _ChildStats extends StatelessWidget {
                   padding: const EdgeInsets.all(AppSpacing.xxl),
                   child: Center(
                     child: Text(
-                      'Chua co giao dich nao.',
+                      'Chưa có giao dịch nào.',
                       style: context.text.bodyMedium?.copyWith(
                         color: context.semantic.onSurfaceMuted,
                       ),
@@ -214,19 +214,19 @@ class _JarOverview extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: _JarCard(label: 'Tieu', amount: balance.spend, jar: Jar.spend),
+          child: _JarCard(label: 'Tiêu', amount: balance.spend, jar: Jar.spend),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: _JarCard(
-            label: 'De danh',
+            label: 'Để dành',
             amount: balance.save,
             jar: Jar.save,
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: _JarCard(label: 'Cho di', amount: balance.give, jar: Jar.give),
+          child: _JarCard(label: 'Cho đi', amount: balance.give, jar: Jar.give),
         ),
       ],
     );
@@ -300,12 +300,12 @@ class _StreakCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${streak.currentLen} ngay lien tiep',
+                    '${streak.currentLen} ngày liên tiếp',
                     style: context.text.titleSmall,
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    'Ky luc: ${streak.bestLen} ngay',
+                    'Kỷ lục: ${streak.bestLen} ngày',
                     style: context.text.bodySmall?.copyWith(
                       color: context.semantic.onSurfaceMuted,
                     ),
@@ -392,14 +392,14 @@ class _TransactionTile extends StatelessWidget {
   };
 
   String _reasonLabel(String reason) => switch (reason) {
-    'taskApproved' => 'Hoan thanh viec',
-    'routineBonus' => 'Thuong tron bo',
-    'streakBonus' => 'Thuong lien tiep',
-    'rewardRedeemed' => 'Doi thuong',
-    'rewardRefund' => 'Hoan xu',
-    'manualAdjust' => 'Dieu chinh',
-    'bonus' => 'Thuong them',
-    'penalty' => 'Tru xu',
+    'taskApproved' => 'Hoàn thành việc',
+    'routineBonus' => 'Thưởng trọn bộ',
+    'streakBonus' => 'Thưởng liên tiếp',
+    'rewardRedeemed' => 'Đổi thưởng',
+    'rewardRefund' => 'Hoàn xu',
+    'manualAdjust' => 'Điều chỉnh',
+    'bonus' => 'Thưởng thêm',
+    'penalty' => 'Trừ xu',
     _ => reason,
   };
 }

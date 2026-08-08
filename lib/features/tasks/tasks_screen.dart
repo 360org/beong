@@ -28,7 +28,7 @@ class TasksScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Viec nha', style: context.text.titleLarge),
+        title: Text('Việc nhà', style: context.text.titleLarge),
       ),
       body: _TaskList(
         familyId: session.familyId,
@@ -115,15 +115,15 @@ class _TaskListState extends State<_TaskList> {
               ),
               const SizedBox(height: AppSpacing.xl),
               Text(
-                'Chua co viec nao',
+                'Chưa có việc nào',
                 style: context.text.titleMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 widget.isParent
-                    ? 'Bam + de them viec moi cho be.'
-                    : 'Bo me chua tao viec.',
+                    ? 'Bấm + để thêm việc mới cho bé.'
+                    : 'Bố mẹ chưa tạo việc.',
                 style: context.text.bodyMedium?.copyWith(
                   color: context.semantic.onSurfaceMuted,
                 ),
@@ -167,7 +167,7 @@ class _TaskListState extends State<_TaskList> {
           const SizedBox(height: AppSpacing.xl),
         ],
         if (standaloneTasks.isNotEmpty) ...[
-          Text('Viec le', style: context.text.titleMedium),
+          Text('Việc lẻ', style: context.text.titleMedium),
           const SizedBox(height: AppSpacing.md),
           ...standaloneTasks.map(
             (task) => Padding(
@@ -232,7 +232,7 @@ class _RoutineGroupCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppRadius.pill),
                   ),
                   child: Text(
-                    '${tasks.length} viec',
+                    '${tasks.length} việc',
                     style: context.text.labelSmall?.copyWith(
                       color: context.colors.primary,
                     ),
@@ -325,9 +325,9 @@ class _TaskTile extends StatelessWidget {
   String _repeatLabel(Task task) {
     final type = RepeatType.values.firstWhere((e) => e.name == task.repeatType);
     return switch (type) {
-      RepeatType.daily => 'Hang ngay',
-      RepeatType.custom => 'Tuy chon',
-      RepeatType.once => 'Mot lan',
+      RepeatType.daily => 'Hằng ngày',
+      RepeatType.custom => 'Tuỳ chọn',
+      RepeatType.once => 'Một lần',
     };
   }
 }
@@ -406,9 +406,9 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Them viec moi', style: context.text.titleLarge),
+            Text('Thêm việc mới', style: context.text.titleLarge),
             const SizedBox(height: AppSpacing.lg),
-            Text('Chon nhanh', style: context.text.titleSmall),
+            Text('Chọn nhanh', style: context.text.titleSmall),
             const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: AppSpacing.sm,
@@ -435,7 +435,7 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
             const SizedBox(height: AppSpacing.xl),
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(hintText: 'Ten viec'),
+              decoration: const InputDecoration(hintText: 'Tên việc'),
               textCapitalization: TextCapitalization.sentences,
               autofocus: true,
             ),
@@ -443,7 +443,7 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
             TextField(
               controller: _pointsController,
               decoration: const InputDecoration(
-                hintText: 'Diem',
+                hintText: 'Điểm',
                 suffixText: 'xu',
               ),
               keyboardType: TextInputType.number,
@@ -475,7 +475,7 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _save,
-                child: const Text('LUU'),
+                child: const Text('LƯU'),
               ),
             ),
           ],

@@ -187,7 +187,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 child: ElevatedButton(
                   onPressed: _currentPage < 2 ? _nextPage : _finish,
                   child: Text(
-                    _currentPage < 2 ? 'TIEP TUC' : 'BAT DAU',
+                    _currentPage < 2 ? 'TIẾP TỤC' : 'BẮT ĐẦU',
                   ),
                 ),
               ),
@@ -306,10 +306,10 @@ class _ChildStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Them be', style: context.text.titleLarge),
+          Text('Thêm bé', style: context.text.titleLarge),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Nhap ten, chon mau va con vat cho be.',
+            'Nhập tên, chọn màu và con vật cho bé.',
             style: context.text.bodyMedium?.copyWith(
               color: context.semantic.onSurfaceMuted,
             ),
@@ -330,13 +330,13 @@ class _ChildStep extends StatelessWidget {
           const SizedBox(height: AppSpacing.xl),
           TextField(
             controller: controller,
-            decoration: const InputDecoration(hintText: 'Ten be'),
+            decoration: const InputDecoration(hintText: 'Tên bé'),
             textCapitalization: TextCapitalization.words,
             autofocus: true,
           ),
           const SizedBox(height: AppSpacing.xl),
           Text(
-            'CON VAT',
+            'CON VẬT',
             style: context.text.labelSmall?.copyWith(
               color: context.semantic.onSurfaceMuted,
             ),
@@ -369,7 +369,7 @@ class _ChildStep extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xl),
           Text(
-            'MAU',
+            'MÀU',
             style: context.text.labelSmall?.copyWith(
               color: context.semantic.onSurfaceMuted,
             ),
@@ -419,11 +419,11 @@ class _RoutineStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Chon thoi quen', style: context.text.titleLarge),
+        Text('Chọn thói quen', style: context.text.titleLarge),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Chon routine san de bat dau nhanh. '
-          'Be co the sua sau.',
+          'Chọn routine sẵn để bắt đầu nhanh. '
+          'Bé có thể sửa sau.',
           style: context.text.bodyMedium?.copyWith(
             color: context.semantic.onSurfaceMuted,
           ),
@@ -458,7 +458,7 @@ class _RoutineStep extends StatelessWidget {
                               style: context.text.titleMedium,
                             ),
                             Text(
-                              '${preset.taskKeys.length} viec',
+                              '${preset.taskKeys.length} việc',
                               style: context.text.bodySmall?.copyWith(
                                 color: context.semantic.onSurfaceMuted,
                               ),
