@@ -19,6 +19,13 @@ if (keystorePropertiesFile.exists()) {
 fun signingProperty(propertyKey: String, envKey: String): String? =
     keystoreProperties.getProperty(propertyKey) ?: System.getenv(envKey)
 
+// Lệnh gradle lần này có nhắm tới bản release không. Tính ở đây, ngoài `android {}`,
+// vì `buildTypes { release { ... } }` chạy ở **configuration time** — tức là với mọi
+// lệnh gradle, kể cả `assembleDebug`.
+val buildingRelease = gradle.startParameter.taskNames.any {
+    it.contains("Release", ignoreCase = true)
+}
+
 android {
     namespace = "net.beong.app"
     compileSdk = flutter.compileSdkVersion
@@ -65,7 +72,11 @@ android {
             // từ chối bằng một thông báo không liên quan gì tới nguyên nhân
             // ("not signed with the upload certificate"). Sai sót đáng phát hiện
             // ở phút thứ ba của build, không phải ở phút thứ mười lăm.
-            if (!hasReleaseKey && System.getenv("CI") == "true") {
+            //
+            // `buildingRelease` là bắt buộc: thiếu nó thì job "Build android" của
+            // CI (chạy `flutter build apk --debug`, không có keystore và cũng
+            // không cần) đỏ ngay ở bước configuration.
+            if (!hasReleaseKey && buildingRelease && System.getenv("CI") == "true") {
                 throw GradleException(
                     "Build release trên CI mà không có keystore — kiểm secret " +
                         "ANDROID_KEYSTORE_BASE64 và biến ANDROID_KEYSTORE_PATH " +
