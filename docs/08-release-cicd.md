@@ -9,7 +9,10 @@ phải tăng, cả hai store đều từ chối nộp trùng build number.
 ## Bundle ID / package name
 
 Đã cố định: **`net.beong.app`** — dùng chung cho cả Android (`applicationId`) và iOS
-(`PRODUCT_BUNDLE_IDENTIFIER`). Không đổi được sau khi đã public lên store.
+(`PRODUCT_BUNDLE_IDENTIFIER`). Không đổi được sau khi đã public lên store; đã chốt ở **ADR-026**.
+
+Khi tạo App ID trên developer.apple.com và app trên Play Console, gõ **chính xác** chuỗi này. Gõ
+lệch một ký tự thì build vẫn chạy và chỉ chết ở bước upload với "App not found", không nói vì sao.
 
 ---
 

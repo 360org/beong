@@ -471,11 +471,52 @@ Cho đi); thu hồi xu khi mở lại (trừ hai lần); cho số dư âm (khôn
 
 ---
 
+## ADR-026: Bundle ID / application ID là `net.beong.app`, đóng băng từ đây
+
+**Bối cảnh:** giá trị này được đặt lúc đổi tên dự án sang "Bé Ong" (commit `5dda80e`, 2/8) và
+được dùng nhất quán ở 22 chỗ: `namespace` + `applicationId` bên Android, thư mục và `package` của
+`MainActivity.kt`, `PRODUCT_BUNDLE_IDENTIFIER` của iOS và macOS, hai `Appfile` của Fastlane, và
+`ExportOptions.plist.template`.
+
+Nhưng nó **chưa từng được ghi lại ở đâu và cũng chưa từng được chủ dự án chốt** — người viết code
+tự suy ra từ tên thương hiệu rồi tự quyết. Đúng loại quyết định phải có ADR mà lại không có: khi
+được hỏi lại "có phải `com.mobile.beong` không?", không ai trả lời được mà không đi grep cả repo.
+
+**Quyết định:** giữ **`net.beong.app`**, và coi đây là giá trị đã đóng băng.
+
+**Vì sao chốt bây giờ:** cả hai store coi ID này là danh tính vĩnh viễn của app — đổi sau khi phát
+hành nghĩa là một app khác, mất toàn bộ người dùng, đánh giá và lịch sử cài đặt. Trước lần tạo App
+ID đầu tiên thì đổi chỉ là một commit; sau đó thì không đổi được nữa. Cửa sổ để chọn đóng lại đúng
+lúc tạo App ID trên developer.apple.com và app trên Play Console.
+
+**Không chọn `com.beong.app`** dù `com.` phổ biến hơn: giá trị đang có đã nhất quán khắp 5 nền
+tảng, và đổi tiền tố chỉ vì thói quen đặt tên thì được một chút thẩm mỹ mà phải sửa 22 chỗ cùng
+thư mục package Kotlin. Cả hai store không phân biệt tiền tố — chúng chỉ cần một tên miền ngược,
+duy nhất, không đổi.
+
+**Hệ quả:** mọi tài liệu hướng dẫn phát hành (`08-release-cicd.md`) dùng đúng chuỗi này; ai tạo App
+ID hay app trên Play Console phải gõ **chính xác** `net.beong.app`, gõ khác đi thì `upload_to_*` báo
+"App not found" mà không nói vì sao.
+
+**Đổi được, đổi không được:**
+
+| Thứ | Đổi sau khi phát hành? |
+|---|---|
+| Bundle ID / application ID (`net.beong.app`) | **Không.** Đóng băng từ ADR này |
+| Tên hiển thị dưới icon (`CFBundleDisplayName` = "Bé Ong") | Được, bất cứ lúc nào |
+| Tên trên store, mô tả, ảnh chụp, icon | Được, bất cứ lúc nào |
+| Tên gói Dart (`beong` trong `pubspec.yaml`) | Được, chỉ là chuyện nội bộ |
+
+Nghĩa là chốt ID **không** khoá luôn thương hiệu: câu hỏi mở #4 vẫn mở, đổi tên hiển thị về sau
+không ảnh hưởng gì tới ID.
+
+---
+
 ## Câu hỏi còn mở
 
 | # | Câu hỏi | Cần chốt trước |
 |---|---|---|
-| 4 | Tên & thương hiệu chính thức (Bé Ong chỉ là tên tạm) | Sprint 5 |
+| 4 | Tên & thương hiệu chính thức (Bé Ong chỉ là tên tạm) — **chỉ còn là tên hiển thị**, vì định danh kỹ thuật đã đóng băng ở ADR-026; đổi tên hiển thị về sau không phải sửa code | Sprint 5 |
 | 5 | Self-host Supabase ngay từ đầu hay dùng cloud rồi chuyển sau? | Sprint 3 (sprint backend, đã đôn lên — ADR-021) |
 | 6 | Tiền tiêu vặt: chỉ ghi sổ "bố mẹ nợ con", hay v2 nối ví điện tử (MoMo/ZaloPay)? Nối ví kéo theo KYC và quy định tài chính — nặng | v2 |
 | 7 | Mô hình doanh thu cho bản sau v1 (nếu cần) — đã hoãn theo ADR-014 | sau v1 |
