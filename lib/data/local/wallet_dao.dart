@@ -3,59 +3,62 @@ import 'dart:convert';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/tables/tables.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/services/jar_splitter.dart';
+import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:meta/meta.dart';
 
 part 'wallet_dao.g.dart';
 
-/// Số dư ba hũ của một trẻ.
+/// Số dư từng hũ của một trẻ.
+///
+/// Khoá là `jar_key` — **không** phải `enum Jar`. Ba hũ mặc định vẫn có getter
+/// riêng cho tiện đọc, nhưng lớp này không giới hạn ở chúng: từ ADR-024 bố mẹ tự
+/// lập được hũ với khoá bất kỳ, và bản trước của lớp này chỉ đếm bốn khoá cứng
+/// nên xu trong hũ tự lập **biến mất khỏi mọi màn hình** dù vẫn nằm trong sổ cái.
+/// Số dư đọc hết những gì sổ cái có là cách duy nhất không âm thầm mất xu.
 @immutable
 class WalletBalance {
-  const WalletBalance({
-    required this.spend,
-    required this.save,
-    required this.give,
-    this.inbox = 0,
-  });
+  const WalletBalance.fromKeys(this._byKey);
 
-  static const zero = WalletBalance(spend: 0, save: 0, give: 0);
+  static const zero = WalletBalance.fromKeys(<String, int>{});
 
-  final int spend;
-  final int save;
-  final int give;
+  final Map<String, int> _byKey;
+
+  /// Số dư từng hũ, chỉ những hũ đã có giao dịch.
+  Map<String, int> get byKey => Map.unmodifiable(_byKey);
+
+  int ofKey(String jarKey) => _byKey[jarKey] ?? 0;
+  int of(Jar jar) => ofKey(jar.name);
+
+  int get spend => ofKey(kJarSpend);
+  int get save => ofKey(kJarSave);
+  int get give => ofKey(kJarGive);
 
   /// Xu đã kiếm nhưng con chưa chia vào hũ nào — ADR-024, chế độ `manual`.
-  final int inbox;
+  int get inbox => ofKey(kJarInbox);
 
   /// **Tính cả hũ chờ.** Con làm việc xong là xu thuộc về con, dù chưa chia.
   /// Bỏ hũ chờ ra khỏi tổng thì màn hình con hiện 0 điểm sau khi làm xong việc.
-  int get total => spend + save + give + inbox;
+  int get total => _byKey.values.fold(0, (a, b) => a + b);
 
   /// Tổng đã chia — dùng khi cần phân biệt với phần chưa chia.
-  int get allocated => spend + save + give;
-
-  int of(Jar jar) => switch (jar) {
-    Jar.spend => spend,
-    Jar.save => save,
-    Jar.give => give,
-    Jar.inbox => inbox,
-  };
+  int get allocated => total - inbox;
 
   @override
   bool operator ==(Object other) =>
       other is WalletBalance &&
-      other.spend == spend &&
-      other.save == save &&
-      other.give == give &&
-      other.inbox == inbox;
+      const MapEquality<String, int>().equals(other._byKey, _byKey);
 
   @override
-  int get hashCode => Object.hash(spend, save, give, inbox);
+  int get hashCode => const MapEquality<String, int>().hash(_byKey);
 
   @override
-  String toString() =>
-      'WalletBalance(tiêu $spend, để dành $save, cho đi $give, chờ $inbox)';
+  String toString() {
+    final parts = _byKey.entries.map((e) => '${e.key} ${e.value}').join(', ');
+    return 'WalletBalance($parts)';
+  }
 }
 
 /// Lỗi khi thao tác ví.
@@ -86,29 +89,13 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
               ..groupBy([pointTransactions.jar]))
             .get();
 
-    var spend = 0;
-    var save = 0;
-    var give = 0;
-    var inbox = 0;
+    final byKey = <String, int>{};
     for (final row in rows) {
-      final total = row.read(deltaSum) ?? 0;
-      switch (row.read(pointTransactions.jar)) {
-        case 'spend':
-          spend = total;
-        case 'save':
-          save = total;
-        case 'give':
-          give = total;
-        case 'inbox':
-          inbox = total;
-      }
+      final jarKey = row.read(pointTransactions.jar);
+      if (jarKey == null) continue;
+      byKey[jarKey] = row.read(deltaSum) ?? 0;
     }
-    return WalletBalance(
-      spend: spend,
-      save: save,
-      give: give,
-      inbox: inbox,
-    );
+    return WalletBalance.fromKeys(byKey);
   }
 
   /// Theo dõi số dư, phát lại mỗi khi sổ cái đổi.
@@ -116,28 +103,11 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     return (select(
       pointTransactions,
     )..where((t) => t.memberId.equals(memberId))).watch().map((rows) {
-      var spend = 0;
-      var save = 0;
-      var give = 0;
-      var inbox = 0;
+      final byKey = <String, int>{};
       for (final row in rows) {
-        switch (row.jar) {
-          case 'spend':
-            spend += row.delta;
-          case 'save':
-            save += row.delta;
-          case 'give':
-            give += row.delta;
-          case 'inbox':
-            inbox += row.delta;
-        }
+        byKey[row.jar] = (byKey[row.jar] ?? 0) + row.delta;
       }
-      return WalletBalance(
-        spend: spend,
-        save: save,
-        give: give,
-        inbox: inbox,
-      );
+      return WalletBalance.fromKeys(byKey);
     });
   }
 
@@ -231,14 +201,44 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     String? refId,
     String? note,
     String? createdBy,
+  }) => creditToJarKey(
+    familyId: familyId,
+    memberId: memberId,
+    jarKey: jar.name,
+    amount: amount,
+    reason: reason,
+    clientOpId: clientOpId,
+    opGroupId: opGroupId,
+    refType: refType,
+    refId: refId,
+    note: note,
+    createdBy: createdBy,
+  );
+
+  /// Như [creditToJar] nhưng nhận **khoá hũ** dạng chuỗi.
+  ///
+  /// Hũ do bố mẹ tự lập (ADR-024) không có giá trị nào trong `enum Jar` — enum
+  /// chỉ có bốn hũ dựng sẵn — nên mọi đường ghi vào hũ tuỳ ý phải đi qua đây.
+  Future<int> creditToJarKey({
+    required String familyId,
+    required String memberId,
+    required String jarKey,
+    required int amount,
+    required TxReason reason,
+    required String clientOpId,
+    String? opGroupId,
+    String? refType,
+    String? refId,
+    String? note,
+    String? createdBy,
   }) async {
     if (amount <= 0) {
       throw WalletException('Số xu cộng vào phải dương, nhận được $amount');
     }
-    return _insertIfNew(
+    return _insertIfNewKey(
       familyId: familyId,
       memberId: memberId,
-      jar: jar,
+      jarKey: jarKey,
       delta: amount,
       reason: reason,
       clientOpId: clientOpId,
@@ -484,6 +484,34 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     String? refId,
     String? note,
     String? createdBy,
+  }) => _insertIfNewKey(
+    familyId: familyId,
+    memberId: memberId,
+    jarKey: jar.name,
+    delta: delta,
+    reason: reason,
+    clientOpId: clientOpId,
+    opGroupId: opGroupId,
+    refType: refType,
+    refId: refId,
+    note: note,
+    createdBy: createdBy,
+  );
+
+  /// Như [_insertIfNew] nhưng nhận khoá hũ dạng chuỗi, để ghi được vào hũ do bố
+  /// mẹ tự lập (ADR-024) — những hũ không có giá trị trong `enum Jar`.
+  Future<int> _insertIfNewKey({
+    required String familyId,
+    required String memberId,
+    required String jarKey,
+    required int delta,
+    required TxReason reason,
+    required String clientOpId,
+    String? opGroupId,
+    String? refType,
+    String? refId,
+    String? note,
+    String? createdBy,
   }) async {
     // `insertOrIgnore` trả về rowid chứ không phải số dòng thực sự được ghi, nên
     // không dùng nó để suy ra "đã tồn tại hay chưa" được. Kiểm tra tường minh.
@@ -500,7 +528,7 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
         id: clientOpId,
         familyId: familyId,
         memberId: memberId,
-        jar: jar.name,
+        jar: jarKey,
         delta: delta,
         reason: reason.name,
         clientOpId: clientOpId,
