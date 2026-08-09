@@ -96,6 +96,21 @@ test/
 Quy ước: feature **không** import trực tiếp `data/`; chỉ đi qua `domain/repositories`.
 Lint chặn bằng `import_lint` hoặc review.
 
+### 3.1 Hiện trạng so với cây trên
+
+Cây ở trên là **đích**, không phải mã hiện tại. Khác biệt thật, tính đến Sprint 4:
+
+| Tài liệu | Thực tế | Vì sao |
+|---|---|---|
+| `domain/usecases/` | **không tồn tại**; thay bằng `domain/services/` (`TaskReviewService`, `PenaltyService`, `RedemptionService`, `DayStartService`…) | Một service gom cả vòng đời của một khái niệm dễ theo hơn hàng chục lớp một-phương-thức. Ranh giới vẫn thế: không có Flutter, không có Drift-cụ-thể trong chữ ký công khai |
+| `domain/repositories/` | thư mục **rỗng** | Chưa có nguồn dữ liệu thứ hai nên interface chưa trả lời được câu hỏi nào. Phải làm **trước** sync (Sprint 3) |
+| `data/local/daos/` | DAO nằm phẳng ở `data/local/*_dao.dart` | 6 file, chưa cần thêm một tầng thư mục |
+| `data/remote/`, `data/sync/` | chưa tồn tại | Chưa có backend (Sprint 3) |
+| feature không import `data/` | **feature đang import `data/` trực tiếp** | Hệ quả của việc chưa có tầng repository. Đây là món nợ đã ghi, không phải quy ước mới |
+
+Quy ước "không import `data/`" vì vậy **chưa được thi hành** và cũng chưa có lint chặn. Cần dựng
+tầng repository trước, rồi mới bật lint — bật trước thì chỉ tạo ra một rừng `// ignore`.
+
 ## 4. Đồng bộ (SyncEngine)
 
 ### Nguyên tắc

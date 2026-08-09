@@ -3,6 +3,27 @@
 Ước lượng theo **1 dev full-time**. Có 2 dev thì chia Sprint 3–6 song song (một người backend/sync,
 một người UI).
 
+## Trạng thái hiện tại
+
+Cập nhật bằng cách **đọc code**, không tick theo cảm giác — xem quy trình ở
+`.claude/skills/flutter-8-buoc`.
+
+| Sprint | Trạng thái | Ghi chú |
+|---|---|---|
+| 0 — Nền móng | ✅ Xong | Còn pre-commit hook, cố ý hoãn |
+| 1 — Dữ liệu local | ✅ Xong | Trừ **tầng repository** (`lib/domain/repositories/` rỗng) |
+| 2 — Luồng UI cốt lõi | 🟡 Gần xong | Thiếu Task Editor đủ khối, Routine Editor, animation ăn mừng, PIN, integration test |
+| 3 — Backend & ghép cặp | 🔴 Chưa bắt đầu | Pha 0 đã xong 2/4; phần backend chờ dựng Supabase |
+| 4 — Phần thưởng & tài chính | 🟡 Đang làm | Đổi thưởng + duyệt + hoàn xu ✅, trừ xu ✅, con tự chia xu ✅. Thiếu streak/huy hiệu/JarTrio/quản lý hũ |
+| 5 — Thông báo & hoàn thiện | 🔴 Chưa bắt đầu | |
+| 6 — Phát hành v1.0 | 🟡 Hạ tầng sẵn | CI/CD 7 job + Fastlane ✅; chưa có tài khoản store, chưa có icon/ảnh chụp |
+
+**Chặn lớn nhất:** chưa có backend nên chưa ghép cặp được máy con — mà "mỗi bé một máy" là điểm bán
+chính (ADR-021). Mọi thứ khác đang chạy được trên **một** thiết bị.
+
+**Đã làm nhiều hơn kế hoạch ở Sprint 4** vì chủ dự án yêu cầu theo thứ tự khác: trừ xu, duyệt tuỳ
+chọn, đổi thưởng, con tự chia xu đều đã xong trước khi Sprint 3 bắt đầu.
+
 ## Sprint 0 — Nền móng ✅ XONG
 - [x] `flutter create` với 5 platform (ios, android, macos, windows, **linux**)
 - [x] Cấu hình lint (`very_good_analysis`), format
@@ -140,7 +161,7 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
       `requires_approval = false` cho phép tự duyệt
 - [x] Template phần thưởng và nhiệm vụ hiện **ngay trên trang trống**, không chôn trong
       bottom sheet sau nút "+"
-- [ ] `StreakFlame` + màn huy hiệu (8 huy hiệu MVP)
+- [ ] `StreakFlame` + màn huy hiệu (8 huy hiệu MVP) — logic streak đã có và có test, chỉ thiếu UI
 - [ ] `JarTrio` — hiện các hũ của con, số hũ do bố mẹ đặt (ADR-024)
 - [ ] Tỷ giá quy đổi ra tiền thật (mặc định tắt — ADR-017)
 - [ ] Mục tiêu tiết kiệm + thanh tiến độ
@@ -153,8 +174,10 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 - [x] Ẩn tab Cài đặt với vai con, thêm đường đổi người dùng ở avatar
 - [x] **Con tự chia xu** (ADR-024) — công tắc trong Cài đặt, hũ chờ (`Jar.inbox`), banner trên màn
       con, màn "Chia xu vào hũ". Tổng điểm tính cả hũ chờ.
-- [ ] **Hũ do bố mẹ tự lập** (ADR-024) — bảng `jars` và `splitByPlan` đã có, **chưa** nối vào UI:
-      thiếu màn quản lý hũ (thêm/sửa/đổi tỷ lệ/chọn emoji). Màn chia xu hiện dùng ba hũ mặc định.
+- [ ] **Hũ do bố mẹ tự lập** (ADR-024) — 🟡 **đang làm**: bảng `jars`, `JarPlan`, `splitByPlan` và
+      18 test đã có; **chưa** nối vào UI. Thiếu màn quản lý hũ (thêm/sửa/đổi tỷ lệ/chọn emoji), và
+      màn chia xu hiện hard-code ba hũ mặc định thay vì đọc bảng.
+- [ ] Đổi tên `JarTrio` → tên không hàm ý đúng 3 hũ (`JarList`?) trước khi widget này được viết
 - [x] **Trừ xu** (ADR-022) — làm sớm hơn kế hoạch: cấu hình hai mức ở cấp gia đình, nút "mở lại"
       trong hàng đợi duyệt, khoản trừ cuối ngày cho việc bỏ. Mặc định tắt.
 - [x] Trừ xu: cho phép tự nhập mức % bất kỳ (chip "Khác…")
@@ -172,6 +195,10 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 - [ ] Rà soát khả dụng (TalkBack/VoiceOver, contrast, text scale)
 
 ## Sprint 6 — Phát hành v1.0 (1 tuần)
+
+> **Hạ tầng đã sẵn, tài khoản thì chưa.** `.github/workflows/release.yml` + Fastlane cho cả hai store
+> đã viết và CI 7 job đang xanh, nhưng chưa có tài khoản Apple Developer / Google Play, chưa có
+> secret nào được nạp. Hướng dẫn từng bước ở `08-release-cicd.md`.
 - [ ] Icon app, splash, ảnh chụp store
 - [ ] Chính sách quyền riêng tư + điều khoản (bắt buộc cho app trẻ em)
 - [ ] Khai báo store: **không mua trong app, không quảng cáo** (ADR-014)

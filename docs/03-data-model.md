@@ -131,7 +131,7 @@ của các task đó không dùng đến.
 | cost_points | int | |
 | meta_json | jsonb | trường riêng theo loại: `{minutes}` hoặc `{amount, currency}` |
 | stock | int NULL | NULL = không giới hạn |
-| requires_approval | bool | mặc định true |
+| requires_approval | bool | **không còn được đọc** từ ADR-025: mọi lượt đổi thưởng đều phải bố mẹ duyệt. Cột giữ lại để không phá dữ liệu cũ |
 | active, deleted_at, version | | |
 
 ### redemptions
@@ -301,16 +301,17 @@ create policy tasks_rw on tasks
 
 - Drift: `schemaVersion` tăng dần, mỗi bước có test dựng DB phiên bản cũ rồi migrate.
   Test: `test/unit/data/migration_test.dart`.
-  - v1 → v2: thêm `device_settings`.
-  - v5 → v6: thêm `point_transactions.op_group_id` — nhóm các dòng của cùng một thao tác để
-    "Sổ của con" hiện một việc thành **một** mục. Dòng cũ để NULL, tầng hiển thị lấy `id` làm nhóm;
-    **không backfill** vì suy ngược từ `client_op_id` không đáng tin.
-  - v4 → v5: thêm bảng `jars` + `families.allocation_mode` (ADR-024). Không sửa một dòng
-    `point_transactions` nào.
-  - v3 → v4: thêm `families.require_approval` (ADR-023). Default `false`, nên gia đình nâng cấp từ
-    bản cũ **đổi hành vi** — đây là đổi có chủ ý, có test chốt.
+  Phiên bản hiện tại: **6**.
+  - v1 → v2: thêm `device_settings` (lưu session + khoá "đã chạy đầu ngày").
   - v2 → v3: thêm `families.missed_penalty_pct`, `families.reopen_penalty_pct`,
     `task_instances.reopen_count`, `task_instances.missed_penalty_at` (ADR-022). Mọi cột có
     default 0/NULL nên **nâng cấp không tự bật trừ xu** — có test khẳng định điều này.
+  - v3 → v4: thêm `families.require_approval` (ADR-023). Default `false`, nên gia đình nâng cấp từ
+    bản cũ **đổi hành vi** — đây là đổi có chủ ý, có test chốt.
+  - v4 → v5: thêm bảng `jars` + `families.allocation_mode` (ADR-024). Không sửa một dòng
+    `point_transactions` nào.
+  - v5 → v6: thêm `point_transactions.op_group_id` — nhóm các dòng của cùng một thao tác để
+    "Sổ của con" hiện một việc thành **một** mục. Dòng cũ để NULL, tầng hiển thị lấy `id` làm nhóm;
+    **không backfill** vì suy ngược từ `client_op_id` không đáng tin.
 - Supabase: file SQL đánh số trong `supabase/migrations/`, chạy qua CLI trong CI.
 - Quy tắc: chỉ thêm cột nullable hoặc có default; đổi tên = thêm mới + backfill + xóa ở release sau.

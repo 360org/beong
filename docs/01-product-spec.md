@@ -61,8 +61,10 @@ Phân tích đối thủ đầy đủ: [`07-competitive-analysis.md`](07-competi
 2. Tạo task: preset hoặc tự nhập, điểm, lặp (Once/Daily/Custom theo thứ), buổi trong ngày
 3. **Routines** — gom nhiều task thành một thói quen có thứ tự (Buổi sáng, Trước khi ngủ, Dọn nhà)
 4. Gán task/routine cho một hoặc nhiều trẻ
-5. Trẻ đánh dấu hoàn thành → trạng thái *chờ duyệt* hoặc *tự động duyệt* (tùy cấu hình task)
-6. Phụ huynh duyệt/từ chối; điểm cộng vào ví của trẻ
+5. Trẻ đánh dấu hoàn thành → **xong luôn và cộng xu ngay** (mặc định, ADR-023); nhà nào bật
+   `require_approval` thì vào hàng đợi *chờ duyệt*
+6. Nếu bật duyệt: phụ huynh duyệt/từ chối rồi điểm mới cộng vào ví. Nếu tắt: phụ huynh **mở lại**
+   việc con bấm xong mà chưa làm (trừ xu theo ADR-022)
 7. Kho phần thưởng **có phân loại** (screen time / tiền tiêu vặt / trải nghiệm / đồ vật / tùy chỉnh);
    trẻ đổi → yêu cầu chờ duyệt
 8. **Streak ngày** + 8 huy hiệu cơ bản
@@ -190,7 +192,8 @@ Quy tắc bắt buộc (chi tiết và lý do ở ADR-022):
 > tuỳ chọn (ADR-023). Làm xong một việc chỉ làm một con số tăng lên; đổi thưởng thì tiêu xu ra thế
 > giới thật và không có đường "mở lại".
 
-- Phụ huynh tạo: tên, icon, **loại**, giá điểm, số lượng còn (tùy chọn), có cần duyệt không
+- Phụ huynh tạo: tên, icon, **loại**, giá điểm, số lượng còn (tùy chọn). Không có ô "cần duyệt
+  không" — duyệt là bắt buộc (ADR-025)
 - Trẻ đổi → `redemption` trạng thái `pending` → phụ huynh `fulfilled` / `rejected` (hoàn điểm)
 
 **Phân loại (`reward_type`)** — quyết định UI và cách phụ huynh thực hiện:
