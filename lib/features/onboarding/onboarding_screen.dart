@@ -147,6 +147,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
         );
 
+    // Sinh việc cho hôm nay ngay, `force` vì routine vừa được tạo xong: chờ tới
+    // lần mở app sau thì bố mẹ thấy "0 / 0 việc hôm nay" ngay sau onboarding.
+    await ref
+        .read(dayStartServiceProvider)
+        .runIfNeeded(familyId: familyId, force: true);
+
     if (mounted) context.go('/');
   }
 

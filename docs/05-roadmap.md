@@ -82,8 +82,8 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
 > tải hồ sơ về → đồng bộ) không chạy được, và v1.0 không phát hành được.
 
 **Pha 0 — gỡ chặn, làm trước tiên và không cần backend:**
-- [ ] Sinh `task_instances` lúc **mở app** và khi đổi ngày, không chỉ khi bấm nút ở màn hình con
-      (`03-data-model.md` §3 đã tả đúng, code chưa làm — bố mẹ đang thấy "0 / 0 việc hôm nay")
+- [x] Sinh `task_instances` lúc **mở app**, khi quay lại app, và sau onboarding —
+      `DayStartService`, có khoá một-lần-mỗi-ngày
 - [x] **Lưu session bền vững** — `device_settings` + `SessionStore` (làm trước, ngoài kế hoạch)
 - [ ] Màn chọn vai Bố mẹ / Con ở lần mở đầu, ghi nhớ vĩnh viễn (ADR-018)
 - [ ] Tách điều hướng theo vai; onboarding tách hai nhánh
@@ -94,8 +94,8 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
 - [ ] Routine Editor + kéo thả thứ tự
 - [ ] Animation ăn mừng — nối `KidScale.celebrateOnTap`, hiện là cờ chết
 - [ ] PIN phụ huynh (chỉ có cột `pin_hash`, chưa có UI/logic)
-- [ ] Gộp ba dòng sổ cái của cùng một giao dịch khi hiện trong "Sổ của con", và hiện **tên việc**
-      thay vì chữ "Hoàn thành việc" chung cho mọi dòng
+- [x] Gộp các dòng sổ cái của cùng một giao dịch trong "Sổ của con" (`op_group_id`), hiện **tên
+      việc / tên phần thưởng** và chi tiết từng hũ
 - [ ] `integration_test/` cho luồng đầy đủ
 
 **Backend & tài khoản:**

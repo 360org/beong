@@ -228,9 +228,10 @@ phần chưa xử lý, và **không trừ hồi tố** khi bố mẹ bật tính
 
 Chạy khi: mở app, đổi ngày, sửa task.
 
-> **Lệch với code hiện tại:** `TaskDao.generateInstances` chỉ được gọi từ nút "Tạo việc hôm nay"
-> trên màn hình con, không chạy lúc mở app. Hệ quả thấy được: bố mẹ mở app sau khi tạo routine thì
-> thấy "0 / 0 việc hôm nay", tưởng routine chưa lưu. Việc còn lại nằm ở `05-roadmap.md` Sprint 3.
+Nơi gọi: `DayStartService.runIfNeeded` — chạy lúc **mở app** (trong `main`, sau khi nạp session),
+lúc app **quay lại từ nền** (ngày có thể đã đổi khi máy để qua đêm), và ngay **sau onboarding**
+(`force: true`, vì routine vừa tạo cần có việc ngay). Có khoá theo ngày trong `device_settings`
+(`rollover.last_run_date`) nên gọi nhiều lần chỉ thực sự chạy một lần mỗi ngày.
 
 ```
 Với mỗi task active của family:
@@ -301,6 +302,9 @@ create policy tasks_rw on tasks
 - Drift: `schemaVersion` tăng dần, mỗi bước có test dựng DB phiên bản cũ rồi migrate.
   Test: `test/unit/data/migration_test.dart`.
   - v1 → v2: thêm `device_settings`.
+  - v5 → v6: thêm `point_transactions.op_group_id` — nhóm các dòng của cùng một thao tác để
+    "Sổ của con" hiện một việc thành **một** mục. Dòng cũ để NULL, tầng hiển thị lấy `id` làm nhóm;
+    **không backfill** vì suy ngược từ `client_op_id` không đáng tin.
   - v4 → v5: thêm bảng `jars` + `families.allocation_mode` (ADR-024). Không sửa một dòng
     `point_transactions` nào.
   - v3 → v4: thêm `families.require_approval` (ADR-023). Default `false`, nên gia đình nâng cấp từ

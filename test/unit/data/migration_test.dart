@@ -36,6 +36,11 @@ void main() {
         .insert(FamiliesCompanion.insert(id: 'fam-1', name: 'Nhà mình'));
 
     // Bỏ dần những gì phiên bản sau đã thêm, từ mới nhất về cũ nhất.
+    if (version < 6) {
+      await db.customStatement(
+        'ALTER TABLE point_transactions DROP COLUMN op_group_id',
+      );
+    }
     if (version < 5) {
       await db.customStatement('DROP TABLE jars');
       await db.customStatement(
@@ -110,6 +115,30 @@ void main() {
     final family = await db.select(db.families).getSingle();
     expect(family.missedPenaltyPct, 0);
     expect(family.reopenPenaltyPct, 0);
+  });
+
+  test('v5 -> v6 thêm cột nhóm sổ cái, dòng cũ để NULL', () async {
+    await seedAtVersion(5);
+    final db = await openCurrent();
+
+    // Không backfill: suy ngược `op_group_id` từ `client_op_id` không đáng tin,
+    // nên dòng cũ để NULL và tầng hiển thị lấy `id` làm nhóm.
+    await db
+        .into(db.pointTransactions)
+        .insert(
+          PointTransactionsCompanion.insert(
+            id: 'tx-1',
+            familyId: 'fam-1',
+            memberId: 'con-1',
+            jar: 'spend',
+            delta: 5,
+            reason: 'bonus',
+            clientOpId: 'tx-1',
+          ),
+        );
+
+    final row = await db.select(db.pointTransactions).getSingle();
+    expect(row.opGroupId, isNull);
   });
 
   test('v4 -> v5 tạo bảng hũ và giữ mặc định chia tự động', () async {

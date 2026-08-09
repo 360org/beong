@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:beong/app/router.dart';
 import 'package:beong/core/l10n/gen/app_localizations.dart';
+import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/app_typography.dart';
@@ -33,7 +36,8 @@ class BeOngApp extends ConsumerStatefulWidget {
   ConsumerState<BeOngApp> createState() => _BeOngAppState();
 }
 
-class _BeOngAppState extends ConsumerState<BeOngApp> {
+class _BeOngAppState extends ConsumerState<BeOngApp>
+    with WidgetsBindingObserver {
   final _sessionNotifier = _SessionChangeNotifier();
   late final GoRouter _router = createRouter(
     getSession: () => ref.read(sessionProvider),
@@ -41,9 +45,31 @@ class _BeOngAppState extends ConsumerState<BeOngApp> {
   );
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _sessionNotifier.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state != AppLifecycleState.resumed) return;
+
+    // Ngày của gia đình có thể đã đổi trong lúc app ngủ — điện thoại để qua đêm
+    // là ca thường gặp nhất, không phải ngoại lệ. `runIfNeeded` tự bỏ qua nếu
+    // hôm nay đã chạy, nên gọi mỗi lần quay lại app là vô hại.
+    final session = ref.read(sessionProvider);
+    if (session == null) return;
+    unawaited(
+      ref.read(dayStartServiceProvider).runIfNeeded(familyId: session.familyId),
+    );
   }
 
   @override

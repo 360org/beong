@@ -173,6 +173,9 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
           delta: entry.value,
           reason: reason,
           clientOpId: '$clientOpId:${entry.key.name}',
+          // Ba dòng của cùng một lần cộng chung một nhóm, để "Sổ của con" hiện
+          // một mục thay vì ba.
+          opGroupId: clientOpId,
           refType: refType,
           refId: refId,
           note: note,
@@ -278,6 +281,7 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
           delta: -take,
           reason: TxReason.penalty,
           clientOpId: '$clientOpId:${jar.name}',
+          opGroupId: clientOpId,
           refType: refType,
           refId: refId,
           note: note,
@@ -337,7 +341,9 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     });
   }
 
-  /// Lịch sử giao dịch cho màn "Sổ của con" — mới nhất trước.
+  /// Lịch sử giao dịch thô, **mỗi hũ một dòng** — mới nhất trước.
+  ///
+  /// Màn hình nên dùng `watchGroupedHistory` để trẻ thấy một việc là một mục.
   ///
   /// Không có tham số nào giới hạn thời gian: trẻ xem lại được từ ngày đầu tiên.
   Stream<List<PointTransaction>> watchHistory(String memberId, {Jar? jar}) {
@@ -360,6 +366,7 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     required int delta,
     required TxReason reason,
     required String clientOpId,
+    String? opGroupId,
     String? refType,
     String? refId,
     String? note,
@@ -384,6 +391,7 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
         delta: delta,
         reason: reason.name,
         clientOpId: clientOpId,
+        opGroupId: Value(opGroupId),
         refType: Value(refType),
         refId: Value(refId),
         note: Value(note),
@@ -393,4 +401,92 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     );
     return 1;
   }
+}
+
+/// Một mục lịch sử đã gộp — xem `WalletHistory.watchGroupedHistory`.
+@immutable
+class LedgerEntry {
+  const LedgerEntry({
+    required this.groupId,
+    required this.reason,
+    required this.delta,
+    required this.createdAt,
+    required this.byJar,
+    this.refType,
+    this.refId,
+    this.note,
+  });
+
+  final String groupId;
+
+  /// `TxReason` dạng chuỗi.
+  final String reason;
+
+  /// Tổng thay đổi của cả thao tác, cộng dồn các hũ.
+  final int delta;
+
+  final DateTime createdAt;
+
+  /// Chi tiết từng hũ, để mở ra xem khi cần.
+  final Map<String, int> byJar;
+
+  final String? refType;
+  final String? refId;
+  final String? note;
+
+  @override
+  String toString() => 'LedgerEntry($reason $delta, ${byJar.length} hũ)';
+}
+
+extension WalletHistory on WalletDao {
+  /// Lịch sử **đã gộp** cho "Sổ của con".
+  ///
+  /// Sổ cái ghi mỗi hũ một dòng (ADR-016), nên một việc 10 xu thành ba dòng
+  /// (+5, +4, +1). Đúng về kế toán, nhưng hiện thẳng ra cho trẻ thì thành "làm
+  /// một việc sao lại ba mục?". Hàm này gộp theo `op_group_id`, rơi về `id` với
+  /// dòng cũ ghi trước v6.
+  ///
+  /// Gộp ở tầng Dart chứ không bằng GROUP BY: cần giữ chi tiết từng hũ để màn
+  /// hình mở ra xem được, và số dòng một trẻ có trong một ngày là hàng chục,
+  /// không phải hàng vạn.
+  Stream<List<LedgerEntry>> watchGroupedHistory(String memberId) {
+    return watchHistory(memberId).map(groupLedgerRows);
+  }
+}
+
+/// Gộp các dòng sổ cái theo thao tác. Hàm thuần để test được không cần DB.
+List<LedgerEntry> groupLedgerRows(List<PointTransaction> rows) {
+  final order = <String>[];
+  final buckets = <String, List<PointTransaction>>{};
+
+  for (final row in rows) {
+    final key = row.opGroupId ?? row.id;
+    if (!buckets.containsKey(key)) {
+      buckets[key] = [];
+      order.add(key);
+    }
+    buckets[key]!.add(row);
+  }
+
+  return [
+    for (final key in order)
+      () {
+        final group = buckets[key]!;
+        final first = group.first;
+        return LedgerEntry(
+          groupId: key,
+          reason: first.reason,
+          delta: group.fold(0, (sum, r) => sum + r.delta),
+          // Mốc thời gian sớm nhất trong nhóm: ba dòng ghi trong cùng một
+          // transaction nhưng `currentDateAndTime` có thể lệch nhau một giây.
+          createdAt: group
+              .map((r) => r.createdAt)
+              .reduce((a, b) => a.isBefore(b) ? a : b),
+          byJar: {for (final r in group) r.jar: r.delta},
+          refType: first.refType,
+          refId: first.refId,
+          note: first.note,
+        );
+      }(),
+  ];
 }

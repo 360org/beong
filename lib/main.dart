@@ -1,4 +1,5 @@
 import 'package:beong/app/app.dart';
+import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +17,20 @@ Future<void> main() async {
   final restored = await container.read(sessionStoreProvider).load();
   if (restored != null) {
     container.read(sessionProvider.notifier).restore(restored);
+
+    // Sinh việc cho hôm nay **trước khung hình đầu** (`03-data-model.md` §3).
+    // Không có bước này, bố mẹ mở app thấy "0 / 0 việc hôm nay" dù đã tạo
+    // routine, và lượt quá hạn không bao giờ được đánh dấu bỏ lỡ.
+    //
+    // Lỗi ở đây không được chặn app khởi động: hỏng bộ lập lịch thì tệ, nhưng
+    // không mở được app thì tệ hơn.
+    try {
+      await container
+          .read(dayStartServiceProvider)
+          .runIfNeeded(familyId: restored.familyId);
+    } on Exception catch (error, stack) {
+      debugPrint('Không chạy được bộ sinh việc đầu ngày: $error\n$stack');
+    }
   }
 
   runApp(

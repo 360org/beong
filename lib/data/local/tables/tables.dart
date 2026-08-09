@@ -237,6 +237,20 @@ class PointTransactions extends Table with FamilyScoped {
   /// Idempotency: gửi lại cùng một thao tác không nhân đôi xu.
   TextColumn get clientOpId => text()();
 
+  /// Nhóm các dòng sinh ra từ **cùng một thao tác**.
+  ///
+  /// Cộng 10 xu tạo ra ba dòng (một hũ một dòng — ADR-016), cả ba dùng chung
+  /// `op_group_id`. Không có cột này thì "Sổ của con" hiện một việc thành ba
+  /// dòng rời (+5, +4, +1) và trẻ không hiểu vì sao làm một việc lại ra ba mục.
+  ///
+  /// Suy từ `client_op_id` bằng cách cắt hậu tố tên hũ là **không đáng tin**:
+  /// hậu tố là khoá hũ do bố mẹ đặt (ADR-024) nên có thể chứa dấu hai chấm, và
+  /// thao tác một dòng (`debit`) không có hậu tố nào.
+  ///
+  /// NULL với dòng cũ ghi trước v6 và với thao tác chỉ có một dòng; lúc đó lấy
+  /// `id` làm nhóm.
+  TextColumn get opGroupId => text().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 

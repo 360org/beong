@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
@@ -5,6 +7,8 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/member_dao.dart';
+import 'package:beong/data/local/reward_dao.dart';
+import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +24,8 @@ class StatsScreen extends ConsumerWidget {
 
     final memberDao = ref.watch(memberDaoProvider);
     final walletDao = ref.watch(walletDaoProvider);
+    final taskDao = ref.watch(taskDaoProvider);
+    final rewardDao = ref.watch(rewardDaoProvider);
 
     if (session.isParent) {
       return _ParentStats(
@@ -33,6 +39,8 @@ class StatsScreen extends ConsumerWidget {
       memberId: session.activeMemberId,
       walletDao: walletDao,
       memberDao: memberDao,
+      taskDao: taskDao,
+      rewardDao: rewardDao,
     );
   }
 }
@@ -139,11 +147,15 @@ class _ChildStats extends StatelessWidget {
     required this.memberId,
     required this.walletDao,
     required this.memberDao,
+    required this.taskDao,
+    required this.rewardDao,
   });
 
   final String memberId;
   final WalletDao walletDao;
   final MemberDao memberDao;
+  final TaskDao taskDao;
+  final RewardDao rewardDao;
 
   @override
   Widget build(BuildContext context) {
@@ -176,8 +188,9 @@ class _ChildStats extends StatelessWidget {
           const SizedBox(height: AppSpacing.xxl),
           Text('Lịch sử', style: context.text.titleMedium),
           const SizedBox(height: AppSpacing.md),
-          StreamBuilder<List<PointTransaction>>(
-            stream: walletDao.watchHistory(memberId),
+          StreamBuilder<List<LedgerEntry>>(
+            // Đã gộp: một việc là **một** mục, không phải ba dòng theo hũ.
+            stream: walletDao.watchGroupedHistory(memberId),
             builder: (context, snap) {
               final txns = snap.data ?? [];
               if (txns.isEmpty) {
@@ -194,7 +207,17 @@ class _ChildStats extends StatelessWidget {
                 );
               }
               return Column(
-                children: txns.map((tx) => _TransactionTile(tx: tx)).toList(),
+                children: [
+                  for (final tx in txns)
+                    _TransactionTile(
+                      // Key theo nhóm: thiếu key thì State bị tái dùng theo vị
+                      // trí và dòng hiện tên của giao dịch cũ.
+                      key: ValueKey(tx.groupId),
+                      tx: tx,
+                      taskDao: taskDao,
+                      rewardDao: rewardDao,
+                    ),
+                ],
               );
             },
           ),
@@ -320,14 +343,77 @@ class _StreakCard extends StatelessWidget {
   }
 }
 
-class _TransactionTile extends StatelessWidget {
-  const _TransactionTile({required this.tx});
+/// Một mục trong Sổ của con.
+///
+/// Hiện **tên việc / tên phần thưởng** chứ không chỉ "Hoàn thành việc": trước
+/// đây mọi dòng đều mang cùng một chữ, nên sổ chín việc trông như chín dòng
+/// giống hệt nhau và trẻ không tra được xu đến từ đâu.
+class _TransactionTile extends StatefulWidget {
+  const _TransactionTile({
+    required this.tx,
+    required this.taskDao,
+    required this.rewardDao,
+    super.key,
+  });
 
-  final PointTransaction tx;
+  final LedgerEntry tx;
+  final TaskDao taskDao;
+  final RewardDao rewardDao;
+
+  @override
+  State<_TransactionTile> createState() => _TransactionTileState();
+}
+
+class _TransactionTileState extends State<_TransactionTile> {
+  String? _subject;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadSubject());
+  }
+
+  @override
+  void didUpdateWidget(_TransactionTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.tx.refId != widget.tx.refId) unawaited(_loadSubject());
+  }
+
+  /// Tra tên của thứ giao dịch này nói về.
+  ///
+  /// Không tra được thì để `null` và chỉ hiện nhãn theo lý do — dữ liệu cũ hoặc
+  /// việc đã bị xoá không được làm dòng lịch sử biến mất.
+  Future<void> _loadSubject() async {
+    final tx = widget.tx;
+    final refId = tx.refId;
+    if (refId == null) return;
+
+    String? name;
+    switch (tx.refType) {
+      case 'task_instance':
+        final instance = await widget.taskDao.getInstanceById(refId);
+        if (instance != null) {
+          name = (await widget.taskDao.getTaskById(instance.taskId)).title;
+        }
+      case 'reward':
+        name = (await widget.rewardDao.getReward(refId))?.title;
+      case 'redemption':
+        final redemption = await widget.rewardDao.getRedemption(refId);
+        if (redemption != null) {
+          name = (await widget.rewardDao.getReward(redemption.rewardId))?.title;
+        }
+      default:
+        name = null;
+    }
+
+    if (mounted && name != null) setState(() => _subject = name);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final tx = widget.tx;
     final isPositive = tx.delta > 0;
+    final subject = _subject;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -350,16 +436,21 @@ class _TransactionTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _reasonLabel(tx.reason),
+                      subject ?? _reasonLabel(tx.reason),
                       style: context.text.bodyMedium,
                     ),
-                    if (tx.note != null)
-                      Text(
-                        tx.note!,
-                        style: context.text.bodySmall?.copyWith(
-                          color: context.semantic.onSurfaceMuted,
-                        ),
+                    Text(
+                      // Dòng phụ: lý do + chi tiết hũ. Trẻ thấy được 10 xu đã
+                      // chia đi đâu mà không phải mở thêm màn nào.
+                      [
+                        if (subject != null) _reasonLabel(tx.reason),
+                        if (tx.note != null) tx.note!,
+                        if (tx.byJar.length > 1) _jarBreakdown(tx.byJar),
+                      ].join(' · '),
+                      style: context.text.bodySmall?.copyWith(
+                        color: context.semantic.onSurfaceMuted,
                       ),
+                    ),
                   ],
                 ),
               ),
@@ -378,6 +469,35 @@ class _TransactionTile extends StatelessWidget {
       ),
     );
   }
+
+  /// "Tiêu 5, Để dành 4, Cho đi 1" — gọn, không cần mở thêm.
+  ///
+  /// Thứ tự **cố định**, không theo thứ tự dòng trả về từ DB: thứ tự đổi giữa
+  /// các mục làm sổ trông như dữ liệu lộn xộn, dù số vẫn đúng.
+  String _jarBreakdown(Map<String, int> byJar) {
+    const order = ['spend', 'save', 'give'];
+    final keys = [
+      ...order.where(byJar.containsKey),
+      // Hũ do bố mẹ tự lập (ADR-024) xếp sau, theo thứ tự chữ cái cho ổn định.
+      ...byJar.keys.where((k) => !order.contains(k)).toList()..sort(),
+    ];
+
+    final parts = <String>[];
+    for (final key in keys) {
+      final value = byJar[key] ?? 0;
+      if (value == 0) continue;
+      parts.add('${_jarLabel(key)} ${value.abs()}');
+    }
+    return parts.join(', ');
+  }
+
+  String _jarLabel(String jarKey) => switch (jarKey) {
+    'spend' => 'Tiêu',
+    'save' => 'Để dành',
+    'give' => 'Cho đi',
+    // Hũ do bố mẹ tự lập (ADR-024): chưa tra được tên nên hiện khoá.
+    _ => jarKey,
+  };
 
   IconData _reasonIcon(String reason) => switch (reason) {
     'taskApproved' => Icons.check_circle_outline,

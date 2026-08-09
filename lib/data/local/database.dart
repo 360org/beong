@@ -38,7 +38,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -57,6 +57,12 @@ class AppDatabase extends _$AppDatabase {
       }
       // v2 -> v3: cấu hình trừ xu (ADR-022). Mọi cột đều có default nên gia
       // đình đang dùng bản cũ nâng lên là **tắt** trừ xu, không tự bật.
+      // v5 -> v6: nhóm các dòng sổ cái của cùng một thao tác. Dòng cũ để NULL
+      // và lấy `id` làm nhóm — không backfill, vì suy ngược từ `client_op_id`
+      // không đáng tin (xem doc của cột).
+      if (from < 6) {
+        await m.addColumn(pointTransactions, pointTransactions.opGroupId);
+      }
       // v4 -> v5: hũ thành bảng + chế độ chia xu (ADR-024). Không di trú
       // `point_transactions`: ba hũ mặc định dùng đúng key cũ.
       if (from < 5) {
