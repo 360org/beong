@@ -416,26 +416,22 @@ class _DashboardCard extends StatelessWidget {
                       // cạnh con số, thêm vào nhãn là lặp lại lần thứ ba.
                       label: 'XU',
                       onTap: unallocated > 0 ? onAllocate : null,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          XuBadgeStat(amount: points),
-                          if (unallocated > 0) ...[
-                            const SizedBox(width: AppSpacing.sm),
-                            // Phần chưa chia là **một phần của** tổng ở trên,
-                            // không phải số cộng thêm — dấu ngoặc và mũi nhọn
-                            // nói điều đó mà không cần thêm chữ.
-                            Text(
-                              '($unallocated chưa chia ›)',
+                      // Xuống dòng riêng, không nằm cạnh con số: đứng cùng dòng
+                      // thì hai con số dính nhau và ô bị chật ở 412dp.
+                      //
+                      // Đặt **dưới** nhãn "XU" để đọc theo thứ tự: bao nhiêu →
+                      // đơn vị gì → còn bao nhiêu chưa chia.
+                      footer: unallocated > 0
+                          ? Text(
+                              '$unallocated chưa chia ›',
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: Colors.white.withValues(alpha: 0.9),
+                                color: Colors.white.withValues(alpha: 0.92),
                               ),
-                            ),
-                          ],
-                        ],
-                      ),
+                            )
+                          : null,
+                      child: XuBadgeStat(amount: points),
                     ),
                     if (scale.showStreakFlame) ...[
                       const SizedBox(height: AppSpacing.sm),
@@ -520,10 +516,18 @@ class _BusyBeeBadge extends StatelessWidget {
 }
 
 class _StatTile extends StatelessWidget {
-  const _StatTile({required this.child, required this.label, this.onTap});
+  const _StatTile({
+    required this.child,
+    required this.label,
+    this.onTap,
+    this.footer,
+  });
 
   final Widget child;
   final String label;
+
+  /// Dòng phụ dưới nhãn. Null = ô chỉ có số và nhãn.
+  final Widget? footer;
 
   /// Bấm được thì ô thành nút. Null = chỉ để đọc.
   final VoidCallback? onTap;
@@ -570,6 +574,10 @@ class _StatTile extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.85),
             ),
           ),
+          if (footer != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            footer!,
+          ],
         ],
       ),
     );
