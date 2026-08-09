@@ -4,6 +4,8 @@ import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/member_dao.dart';
@@ -289,13 +291,13 @@ class _JarOverview extends ConsumerWidget {
           for (final jar in jars)
             _JarCard(
               label: jar.title,
-              emoji: jar.emoji,
+              iconKey: iconKeyForEmoji(jar.emoji),
               amount: balance.ofKey(jar.key),
             ),
           if (balance.inbox > 0)
             _JarCard(
               label: 'Chờ chia',
-              emoji: '📥',
+              iconKey: 'jar_inbox',
               amount: balance.inbox,
             ),
         ];
@@ -325,15 +327,15 @@ class _JarCard extends StatelessWidget {
   const _JarCard({
     required this.label,
     required this.amount,
-    required this.emoji,
+    required this.iconKey,
   });
 
   final String label;
   final int amount;
 
-  /// Emoji của hũ, do bố mẹ chọn. Thay cho bộ icon cứng ba hũ trước đây — hũ tự
-  /// lập không có icon nào trong bộ đó.
-  final String emoji;
+  /// Khoá icon của hũ, suy từ emoji bố mẹ đã chọn. Thay cho bộ icon cứng ba hũ
+  /// trước đây — hũ tự lập không có icon nào trong bộ đó.
+  final String iconKey;
 
   @override
   Widget build(BuildContext context) {
@@ -342,7 +344,7 @@ class _JarCard extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 22)),
+            AppIcon(iconKey, size: 26),
             const SizedBox(height: AppSpacing.sm),
             XuBadge(amount: amount),
             const SizedBox(height: AppSpacing.xs),

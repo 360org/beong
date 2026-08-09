@@ -4,7 +4,7 @@ import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
-import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
@@ -180,10 +180,7 @@ class _RewardCard extends StatelessWidget {
                 color: context.colors.primaryContainer,
                 borderRadius: BorderRadius.circular(AppRadius.field),
               ),
-              child: Text(
-                iconForKey(reward.iconKey),
-                style: const TextStyle(fontSize: 24),
-              ),
+              child: AppIcon.task(reward.iconKey, size: 26),
             ),
             const SizedBox(width: AppSpacing.lg),
             Expanded(
@@ -357,7 +354,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('🎁', style: TextStyle(fontSize: 56)),
+            const AppIcon('jar_gift', size: 60),
             const SizedBox(height: AppSpacing.xl),
             Text(
               'Chưa có phần thưởng nào',
@@ -438,10 +435,7 @@ class _PresetSuggestions extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        iconForKey(preset.iconKey),
-                        style: const TextStyle(fontSize: 18),
-                      ),
+                      AppIcon.task(preset.iconKey, size: 20),
                       const SizedBox(width: AppSpacing.sm),
                       Text(
                         preset.titleVi,
@@ -539,7 +533,7 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
               children: kRewardPresets.map((preset) {
                 final selected = _selectedPreset == preset.key;
                 return PresetChip(
-                  emoji: iconForKey(preset.iconKey),
+                  iconKey: preset.iconKey,
                   label: preset.titleVi,
                   selected: selected,
                   onTap: () {

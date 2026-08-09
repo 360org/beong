@@ -118,7 +118,7 @@ Không lục giác hoá nút bấm, avatar hay ô nhập — vùng chạm phải
 | `RoutineProgressRing` | Vòng tròn tiến độ routine; đầy 100% → hiệu ứng phát sáng + hiện điểm bonus |
 | `RewardCard` | Icon theo `reward_type` + tên + giá gem; nếu chưa đủ điểm hiện "còn thiếu 30 💎" |
 | `XuBadge` | Đồng xu vàng + số; nếu gia đình bật quy đổi thì hiện thêm `≈ 35.000đ` cỡ nhỏ |
-| `JarTrio` | Các hũ của con, mỗi hũ một cột mật đầy dần. Số hũ là **dữ liệu**, không cố định 3 (ADR-024) — widget phải chịu được 1 hũ hoặc 6 hũ, và mỗi hũ hiện emoji của nó |
+| `JarTrio` | Các hũ của con, mỗi hũ một cột mật đầy dần. Số hũ là **dữ liệu**, không cố định 3 (ADR-024) — widget phải chịu được 1 hũ hoặc 6 hũ, và mỗi hũ hiện icon của nó |
 | `GoalCard` | Ảnh món con muốn + thanh tiến độ + "còn 120 xu nữa" |
 | `StreakFlame` | Ngọn lửa + số ngày; xám khi streak = 0; nhấp nháy nhẹ khi hôm nay chưa đạt |
 | `BadgeGrid` | Lưới huy hiệu, cái chưa đạt hiện dạng bóng mờ + điều kiện đạt |
@@ -128,7 +128,40 @@ Không lục giác hoá nút bấm, avatar hay ô nhập — vùng chạm phải
 
 ## 5. Icon & preset
 
-24 preset MVP, mỗi cái có `preset_key`, emoji/illustration, điểm mặc định:
+### Bộ icon: Fluent Emoji (MIT), vẽ từ asset
+
+Icon vẽ từ **asset PNG** trong `assets/icons/` qua `AppIcon`, **không** dùng emoji
+của hệ thống nữa. Chi tiết và cách thêm icon: `assets/icons/README.md`.
+
+Lý do đổi — emoji hệ thống có ba vấn đề thật:
+
+1. **Mỗi nền tảng vẽ một kiểu**, và máy thiếu glyph thì hiện ô vuông ▯. Không
+   kiểm soát được thứ trẻ nhìn thấy, trong khi đây là app mà trẻ đọc hình trước
+   khi đọc chữ.
+2. **Ảnh chụp store** sẽ mang emoji của máy build, không giống máy người dùng.
+3. Emoji hệ thống thường phẳng; bộ 3D tròn và có khối, đúng tinh thần
+   `00-brand-values.md`.
+
+Chọn **Fluent Emoji** vì giấy phép **MIT** — chỉ cần giữ kèm bản quyền, không
+phải ghi công trong app. Twemoji (CC-BY), OpenMoji (CC BY-SA) và Noto (OFL/Apache)
+đều buộc ghi công, riêng OpenMoji còn thêm ShareAlike.
+
+Quy ước:
+
+- Tên file = `iconKey` trong `lib/core/theme/task_icons.dart`, **không** phải tên
+  gốc của Fluent. Nhờ vậy đổi bộ icon về sau chỉ là thay file, không phải sửa DB —
+  `tasks.icon_key` đã lưu khoá này trong dữ liệu người dùng.
+- `jars.emoji` và `members.avatar_key` vẫn lưu **ký tự emoji** (dữ liệu cũ);
+  `iconKeyForEmoji` tra ngược sang khoá asset, nên không cần migration.
+- Khoá không có file thì `AppIcon` hiện dấu hỏi và in cảnh báo — thà thấy một chỗ
+  sai còn hơn im lặng vẽ ⭐ giống mọi việc khác.
+- `star` (⭐) **không** nằm trong bộ bố mẹ chọn được: nó trùng đúng giá trị
+  `taskIconFallback`, nên một việc chọn hình đó trông giống hệt một việc có khoá
+  sai.
+
+### Preset
+
+24 preset MVP, mỗi cái có `preset_key`, khoá icon, điểm mặc định:
 
 | key | Nhãn (vi) | Điểm |
 |---|---|---|

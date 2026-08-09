@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
-import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/reward_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
@@ -157,10 +157,7 @@ class _RedemptionCardState extends State<_RedemptionCard> {
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(
           children: [
-            Text(
-              iconForKey(reward.iconKey),
-              style: const TextStyle(fontSize: 24),
-            ),
+            AppIcon.task(reward.iconKey, size: 26),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
@@ -307,10 +304,7 @@ class _VoucherCardState extends State<_VoucherCard> {
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(
           children: [
-            Text(
-              iconForKey(reward.iconKey),
-              style: const TextStyle(fontSize: 24),
-            ),
+            AppIcon.task(reward.iconKey, size: 26),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(

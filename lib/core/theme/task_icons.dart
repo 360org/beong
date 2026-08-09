@@ -1,9 +1,72 @@
-/// Icon emoji cho task/routine — thân thiện với trẻ em hơn Material icon.
+/// Khoá icon của task/routine/phần thưởng, và đường dẫn asset tương ứng.
+///
+/// Hình vẽ từ **asset PNG** trong `assets/icons/` (Fluent Emoji, MIT) qua
+/// `AppIcon`, không phải emoji của hệ thống nữa — xem `assets/icons/README.md`.
+/// Map [taskIcons] vẫn giữ emoji tương ứng vì nó còn dùng được ở chỗ chỉ nhận
+/// chuỗi (nhãn accessibility, log, test đối chiếu), nhưng **UI thì dùng
+/// `AppIcon`**.
 ///
 /// Khoá khớp với `iconKey` trong `TaskPreset`/`RoutinePreset`
-/// (`lib/data/seed/presets.dart`). Thêm preset mới thì thêm khoá ở đây,
-/// thiếu khoá sẽ rơi về [taskIconFallback].
+/// (`lib/data/seed/presets.dart`) và với **tên file** trong `assets/icons/`.
 library;
+
+/// Thư mục chứa asset icon.
+const String kIconAssetDir = 'assets/icons';
+
+/// Đường dẫn asset của một khoá icon.
+///
+/// Khoá lạ vẫn trả về đường dẫn (không có file), để `AppIcon` hiện dấu hỏi và in
+/// cảnh báo — thà thấy một chỗ sai còn hơn im lặng vẽ ⭐ giống mọi việc khác.
+String assetPathForIcon(String iconKey) => '$kIconAssetDir/$iconKey.png';
+
+/// Emoji -> khoá asset, cho hai chỗ **đã lưu ký tự emoji vào DB**: `jars.emoji`
+/// và `members.avatar_key`.
+///
+/// Đổi hai cột đó sang khoá sẽ cần một migration cho dữ liệu người dùng, mà giá
+/// trị trong đó luôn đến từ hai danh sách cố định (`kJarEmojis`,
+/// `kAvatarEmojis`) nên tra ngược là đủ và không rủi ro. Nếu về sau cần thêm
+/// emoji ngoài hai danh sách đó thì lúc ấy mới phải migrate.
+const Map<String, String> kEmojiIconKeys = {
+  // Hũ — `kJarEmojis` trong `lib/domain/entities/jar_def.dart`.
+  '🛍️': 'jar_spend',
+  '🐷': 'jar_save',
+  '💝': 'jar_give',
+  '📚': 'books',
+  '🎮': 'game',
+  '⚽': 'soccer',
+  '🎨': 'palette',
+  '🎁': 'jar_gift',
+  '🍦': 'ice_cream',
+  '🚲': 'bike',
+  '🎸': 'jar_guitar',
+  '🧸': 'toy',
+  '🌱': 'plant',
+  '🏦': 'jar_bank',
+  '✈️': 'jar_plane',
+  '🎪': 'jar_circus',
+  '📥': 'jar_inbox',
+
+  // Avatar — `kAvatarEmojis` dưới đây.
+  '🦁': 'av_lion',
+  '🐱': 'av_cat',
+  '🐶': 'av_dog',
+  '🐰': 'av_rabbit',
+  '🐼': 'av_panda',
+  '🦊': 'av_fox',
+  '🐨': 'av_koala',
+  '🐯': 'av_tiger',
+  '🐸': 'av_frog',
+  '🦄': 'av_unicorn',
+  '🐧': 'av_penguin',
+  '🐵': 'av_monkey',
+};
+
+/// Khoá asset cho một emoji đã lưu trong DB.
+///
+/// Không tra được thì trả về [kDefaultTaskIconKey] chứ không trả chuỗi rỗng: ô
+/// icon trống giữa một danh sách đọc ra như dữ liệu bị hỏng.
+String iconKeyForEmoji(String? emoji) =>
+    kEmojiIconKeys[emoji] ?? kDefaultTaskIconKey;
 
 const Map<String, String> taskIcons = {
   'tooth': '🪥',
@@ -38,9 +101,7 @@ const Map<String, String> taskIcons = {
   'palette': '🎨',
   'soccer': '⚽',
   'bike': '🚲',
-  'swim': '🏊',
   'park': '🏞️',
-  'gift': '🎁',
   'phone_off': '🔇',
   'clock': '⏰',
   'star': '⭐',

@@ -2,7 +2,7 @@ import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/kid_scale.dart';
-import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:flutter/material.dart';
 
@@ -51,8 +51,8 @@ class TaskCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                _EmojiAvatar(
-                  emoji: iconForKey(iconKey),
+                _IconAvatar(
+                  iconKey: iconKey,
                   faded: isDone,
                   boxSize: avatarSize,
                   emojiSize: scale.taskEmojiSize,
@@ -91,18 +91,21 @@ class TaskCard extends StatelessWidget {
   }
 }
 
-class _EmojiAvatar extends StatelessWidget {
-  const _EmojiAvatar({
-    required this.emoji,
+class _IconAvatar extends StatelessWidget {
+  const _IconAvatar({
+    required this.iconKey,
     required this.faded,
     required this.boxSize,
     required this.emojiSize,
     required this.radius,
   });
 
-  final String emoji;
+  final String? iconKey;
   final bool faded;
   final double boxSize;
+
+  /// Cạnh của icon. Vẫn theo `KidScale.taskEmojiSize` — icon càng to với bé càng
+  /// nhỏ, đúng như khi còn dùng emoji.
   final double emojiSize;
   final double radius;
 
@@ -118,7 +121,7 @@ class _EmojiAvatar extends StatelessWidget {
           color: context.colors.primaryContainer,
           borderRadius: BorderRadius.circular(radius),
         ),
-        child: Text(emoji, style: TextStyle(fontSize: emojiSize)),
+        child: AppIcon.task(iconKey, size: emojiSize),
       ),
     );
   }

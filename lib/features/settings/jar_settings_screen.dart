@@ -4,6 +4,8 @@ import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/data/local/jar_dao.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:flutter/material.dart';
@@ -84,10 +86,7 @@ class JarSettingsScreen extends ConsumerWidget {
                   ListTile(
                     leading: Opacity(
                       opacity: 0.5,
-                      child: Text(
-                        jar.emoji,
-                        style: const TextStyle(fontSize: 26),
-                      ),
+                      child: AppIcon(iconKeyForEmoji(jar.emoji), size: 30),
                     ),
                     title: Text(jar.title),
                     trailing: TextButton(
@@ -193,7 +192,7 @@ class _JarTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Text(jar.emoji, style: const TextStyle(fontSize: 28)),
+      leading: AppIcon(iconKeyForEmoji(jar.emoji), size: 32),
       title: Text(jar.title),
       subtitle: Text('${jar.pct}% mỗi lần con kiếm xu'),
       trailing: Row(
@@ -410,7 +409,7 @@ class _EmojiChoice extends StatelessWidget {
               ? Border.all(color: context.colors.primary, width: 2)
               : null,
         ),
-        child: Text(emoji, style: const TextStyle(fontSize: 22)),
+        child: AppIcon(iconKeyForEmoji(emoji), size: 26),
       ),
     );
   }

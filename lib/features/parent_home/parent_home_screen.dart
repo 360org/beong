@@ -6,6 +6,7 @@ import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/task_dao.dart';
@@ -172,7 +173,7 @@ class _PendingReviewSectionState extends State<_PendingReviewSection> {
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Row(
             children: [
-              const Text('📖', style: TextStyle(fontSize: 22)),
+              const AppIcon('book'),
               const SizedBox(width: AppSpacing.md),
               Text(
                 'Không có việc nào chờ duyệt',
@@ -424,9 +425,9 @@ class _ChildSummaryCard extends StatelessWidget {
                     color: color.withValues(alpha: 0.18),
                     shape: BoxShape.circle,
                   ),
-                  child: Text(
-                    avatarForKey(child.avatarKey),
-                    style: const TextStyle(fontSize: 24),
+                  child: AppIcon(
+                    iconKeyForEmoji(avatarForKey(child.avatarKey)),
+                    size: 28,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.lg),
@@ -608,7 +609,7 @@ class _DoneRowState extends State<_DoneRow> {
 
     return Row(
       children: [
-        Text(iconForKey(task.iconKey), style: const TextStyle(fontSize: 18)),
+        AppIcon.task(task.iconKey, size: 20),
         const SizedBox(width: AppSpacing.sm),
         Expanded(child: Text(task.title, style: context.text.bodyMedium)),
         if (widget.instance.reopenCount > 0)

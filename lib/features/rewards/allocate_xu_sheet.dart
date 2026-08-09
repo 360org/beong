@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:flutter/material.dart';
@@ -106,7 +108,7 @@ class _AllocateXuSheetState extends State<AllocateXuSheet> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('📥', style: TextStyle(fontSize: 22)),
+                const AppIcon('jar_inbox'),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
                   'Còn $_left xu chưa chia',
@@ -172,7 +174,7 @@ class _JarRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Row(
         children: [
-          Text(jar.emoji, style: const TextStyle(fontSize: 28)),
+          AppIcon(iconKeyForEmoji(jar.emoji), size: 32),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(

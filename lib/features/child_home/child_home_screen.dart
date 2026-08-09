@@ -8,6 +8,7 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/kid_scale.dart';
 import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/bee_mascot.dart';
 import 'package:beong/core/widgets/progress_ring.dart';
 import 'package:beong/core/widgets/task_card.dart';
@@ -254,9 +255,9 @@ class _ChildHeader extends ConsumerWidget {
             ),
             for (final m in members)
               ListTile(
-                leading: Text(
-                  avatarForKey(m.avatarKey),
-                  style: const TextStyle(fontSize: 26),
+                leading: AppIcon(
+                  iconKeyForEmoji(avatarForKey(m.avatarKey)),
+                  size: 30,
                 ),
                 title: Text(m.displayName),
                 subtitle: Text(
@@ -303,9 +304,9 @@ class _ChildHeader extends ConsumerWidget {
               color: color.withValues(alpha: 0.18),
               shape: BoxShape.circle,
             ),
-            child: Text(
-              avatarForKey(member?.avatarKey),
-              style: const TextStyle(fontSize: 26),
+            child: AppIcon(
+              iconKeyForEmoji(avatarForKey(member?.avatarKey)),
+              size: 30,
             ),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -442,7 +443,7 @@ class _DashboardCard extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text('🔥', style: TextStyle(fontSize: 18)),
+                            const AppIcon('fire', size: 20),
                             const SizedBox(width: 4),
                             Text(
                               '$streak',
@@ -501,7 +502,7 @@ class _BusyBeeBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('🐝', style: TextStyle(fontSize: 14)),
+          const AppIcon('bee', size: 16),
           const SizedBox(width: 5),
           Text(
             label,
@@ -598,7 +599,7 @@ class XuBadgeStat extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('💎', style: TextStyle(fontSize: 20)),
+        const AppIcon('gem', size: 22),
         const SizedBox(width: 4),
         Text(
           '$amount',
@@ -725,7 +726,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('🎉', style: TextStyle(fontSize: 56)),
+            const AppIcon('party', size: 60),
             const SizedBox(height: AppSpacing.xl),
             Text(
               'Chưa có việc nào hôm nay',

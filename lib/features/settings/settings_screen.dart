@@ -7,6 +7,7 @@ import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
@@ -148,7 +149,7 @@ class _FamilyInfoCard extends StatelessWidget {
                 color: context.colors.primaryContainer,
                 shape: BoxShape.circle,
               ),
-              child: const Text('🏡', style: TextStyle(fontSize: 24)),
+              child: const AppIcon('family', size: 28),
             ),
             const SizedBox(width: AppSpacing.lg),
             Expanded(
@@ -208,9 +209,12 @@ class _MemberTile extends StatelessWidget {
                   color: color.withValues(alpha: 0.18),
                   shape: BoxShape.circle,
                 ),
-                child: Text(
-                  isParent ? '🧑' : avatarForKey(member.avatarKey),
-                  style: const TextStyle(fontSize: 20),
+                child: AppIcon(
+                  // Vai bố mẹ không chọn avatar con vật; dùng hình người bóng
+                  // đen trung tính, không mang giới tính hay màu da.
+                  isParent
+                      ? 'av_parent'
+                      : iconKeyForEmoji(avatarForKey(member.avatarKey)),
                 ),
               ),
               const SizedBox(width: AppSpacing.lg),

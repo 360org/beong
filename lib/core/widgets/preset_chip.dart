@@ -1,20 +1,19 @@
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/widgets/app_icon.dart';
 import 'package:flutter/material.dart';
 
-/// Pill "chọn nhanh" có emoji leading — dùng ở sheet tạo task/reward.
-///
-/// Emoji thay icon vẽ tay: trẻ nhận diện nhanh, không cần load asset riêng.
+/// Pill "chọn nhanh" có icon leading — dùng ở sheet tạo task/reward.
 class PresetChip extends StatelessWidget {
   const PresetChip({
-    required this.emoji,
+    required this.iconKey,
     required this.label,
     required this.selected,
     required this.onTap,
     super.key,
   });
 
-  final String emoji;
+  final String iconKey;
   final String label;
   final bool selected;
   final VoidCallback onTap;
@@ -38,7 +37,7 @@ class PresetChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 18)),
+            AppIcon.task(iconKey, size: 20),
             const SizedBox(width: AppSpacing.sm),
             Text(
               label,

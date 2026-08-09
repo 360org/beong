@@ -4,6 +4,7 @@ import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,7 +88,7 @@ class _WhyThisIsOffByDefault extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Text('⚠️', style: TextStyle(fontSize: 20)),
+                const AppIcon('warning', size: 22),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(

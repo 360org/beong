@@ -6,6 +6,7 @@ import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
@@ -258,7 +259,7 @@ class _RoutineGroupCard extends StatelessWidget {
                     color: context.colors.primaryContainer,
                     borderRadius: BorderRadius.circular(AppRadius.field),
                   ),
-                  child: const Text('📋', style: TextStyle(fontSize: 18)),
+                  child: const AppIcon('clipboard', size: 20),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
@@ -293,10 +294,7 @@ class _RoutineGroupCard extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                 child: Row(
                   children: [
-                    Text(
-                      iconForKey(task.iconKey),
-                      style: const TextStyle(fontSize: 16),
-                    ),
+                    AppIcon.task(task.iconKey, size: 18),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(task.title, style: context.text.bodyMedium),
@@ -336,10 +334,7 @@ class _TaskTile extends StatelessWidget {
                 color: context.colors.primaryContainer,
                 borderRadius: BorderRadius.circular(AppRadius.field),
               ),
-              child: Text(
-                iconForKey(task.iconKey),
-                style: const TextStyle(fontSize: 22),
-              ),
+              child: AppIcon.task(task.iconKey),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -411,12 +406,12 @@ class _TaskTile extends StatelessWidget {
 /// hơn thì ngón tay trẻ bấm trượt sang hình bên cạnh.
 class _IconChoice extends StatelessWidget {
   const _IconChoice({
-    required this.emoji,
+    required this.iconKey,
     required this.selected,
     required this.onTap,
   });
 
-  final String emoji;
+  final String iconKey;
   final bool selected;
   final VoidCallback onTap;
 
@@ -441,7 +436,7 @@ class _IconChoice extends StatelessWidget {
               ? Border.all(color: context.colors.primary, width: 2)
               : null,
         ),
-        child: Text(emoji, style: const TextStyle(fontSize: 22)),
+        child: AppIcon.task(iconKey, size: 26),
       ),
     );
   }
@@ -576,7 +571,7 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
               children: kTaskPresets.map((preset) {
                 final selected = _selectedPreset == preset.key;
                 return PresetChip(
-                  emoji: iconForKey(preset.iconKey),
+                  iconKey: preset.iconKey,
                   label: preset.titleVi,
                   selected: selected,
                   onTap: () {
@@ -620,7 +615,7 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
               children: [
                 for (final key in kTaskIconKeys)
                   _IconChoice(
-                    emoji: iconForKey(key),
+                    iconKey: key,
                     selected: key == _iconKey,
                     onTap: () => setState(() => _iconKey = key),
                   ),
@@ -749,10 +744,7 @@ class _TaskPresetSuggestions extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        iconForKey(preset.iconKey),
-                        style: const TextStyle(fontSize: 18),
-                      ),
+                      AppIcon.task(preset.iconKey, size: 20),
                       const SizedBox(width: AppSpacing.sm),
                       Text(
                         preset.titleVi,

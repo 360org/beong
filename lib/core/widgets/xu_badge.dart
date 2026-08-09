@@ -1,5 +1,6 @@
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/widgets/app_icon.dart';
 import 'package:flutter/material.dart';
 
 /// Badge xu hình viên kim cương 💎 — đơn vị điểm gọi là "xu" (ADR-015).
@@ -34,7 +35,7 @@ class XuBadge extends StatelessWidget {
     final content = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('💎', style: TextStyle(fontSize: emojiSize)),
+        AppIcon('gem', size: emojiSize),
         const SizedBox(width: 5),
         Text(
           '$amount',

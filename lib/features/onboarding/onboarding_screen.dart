@@ -7,6 +7,7 @@ import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/bee_mascot.dart';
 import 'package:beong/core/widgets/responsive_scaffold.dart';
 import 'package:beong/data/local/database.dart';
@@ -411,7 +412,7 @@ class _ChildStep extends StatelessWidget {
                         ? Border.all(color: color, width: 2.5)
                         : null,
                   ),
-                  child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                  child: AppIcon(iconKeyForEmoji(emoji), size: 28),
                 ),
               );
             }).toList(),

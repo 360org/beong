@@ -47,6 +47,12 @@ flutter:
   uses-material-design: true
   generate: true
 
+  # Bộ icon Fluent Emoji kiểu 3D (MIT) — xem assets/icons/README.md. Khai cả thư
+  # mục thay vì từng file: thêm icon chỉ cần bỏ file vào, không sửa pubspec, mà
+  # sửa pubspec là chỗ rất dễ quên rồi nhận ô trống lúc chạy.
+  assets:
+    - assets/icons/
+
   # Nunito — bo tròn thân thiện trẻ em, đủ 134 ký tự tiếng Việt có dấu
   # (docs/04-design-system.md §2). Nhúng file thay vì dùng gói `google_fonts`
   # tải lúc chạy: app là offline-first (ADR-002), mất mạng không được mất chữ.
