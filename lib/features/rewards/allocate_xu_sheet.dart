@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/data/local/wallet_dao.dart';
-import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:flutter/material.dart';
 
@@ -21,6 +20,7 @@ class AllocateXuSheet extends StatefulWidget {
     required this.memberId,
     required this.inbox,
     required this.walletDao,
+    required this.jars,
     super.key,
   });
 
@@ -32,9 +32,12 @@ class AllocateXuSheet extends StatefulWidget {
 
   final WalletDao walletDao;
 
-  /// Hũ hiện có. Hằng cho tới khi ADR-024 nối bảng `jars` vào UI — lúc đó
-  /// truyền từ ngoài vào.
-  List<JarDef> get jars => kDefaultJars;
+  /// Hũ đang dùng của gia đình, đọc từ bảng `jars` (ADR-024).
+  ///
+  /// Trước đây chỗ này trả hằng `kDefaultJars`, nên bố mẹ lập hũ mới xong con
+  /// vẫn chỉ chia được vào ba hũ cũ — hũ mới hiện ở màn Cài đặt mà không hiện ở
+  /// đúng chỗ cần dùng nó.
+  final List<JarDef> jars;
 
   @override
   State<AllocateXuSheet> createState() => _AllocateXuSheetState();
@@ -62,10 +65,10 @@ class _AllocateXuSheetState extends State<AllocateXuSheet> {
 
     for (final entry in _draft.entries) {
       if (entry.value <= 0) continue;
-      await widget.walletDao.moveFromInbox(
+      await widget.walletDao.moveFromInboxToKey(
         familyId: widget.familyId,
         memberId: widget.memberId,
-        toJar: Jar.values.firstWhere((j) => j.name == entry.key),
+        toJarKey: entry.key,
         amount: entry.value,
         clientOpId: '$opBase:${entry.key}',
       );

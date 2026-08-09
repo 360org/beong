@@ -11,6 +11,7 @@ import 'package:beong/data/local/reward_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/entities/jar_def.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -37,6 +38,7 @@ class StatsScreen extends ConsumerWidget {
 
     return _ChildStats(
       memberId: session.activeMemberId,
+      familyId: session.familyId,
       walletDao: walletDao,
       memberDao: memberDao,
       taskDao: taskDao,
@@ -125,7 +127,10 @@ class _ChildStatsCard extends StatelessWidget {
           stream: walletDao.watchBalance(child.id),
           builder: (context, snap) {
             final balance = snap.data ?? WalletBalance.zero;
-            return _JarOverview(balance: balance);
+            return _JarOverview(
+              balance: balance,
+              familyId: child.familyId,
+            );
           },
         ),
         const SizedBox(height: AppSpacing.md),
@@ -145,6 +150,7 @@ class _ChildStatsCard extends StatelessWidget {
 class _ChildStats extends StatelessWidget {
   const _ChildStats({
     required this.memberId,
+    required this.familyId,
     required this.walletDao,
     required this.memberDao,
     required this.taskDao,
@@ -152,6 +158,7 @@ class _ChildStats extends StatelessWidget {
   });
 
   final String memberId;
+  final String familyId;
   final WalletDao walletDao;
   final MemberDao memberDao;
   final TaskDao taskDao;
@@ -173,7 +180,7 @@ class _ChildStats extends StatelessWidget {
             stream: walletDao.watchBalance(memberId),
             builder: (context, snap) {
               final balance = snap.data ?? WalletBalance.zero;
-              return _JarOverview(balance: balance);
+              return _JarOverview(balance: balance, familyId: familyId);
             },
           ),
           const SizedBox(height: AppSpacing.xxl),
@@ -188,38 +195,45 @@ class _ChildStats extends StatelessWidget {
           const SizedBox(height: AppSpacing.xxl),
           Text('Lịch sử', style: context.text.titleMedium),
           const SizedBox(height: AppSpacing.md),
-          StreamBuilder<List<LedgerEntry>>(
-            // Đã gộp: một việc là **một** mục, không phải ba dòng theo hũ.
-            stream: walletDao.watchGroupedHistory(memberId),
-            builder: (context, snap) {
-              final txns = snap.data ?? [];
-              if (txns.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xxl),
-                  child: Center(
-                    child: Text(
-                      'Chưa có giao dịch nào.',
-                      style: context.text.bodyMedium?.copyWith(
-                        color: context.semantic.onSurfaceMuted,
+          // Tên hũ tra từ bảng `jars`: sổ cái chỉ lưu `jar_key`, nên không có
+          // bảng tra thì dòng chia xu hiện ra khoá thô kiểu
+          // "jar1786289533739171 14" — con đọc không hiểu gì.
+          _JarTitles(
+            familyId: familyId,
+            builder: (context, jarTitles) => StreamBuilder<List<LedgerEntry>>(
+              // Đã gộp: một việc là **một** mục, không phải ba dòng theo hũ.
+              stream: walletDao.watchGroupedHistory(memberId),
+              builder: (context, snap) {
+                final txns = snap.data ?? [];
+                if (txns.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.all(AppSpacing.xxl),
+                    child: Center(
+                      child: Text(
+                        'Chưa có giao dịch nào.',
+                        style: context.text.bodyMedium?.copyWith(
+                          color: context.semantic.onSurfaceMuted,
+                        ),
                       ),
                     ),
-                  ),
+                  );
+                }
+                return Column(
+                  children: [
+                    for (final tx in txns)
+                      _TransactionTile(
+                        // Key theo nhóm: thiếu key thì State bị tái dùng theo vị
+                        // trí và dòng hiện tên của giao dịch cũ.
+                        key: ValueKey(tx.groupId),
+                        tx: tx,
+                        taskDao: taskDao,
+                        rewardDao: rewardDao,
+                        jarTitles: jarTitles,
+                      ),
+                  ],
                 );
-              }
-              return Column(
-                children: [
-                  for (final tx in txns)
-                    _TransactionTile(
-                      // Key theo nhóm: thiếu key thì State bị tái dùng theo vị
-                      // trí và dòng hiện tên của giao dịch cũ.
-                      key: ValueKey(tx.groupId),
-                      tx: tx,
-                      taskDao: taskDao,
-                      rewardDao: rewardDao,
-                    ),
-                ],
-              );
-            },
+              },
+            ),
           ),
         ],
       ),
@@ -227,31 +241,82 @@ class _ChildStats extends StatelessWidget {
   }
 }
 
-class _JarOverview extends StatelessWidget {
-  const _JarOverview({required this.balance});
+/// Bảng tra `jar_key` -> tên hũ, đọc từ bảng `jars`.
+class _JarTitles extends ConsumerWidget {
+  const _JarTitles({required this.familyId, required this.builder});
 
-  final WalletBalance balance;
+  final String familyId;
+  final Widget Function(BuildContext, Map<String, String>) builder;
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _JarCard(label: 'Tiêu', amount: balance.spend, jar: Jar.spend),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: _JarCard(
-            label: 'Để dành',
-            amount: balance.save,
-            jar: Jar.save,
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: _JarCard(label: 'Cho đi', amount: balance.give, jar: Jar.give),
-        ),
-      ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    return StreamBuilder<List<JarDef>>(
+      // Lấy **cả hũ đã xếp lại**: sổ cái vẫn còn dòng của chúng, và một hũ xếp
+      // lại rồi vẫn phải đọc được tên trong lịch sử.
+      stream: ref
+          .watch(jarDaoProvider)
+          .watchAllJars(familyId)
+          .map((rows) => [for (final r in rows) r.jar]),
+      builder: (context, snap) => builder(context, {
+        for (final jar in snap.data ?? kDefaultJars) jar.key: jar.title,
+      }),
+    );
+  }
+}
+
+/// Số dư từng hũ của gia đình.
+///
+/// Đọc danh sách hũ từ bảng `jars` chứ không dựng cứng ba ô: bản trước hiện đúng
+/// Tiêu / Để dành / Cho đi, nên hũ do bố mẹ tự lập **không có ô nào** và xu trong
+/// đó mất khỏi màn hình. Con cộng ba ô lại thấy 11 trong khi tổng ghi 25 — không
+/// có cách nào hiểu được chuyện gì xảy ra.
+class _JarOverview extends ConsumerWidget {
+  const _JarOverview({required this.balance, required this.familyId});
+
+  final WalletBalance balance;
+  final String familyId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return StreamBuilder<List<JarDef>>(
+      stream: ref.watch(jarDaoProvider).watchActiveJars(familyId),
+      builder: (context, snap) {
+        final jars = snap.data ?? kDefaultJars;
+
+        // Hũ chờ không nằm trong bảng `jars` nhưng vẫn phải hiện khi còn xu:
+        // không hiện thì con thấy tổng lớn hơn tổng các ô mà không biết vì sao.
+        final tiles = <Widget>[
+          for (final jar in jars)
+            _JarCard(
+              label: jar.title,
+              emoji: jar.emoji,
+              amount: balance.ofKey(jar.key),
+            ),
+          if (balance.inbox > 0)
+            _JarCard(
+              label: 'Chờ chia',
+              emoji: '📥',
+              amount: balance.inbox,
+            ),
+        ];
+
+        // Wrap chứ không Row: bốn hũ trở lên thì Row bóp mỗi ô còn quá hẹp để
+        // đọc số.
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            const gap = AppSpacing.sm;
+            final perRow = tiles.length <= 3 ? tiles.length : 3;
+            final width = (constraints.maxWidth - gap * (perRow - 1)) / perRow;
+            return Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: [
+                for (final tile in tiles) SizedBox(width: width, child: tile),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -260,12 +325,15 @@ class _JarCard extends StatelessWidget {
   const _JarCard({
     required this.label,
     required this.amount,
-    required this.jar,
+    required this.emoji,
   });
 
   final String label;
   final int amount;
-  final Jar jar;
+
+  /// Emoji của hũ, do bố mẹ chọn. Thay cho bộ icon cứng ba hũ trước đây — hũ tự
+  /// lập không có icon nào trong bộ đó.
+  final String emoji;
 
   @override
   Widget build(BuildContext context) {
@@ -274,10 +342,7 @@ class _JarCard extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           children: [
-            Icon(
-              _jarIcon(jar),
-              color: context.colors.primary,
-            ),
+            Text(emoji, style: const TextStyle(fontSize: 22)),
             const SizedBox(height: AppSpacing.sm),
             XuBadge(amount: amount),
             const SizedBox(height: AppSpacing.xs),
@@ -292,13 +357,6 @@ class _JarCard extends StatelessWidget {
       ),
     );
   }
-
-  IconData _jarIcon(Jar jar) => switch (jar) {
-    Jar.spend => Icons.shopping_bag_rounded,
-    Jar.save => Icons.savings_rounded,
-    Jar.give => Icons.volunteer_activism_rounded,
-    Jar.inbox => Icons.inbox_rounded,
-  };
 }
 
 class _StreakCard extends StatelessWidget {
@@ -354,12 +412,16 @@ class _TransactionTile extends StatefulWidget {
     required this.tx,
     required this.taskDao,
     required this.rewardDao,
+    required this.jarTitles,
     super.key,
   });
 
   final LedgerEntry tx;
   final TaskDao taskDao;
   final RewardDao rewardDao;
+
+  /// `jar_key` -> tên hũ do bố mẹ đặt.
+  final Map<String, String> jarTitles;
 
   @override
   State<_TransactionTile> createState() => _TransactionTileState();
@@ -666,14 +728,22 @@ class _TransactionTileState extends State<_TransactionTile> {
     return parts.join(', ');
   }
 
-  String _jarLabel(String jarKey) => switch (jarKey) {
-    'spend' => 'Tiêu',
-    'save' => 'Để dành',
-    'give' => 'Cho đi',
-    'inbox' => 'Chờ chia',
-    // Hũ do bố mẹ tự lập (ADR-024): chưa tra được tên nên hiện khoá.
-    _ => jarKey,
-  };
+  /// Tên hũ để hiện trong sổ.
+  ///
+  /// Ưu tiên tên bố mẹ đặt trong bảng `jars`; ba hũ dựng sẵn có tên cố định để
+  /// dòng cũ vẫn đọc được kể cả khi hũ đã bị xếp lại và đổi tên.
+  String _jarLabel(String jarKey) {
+    final title = widget.jarTitles[jarKey];
+    if (title != null && title.isNotEmpty) return title;
+    return switch (jarKey) {
+      kJarSpend => 'Tiêu',
+      kJarSave => 'Để dành',
+      kJarGive => 'Cho đi',
+      kJarInbox => 'Chờ chia',
+      // Hũ đã bị xoá khỏi bảng bằng tay: thà hiện khoá còn hơn hiện chuỗi rỗng.
+      _ => jarKey,
+    };
+  }
 
   IconData _reasonIcon(String reason) => switch (reason) {
     'taskApproved' => Icons.check_circle_outline,

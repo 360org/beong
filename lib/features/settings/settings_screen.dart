@@ -89,6 +89,7 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   _ApprovalTile(familyId: session.familyId),
                   _AllocationTile(familyId: session.familyId),
+                  _JarsTile(familyId: session.familyId),
                   _PenaltyTile(familyId: session.familyId),
                   _SettingsTile(
                     icon: Icons.info_outline,
@@ -309,6 +310,39 @@ class _SettingsTile extends StatelessWidget {
 ///
 /// Hiện luôn mức đang đặt ngay ở dòng phụ, không chỉ ghi "Cấu hình": bố mẹ phải
 /// thấy được nhà mình đang bật trừ xu hay không mà không cần bấm vào.
+/// Lối vào màn quản lý hũ, kèm tổng tỷ lệ ngay trên dòng.
+///
+/// Hiện tổng ở đây vì tổng khác 100% làm việc chia xu **âm thầm** rơi về ba hũ
+/// mặc định — bố mẹ cần thấy sai sót mà không phải mở màn con ra kiểm.
+class _JarsTile extends ConsumerWidget {
+  const _JarsTile({required this.familyId});
+
+  final String familyId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final jarDao = ref.watch(jarDaoProvider);
+
+    return StreamBuilder<List<JarDef>>(
+      stream: jarDao.watchActiveJars(familyId),
+      builder: (context, snap) {
+        final jars = snap.data ?? const <JarDef>[];
+        final total = jars.fold(0, (sum, j) => sum + j.pct);
+        return _SettingsTile(
+          icon: Icons.savings_outlined,
+          title: 'Các hũ',
+          subtitle: jars.isEmpty
+              ? 'Đang tải…'
+              : total == 100
+              ? '${jars.length} hũ · chia đủ 100%'
+              : '${jars.length} hũ · tổng $total%, chưa đủ 100%',
+          onTap: () => context.go(Routes.jarSettings),
+        );
+      },
+    );
+  }
+}
+
 class _PenaltyTile extends ConsumerWidget {
   const _PenaltyTile({required this.familyId});
 

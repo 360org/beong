@@ -12,6 +12,7 @@ import 'package:beong/core/widgets/bee_mascot.dart';
 import 'package:beong/core/widgets/progress_ring.dart';
 import 'package:beong/core/widgets/task_card.dart';
 import 'package:beong/data/local/database.dart';
+import 'package:beong/data/local/jar_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
@@ -99,6 +100,7 @@ class ChildHomeScreen extends ConsumerWidget {
                                               memberId: memberId,
                                               inbox: balance.inbox,
                                               walletDao: walletDao,
+                                              jarDao: ref.read(jarDaoProvider),
                                             ),
                                           )
                                         : null,
@@ -760,8 +762,14 @@ Future<void> _openAllocateSheet({
   required String memberId,
   required int inbox,
   required WalletDao walletDao,
-}) {
-  return showModalBottomSheet<void>(
+  required JarDao jarDao,
+}) async {
+  // Đọc hũ **trước khi** mở sheet: mở rồi mới đọc thì con thấy một khung trống
+  // nháy lên, và trên máy chậm thì đủ lâu để bấm vào chỗ chưa có gì.
+  final jars = await jarDao.activeJars(familyId);
+  if (!context.mounted) return;
+
+  await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     builder: (context) => AllocateXuSheet(
@@ -769,6 +777,7 @@ Future<void> _openAllocateSheet({
       memberId: memberId,
       inbox: inbox,
       walletDao: walletDao,
+      jars: jars,
     ),
   );
 }

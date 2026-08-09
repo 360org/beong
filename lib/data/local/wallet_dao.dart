@@ -75,7 +75,7 @@ class WalletException implements Exception {
 /// Toàn bộ tầng này tuân thủ ADR-005: sổ cái **append-only**. Không có phương
 /// thức nào UPDATE hay DELETE một dòng giao dịch. Sửa sai bằng cách ghi dòng bù.
 /// Số dư luôn được tính lại từ sổ cái, không đọc từ cột cache nào.
-@DriftAccessor(tables: [PointTransactions, Members, Families])
+@DriftAccessor(tables: [PointTransactions, Members, Families, Jars])
 class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
   WalletDao(super.attachedDatabase);
 
@@ -156,22 +156,35 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     if (amount <= 0) {
       throw WalletException('Số xu cộng vào phải dương, nhận được $amount');
     }
-    final effectiveSplit = split ?? await splitFor(memberId);
-    final parts = splitAmount(amount, effectiveSplit);
+
+    // Hai đường chia, và ranh giới giữa chúng là chỗ dễ sai nhất:
+    //
+    // - [split] truyền vào tay: giữ đúng tỷ lệ đó. Hoàn xu khi từ chối đổi
+    //   thưởng đi đường này với `spendOnly` — chia lại theo tỷ lệ sẽ âm thầm đẩy
+    //   xu sang hũ Để dành/Cho đi, tức là con mất phần tiêu được.
+    // - Không truyền: chia theo **các hũ của gia đình** (bảng `jars`, ADR-024),
+    //   không phải ba hũ cứng. Trước đây chỗ này chỉ đọc `families.jar_split`
+    //   nên hũ tự lập không bao giờ nhận được xu nào từ việc nhà.
+    final parts = split != null
+        ? {
+            for (final e in splitAmount(amount, split).entries)
+              e.key.name: e.value,
+          }
+        : splitByPlan(amount, await planFor(memberId));
 
     return transaction(() async {
       var written = 0;
       for (final entry in parts.entries) {
         if (entry.value == 0) continue;
-        written += await _insertIfNew(
+        written += await _insertIfNewKey(
           familyId: familyId,
           memberId: memberId,
-          jar: entry.key,
+          jarKey: entry.key,
           delta: entry.value,
           reason: reason,
-          clientOpId: '$clientOpId:${entry.key.name}',
-          // Ba dòng của cùng một lần cộng chung một nhóm, để "Sổ của con" hiện
-          // một mục thay vì ba.
+          clientOpId: '$clientOpId:${entry.key}',
+          // Các dòng của cùng một lần cộng chung một nhóm, để "Sổ của con" hiện
+          // một mục thay vì nhiều.
           opGroupId: clientOpId,
           refType: refType,
           refId: refId,
@@ -182,6 +195,68 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
       return written;
     });
   }
+
+  /// Kế hoạch chia của một trẻ — các hũ của gia đình kèm tỷ lệ (ADR-024).
+  ///
+  /// Thứ tự ưu tiên:
+  /// 1. `members.jar_split_override` — tỷ lệ riêng của trẻ, vẫn theo ba hũ cũ.
+  /// 2. Bảng `jars` của gia đình.
+  /// 3. Ba hũ mặc định, cho gia đình tạo trước schema v5.
+  ///
+  /// Tổng tỷ lệ **không bằng 100** thì cũng rơi về mặc định chứ không ném lỗi:
+  /// bố mẹ đang sửa dở tỷ lệ giữa lúc con làm xong việc là chuyện có thật, và
+  /// chặn cộng xu ở đó thì con mất xu vì lỗi của người khác.
+  Future<JarPlan> planFor(String memberId) async {
+    final member = await (select(
+      members,
+    )..where((m) => m.id.equals(memberId))).getSingleOrNull();
+    if (member == null) {
+      throw WalletException('Không tìm thấy hồ sơ $memberId');
+    }
+
+    final override = member.jarSplitOverride;
+    if (override != null && override.isNotEmpty) {
+      final split = JarSplit.fromJson(
+        jsonDecode(override) as Map<String, dynamic>,
+      );
+      if (split.isValid) return _planFromSplit(split);
+    }
+
+    final rows =
+        await (select(jars)
+              ..where(
+                (j) => j.familyId.equals(member.familyId) & j.isArchived.not(),
+              )
+              ..orderBy([(j) => OrderingTerm(expression: j.orderIndex)]))
+            .get();
+
+    final plan = JarPlan([
+      for (final row in rows)
+        JarDef(
+          key: row.jarKey,
+          title: row.title,
+          emoji: row.emoji,
+          pct: row.pct,
+          orderIndex: row.orderIndex,
+        ),
+    ]);
+    if (plan.isValid) return plan;
+
+    return JarPlan.defaultPlan;
+  }
+
+  /// Ba hũ cũ dưới dạng kế hoạch, giữ tên và emoji mặc định.
+  JarPlan _planFromSplit(JarSplit split) => JarPlan([
+    for (final jar in kDefaultJars)
+      jar.copyWith(
+        pct: switch (jar.key) {
+          kJarSpend => split.spend,
+          kJarSave => split.save,
+          kJarGive => split.give,
+          _ => 0,
+        },
+      ),
+  ]);
 
   /// Cộng xu vào **một hũ duy nhất**, không chia.
   ///
@@ -261,8 +336,24 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     required Jar toJar,
     required int amount,
     required String clientOpId,
+  }) => moveFromInboxToKey(
+    familyId: familyId,
+    memberId: memberId,
+    toJarKey: toJar.name,
+    amount: amount,
+    clientOpId: clientOpId,
+  );
+
+  /// Như [moveFromInbox] nhưng nhận **khoá hũ** — con chia được vào hũ do bố mẹ
+  /// tự lập, những hũ không có giá trị trong `enum Jar`.
+  Future<void> moveFromInboxToKey({
+    required String familyId,
+    required String memberId,
+    required String toJarKey,
+    required int amount,
+    required String clientOpId,
   }) async {
-    if (toJar == Jar.inbox) {
+    if (toJarKey == kJarInbox) {
       throw const WalletException('Không chuyển hũ chờ sang chính nó');
     }
     if (amount <= 0) {
@@ -277,22 +368,22 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
         );
       }
 
-      await _insertIfNew(
+      await _insertIfNewKey(
         familyId: familyId,
         memberId: memberId,
-        jar: Jar.inbox,
+        jarKey: kJarInbox,
         delta: -amount,
         reason: TxReason.jarTransfer,
         clientOpId: '$clientOpId:inbox',
         opGroupId: clientOpId,
       );
-      await _insertIfNew(
+      await _insertIfNewKey(
         familyId: familyId,
         memberId: memberId,
-        jar: toJar,
+        jarKey: toJarKey,
         delta: amount,
         reason: TxReason.jarTransfer,
-        clientOpId: '$clientOpId:${toJar.name}',
+        clientOpId: '$clientOpId:$toJarKey',
         opGroupId: clientOpId,
       );
     });

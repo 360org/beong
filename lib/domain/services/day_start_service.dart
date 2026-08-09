@@ -1,3 +1,4 @@
+import 'package:beong/data/local/jar_dao.dart';
 import 'package:beong/data/local/member_dao.dart';
 import 'package:beong/data/local/settings_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
@@ -23,15 +24,18 @@ class DayStartService {
     required MemberDao memberDao,
     required SettingsDao settingsDao,
     required PenaltyService penaltyService,
+    required JarDao jarDao,
   }) : _tasks = taskDao,
        _members = memberDao,
        _settings = settingsDao,
-       _penalties = penaltyService;
+       _penalties = penaltyService,
+       _jars = jarDao;
 
   final TaskDao _tasks;
   final MemberDao _members;
   final SettingsDao _settings;
   final PenaltyService _penalties;
+  final JarDao _jars;
 
   /// Khoá ghi ngày đã chạy gần nhất, theo thiết bị.
   static const _lastRunKey = 'rollover.last_run_date';
@@ -52,6 +56,16 @@ class DayStartService {
     DateTime? now,
   }) async {
     final family = await _members.getFamily(familyId);
+
+    // Gieo ba hũ mặc định vào **bảng** `jars` nếu chưa có (ADR-024).
+    //
+    // Chạy ở đây, ngoài khoá một-lần-mỗi-ngày, vì đây là đường nâng cấp cho gia
+    // đình tạo trước schema v5: bảng rỗng thì màn quản lý hũ **không có gì để
+    // sửa** trong khi màn Cài đặt lại hiện "3 hũ · chia đủ 100%" nhờ đường rơi về
+    // hằng số. Hai màn nói khác nhau về cùng một thứ, và bấm "Thêm hũ" sẽ tạo hũ
+    // thứ tư bên cạnh ba hũ vô hình. Có hàng thật thì cả hai màn đọc cùng một
+    // nguồn.
+    await _jars.seedDefaults(familyId);
 
     // Múi giờ lấy từ thiết bị, không từ `families.timezone`: cột đó lưu tên
     // IANA và tầng data chưa quy đổi (xem ADR-008). Đây là chỗ sẽ phải sửa khi

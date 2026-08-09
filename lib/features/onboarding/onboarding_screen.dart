@@ -81,6 +81,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       FamiliesCompanion.insert(id: familyId, name: familyName),
     );
 
+    // Ba hũ mặc định vào **bảng** `jars` ngay từ đầu (ADR-024), để màn quản lý hũ
+    // có thứ thật mà sửa. Không gieo thì gia đình mới chạy bằng đường rơi về
+    // `kDefaultJars`, và bố mẹ sửa tỷ lệ xong thấy không có gì thay đổi.
+    await ref.read(jarDaoProvider).seedDefaults(familyId);
+
     await memberDao.addMember(
       MembersCompanion.insert(
         id: parentId,

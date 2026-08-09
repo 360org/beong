@@ -253,4 +253,99 @@ void main() {
       expect((await walletDao.watchBalance(childId).first).ofKey(jar.key), 7);
     });
   });
+
+  group('chia tự động theo hũ của gia đình', () {
+    test('hũ tự lập nhận được xu từ việc nhà', () async {
+      // Trước đây `credit` chỉ đọc `families.jar_split` (ba hũ cứng), nên hũ tự
+      // lập vĩnh viễn rỗng dù bố mẹ đã đặt tỷ lệ cho nó.
+      await jarDao.seedDefaults(familyId);
+      await jarDao.updateJar(familyId: familyId, jarKey: kJarSpend, pct: 40);
+      await jarDao.updateJar(familyId: familyId, jarKey: kJarSave, pct: 30);
+      await jarDao.updateJar(familyId: familyId, jarKey: kJarGive, pct: 10);
+      final hocTap = await jarDao.addJar(
+        familyId: familyId,
+        title: 'Học tập',
+        emoji: '📚',
+        pct: 20,
+      );
+
+      await walletDao.credit(
+        familyId: familyId,
+        memberId: childId,
+        amount: 100,
+        reason: TxReason.taskApproved,
+        clientOpId: 'test:chia-4-hu',
+      );
+
+      final balance = await walletDao.balanceOf(childId);
+      expect(balance.ofKey(hocTap.key), 20);
+      expect(balance.spend, 40);
+      expect(balance.save, 30);
+      expect(balance.give, 10);
+      expect(balance.total, 100, reason: 'không được mất xu nào khi chia');
+    });
+
+    test('tổng xu luôn đúng dù tỷ lệ chia lẻ', () async {
+      await jarDao.seedDefaults(familyId);
+      await jarDao.updateJar(familyId: familyId, jarKey: kJarSpend, pct: 34);
+      await jarDao.updateJar(familyId: familyId, jarKey: kJarSave, pct: 33);
+      await jarDao.updateJar(familyId: familyId, jarKey: kJarGive, pct: 33);
+
+      await walletDao.credit(
+        familyId: familyId,
+        memberId: childId,
+        amount: 10,
+        reason: TxReason.taskApproved,
+        clientOpId: 'test:chia-le',
+      );
+
+      expect((await walletDao.balanceOf(childId)).total, 10);
+    });
+
+    test(
+      'tỷ lệ chưa cộng đủ 100 thì rơi về mặc định, không chặn cộng xu',
+      () async {
+        // Bố mẹ đang sửa dở tỷ lệ giữa lúc con làm xong việc: chặn ở đây thì con
+        // mất xu vì lỗi của người khác.
+        await jarDao.seedDefaults(familyId);
+        await jarDao.updateJar(familyId: familyId, jarKey: kJarSave, pct: 5);
+
+        await walletDao.credit(
+          familyId: familyId,
+          memberId: childId,
+          amount: 10,
+          reason: TxReason.taskApproved,
+          clientOpId: 'test:ty-le-sai',
+        );
+
+        final balance = await walletDao.balanceOf(childId);
+        expect(balance.total, 10);
+        expect(balance.spend, 5, reason: 'tỷ lệ mặc định 50/40/10');
+      },
+    );
+
+    test('hũ đã xếp lại không nhận xu mới nữa', () async {
+      await jarDao.seedDefaults(familyId);
+      await jarDao.setArchived(
+        familyId: familyId,
+        jarKey: kJarGive,
+        archived: true,
+      );
+      await jarDao.updateJar(familyId: familyId, jarKey: kJarSpend, pct: 60);
+      await jarDao.updateJar(familyId: familyId, jarKey: kJarSave, pct: 40);
+
+      await walletDao.credit(
+        familyId: familyId,
+        memberId: childId,
+        amount: 100,
+        reason: TxReason.taskApproved,
+        clientOpId: 'test:hu-xep-lai',
+      );
+
+      final balance = await walletDao.balanceOf(childId);
+      expect(balance.give, 0);
+      expect(balance.spend, 60);
+      expect(balance.save, 40);
+    });
+  });
 }

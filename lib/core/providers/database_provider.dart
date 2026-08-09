@@ -1,5 +1,6 @@
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/data/local/database.dart';
+import 'package:beong/data/local/jar_dao.dart';
 import 'package:beong/data/local/member_dao.dart';
 import 'package:beong/data/local/reward_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
@@ -32,6 +33,9 @@ RewardDao rewardDao(Ref ref) => RewardDao(ref.watch(appDatabaseProvider));
 MemberDao memberDao(Ref ref) => MemberDao(ref.watch(appDatabaseProvider));
 
 @riverpod
+JarDao jarDao(Ref ref) => JarDao(ref.watch(appDatabaseProvider));
+
+@riverpod
 PenaltyService penaltyService(Ref ref) => PenaltyService(
   taskDao: ref.watch(taskDaoProvider),
   walletDao: ref.watch(walletDaoProvider),
@@ -58,4 +62,5 @@ DayStartService dayStartService(Ref ref) => DayStartService(
   memberDao: ref.watch(memberDaoProvider),
   settingsDao: ref.watch(settingsDaoProvider),
   penaltyService: ref.watch(penaltyServiceProvider),
+  jarDao: ref.watch(jarDaoProvider),
 );
