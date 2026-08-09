@@ -1,6 +1,8 @@
 # 01 — Đặc tả sản phẩm (PRD)
 
-**Sản phẩm:** DailyChildren — app quản lý việc nhà & phần thưởng cho gia đình
+**Sản phẩm:** Bé Ong — app giúp trẻ tập làm việc, tự lập và quản lý tiền của chính mình
+**Kim chỉ nam:** độc lập — tự lập. Bốn giá trị: học tập · tự lập · minh bạch · đồng hành.
+Xem [`00-brand-values.md`](00-brand-values.md) trước khi đọc tài liệu này.
 **Nền tảng:** Flutter (iOS, Android, macOS, Windows) + web (tùy chọn giai đoạn sau)
 **Trạng thái:** Bản kế hoạch v1 — chưa viết code
 
@@ -25,7 +27,7 @@ Phân tích đối thủ đầy đủ: [`07-competitive-analysis.md`](07-competi
 
 ### Điểm yếu quan sát được (cơ hội cải tiến)
 
-| Vấn đề | Cải tiến của DailyChildren |
+| Vấn đề | Cải tiến của Bé Ong |
 |---|---|
 | **Bắt buộc có Internet mới chạy được** (họ tự khai trong App Store listing) | **Offline-first** — dùng đầy đủ khi mất mạng, sync sau. Đây là điểm khác biệt số 1 |
 | Chỉ có mobile | Thêm desktop (macOS/Windows) cho phụ huynh quản lý |
@@ -69,9 +71,14 @@ Phân tích đối thủ đầy đủ: [`07-competitive-analysis.md`](07-competi
 11. Offline-first + đồng bộ nhiều thiết bị
 12. Thông báo "nhắc nhẹ, không cằn nhằn": nhắc task, có việc chờ duyệt, đổi thưởng
 13. Đa ngôn ngữ: Tiếng Việt + English
+14. **Giáo dục tài chính** — ba hũ (Tiêu / Để dành / Cho đi), tỷ giá quy đổi ra tiền thật,
+    mục tiêu tiết kiệm, sổ chi tiêu của con. Xem §4.8
 
 > Mục 3, 7, 8 được đôn từ v1.1 lên MVP sau khi phân tích ChoreReward — đây là phần cốt lõi
 > trong luồng của họ, thiếu thì sản phẩm bị nhìn nhận là kém hơn.
+>
+> Mục 14 là **trụ riêng của Bé Ong**, không có trong ChoreReward. Quản lý tiền là nửa sau của
+> tự lập: biết làm ra giá trị mà không biết giữ và dùng nó thì mới đi được nửa đường.
 
 ### v1.1 – v1.2
 - Level, thêm huy hiệu, thử thách tuần (weekly goals)
@@ -121,17 +128,60 @@ Gấp chăn màn → Soạn cặp sách.
 scheduled → (trẻ bấm xong) → pending_review → (parent duyệt) → approved → điểm cộng ví
                             ↘ (auto-approve)  → approved
                             ↘ (parent từ chối) → rejected → quay lại scheduled
-        → (hết ngày chưa làm) → missed
+                            ↘ (parent mở lại)  → scheduled, reopen_count++ , trừ xu
+        → (hết ngày chưa làm) → missed, trừ xu
 ```
+
+**Mặc định là không cần duyệt** (ADR-023): con bấm xong → `approved` ngay và **xu cộng ngay**. Bố mẹ
+bật `require_approval` trong Cài đặt thì mọi việc con bấm xong vào hàng đợi, duyệt từng việc hoặc
+bấm **Duyệt tất cả**.
+
+**Từ chối** và **mở lại** khác nhau, và UI phải nói rõ: từ chối là đóng lượt lại, mở lại là trả
+việc về cho con làm tiếp. Chỉ mở lại mới cộng `reopen_count` và mới bị trừ xu (ADR-022).
+
+Khi tắt duyệt thì không có hàng đợi, nên đường để bố mẹ mở lại việc là danh sách **"Đã xong hôm
+nay"** trong thẻ mỗi con ở Trang chính.
 
 Task thuộc routine: khi **mọi** instance của routine trong ngày đạt `approved` → ghi thêm một
 giao dịch `routine_bonus` (idempotent theo `(routine_id, member_id, due_date)`).
 
-### 4.4 Điểm & ví
+### 4.4 Xu & ví
+Đơn vị điểm trong app gọi là **xu**, không gọi là "điểm" hay "gem".
+
+> Cố ý: mục tiêu là dạy tài chính, nên đơn vị phải gợi tiền thật. "Con được 50 xu" tự nhiên
+> và có ý nghĩa hơn "con được 50 viên đá quý". Đá quý là đồ chơi; xu là thứ có thể quy ra
+> giá trị thật, có thể để dành, có thể tiêu hết.
+
 - Ví theo từng trẻ, số dư = tổng `approved` − tổng đã đổi thưởng
 - Mọi thay đổi số dư ghi vào **sổ cái (ledger)**, không sửa số dư trực tiếp
 - Loại giao dịch: `task_approved`, `routine_bonus`, `streak_bonus`, `reward_redeemed`,
   `reward_refund`, `manual_adjust`, `penalty`, `bonus`
+
+#### Trừ xu (mặc định tắt — ADR-022)
+Bố mẹ bật được hai mức, tính theo **phần trăm điểm của việc**:
+
+| Mức | Khi nào áp | Ví dụ với việc 10 xu |
+|---|---|---|
+| Hết ngày chưa làm | Lượt việc chuyển `missed` | 50% → trừ 5 xu |
+| Bấm xong nhưng chưa làm | Mỗi lần bố mẹ mở lại lượt | 20% → trừ 2 xu |
+
+Ví dụ đầy đủ một ngày — con đang có 100 xu, 10 việc mỗi việc 10 xu, làm xong 8 việc, trong đó 3
+việc phải làm lại một lần:
+
+```
+100  (đang có)
++80  8 việc x 10 xu
+-10  2 việc chưa làm x 50% x 10 xu
+- 6  3 lần làm lại x 20% x 10 xu
+= 164
+```
+
+Quy tắc bắt buộc (chi tiết và lý do ở ADR-022):
+- Việc bị mở lại **vẫn được tính xu đầy đủ** khi cuối cùng làm xong — không trừ hai lần cho một lỗi.
+- Số dư **không bao giờ âm**: trừ tối đa đến 0.
+- Thứ tự lấy xu: hũ Tiêu → Để dành → **Cho đi cuối cùng**.
+- Làm tròn xuống. Không trừ hồi tố khi bố mẹ bật tính năng muộn.
+- Mỗi khoản trừ là một dòng sổ cái có lý do đọc được, hiện trong "Sổ của con".
 
 ### 4.5 Phần thưởng
 - Phụ huynh tạo: tên, icon, **loại**, giá điểm, số lượng còn (tùy chọn), có cần duyệt không
@@ -169,6 +219,48 @@ lại cùng một nhắc nhở; không thông báo mang giọng trách móc; kh�
 | Yêu cầu đổi thưởng | Phụ huynh |
 | Tổng kết cuối ngày | Phụ huynh |
 | Sắp mất streak (chỉ khi còn ≥ 1 task chưa làm, gửi 1 lần) | Trẻ |
+
+### 4.8 Giáo dục tài chính
+
+Trụ riêng của Bé Ong. Mục tiêu: con hiểu **công sức → giá trị → lựa chọn**, chứ không chỉ
+đổi điểm lấy quà.
+
+#### Ba hũ
+Xu con kiếm được tự chia vào ba hũ theo tỷ lệ bố mẹ đặt (mặc định 50/40/10):
+
+| Hũ | Dùng để | Ghi chú |
+|---|---|---|
+| **Tiêu** | Đổi phần thưởng nhỏ ngay | Dạy tiêu có giới hạn |
+| **Để dành** | Dồn cho mục tiêu lớn | Không tiêu được cho đồ vặt — đây chính là điểm dạy dỗ |
+| **Cho đi** | Việc tử tế: mua quà tặng, quyên góp | Dạy tiền không chỉ để phục vụ mình |
+
+Trẻ lớn (cấu hình theo tuổi) được **tự đặt tỷ lệ chia** — một bước tiến của tự lập.
+
+#### Tỷ giá quy đổi
+Bố mẹ đặt tỷ giá tượng trưng (vd `100 xu = 10.000đ`). Ví của con hiển thị **cả hai**:
+`350 xu ≈ 35.000đ`.
+
+Đây là thứ biến điểm ảo thành khái niệm tiền thật mà không cần chạm vào thanh toán:
+con nhìn thấy công sức của mình có giá trị đo được. Tỷ giá là **tùy chọn**, tắt được —
+có gia đình không muốn gắn việc nhà với tiền, và đó là lựa chọn chính đáng.
+
+#### Mục tiêu tiết kiệm
+Con chọn một món muốn mua, đặt làm mục tiêu, kèm ảnh. Màn hình chính hiện thanh tiến độ
+"còn 120 xu nữa". Đây là cơ chế dạy **trì hoãn thỏa mãn** — kỹ năng tài chính quan trọng nhất
+mà một đứa trẻ có thể học.
+
+#### Sổ của con
+Toàn bộ lịch sử: xu vào từ việc nào, xu ra vì đổi gì, còn lại bao nhiêu ở mỗi hũ.
+Không giới hạn thời gian. Đây là hiện thân của giá trị **minh bạch** — xem
+[`00-brand-values.md`](00-brand-values.md).
+
+#### Lãi tượng trưng (v1.1)
+Bố mẹ có thể bật "thưởng để dành": cuối tháng, hũ Để dành được cộng thêm x% do bố mẹ trả.
+Dạy khái niệm tiền sinh tiền và phần thưởng cho sự kiên nhẫn.
+
+#### Ngoài phạm vi
+Không kết nối ví điện tử, không chuyển tiền thật, không KYC. Tiền tiêu vặt chỉ là ghi sổ
+"bố mẹ nợ con", hai bên tự thanh toán ngoài đời.
 
 ---
 

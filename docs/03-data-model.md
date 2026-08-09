@@ -16,6 +16,7 @@ families
    │              └── task_events (append-only)
    ├── rewards            (reward_type: screen_time|pocket_money|experience|item|custom)
    │      └── redemptions
+   ├── savings_goals      (mục tiêu tiết kiệm của trẻ)
    ├── streaks            (theo member, tính lại được)
    ├── badges_earned
    └── point_transactions (append-only ledger)
@@ -30,6 +31,9 @@ families
 | name | text | "Nhà mình" |
 | timezone | text | IANA, vd `Asia/Ho_Chi_Minh` — dùng để chốt "ngày" |
 | day_rollover_hour | int | mặc định 4 (ngày mới bắt đầu 4h sáng) |
+| exchange_rate_xu | int NULL | bao nhiêu xu = 1 đơn vị tiền; NULL = tắt quy đổi |
+| currency | text | mặc định `VND` |
+| jar_split | jsonb | tỷ lệ ba hũ, mặc định `{"spend":50,"save":40,"give":10}` |
 | created_at / updated_at | timestamptz | |
 
 ### memberships
@@ -53,6 +57,7 @@ families
 | birth_year | int NULL | để gợi ý preset theo tuổi |
 | pin_hash | text NULL | Argon2, chỉ lưu local |
 | balance_cache | int | số dư cache, luôn tính lại được từ ledger |
+| jar_split_override | jsonb NULL | trẻ lớn tự đặt tỷ lệ chia; NULL = theo gia đình |
 | deleted_at | timestamptz NULL | soft delete |
 
 ### routines
@@ -139,6 +144,18 @@ của các task đó không dùng đến.
 | created_at, resolved_at, resolved_by | | |
 | used_at | timestamptz NULL | trẻ bấm "đã dùng" trên phiếu |
 
+### savings_goals
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| id, family_id, member_id | uuid | |
+| title | text | "Bộ Lego cảnh sát" |
+| image_path | text NULL | ảnh món đồ con muốn |
+| target_xu | int | |
+| status | text | `active` \| `reached` \| `abandoned` |
+| created_at, reached_at | | |
+
+Chỉ một mục tiêu `active` mỗi trẻ — nhiều mục tiêu cùng lúc làm loãng bài học trì hoãn thỏa mãn.
+
 ### streaks
 `member_id PK, current_len, best_len, last_qualified_date, grace_used_month (YYYY-MM), grace_count`
 Bảng dẫn xuất — luôn tính lại được từ `task_instances`; chỉ để tránh quét lại lịch sử mỗi lần mở app.
@@ -152,7 +169,8 @@ Unique `(member_id, badge_key)` — huy hiệu chỉ nhận một lần.
 |---|---|---|
 | id | uuid PK | |
 | family_id, member_id | uuid | |
-| delta | int | dương/âm |
+| jar | text | `spend` \| `save` \| `give` — mỗi giao dịch thuộc đúng một hũ |
+| delta | int | dương/âm, đơn vị **xu** |
 | reason | text | `task_approved` \| `routine_bonus` \| `streak_bonus` \| `reward_redeemed` \| `reward_refund` \| `manual_adjust` \| `bonus` \| `penalty` |
 | ref_type / ref_id | text/uuid | trỏ tới instance, routine hoặc redemption |
 | note | text NULL | |
@@ -160,15 +178,45 @@ Unique `(member_id, badge_key)` — huy hiệu chỉ nhận một lần.
 | client_op_id | uuid UNIQUE | idempotency |
 | created_at | timestamptz | |
 
-> Số dư = `SELECT COALESCE(SUM(delta),0) FROM point_transactions WHERE member_id = ?`.
+> Số dư mỗi hũ = `SELECT SUM(delta) FROM point_transactions WHERE member_id = ? AND jar = ?`.
+> Tổng số dư = tổng ba hũ. Không có cột số dư nào được ghi trực tiếp.
+>
+> Một lần duyệt task sinh **ba dòng ledger** (một cho mỗi hũ) theo `jar_split`, chia phần dư
+> vào hũ Tiêu để tổng luôn khớp. Cả ba dòng dùng chung `client_op_id` gốc kèm hậu tố hũ để
+> giữ tính idempotent.
 > `members.balance_cache` chỉ để hiển thị nhanh; job đối soát chạy lại mỗi lần full sync.
 
 ### outbox (chỉ local)
 `id, op, entity, entity_id, payload_json, client_op_id, created_at, retry_count, last_error`
 
+### device_settings (chỉ local, không đồng bộ)
+`setting_key (PK), setting_value`
+
+Cấu hình thuộc về **cái máy này**, không thuộc về gia đình: đang mở hồ sơ nào, vai đã chọn. Cấu
+hình gia đình nằm ở tài khoản bố mẹ (ADR-021). Khoá session dùng tiền tố `session.`.
+
+**Không đặt bí mật vào bảng này.** Token ghép cặp phải nằm ở Keychain / Keystore
+(`09-onboarding-pairing.md` §4) — file SQLite đọc được trên máy đã root hoặc qua bản sao lưu.
+
+### Cấu hình duyệt (trên `families`)
+`require_approval` — mặc định `false`: con bấm xong là xong (ADR-023). Bật lên thì tôn trọng
+`tasks.approval_mode` của từng task.
+
+### Cấu hình trừ xu (trên `families`)
+`missed_penalty_pct, reopen_penalty_pct` — phần trăm điểm của việc, 0 = tắt (ADR-022).
+
+### Đếm trừ xu (trên `task_instances`)
+`reopen_count` — số lần bố mẹ mở lại lượt này; mỗi lần là một khoản trừ.
+`missed_penalty_at` — đã áp khoản trừ "bỏ việc" chưa. Có cột này thì bộ chạy cuối ngày chỉ quét
+phần chưa xử lý, và **không trừ hồi tố** khi bố mẹ bật tính năng muộn.
+
 ## 3. Sinh task_instances
 
 Chạy khi: mở app, đổi ngày, sửa task.
+
+> **Lệch với code hiện tại:** `TaskDao.generateInstances` chỉ được gọi từ nút "Tạo việc hôm nay"
+> trên màn hình con, không chạy lúc mở app. Hệ quả thấy được: bố mẹ mở app sau khi tạo routine thì
+> thấy "0 / 0 việc hôm nay", tưởng routine chưa lưu. Việc còn lại nằm ở `05-roadmap.md` Sprint 3.
 
 ```
 Với mỗi task active của family:
@@ -237,5 +285,12 @@ create policy tasks_rw on tasks
 ## 6. Migration
 
 - Drift: `schemaVersion` tăng dần, mỗi bước có test dựng DB phiên bản cũ rồi migrate.
+  Test: `test/unit/data/migration_test.dart`.
+  - v1 → v2: thêm `device_settings`.
+  - v3 → v4: thêm `families.require_approval` (ADR-023). Default `false`, nên gia đình nâng cấp từ
+    bản cũ **đổi hành vi** — đây là đổi có chủ ý, có test chốt.
+  - v2 → v3: thêm `families.missed_penalty_pct`, `families.reopen_penalty_pct`,
+    `task_instances.reopen_count`, `task_instances.missed_penalty_at` (ADR-022). Mọi cột có
+    default 0/NULL nên **nâng cấp không tự bật trừ xu** — có test khẳng định điều này.
 - Supabase: file SQL đánh số trong `supabase/migrations/`, chạy qua CLI trong CI.
 - Quy tắc: chỉ thêm cột nullable hoặc có default; đổi tên = thêm mới + backfill + xóa ở release sau.

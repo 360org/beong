@@ -1,6 +1,6 @@
-import 'package:dailychildren/core/theme/app_colors.dart';
-import 'package:dailychildren/core/theme/app_spacing.dart';
-import 'package:dailychildren/core/theme/app_typography.dart';
+import 'package:beong/core/theme/app_colors.dart';
+import 'package:beong/core/theme/app_spacing.dart';
+import 'package:beong/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 
 /// Dựng [ThemeData] sáng/tối từ design token.
@@ -12,10 +12,17 @@ abstract final class AppTheme {
     // `surface` và `onPrimary` trùng mặc định của ColorScheme.light nên bỏ qua.
     // Các trường còn lại phải khai báo — mặc định của Material cho onSurface và
     // outlineVariant là đen thuần, không phải màu thương hiệu.
+    ctaBackground: AppColors.xuLight,
+    ctaForeground: AppColors.onSurfaceLight,
+    navLabel: AppColors.navLabelLight,
     scheme: const ColorScheme.light(
       primary: AppColors.primaryLight,
       primaryContainer: AppColors.primaryContainerLight,
       onPrimaryContainer: AppColors.onSurfaceLight,
+      secondary: AppColors.secondaryLight,
+      onSecondary: AppColors.onSecondaryLight,
+      secondaryContainer: AppColors.secondaryContainerLight,
+      onSecondaryContainer: AppColors.onSecondaryContainerLight,
       onSurface: AppColors.onSurfaceLight,
       surfaceContainerHighest: AppColors.surfaceVariantLight,
       outlineVariant: AppColors.outlineLight,
@@ -26,11 +33,18 @@ abstract final class AppTheme {
 
   static ThemeData dark() => _build(
     brightness: Brightness.dark,
+    ctaBackground: AppColors.xuDark,
+    ctaForeground: AppColors.onPrimaryDark,
+    navLabel: AppColors.navLabelDark,
     scheme: const ColorScheme.dark(
       primary: AppColors.primaryDark,
       onPrimary: AppColors.onPrimaryDark,
       primaryContainer: AppColors.primaryContainerDark,
       onPrimaryContainer: AppColors.onSurfaceDark,
+      secondary: AppColors.secondaryDark,
+      onSecondary: AppColors.onSecondaryDark,
+      secondaryContainer: AppColors.secondaryContainerDark,
+      onSecondaryContainer: AppColors.onSecondaryContainerDark,
       surface: AppColors.surfaceDark,
       onSurface: AppColors.onSurfaceDark,
       surfaceContainerHighest: AppColors.surfaceVariantDark,
@@ -43,6 +57,9 @@ abstract final class AppTheme {
   static ThemeData _build({
     required ColorScheme scheme,
     required AppSemanticColors semantic,
+    required Color ctaBackground,
+    required Color ctaForeground,
+    required Color navLabel,
     Brightness brightness = Brightness.light,
   }) {
     final textTheme = AppTypography.textTheme(scheme.onSurface);
@@ -52,6 +69,9 @@ abstract final class AppTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor: scheme.surface,
       textTheme: textTheme,
+      // Đặt cả ở đây để `TextStyle(...)` viết tay trong widget (không dựa vào
+      // textTheme) vẫn thừa hưởng Nunito qua DefaultTextStyle.
+      fontFamily: AppTypography.fontFamily,
       extensions: [semantic],
 
       appBarTheme: AppBarTheme(
@@ -64,10 +84,14 @@ abstract final class AppTheme {
       ),
 
       // Nút chính: full-width, cao 56, bo tròn — §4 design system.
+      //
+      // Nền vàng mật + chữ đậm, **không** dùng trắng-trên-primary: nút là khối
+      // màu lớn nhất màn hình nên để vàng ở đây thì màu Bé Ong mới thật sự chủ
+      // đạo, và cặp này đạt 11.00:1 so với 4.65:1 của trắng-trên-dương.
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: scheme.primary,
-          foregroundColor: scheme.onPrimary,
+          backgroundColor: ctaBackground,
+          foregroundColor: ctaForeground,
           minimumSize: const Size.fromHeight(AppSpacing.giant),
           elevation: 0,
           shape: const RoundedRectangleBorder(
@@ -77,6 +101,75 @@ abstract final class AppTheme {
             fontWeight: FontWeight.w800,
             letterSpacing: 0.5,
           ),
+        ),
+      ),
+
+      // Thanh điều hướng — icon cỡ lớn, nét bo tròn, viên nền squircle.
+      //
+      // Icon to hơn mặc định Material (30 vs 24) vì với bé chưa đọc được nhãn
+      // thì icon là **nội dung duy nhất**, không phải trang trí. Kích thước lấy
+      // từ AppNavMetrics để test giữ được, không rải số magic ở đây.
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: scheme.surface,
+        elevation: 0,
+        height: AppNavMetrics.barHeight,
+        indicatorColor: scheme.primaryContainer,
+        indicatorShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(AppNavMetrics.indicatorRadius),
+          ),
+        ),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return IconThemeData(
+            size: AppNavMetrics.iconSize,
+            color: selected ? scheme.primary : navLabel,
+          );
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return TextStyle(
+            fontFamily: AppTypography.fontFamily,
+            fontSize: AppNavMetrics.labelSize,
+            fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+            letterSpacing: 0.2,
+            color: selected ? scheme.primary : navLabel,
+          );
+        }),
+      ),
+
+      // Rail trên desktop dùng cùng ngôn ngữ hình học với thanh dưới.
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: scheme.surface,
+        elevation: 0,
+        indicatorColor: scheme.primaryContainer,
+        indicatorShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(AppNavMetrics.indicatorRadius),
+          ),
+        ),
+        selectedIconTheme: IconThemeData(
+          size: AppNavMetrics.iconSize,
+          color: scheme.primary,
+        ),
+        unselectedIconTheme: IconThemeData(
+          size: AppNavMetrics.iconSize,
+          color: navLabel,
+        ),
+        selectedLabelTextStyle: TextStyle(
+          fontFamily: AppTypography.fontFamily,
+          fontSize: AppNavMetrics.railLabelSize,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.2,
+          color: scheme.primary,
+        ),
+        unselectedLabelTextStyle: TextStyle(
+          fontFamily: AppTypography.fontFamily,
+          fontSize: AppNavMetrics.railLabelSize,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.2,
+          color: navLabel,
         ),
       ),
 
@@ -132,7 +225,7 @@ abstract final class AppTheme {
   }
 }
 
-/// Truy cập nhanh màu ngữ nghĩa: `context.semantic.gem`.
+/// Truy cập nhanh màu ngữ nghĩa: `context.semantic.xu`.
 extension AppThemeContext on BuildContext {
   AppSemanticColors get semantic =>
       Theme.of(this).extension<AppSemanticColors>() ?? AppSemanticColors.light;
@@ -140,4 +233,7 @@ extension AppThemeContext on BuildContext {
   ColorScheme get colors => Theme.of(this).colorScheme;
 
   TextTheme get text => Theme.of(this).textTheme;
+
+  /// Một gradient cho cả hai chế độ — xem [AppColors.dashboardGradient].
+  Gradient get dashboardGradient => AppColors.dashboardGradient;
 }

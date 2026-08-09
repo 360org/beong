@@ -5,28 +5,70 @@ mở rộng được cho desktop.
 
 ## 1. Màu
 
+### Ba màu thương hiệu và cách chia vai
+
+| Màu | Mã | Vai |
+|---|---|---|
+| Vàng mật Bé Ong | `#FFC53D` | Nhận diện, chiếm diện tích lớn: nút chính, xu, linh vật, danh hiệu |
+| Xanh dương 360 Corp | `#0077CD` | Tương tác & cấu trúc: `primary`, viền, thanh tiến độ |
+| Xanh lá 360 Corp | `#00CE2C` | Hoàn thành, duyệt |
+
+Cách chia vai này **suy ra từ ràng buộc tương phản**, không phải sở thích:
+
+| Cặp màu | Tỉ lệ | Kết luận |
+|---|---|---|
+| Vàng mật + chữ trắng | 1.58:1 | ✗ Không bao giờ dùng |
+| Lá 360 + chữ trắng | 2.13:1 | ✗ Nền sáng phải hạ độ sáng thành `#00851C` (4.80:1) |
+| Dương 360 + chữ trắng | 4.65:1 | ✓ Nên nó làm `primary` |
+| Vàng mật + chữ đậm | **11.00:1** | ✓ Nút chính dùng cặp này |
+
+Vì vậy **nút chính là vàng mật với chữ đậm**, không phải trắng-trên-`primary`: nút là khối màu
+lớn nhất màn hình nên để vàng ở đó thì màu Bé Ong mới thật sự chủ đạo, và cặp này đạt 11.00:1
+thay vì 4.65:1.
+
+### Token
+
 | Token | Light | Dark | Dùng cho |
 |---|---|---|---|
-| `primary` | `#6B4EFF` | `#8B72FF` | Nút chính, chip đang chọn |
-| `onPrimary` | `#FFFFFF` | `#12082E` | Chữ trên nút chính |
-| `primaryContainer` | `#EFEBFF` | `#2A1E5C` | Chip preset, nền footer |
+| `primary` | `#0077CD` | `#3AA0E8` | Chip đang chọn, viền focus, thanh tiến độ |
+| `onPrimary` | `#FFFFFF` | `#12082E` | Chữ trên `primary` |
+| `primaryContainer` | `#E3F2FD` | `#10365C` | Chip preset, nền icon |
 | `surface` | `#FFFFFF` | `#14102A` | Nền màn hình |
 | `surfaceVariant` | `#F6F5FC` | `#1E1940` | Card, ô nhập |
 | `onSurface` | `#1B1046` | `#F2F0FF` | Chữ chính |
-| `onSurfaceMuted` | `#8E8AA8` | `#A7A2C4` | Nhãn phụ (`QUICK PRESETS`, `POINTS`) |
-| `success` | `#22C55E` | `#4ADE80` | Đã duyệt, streak |
-| `warning` | `#F59E0B` | `#FBBF24` | Chờ duyệt, gem |
-| `danger` | `#EF4444` | `#F87171` | Xóa, từ chối, missed |
-| `gem` | `#FFC53D` | `#FFD166` | Biểu tượng điểm |
+| `onSurfaceMuted` | `#8E8AA8` | `#A7A2C4` | Nhãn phụ (`VIỆC CÓ SẴN`, `ĐIỂM`) |
+| `success` | `#00851C` | `#00CE2C` | Đã duyệt, streak |
+| `successBright` | `#00CE2C` | `#00CE2C` | Nền trang trí, **chỉ với nội dung đậm** |
+| `warning` | `#B55800` | `#FF922B` | Chờ duyệt — cam, tách rõ khỏi vàng xu |
+| `danger` | `#E31313` | `#F87171` | Xoá, từ chối, bỏ lỡ |
+| `xu` | `#FFC53D` | `#FFD166` | **Nền** đồng xu |
+| `xuText` | `#906500` | `#FFD166` | **Chữ số** xu |
 
-**Màu hồ sơ trẻ** (dùng cho avatar, viền card, biểu đồ): 8 màu
-`#6B4EFF #E3004D #17833F #9E6606 #047D92 #9B3CF6 #E31313 #0E8074`.
+`xu` và `xuText` phải tách làm hai token: nền badge xu là `xu` pha mờ 15% nên gần như trắng,
+viết số bằng chính `xu` lên đó chỉ đạt 1.47:1 — đọc không được.
+
+### Gradient thẻ Dashboard
+
+Chạy `#0077CD` → `#00851C`, tức dùng đúng hai màu công ty làm nền, còn linh vật vàng đặt lên
+trên — vàng và xanh là cặp bù màu nên con ong nổi hẳn. Mọi điểm dọc gradient đạt ≥ 4.65:1 với
+chữ trắng, nên chữ trắng đặt ở đâu trên thẻ cũng đọc được. Dùng chung cho cả hai chế độ.
+
+Thân ong màu vàng chỉ đạt 2.94:1 với gradient — dưới ngưỡng 3:1 mà WCAG 1.4.11 đòi cho hình
+mang nghĩa (mặt ong chính là cách báo tiến độ cho trẻ chưa đọc số). Vì vậy linh vật có **viền
+kem `#FFF6E2` kiểu sticker**; viền là thứ tiếp giáp nền và nó đạt ngưỡng.
+
+### Màu hồ sơ trẻ
+
+8 màu dùng cho avatar, viền card, biểu đồ:
+`#0066B0 #E3004D #00851C #9E6606 #047D92 #9B3CF6 #E31313 #0E8074`.
+Hai màu đầu và thứ ba lấy từ màu 360 (đã hạ độ sáng cho đủ tương phản).
 
 Ràng buộc: mọi màu hồ sơ đạt contrast **≥ 4.8:1 với chữ trắng** khi làm nền đậm (ngưỡng WCAG AA
-là 4.5, chừa biên an toàn). Giá trị trên là bảng màu thiết kế ban đầu (`#FF6B9D #22C55E #F59E0B
-#06B6D4 #A855F7 #EF4444 #14B8A6`) đã **hạ độ sáng, giữ nguyên hue/saturation** cho tới khi đạt
-ngưỡng — bảng gốc chỉ đạt 2.7–3.9:1, không dùng được với chữ trắng.
-`test/unit/app_theme_test.dart` kiểm tra lại ràng buộc này ở mỗi lần chạy CI.
+là 4.5, chừa biên an toàn). Giá trị được tính bằng cách **hạ độ sáng, giữ nguyên hue/saturation**
+cho tới khi đạt ngưỡng.
+
+Toàn bộ ràng buộc màu ở mục này được `test/unit/app_theme_test.dart` kiểm lại ở mỗi lần chạy CI —
+đổi màu mà không chạy test là làm chữ không đọc được.
 
 ## 2. Chữ
 
@@ -43,6 +85,15 @@ Fallback hệ thống: SF Pro / Roboto / Segoe UI.
 | `caption` | 13 / 500 / 1.4 |
 
 Giao diện trẻ dùng cỡ ≥ 16; tôn trọng `textScaleFactor` hệ thống, giới hạn trần 1.6 để không vỡ layout.
+
+### Motif lục giác
+Ô lục giác của tổ ong là dấu hiệu nhận diện của Bé Ong. Dùng có chừng mực, chỉ ở ba chỗ:
+
+- **Huy hiệu** — khung lục giác thay vì tròn
+- **Lưới nhiệm vụ trên desktop** — các thẻ xếp so le kiểu tổ ong ở breakpoint rộng
+- **Hoa văn nền mờ** — opacity ≤ 4%, chỉ ở màn hình trống và màn ăn mừng
+
+Không lục giác hoá nút bấm, avatar hay ô nhập — vùng chạm phải dễ đoán, hình lạ làm trẻ khựng lại.
 
 ## 3. Khoảng cách & hình khối
 
@@ -66,6 +117,9 @@ Giao diện trẻ dùng cỡ ≥ 16; tôn trọng `textScaleFactor` hệ thống
 | `RoutineCard` | Icon + tên routine + thanh tiến độ "2/4" + danh sách task con thu gọn được |
 | `RoutineProgressRing` | Vòng tròn tiến độ routine; đầy 100% → hiệu ứng phát sáng + hiện điểm bonus |
 | `RewardCard` | Icon theo `reward_type` + tên + giá gem; nếu chưa đủ điểm hiện "còn thiếu 30 💎" |
+| `XuBadge` | Đồng xu vàng + số; nếu gia đình bật quy đổi thì hiện thêm `≈ 35.000đ` cỡ nhỏ |
+| `JarTrio` | Ba hũ Tiêu · Để dành · Cho đi, mỗi hũ một cột mật đầy dần |
+| `GoalCard` | Ảnh món con muốn + thanh tiến độ + "còn 120 xu nữa" |
 | `StreakFlame` | Ngọn lửa + số ngày; xám khi streak = 0; nhấp nháy nhẹ khi hôm nay chưa đạt |
 | `BadgeGrid` | Lưới huy hiệu, cái chưa đạt hiện dạng bóng mờ + điều kiện đạt |
 | `VoucherCard` | Phiếu đã đổi: loại, nội dung, ngày, nút "Đã dùng" |
@@ -130,8 +184,9 @@ nhưng 5 preset đầu được xếp theo tần suất dùng của gia đình t
 - Tab theo buổi: Sáng / Chiều / Tối (chỉ hiện buổi có việc)
 - Nội dung mỗi buổi: **`RoutineCard` trước, task lẻ sau**
 - `TaskCard` với checkbox lớn; bấm xong → animation confetti + âm thanh + haptic
-- Thẻ "Mục tiêu của con": phần thưởng đang tiết kiệm + thanh tiến độ
-- Nút **Đổi thưởng** · **Huy hiệu của con**
+- `JarTrio` — ba hũ của con, bấm vào từng hũ xem chi tiết
+- `GoalCard` — món con đang để dành, thanh tiến độ
+- Nút **Đổi thưởng** · **Sổ của con** · **Huy hiệu của con**
 
 ### 6.3b Routine Editor (phụ huynh)
 1. Tên + icon
@@ -161,6 +216,14 @@ Thứ tự khối, từ trên xuống:
 
 > Phần thưởng `screen_time` hiển thị kèm dòng nhỏ *"Bố mẹ sẽ bật cho con"* — nói rõ đây là
 > thỏa thuận giữa người với người, app không tự khóa/mở máy (xem ADR-012).
+
+### 6.5b Sổ của con
+Hiện thân của giá trị **minh bạch** (`00-brand-values.md`). Danh sách giao dịch theo thời gian:
+
+- Mỗi dòng: ngày · việc gì · vào hũ nào · +/- bao nhiêu xu · ai duyệt
+- Lọc theo hũ, theo tháng. **Không giới hạn thời gian** — con xem lại được từ ngày đầu
+- Giao dịch `manual_adjust` **luôn hiện lý do bố mẹ ghi**. Không có lý do thì không lưu được
+- Không có nút xóa. Sổ cái là append-only (ADR-005), sửa sai bằng cách ghi một dòng bù
 
 ### 6.6 Thống kê (phụ huynh)
 - Biểu đồ cột 7 ngày: task hoàn thành theo trẻ

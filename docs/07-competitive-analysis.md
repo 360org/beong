@@ -2,6 +2,7 @@
 
 Nguồn: trang App Store của **ChoreReward** (nhà phát triển **Kidslox inc**), chụp 2026-08.
 
+
 ---
 
 ## 1. Định vị của họ
@@ -52,7 +53,7 @@ Với đúng đối tượng người dùng — trẻ em, thiết bị cũ, wifi
 "mất mạng là app chết" phá vỡ toàn bộ vòng lặp động lực: trẻ làm xong mà không tick được thì
 lần sau không buồn làm nữa.
 
-→ **Thông điệp marketing chính của DailyChildren: "Hoạt động cả khi mất mạng."**
+→ **Thông điệp marketing chính của Bé Ong: "Hoạt động cả khi mất mạng."**
 
 ### 5.2 Chỉ có mobile
 Không có bản desktop. Phụ huynh thiết lập tuần và xem báo cáo trên máy tính thoải mái hơn nhiều.
@@ -71,13 +72,14 @@ Chưa đủ rating → còn kịp để vào. Nhưng cũng nghĩa là **chưa c�
 
 ## 6. Bảng đối chiếu
 
-| | ChoreReward | DailyChildren (kế hoạch) |
+| | ChoreReward | Bé Ong (kế hoạch) |
 |---|---|---|
 | Nền tảng | iOS (+Android) | iOS, Android, **macOS, Windows** |
 | Mất mạng | **Không dùng được** | **Dùng đầy đủ, sync sau** |
 | Routine | ✅ | ✅ (bổ sung sau phân tích này) |
 | Screen time reward | ✅ (nhờ Kidslox) | ⚠️ dạng phiếu, không cưỡng chế kỹ thuật ở v1 |
 | Tiền tiêu vặt | ✅ | ✅ (theo dõi, không xử lý thanh toán) |
+| **Giáo dục tài chính** (ba hũ, mục tiêu, sổ chi tiêu) | ❌ | ✅ **trụ riêng, MVP** |
 | Bằng chứng hoàn thành | ❌ | ✅ v1.1 (ảnh/ghi chú) |
 | Nhiều phụ huynh | ? | ✅ |
 | Thống kê cho phụ huynh | Cơ bản | ✅ + xuất CSV/PDF |

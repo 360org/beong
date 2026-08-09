@@ -1,16 +1,28 @@
-import 'package:dailychildren/core/l10n/gen/app_localizations.dart';
-import 'package:dailychildren/core/widgets/placeholder_screen.dart';
-import 'package:dailychildren/core/widgets/responsive_scaffold.dart';
+import 'package:beong/core/l10n/gen/app_localizations.dart';
+import 'package:beong/core/providers/session_provider.dart';
+import 'package:beong/core/widgets/responsive_scaffold.dart';
+import 'package:beong/features/child_home/child_home_screen.dart';
+import 'package:beong/features/onboarding/onboarding_screen.dart';
+import 'package:beong/features/parent_home/parent_home_screen.dart';
+import 'package:beong/features/rewards/rewards_screen.dart';
+import 'package:beong/features/settings/penalty_settings_screen.dart';
+import 'package:beong/features/settings/settings_screen.dart';
+import 'package:beong/features/stats/stats_screen.dart';
+import 'package:beong/features/tasks/tasks_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Đường dẫn của các màn hình chính. Dùng hằng số, không rải chuỗi thô.
 abstract final class Routes {
   static const home = '/';
   static const tasks = '/tasks';
   static const rewards = '/rewards';
   static const stats = '/stats';
   static const settings = '/settings';
+
+  /// Trang con của Cài đặt — cấu hình trừ xu (ADR-022).
+  static const penaltySettings = '/settings/penalty';
+  static const onboarding = '/onboarding';
 
   static const List<String> shellBranches = [
     home,
@@ -21,30 +33,85 @@ abstract final class Routes {
   ];
 }
 
-/// Router của app.
-///
-/// Dùng [StatefulShellRoute] để mỗi tab giữ được lịch sử điều hướng riêng —
-/// quan trọng trên desktop, nơi người dùng nhảy qua lại giữa các mục nhiều hơn.
-GoRouter createRouter() {
+GoRouter createRouter({
+  required AppSession? Function() getSession,
+  required Listenable refreshListenable,
+}) {
   return GoRouter(
     initialLocation: Routes.home,
+    refreshListenable: refreshListenable,
+    redirect: (context, state) {
+      final session = getSession();
+      final isOnboarding = state.matchedLocation == Routes.onboarding;
+
+      if (session == null && !isOnboarding) return Routes.onboarding;
+      if (session != null && isOnboarding) return Routes.home;
+      return null;
+    },
     routes: [
+      GoRoute(
+        path: Routes.onboarding,
+        builder: (context, state) => const OnboardingScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             _AppShell(navigationShell: navigationShell),
         branches: [
-          for (final branch in _branches)
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: branch.path,
-                  builder: (context, state) => PlaceholderScreen(
-                    title: branch.title(context),
-                    icon: branch.icon,
-                  ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.home,
+                builder: (context, state) => Consumer(
+                  builder: (context, ref, _) {
+                    final session = ref.watch(sessionProvider);
+                    if (session == null) return const SizedBox.shrink();
+                    if (session.isParent) return const ParentHomeScreen();
+                    return const ChildHomeScreen();
+                  },
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.tasks,
+                builder: (context, state) => const TasksScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.rewards,
+                builder: (context, state) => const RewardsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.stats,
+                builder: (context, state) => const StatsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.settings,
+                builder: (context, state) => const SettingsScreen(),
+                routes: [
+                  GoRoute(
+                    // Đường dẫn con nên thanh điều hướng vẫn hiện và nút back
+                    // quay về đúng tab Cài đặt.
+                    path: 'penalty',
+                    builder: (context, state) => const PenaltySettingsScreen(),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     ],
@@ -81,22 +148,22 @@ final _branches = <_Branch>[
     path: Routes.tasks,
     title: (c) => L10n.of(c).tasksTitle,
     label: (c) => L10n.of(c).navTasks,
-    icon: Icons.checklist_outlined,
-    selectedIcon: Icons.checklist_rounded,
+    icon: Icons.fact_check_outlined,
+    selectedIcon: Icons.fact_check_rounded,
   ),
   _Branch(
     path: Routes.rewards,
     title: (c) => L10n.of(c).rewardsTitle,
     label: (c) => L10n.of(c).navRewards,
-    icon: Icons.card_giftcard_outlined,
-    selectedIcon: Icons.card_giftcard_rounded,
+    icon: Icons.redeem_outlined,
+    selectedIcon: Icons.redeem_rounded,
   ),
   _Branch(
     path: Routes.stats,
     title: (c) => L10n.of(c).statsTitle,
     label: (c) => L10n.of(c).navStats,
-    icon: Icons.insights_outlined,
-    selectedIcon: Icons.insights_rounded,
+    icon: Icons.bar_chart_outlined,
+    selectedIcon: Icons.bar_chart_rounded,
   ),
   _Branch(
     path: Routes.settings,
@@ -118,7 +185,6 @@ class _AppShell extends StatelessWidget {
       selectedIndex: navigationShell.currentIndex,
       onDestinationSelected: (index) => navigationShell.goBranch(
         index,
-        // Bấm lại tab đang mở → quay về gốc của tab đó.
         initialLocation: index == navigationShell.currentIndex,
       ),
       destinations: [

@@ -18,7 +18,8 @@ native riêng từng nền tảng (gấp 3 chi phí).
 **Bối cảnh:** trẻ dùng app ở nhà, trên xe, chỗ sóng yếu. Mọi độ trễ đều phá vỡ cảm giác thưởng.
 **Quyết định:** ghi Drift trước, UI đọc từ Drift, SyncEngine đẩy/kéo nền.
 **Hệ quả:** (+) app luôn tức thì, dùng được offline. (−) phải tự xử lý xung đột, phức tạp hơn
-đáng kể so với gọi API trực tiếp; chi phí này dồn vào Sprint 4.
+đáng kể so với gọi API trực tiếp. Chi phí này nằm ở sprint backend & sync, mà theo ADR-021 sprint
+đó đã đôn lên trước phần thưởng.
 
 ---
 
@@ -74,7 +75,11 @@ múi giờ khác server.
 ---
 
 ## ADR-009: Mặc định cần phụ huynh duyệt
-**Quyết định:** `approval_mode = manual` là mặc định khi tạo task; phụ huynh có thể chuyển `auto`.
+
+> **ĐÃ BỊ THAY THẾ bởi ADR-023.** Mặc định giờ là **không cần duyệt**. Giữ nguyên nội dung dưới đây
+> để thấy lập luận cũ và vì sao nó bị lật — đừng đọc mục này như quy tắc đang có hiệu lực.
+
+**Quyết định (cũ):** `approval_mode = manual` là mặc định khi tạo task; phụ huynh có thể chuyển `auto`.
 **Lý do:** chống gian lận, giữ vai trò của phụ huynh trong vòng lặp động lực.
 **Hệ quả:** phụ huynh quên duyệt sẽ chặn phần thưởng → bù bằng nhắc nhở cuối ngày + "Duyệt tất cả".
 Xem lại chỉ số này sau beta; nếu tỷ lệ duyệt trễ cao, cân nhắc auto cho task ≤ 10 điểm.
@@ -147,14 +152,247 @@ sắc bén khi đối thủ trực tiếp thu tiền.
 
 ---
 
+## ADR-015: Đơn vị điểm gọi là "xu", không phải "điểm" hay "gem"
+**Bối cảnh:** ChoreReward dùng gem (đá quý). Mục tiêu của Bé Ong có thêm trụ giáo dục tài chính.
+**Quyết định:** đơn vị trong app là **xu**, hiển thị kèm quy đổi ra tiền thật nếu gia đình bật.
+**Lý do:** đá quý là đồ chơi, không dạy được gì về tiền. Xu là thứ trẻ hiểu được là có giá trị,
+để dành được, tiêu hết được. Đơn vị phải khớp với bài học.
+**Hệ quả:** phải cẩn thận về ranh giới — app **không** chạm vào tiền thật, không ví điện tử,
+không KYC. Tiền tiêu vặt chỉ là ghi sổ giữa bố mẹ và con.
+
+---
+
+## ADR-016: Ba hũ Tiêu / Để dành / Cho đi, chia tự động ngay khi kiếm được
+**Bối cảnh:** cách dạy tài chính cho trẻ phổ biến nhất là chia thu nhập thành nhiều phần ngay
+khi nhận, thay vì tiêu trước rồi để dành phần còn lại.
+**Quyết định:** mỗi lần duyệt task, xu chia vào ba hũ theo tỷ lệ (mặc định 50/40/10) — sinh
+ba dòng ledger, không phải một. Hũ **Để dành** không tiêu được cho đồ vặt.
+**Lý do:** chia sau thì hũ Để dành luôn rỗng — đó là lý do người lớn cũng không tiết kiệm được.
+Ràng buộc "không tiêu được" chính là chỗ dạy dỗ, bỏ nó đi thì ba hũ chỉ còn là trang trí.
+**Hệ quả:** (−) mô hình ledger phức tạp hơn: mọi truy vấn số dư phải theo hũ, mọi giao dịch
+phải khai báo hũ. (+) Đổi lại có sẵn nền cho mục tiêu tiết kiệm và lãi tượng trưng.
+Trẻ lớn được tự đặt tỷ lệ — một bước của tự lập.
+
+---
+
+## ADR-017: Quy đổi ra tiền thật là tùy chọn, mặc định tắt
+**Bối cảnh:** gắn việc nhà với tiền là chủ đề gây tranh cãi trong nuôi dạy con. Nhiều chuyên gia
+cho rằng trả tiền cho việc nhà cơ bản làm mất động lực nội tại — trẻ ngừng giúp đỡ khi không
+được trả.
+**Quyết định:** `exchange_rate_xu` mặc định NULL (tắt). Gia đình nào muốn thì tự bật.
+**Lý do:** ta không đứng về phía nào trong tranh luận nuôi dạy con. Nhưng mặc định là một lời
+khuyên ngầm, nên mặc định phải là phương án an toàn hơn.
+**Hệ quả:** trụ giáo dục tài chính vẫn chạy khi tắt quy đổi — ba hũ, mục tiêu tiết kiệm và sổ
+chi tiêu đều hoạt động với xu thuần, không cần tiền thật.
+
+---
+
+## ADR-018: Vai (bố mẹ / con) được ghi nhớ ở local nhưng không cấp quyền
+
+**Bối cảnh:** luồng ở `09-onboarding-pairing.md` bắt đầu bằng việc chọn vai ngay lần mở app đầu.
+Nếu quyền suy ra từ lựa chọn đó thì trẻ chỉ cần vào Cài đặt đổi vai là thành bố mẹ.
+
+**Quyết định:** vai lưu ở local **chỉ để biết mở màn hình nào**. Mọi quyền suy ra từ credential:
+thiết bị bố mẹ có session auth user, thiết bị con có credential phạm vi hẹp gắn với đúng một
+`member_id`.
+
+**Hệ quả:** (+) đổi vai là thao tác vô hại, không cần khoá bằng PIN, không tạo đường leo thang
+quyền. (+) mất/mượn máy con cũng không thành máy bố mẹ. (−) phải cẩn thận không bao giờ để logic
+nghiệp vụ đọc cờ vai local thay vì đọc credential — dễ sai khi code nhanh.
+
+---
+
+## ADR-019: QR ghép cặp chỉ chứa mã dùng một lần, không chứa dữ liệu
+
+**Bối cảnh:** thiết bị con cần biết nó thuộc gia đình nào và là bé nào. Cách gọn nhất là nhét
+`family_id` + `member_id` + tên vào QR.
+
+**Quyết định:** QR chỉ chứa một mã ngẫu nhiên 128 bit, hạn 10 phút, dùng một lần
+(`beong://pair?v=1&c=<code>`). Server lưu hash của mã. Mọi dữ liệu đi qua server sau khi mã được
+xác thực, và server cấp credential phạm vi hẹp chứ không phải session đầy đủ.
+
+**Lý do:** QR bị chụp lại là chuyện thường (ảnh chụp màn hình, camera người khác). Nếu QR mang dữ
+liệu thì thông tin của trẻ rò rỉ **vĩnh viễn** và không có đường thu hồi — ảnh đã chụp thì không
+rút lại được. Mã vô nghĩa sau 10 phút thì ảnh chụp cũng vô giá trị.
+
+**Hệ quả:** (−) **ghép cặp bắt buộc cần backend**, không có cách nào làm local-only cho ra sản
+phẩm thật; điều này đôn Supabase lên trước trong lộ trình (xem `09` §8). (+) thu hồi được: xoá
+thiết bị là credential vô hiệu.
+
+**Đã cân nhắc:** ghép qua LAN/Bluetooth — hỏng ngay khi hai máy không cùng mạng, mà đó là trường
+hợp thường gặp (bố mẹ ở cơ quan, con ở nhà).
+
+---
+
+## ADR-020: Server chỉ giữ nhóm tuổi của trẻ, không giữ năm sinh
+
+**Bối cảnh:** `members.birthYear` dùng để chọn nhóm tuổi giao diện (`domain/services/age_band.dart`
+— 5–8 / 9–12 / 13–15). Giao diện chỉ cần **nhóm**, không cần năm chính xác.
+
+**Quyết định:** đồng bộ nhóm tuổi (`little` / `middle` / `teen`); năm sinh chính xác chỉ nằm ở
+local máy bố mẹ, không lên server.
+
+**Lý do:** năm sinh là dữ liệu cá nhân của trẻ vị thành niên. Không thu thập lên server thì giảm
+được nghĩa vụ COPPA/GDPR-K đáng kể, mà mất gần như không có gì — cùng lý do với ADR-006.
+
+**Hệ quả:** (+) bề mặt dữ liệu trẻ em trên server nhỏ hơn. (−) đổi ranh giới nhóm tuổi sau này thì
+thiết bị đã ghép cặp không tự xếp lại được, phải bố mẹ nhập lại năm sinh.
+
+---
+
+## ADR-021: Cấu hình gia đình sống trên tài khoản bố mẹ; máy con là bản sao đồng bộ
+
+**Bối cảnh:** câu hỏi mở #8 hỏi có đôn backend lên trước Sprint 3 hay ra v1.0 một-thiết-bị rồi
+ghép cặp ở v1.1. Câu hỏi thật nằm dưới nó: **nơi cư trú của cấu hình** (gia đình, hồ sơ con, task,
+phần thưởng) là máy bố mẹ hay là tài khoản bố mẹ.
+
+**Quyết định:** cấu hình cư trú trên **tài khoản bố mẹ** ở server. Bố mẹ cấu hình xong thì cấu
+hình thuộc về tài khoản, không thuộc về cái máy đã nhập nó. Máy con quét QR → tải về **hồ sơ của
+đúng bé đó** → từ đó đồng bộ hai chiều với tài khoản bố mẹ.
+
+Hệ quả về thứ tự: **backend + auth lên trước phần thưởng/streak** (chọn hướng A của `09` §8).
+
+**Lý do:** đây là điều kiện của ba thứ đã hứa ở chỗ khác và không thể làm local-only:
+- Ghép cặp bằng QR (ADR-019 — QR không mang dữ liệu, nên dữ liệu phải tới từ server).
+- "Mỗi bé một máy" — điểm bán chính, chứ không phải tính năng phụ.
+- Đổi/mất máy bố mẹ mà không mất cả nhà. Nếu cấu hình chỉ nằm ở máy bố mẹ thì mất máy là mất
+  toàn bộ lịch sử xu của con — hỏng đúng thứ app hứa giữ.
+
+**Điều này không lật ADR-002.** Hai câu nói về hai thứ khác nhau, và đừng để chúng bị đọc lẫn:
+
+| | Nguồn sự thật | Vì sao |
+|---|---|---|
+| **Cấu hình** (gia đình, hồ sơ con, task, phần thưởng, tỷ giá) | Tài khoản bố mẹ trên server | Phải sống lâu hơn cái máy, phải tới được máy con |
+| **Hoạt động lúc chạy** (tick việc, cộng xu, tiến độ) | Drift local trên chính máy đó | Bé tick lúc mất mạng phải được cộng xu **ngay** (ADR-002) |
+
+Nghĩa là máy con vẫn ghi Drift trước rồi đẩy lên sau, đúng như ADR-002; nó chỉ không còn là nơi
+**khai sinh** cấu hình.
+
+**Hệ quả:**
+- (+) Câu hỏi mở #8 đóng lại; `05-roadmap.md` đảo thứ tự Sprint 3 ↔ Sprint 4.
+- (+) Máy con cài lại app vẫn lấy lại được dữ liệu bằng cách ghép lại — không mất lịch sử.
+- (−) Không còn đường ra hàng "một thiết bị, không cần tài khoản". v1.0 **bắt buộc** có auth, nên
+  ngày phát hành lùi lại và phần thưởng/streak (Sprint 3 cũ) đi sau.
+- (−) Bắt buộc phải có mạng ở hai thời điểm: bố mẹ đăng ký, và máy con quét QR một lần.
+- (−) Sinh ra nghĩa vụ dữ liệu trẻ em thật sự (không còn "mọi thứ chỉ ở local nên không phải lo") —
+  ADR-020 (server chỉ giữ nhóm tuổi) và ADR-010 (không analytics bên thứ ba) từ chỗ là lựa chọn
+  tốt trở thành **ràng buộc phải giữ**.
+
+**Đã cân nhắc:** hướng B — v1.0 một-thiết-bị, ghép cặp ở v1.1. Bỏ vì nó hoãn đúng điểm bán chính,
+và vì đổi nơi cư trú của cấu hình **sau khi** đã có người dùng thật là việc di trú dữ liệu đau hơn
+nhiều so với làm đúng từ đầu.
+
+---
+
+## ADR-023: Mặc định "làm xong là xong"; duyệt là tính năng bố mẹ tự bật
+
+**Thay thế ADR-009.**
+
+**Bối cảnh:** ADR-009 đặt `manual` làm mặc định để chống gian lận và giữ bố mẹ trong vòng lặp động
+lực. Chính nó đã ghi sẵn rủi ro: *"phụ huynh quên duyệt sẽ chặn phần thưởng"*. Đó là rủi ro nặng
+hơn dự tính — với mặc định cũ, mọi việc con làm đều **đứng lại chờ** một người trưởng thành mở app.
+Con làm xong mà xu không nhúc nhích thì phản hồi tức thì biến mất, mà phản hồi tức thì là toàn bộ
+cơ chế của app này.
+
+**Quyết định:** `families.require_approval`, **mặc định `false`**.
+
+| Trạng thái | Con bấm xong | Bố mẹ |
+|---|---|---|
+| Tắt (mặc định) | `approved` ngay, **xu cộng ngay** | Mở lại việc nếu thấy chưa làm thật |
+| Bật | `pending_review` | Duyệt từng việc, hoặc **Duyệt tất cả** |
+
+Thứ tự ưu tiên hai tầng: nhà tắt duyệt → mọi việc xong luôn, không đọc tới `tasks.approval_mode`.
+Nhà bật duyệt → tôn trọng cấu hình từng task (mặc định của task vẫn là `manual`). Quy tắc này nằm
+ở **một** hàm thuần `needsApproval` để hai chỗ không lệch nhau.
+
+**Lý do đổi mặc định thay vì chỉ thêm công tắc:** mặc định là thứ 90% gia đình sẽ dùng. Đặt mặc
+định ở "phải duyệt" là chọn thay cho họ cái phương án có điểm gãy là sự chú ý của người lớn.
+
+**Chống gian lận vẫn còn, chỉ đổi hướng:** thay vì chặn trước, app cho bố mẹ **mở lại** việc (ADR-022).
+Sai sót được sửa sau, không phải chặn trước — và trẻ vẫn nhận phản hồi tức thì trong trường hợp
+thường gặp, tức là khi con làm thật.
+
+**Một lỗi thật lộ ra khi làm quyết định này:** việc cộng xu đang nằm **trong nút duyệt ở UI**. Đường
+tự động duyệt (đã có sẵn cho task đặt `auto`) đổi trạng thái sang `approved` mà **không cộng xu cho
+ai**. Lỗi này không lộ khi mặc định là phải duyệt, nhưng đổi mặc định mà không sửa thì con bấm xong
+được 0 xu. Đã dồn toàn bộ quy tắc cộng xu vào `TaskReviewService`; UI không gọi `WalletDao.credit`
+cho việc nhà nữa.
+
+**Hệ quả:**
+- (+) Con nhận xu ngay khi làm xong — đúng cơ chế app hứa.
+- (+) Bố mẹ quên mở app không còn chặn động lực của con.
+- (+) Cộng xu chỉ còn một đường đi, thay vì hai đường mà một đường bị hỏng.
+- (−) Gia đình đang dùng bản cũ nâng cấp lên sẽ **đổi hành vi**: trước đây mọi việc phải duyệt, giờ
+  xong là xong. Đây là đổi có chủ ý, có test migration chốt, và cần nói rõ trong ghi chú phát hành.
+- (−) `reviewed_by` để trống khi không ai duyệt. Đúng với thực tế, nhưng mọi báo cáo về sau phải
+  chịu được cột này rỗng.
+- (−) Cần một chỗ để bố mẹ mở lại việc **ngoài** hàng đợi duyệt, vì khi tắt duyệt thì không có hàng
+  đợi. Đã thêm danh sách "Đã xong hôm nay" trong thẻ mỗi con ở Trang chính.
+
+**Đã cân nhắc:** giữ mặc định `manual` và chỉ thêm nút "Duyệt tất cả" — vẫn để điểm gãy ở sự chú ý
+của người lớn. Bỏ hẳn tính năng duyệt — mất công cụ cho gia đình thật sự cần nó.
+
+---
+
+## ADR-022: Trừ xu là tính năng bố mẹ tự bật, mặc định tắt
+
+**Bối cảnh:** câu hỏi mở #2 hỏi có cho phép trừ điểm hay không, và ghi rằng nhiều chuyên gia nuôi
+dạy phản đối. Chủ dự án yêu cầu có tính năng này với hai tình huống cụ thể: hết ngày mà việc chưa
+làm, và con bấm xong nhưng thực tế chưa làm rồi bố mẹ phát hiện.
+
+**Quyết định:** làm, nhưng **mặc định tắt** và bố mẹ phải tự bật với cảnh báo hiện trước các lựa
+chọn. Hai mức, cấu hình ở cấp gia đình, tính theo **phần trăm điểm của việc** chứ không phải số xu
+cố định:
+
+| Mức | Khi nào | Mặc định |
+|---|---|---|
+| `missedPenaltyPct` | Hết ngày, việc vẫn `scheduled` → chuyển `missed` | 0 (tắt) |
+| `reopenPenaltyPct` | Bố mẹ mở lại việc con đã bấm xong, **mỗi lần** mở lại | 0 (tắt) |
+
+**Lý do phần trăm chứ không phải số xu:** việc rửa bát 20 xu và việc gấp quần áo 5 xu không nên
+chịu cùng một khoản trừ. Phần trăm giữ được tỷ lệ giữa các việc mà bố mẹ đã tự cân.
+
+**Bảy quyết định nhỏ đi kèm, đều là chỗ dễ làm sai:**
+
+1. **Việc bị mở lại vẫn được tính xu đầy đủ khi cuối cùng làm xong.** Thu hồi xu *và* trừ phạt là
+   trừ hai lần cho một lỗi. `clientOpId` của khoản cộng gắn với lượt việc nên duyệt lần hai không
+   cộng thêm — việc đó cuối cùng vẫn chỉ đáng đúng số xu của nó, cộng một khoản trừ cho lần làm lại.
+2. **Không bao giờ để số dư âm.** Trừ tối đa đến 0 rồi thôi. Trẻ nhìn thấy số âm không hiểu chuyện
+   gì xảy ra, và app này không dạy nợ. Hệ quả phải biết: đứa trẻ đang 0 xu thì trừ bao nhiêu cũng
+   như nhau — tính năng mất tác dụng đúng lúc nó dễ gây tổn thương nhất.
+3. **Thứ tự hũ khi trừ: Tiêu → Để dành → Cho đi.** Không chia theo tỷ lệ ba hũ như khi cộng. Chia
+   theo tỷ lệ nghe công bằng nhưng nó lấy cả xu con đã tự nguyện dành để tặng, biến hũ Cho đi thành
+   công cụ trừng phạt. Hũ Để dành cũng cần được bảo vệ vì nó gắn với mục tiêu dài hạn app đang dạy.
+4. **Làm tròn xuống.** 50% của 15 xu ra 7, không phải 8. Chỗ nào phải chọn thì chọn bên không làm
+   trẻ cảm thấy bị xử ép.
+5. **Không trừ hồi tố.** Lượt việc bỏ được đánh dấu đã xử lý ngay cả khi chính sách đang tắt. Nếu
+   không, ngày bố mẹ bật tính năng lên là toàn bộ việc bỏ từ trước bị trừ một lượt — phạt cho hành
+   vi xảy ra khi luật chưa có.
+6. **Nâng cấp app không tự bật.** Cột mới có default 0, và có test migration khẳng định điều đó.
+7. **Mỗi lần trừ đều có dòng sổ cái với lý do đọc được** ("Hết ngày chưa làm", "Bố mẹ mở lại việc —
+   làm lại lần 2"). Xu biến mất mà không ai giải thích là đúng thứ làm trẻ mất niềm tin. Tuân ADR-005:
+   sổ cái append-only, không sửa dòng cũ.
+
+**Hệ quả:** (+) gia đình muốn thì có, gia đình không muốn thì không bao giờ gặp. (+) sổ cái vẫn là
+nguồn sự thật duy nhất về xu. (−) thêm bề mặt cấu hình mà bố mẹ phải hiểu, nên trang cấu hình có
+phần "Thử một ngày" tự tính bằng số thật thay vì để bố mẹ tự hình dung phần trăm ra bao nhiêu xu.
+(−) đây là tính năng dễ dùng sai nhất trong app; nếu phản hồi beta cho thấy nó gây hại, đường lùi
+là ẩn nó đi, không phải bỏ dữ liệu.
+
+**Đã cân nhắc:** trừ theo số xu cố định (mất tỷ lệ giữa các việc); trừ theo tỷ lệ ba hũ (lấy xu hũ
+Cho đi); thu hồi xu khi mở lại (trừ hai lần); cho số dư âm (không dạy nợ).
+
+---
+
 ## Câu hỏi còn mở
 
 | # | Câu hỏi | Cần chốt trước |
 |---|---|---|
-| 2 | Có cho phép trừ điểm (penalty) không? Nhiều chuyên gia nuôi dạy phản đối | v1.1 |
-| 4 | Tên & thương hiệu chính thức (DailyChildren chỉ là tên tạm) | Sprint 5 |
-| 5 | Self-host Supabase ngay từ đầu hay dùng cloud rồi chuyển sau? | Sprint 4 |
+| 4 | Tên & thương hiệu chính thức (Bé Ong chỉ là tên tạm) | Sprint 5 |
+| 5 | Self-host Supabase ngay từ đầu hay dùng cloud rồi chuyển sau? | Sprint 3 (sprint backend, đã đôn lên — ADR-021) |
 | 6 | Tiền tiêu vặt: chỉ ghi sổ "bố mẹ nợ con", hay v2 nối ví điện tử (MoMo/ZaloPay)? Nối ví kéo theo KYC và quy định tài chính — nặng | v2 |
 | 7 | Mô hình doanh thu cho bản sau v1 (nếu cần) — đã hoãn theo ADR-014 | sau v1 |
 
 > Mục 1 và 3 đã chốt tại ADR-014: miễn phí hoàn toàn ở v1.
+> Mục 8 đã chốt tại ADR-021: cấu hình sống trên tài khoản bố mẹ, backend lên trước phần thưởng.
+> Mục 2 đã chốt tại ADR-022: có trừ xu, nhưng mặc định tắt và bố mẹ tự bật.

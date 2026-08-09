@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "net.dailychildren" "\0"
-            VALUE "FileDescription", "dailychildren" "\0"
+            VALUE "CompanyName", "Bé Ong" "\0"
+            VALUE "FileDescription", "Bé Ong" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "dailychildren" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 net.dailychildren. All rights reserved." "\0"
-            VALUE "OriginalFilename", "dailychildren.exe" "\0"
-            VALUE "ProductName", "dailychildren" "\0"
+            VALUE "InternalName", "beong" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Bé Ong. All rights reserved." "\0"
+            VALUE "OriginalFilename", "beong.exe" "\0"
+            VALUE "ProductName", "Bé Ong" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

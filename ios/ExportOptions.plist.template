@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Template — CI thay các placeholder __...__ bằng giá trị thật từ GitHub
+  Secrets rồi ghi ra `ExportOptions.plist` (đã gitignore), xem
+  `.github/workflows/release.yml`. Không commit file đã điền giá trị thật.
+-->
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>app-store</string>
+	<key>teamID</key>
+	<string>__TEAM_ID__</string>
+	<key>signingStyle</key>
+	<string>manual</string>
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>net.beong.app</key>
+		<string>__PROFILE_NAME__</string>
+	</dict>
+	<key>uploadSymbols</key>
+	<true/>
+	<key>uploadBitcode</key>
+	<false/>
+</dict>
+</plist>

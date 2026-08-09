@@ -1,4 +1,4 @@
-import 'package:dailychildren/core/theme/app_spacing.dart';
+import 'package:beong/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 
 /// Một mục điều hướng chính của app.
@@ -46,17 +46,30 @@ class ResponsiveScaffold extends StatelessWidget {
       return Scaffold(
         body: SafeArea(child: body),
         floatingActionButton: floatingActionButton,
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: selectedIndex,
-          onDestinationSelected: onDestinationSelected,
-          destinations: [
-            for (final d in destinations)
-              NavigationDestination(
-                icon: Icon(d.icon),
-                selectedIcon: Icon(d.selectedIcon),
-                label: d.label,
+        // Đường kẻ mảnh phía trên: thanh nav và nội dung cùng màu nền nên nếu
+        // không có nó thì thanh trôi lẫn vào trang, không đọc ra là một lớp
+        // riêng. Vẽ bằng Container chứ không dùng elevation để giữ đúng quy ước
+        // "chỉ một mức đổ bóng trong toàn app" (design system §3).
+        bottomNavigationBar: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(
+                color: Theme.of(context).colorScheme.outlineVariant,
               ),
-          ],
+            ),
+          ),
+          child: NavigationBar(
+            selectedIndex: selectedIndex,
+            onDestinationSelected: onDestinationSelected,
+            destinations: [
+              for (final d in destinations)
+                NavigationDestination(
+                  icon: Icon(d.icon),
+                  selectedIcon: Icon(d.selectedIcon),
+                  label: d.label,
+                ),
+            ],
+          ),
         ),
       );
     }

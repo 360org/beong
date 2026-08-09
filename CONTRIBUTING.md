@@ -14,12 +14,17 @@ báo không tìm thấy Visual Studio nào.
 
 ```bash
 flutter pub get
-flutter gen-l10n          # bắt buộc: lib/core/l10n/gen/ không được commit
+dart run build_runner build --delete-conflicting-outputs   # sinh *.g.dart
+flutter gen-l10n                                           # sinh L10n
 flutter run -d <thiết-bị>
 ```
 
-`flutter gen-l10n` sinh ra `lib/core/l10n/gen/` từ file ARB. Thư mục này nằm trong
-`.gitignore` nên **clone xong phải chạy lệnh này**, không thì IDE báo lỗi thiếu `L10n`.
+**Mã sinh tự động không được commit** (`.gitignore` loại `*.g.dart`, `*.freezed.dart`
+và `lib/core/l10n/gen/`), nên clone xong phải chạy đủ hai lệnh sinh code ở trên —
+không thì IDE báo thiếu `L10n`, `AppDatabase` và các lớp Drift.
+
+Sửa bảng trong `lib/data/local/tables/` hay thêm `@DriftAccessor` thì chạy lại
+`build_runner`. Dùng `dart run build_runner watch` nếu sửa liên tục.
 
 Build desktop trên Linux cần thêm: `ninja-build libgtk-3-dev pkg-config clang cmake`.
 

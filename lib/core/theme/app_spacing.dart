@@ -20,6 +20,25 @@ abstract final class AppSpacing {
   static const minTouchTarget = 48.0;
 }
 
+/// Kích thước thanh điều hướng — `docs/04-design-system.md` §1.
+///
+/// Tách thành token vì đây là ràng buộc khả dụng, không phải tinh chỉnh thẩm mỹ:
+/// icon nav là **nội dung duy nhất** với bé chưa đọc được nhãn, nên nó phải to
+/// hơn mức 24dp mặc định của Material. `app_theme_test.dart` giữ các mốc này.
+abstract final class AppNavMetrics {
+  /// Cỡ icon. Mặc định Material là 24 — quá nhỏ khi icon phải tự mang nghĩa.
+  static const iconSize = 30.0;
+
+  /// Chiều cao thanh dưới. Đủ chỗ cho icon 30 + nhãn 12 mà không chật.
+  static const barHeight = 80.0;
+
+  /// Bo góc viên nền icon đang chọn.
+  static const indicatorRadius = 18.0;
+
+  static const labelSize = 12.0;
+  static const railLabelSize = 13.0;
+}
+
 abstract final class AppRadius {
   /// Viên thuốc: chip, nút.
   static const pill = 999.0;

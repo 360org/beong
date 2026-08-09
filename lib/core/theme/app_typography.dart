@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 
 /// Kiểu chữ — `docs/04-design-system.md` §2.
 ///
-/// Font Nunito sẽ được nhúng ở Sprint 1 (cần file .ttf trong `assets/fonts/`).
-/// Tạm thời dùng font hệ thống để không chặn tiến độ; đổi [fontFamily] là xong.
+/// Font **Nunito**, nhúng sẵn trong `assets/fonts/` (khai báo ở `pubspec.yaml`).
+/// Chọn Nunito vì đạt cả ba yêu cầu của app này cùng lúc: nét bo tròn nên thân
+/// thiện với trẻ, chiều cao chữ thường lớn nên dễ đọc, và đủ 134 ký tự tiếng
+/// Việt có dấu — phần lớn font "trẻ em" trên Google Fonts thiếu dấu tiếng Việt
+/// hoặc đặt dấu sai vị trí.
 abstract final class AppTypography {
-  /// Font hệ thống ở Sprint 0. Nunito sẽ được nhúng ở Sprint 1 — khi có file
-  /// .ttf trong `assets/fonts/`, đổi giá trị này thành `'Nunito'` là toàn bộ
-  /// app chuyển font, không phải sửa chỗ nào khác.
-  // TODO(sprint1): đổi sang 'Nunito' sau khi nhúng font.
-  static const String? fontFamily = null;
+  /// Đổi giá trị này là toàn bộ app chuyển font, không phải sửa chỗ nào khác.
+  ///
+  /// Chỉ có ba weight được nhúng (500/700/800) — dùng weight khác sẽ bị nền
+  /// tảng giả lập bằng cách làm đậm/mảnh nhân tạo, trông xấu. Cần weight mới
+  /// thì sinh thêm file static.
+  static const String fontFamily = 'Nunito';
 
   /// Trần phóng chữ. Tôn trọng cài đặt hệ thống nhưng chặn ở 1.6 để layout
   /// của trẻ không vỡ khi phụ huynh bật cỡ chữ rất lớn.
@@ -62,5 +66,7 @@ abstract final class AppTypography {
     bodyMedium: body.copyWith(color: onSurface),
     labelLarge: label.copyWith(color: onSurface),
     bodySmall: caption.copyWith(color: onSurface),
-  );
+    // `.apply` đặt family cho mọi style một lượt, kể cả các style Material tự
+    // điền — an toàn hơn là gắn tay vào từng hằng ở trên và quên mất một cái.
+  ).apply(fontFamily: fontFamily);
 }

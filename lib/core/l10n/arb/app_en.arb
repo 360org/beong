@@ -1,7 +1,9 @@
 {
   "@@locale": "en",
 
-  "appTitle": "DailyChildren",
+  "appTitle": "Bé Ong",
+  "appSlogan": "A busy bee every day",
+  "badgeBusyBee": "Busy bee today!",
 
   "navHome": "Home",
   "navTasks": "Tasks",

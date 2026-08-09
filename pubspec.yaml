@@ -1,4 +1,4 @@
-name: dailychildren
+name: beong
 description: "Ứng dụng việc nhà và phần thưởng hằng ngày cho gia đình và trẻ em."
 publish_to: "none"
 
@@ -22,6 +22,7 @@ dependencies:
   go_router: ^17.3.0
   intl: ^0.20.2
   json_annotation: ^4.9.0
+  meta: ^1.16.0
   path: ^1.9.1
   path_provider: ^2.1.5
   riverpod_annotation: ^4.0.3
@@ -40,7 +41,26 @@ dev_dependencies:
   mocktail: ^1.0.4
   riverpod_generator: ^4.0.4
   very_good_analysis: ^10.0.0
+  yaml: ^3.1.2 # test đọc lại khai báo font trong pubspec
 
 flutter:
   uses-material-design: true
   generate: true
+
+  # Nunito — bo tròn thân thiện trẻ em, đủ 134 ký tự tiếng Việt có dấu
+  # (docs/04-design-system.md §2). Nhúng file thay vì dùng gói `google_fonts`
+  # tải lúc chạy: app là offline-first (ADR-002), mất mạng không được mất chữ.
+  #
+  # Dùng bản static cho từng weight chứ không dùng file variable: mặc định của
+  # trục wght là 200 (ExtraLight), nền tảng nào không áp được biến thiên sẽ
+  # hiện toàn bộ chữ mảnh dính. Sinh lại bằng fontTools.varLib.instancer khi
+  # cần thêm weight.
+  fonts:
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Nunito-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Nunito-ExtraBold.ttf
+          weight: 800
