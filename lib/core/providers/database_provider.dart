@@ -4,6 +4,7 @@ import 'package:beong/data/local/reward_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/services/penalty_service.dart';
+import 'package:beong/domain/services/task_review_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'database_provider.g.dart';
@@ -32,4 +33,12 @@ PenaltyService penaltyService(Ref ref) => PenaltyService(
   taskDao: ref.watch(taskDaoProvider),
   walletDao: ref.watch(walletDaoProvider),
   memberDao: ref.watch(memberDaoProvider),
+);
+
+@riverpod
+TaskReviewService taskReviewService(Ref ref) => TaskReviewService(
+  taskDao: ref.watch(taskDaoProvider),
+  walletDao: ref.watch(walletDaoProvider),
+  memberDao: ref.watch(memberDaoProvider),
+  penaltyService: ref.watch(penaltyServiceProvider),
 );

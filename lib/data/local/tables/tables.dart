@@ -45,6 +45,13 @@ class Families extends Table {
   TextColumn get jarSplit =>
       text().withDefault(const Constant('{"spend":50,"save":40,"give":10}'))();
 
+  /// Con bấm xong thì có cần bố mẹ duyệt hay không — ADR-023.
+  ///
+  /// **Mặc định `false`**: làm xong là xong, xu cộng ngay. Bố mẹ bật lên thì
+  /// mọi việc con bấm xong vào hàng đợi duyệt.
+  BoolColumn get requireApproval =>
+      boolean().withDefault(const Constant(false))();
+
   /// Phần trăm điểm bị trừ khi hết ngày mà việc chưa làm — ADR-022.
   /// 0 = tắt, và đây là **mặc định** của mọi gia đình mới.
   IntColumn get missedPenaltyPct => integer().withDefault(const Constant(0))();

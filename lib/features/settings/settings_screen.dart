@@ -86,6 +86,7 @@ class SettingsScreen extends ConsumerWidget {
                     subtitle: 'Bật',
                     onTap: () {},
                   ),
+                  _ApprovalTile(familyId: session.familyId),
                   _PenaltyTile(familyId: session.familyId),
                   _SettingsTile(
                     icon: Icons.info_outline,
@@ -326,6 +327,50 @@ class _PenaltyTile extends ConsumerWidget {
               ? 'Chưa làm ${policy.missedPct}% · Làm lại ${policy.reopenPct}%'
               : 'Đang tắt',
           onTap: () => context.go(Routes.penaltySettings),
+        );
+      },
+    );
+  }
+}
+
+/// Công tắc "Cần bố mẹ duyệt" — ADR-023.
+///
+/// Mặc định **tắt**: con bấm xong là xong, xu cộng ngay. Bật lên thì mọi việc
+/// con bấm xong vào hàng đợi ở Trang chính.
+class _ApprovalTile extends ConsumerWidget {
+  const _ApprovalTile({required this.familyId});
+
+  final String familyId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final memberDao = ref.watch(memberDaoProvider);
+
+    return StreamBuilder<bool>(
+      stream: memberDao.watchRequireApproval(familyId),
+      builder: (context, snap) {
+        final on = snap.data ?? false;
+        return SwitchListTile(
+          value: on,
+          onChanged: (v) => unawaited(
+            memberDao.setRequireApproval(familyId, value: v),
+          ),
+          secondary: Icon(
+            Icons.verified_outlined,
+            color: context.colors.primary,
+          ),
+          title: Text('Cần bố mẹ duyệt', style: context.text.bodyLarge),
+          subtitle: Text(
+            on
+                ? 'Việc con bấm xong chờ bố mẹ duyệt mới được cộng xu'
+                : 'Con bấm xong là xong, xu cộng ngay',
+            style: context.text.bodySmall?.copyWith(
+              color: context.semantic.onSurfaceMuted,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+          ),
         );
       },
     );

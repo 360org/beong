@@ -36,6 +36,11 @@ void main() {
         .insert(FamiliesCompanion.insert(id: 'fam-1', name: 'Nhà mình'));
 
     // Bỏ dần những gì phiên bản sau đã thêm, từ mới nhất về cũ nhất.
+    if (version < 4) {
+      await db.customStatement(
+        'ALTER TABLE families DROP COLUMN require_approval',
+      );
+    }
     if (version < 3) {
       await db.customStatement(
         'ALTER TABLE families DROP COLUMN missed_penalty_pct',
@@ -99,6 +104,17 @@ void main() {
     final family = await db.select(db.families).getSingle();
     expect(family.missedPenaltyPct, 0);
     expect(family.reopenPenaltyPct, 0);
+  });
+
+  test('v3 -> v4 thêm cờ cần duyệt, và nâng cấp là **tắt**', () async {
+    await seedAtVersion(3);
+    final db = await openCurrent();
+
+    // Đây là đổi hành vi có chủ ý (ADR-023): bản cũ bắt duyệt mọi việc, bản mới
+    // mặc định xong-là-xong. Test này chốt rằng nâng cấp đi theo mặc định mới
+    // chứ không rơi vào trạng thái nửa vời.
+    final family = await db.select(db.families).getSingle();
+    expect(family.requireApproval, isFalse);
   });
 
   test('v2 -> v3 thêm cột đếm số lần mở lại, mặc định 0', () async {

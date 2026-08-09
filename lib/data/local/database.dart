@@ -37,7 +37,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -56,6 +56,12 @@ class AppDatabase extends _$AppDatabase {
       }
       // v2 -> v3: cấu hình trừ xu (ADR-022). Mọi cột đều có default nên gia
       // đình đang dùng bản cũ nâng lên là **tắt** trừ xu, không tự bật.
+      // v3 -> v4: cờ cần duyệt (ADR-023). Default false, tức là gia đình đang
+      // dùng bản cũ nâng lên sẽ **đổi hành vi**: trước đây mọi việc phải duyệt.
+      // Xem ADR-023 phần hệ quả — đây là đổi có chủ ý, không phải sơ suất.
+      if (from < 4) {
+        await m.addColumn(families, families.requireApproval);
+      }
       if (from < 3) {
         await m.addColumn(families, families.missedPenaltyPct);
         await m.addColumn(families, families.reopenPenaltyPct);

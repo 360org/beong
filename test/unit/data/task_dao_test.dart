@@ -156,12 +156,15 @@ void main() {
       await dao.generateInstances(familyId: familyId, today: today);
     });
 
-    test('trẻ bấm xong → pending_review khi manual', () async {
+    // Quyết định auto/manual chuyển sang `TaskReviewService` (ADR-023), nên ở
+    // tầng DAO chỉ còn kiểm các bước nguyên tử. Ca auto nằm ở
+    // `test/unit/domain/task_review_service_test.dart`.
+    test('trẻ bấm xong → pending_review', () async {
       final instances = await dao.instancesForMember(
         memberId: childId,
         date: today,
       );
-      await dao.markCompleted(instances.first.id);
+      await dao.markPendingReview(instances.first.id);
 
       final updated = await dao.instancesForMember(
         memberId: childId,
@@ -171,46 +174,12 @@ void main() {
       expect(updated.first.completedAt, isNotNull);
     });
 
-    test('auto-approve khi task đặt auto', () async {
-      await dao.createTask(
-        TasksCompanion.insert(
-          id: 'task-auto',
-          familyId: familyId,
-          title: 'Tự duyệt',
-          approvalMode: const Value('auto'),
-        ),
-        [childId],
-      );
-      await dao.generateInstances(
-        familyId: familyId,
-        today: today,
-      );
-
-      final instances = await dao.instancesForMember(
-        memberId: childId,
-        date: today,
-      );
-      final autoInstance = instances.firstWhere(
-        (i) => i.taskId == 'task-auto',
-      );
-      await dao.markCompleted(autoInstance.id);
-
-      final updated = await dao.instancesForMember(
-        memberId: childId,
-        date: today,
-      );
-      final updatedAuto = updated.firstWhere(
-        (i) => i.taskId == 'task-auto',
-      );
-      expect(updatedAuto.status, InstanceStatus.approved.name);
-    });
-
     test('bố mẹ duyệt → approved', () async {
       final instances = await dao.instancesForMember(
         memberId: childId,
         date: today,
       );
-      await dao.markCompleted(instances.first.id);
+      await dao.markPendingReview(instances.first.id);
       await dao.approve(
         instanceId: instances.first.id,
         reviewerId: parentId,
@@ -264,7 +233,7 @@ void main() {
         memberId: childId,
         date: today,
       );
-      await dao.markCompleted(instances.first.id);
+      await dao.markPendingReview(instances.first.id);
       await dao.approve(
         instanceId: instances.first.id,
         reviewerId: parentId,
@@ -284,7 +253,7 @@ void main() {
       );
 
       for (final i in instances) {
-        await dao.markCompleted(i.id);
+        await dao.markPendingReview(i.id);
         await dao.approve(instanceId: i.id, reviewerId: parentId);
       }
 
@@ -354,7 +323,7 @@ void main() {
         memberId: childId,
         date: today,
       );
-      await dao.markCompleted(instances.first.id);
+      await dao.markPendingReview(instances.first.id);
 
       final pending = await dao.pendingReview(familyId);
       expect(pending.length, 1);

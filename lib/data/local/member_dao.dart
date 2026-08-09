@@ -64,6 +64,22 @@ class MemberDao extends DatabaseAccessor<AppDatabase> with _$MemberDaoMixin {
     )..where((m) => m.id.equals(memberId))).watchSingle();
   }
 
+  /// Nhà này có bắt buộc bố mẹ duyệt hay không — ADR-023.
+  Stream<bool> watchRequireApproval(String familyId) =>
+      watchFamily(familyId).map((f) => f.requireApproval);
+
+  Future<void> setRequireApproval(
+    String familyId, {
+    required bool value,
+  }) async {
+    await (update(families)..where((f) => f.id.equals(familyId))).write(
+      FamiliesCompanion(
+        requireApproval: Value(value),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   /// Chính sách trừ xu của gia đình — ADR-022.
   Future<PenaltyPolicy> penaltyPolicyOf(String familyId) async {
     final family = await getFamily(familyId);

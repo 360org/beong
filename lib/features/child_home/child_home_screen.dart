@@ -501,7 +501,7 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _InstanceCard extends StatefulWidget {
+class _InstanceCard extends ConsumerStatefulWidget {
   const _InstanceCard({
     required this.instance,
     required this.taskDao,
@@ -512,10 +512,10 @@ class _InstanceCard extends StatefulWidget {
   final TaskDao taskDao;
 
   @override
-  State<_InstanceCard> createState() => _InstanceCardState();
+  ConsumerState<_InstanceCard> createState() => _InstanceCardState();
 }
 
-class _InstanceCardState extends State<_InstanceCard> {
+class _InstanceCardState extends ConsumerState<_InstanceCard> {
   Task? _task;
 
   @override
@@ -552,7 +552,11 @@ class _InstanceCardState extends State<_InstanceCard> {
       isCompleted: widget.instance.status == InstanceStatus.approved.name,
       isPending: widget.instance.status == InstanceStatus.pendingReview.name,
       isMissed: widget.instance.status == InstanceStatus.missed.name,
-      onToggle: () => widget.taskDao.markCompleted(widget.instance.id),
+      // Đi qua TaskReviewService chứ không gọi thẳng DAO: nó là chỗ duy nhất
+      // biết nhà này có bật duyệt hay không, và là chỗ cộng xu (ADR-023).
+      onToggle: () => unawaited(
+        ref.read(taskReviewServiceProvider).complete(widget.instance.id),
+      ),
     );
   }
 }

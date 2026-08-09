@@ -104,6 +104,9 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 - [ ] Tỷ giá quy đổi ra tiền thật (mặc định tắt — ADR-017)
 - [ ] Mục tiêu tiết kiệm + thanh tiến độ
 - [ ] **Sổ của con** — lịch sử đầy đủ, `manual_adjust` bắt buộc có lý do
+- [x] **Duyệt là tuỳ chọn, mặc định xong-là-xong** (ADR-023, thay ADR-009) — công tắc trong Cài đặt,
+      nút "Duyệt tất cả", danh sách "Đã xong hôm nay" để mở lại. Sửa kèm một lỗi thật: đường tự
+      động duyệt trước đây **không cộng xu**.
 - [x] **Trừ xu** (ADR-022) — làm sớm hơn kế hoạch: cấu hình hai mức ở cấp gia đình, nút "mở lại"
       trong hàng đợi duyệt, khoản trừ cuối ngày cho việc bỏ. Mặc định tắt.
 - [ ] Trừ xu: cho phép đặt mức riêng theo từng task (hiện chỉ có mức chung của gia đình)

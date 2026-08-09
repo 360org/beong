@@ -132,8 +132,15 @@ scheduled → (trẻ bấm xong) → pending_review → (parent duyệt) → app
         → (hết ngày chưa làm) → missed, trừ xu
 ```
 
+**Mặc định là không cần duyệt** (ADR-023): con bấm xong → `approved` ngay và **xu cộng ngay**. Bố mẹ
+bật `require_approval` trong Cài đặt thì mọi việc con bấm xong vào hàng đợi, duyệt từng việc hoặc
+bấm **Duyệt tất cả**.
+
 **Từ chối** và **mở lại** khác nhau, và UI phải nói rõ: từ chối là đóng lượt lại, mở lại là trả
 việc về cho con làm tiếp. Chỉ mở lại mới cộng `reopen_count` và mới bị trừ xu (ADR-022).
+
+Khi tắt duyệt thì không có hàng đợi, nên đường để bố mẹ mở lại việc là danh sách **"Đã xong hôm
+nay"** trong thẻ mỗi con ở Trang chính.
 
 Task thuộc routine: khi **mọi** instance của routine trong ngày đạt `approved` → ghi thêm một
 giao dịch `routine_bonus` (idempotent theo `(routine_id, member_id, due_date)`).

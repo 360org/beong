@@ -165,26 +165,42 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
         .watch();
   }
 
-  /// Trẻ đánh dấu hoàn thành.
-  Future<void> markCompleted(String instanceId) async {
-    final instance = await (select(
+  Future<TaskInstance?> getInstanceById(String instanceId) {
+    return (select(
       taskInstances,
-    )..where((i) => i.id.equals(instanceId))).getSingle();
+    )..where((i) => i.id.equals(instanceId))).getSingleOrNull();
+  }
 
-    if (instance.status != InstanceStatus.scheduled.name) return;
+  /// Con bấm xong, việc vào hàng đợi duyệt.
+  ///
+  /// **Quyết định auto/manual không nằm ở đây** mà ở `TaskReviewService`: nó
+  /// phụ thuộc cấu hình gia đình lẫn cấu hình task, và cộng xu là việc của ví.
+  Future<void> markPendingReview(String instanceId) async {
+    await (update(taskInstances)..where((i) => i.id.equals(instanceId))).write(
+      TaskInstancesCompanion(
+        status: Value(InstanceStatus.pendingReview.name),
+        completedAt: Value(DateTime.now()),
+      ),
+    );
+  }
 
-    final task = await (select(
-      tasks,
-    )..where((t) => t.id.equals(instance.taskId))).getSingle();
-
-    final newStatus = task.approvalMode == ApprovalMode.auto.name
-        ? InstanceStatus.approved.name
-        : InstanceStatus.pendingReview.name;
+  /// Chốt việc là đã xong. [reviewerId] để `null` khi không ai duyệt (nhà tắt
+  /// tính năng duyệt) — cột `reviewed_by` trống nói đúng điều đã xảy ra.
+  Future<void> markApproved({
+    required String instanceId,
+    required String? reviewerId,
+  }) async {
+    final now = DateTime.now();
+    final instance = await getInstanceById(instanceId);
 
     await (update(taskInstances)..where((i) => i.id.equals(instanceId))).write(
       TaskInstancesCompanion(
-        status: Value(newStatus),
-        completedAt: Value(DateTime.now()),
+        status: Value(InstanceStatus.approved.name),
+        // Giữ mốc con bấm xong nếu đã có: đó là lúc việc thật sự được làm, khác
+        // với lúc bố mẹ mở app ra duyệt.
+        completedAt: Value(instance?.completedAt ?? now),
+        reviewedAt: Value(now),
+        reviewedBy: Value(reviewerId),
       ),
     );
   }
@@ -408,6 +424,26 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
     await (update(taskInstances)..where((i) => i.id.equals(instanceId))).write(
       TaskInstancesCompanion(missedPenaltyAt: Value(DateTime.now())),
     );
+  }
+
+  /// Việc **đã xong** hôm nay của một trẻ, để bố mẹ mở lại nếu thấy chưa làm
+  /// thật — ADR-023.
+  ///
+  /// Cần khi nhà tắt tính năng duyệt: lúc đó không có hàng đợi nào, nên nếu
+  /// không có danh sách này thì bố mẹ không còn đường nào để mở lại việc.
+  Stream<List<TaskInstance>> watchApprovedForMember({
+    required String memberId,
+    required CalendarDate date,
+  }) {
+    return (select(taskInstances)
+          ..where(
+            (i) =>
+                i.memberId.equals(memberId) &
+                i.dueDate.equals(date.toString()) &
+                i.status.equals(InstanceStatus.approved.name),
+          )
+          ..orderBy([(i) => OrderingTerm.desc(i.completedAt)]))
+        .watch();
   }
 
   /// Đánh dấu missed cho instance quá hạn.

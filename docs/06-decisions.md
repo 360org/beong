@@ -75,7 +75,11 @@ múi giờ khác server.
 ---
 
 ## ADR-009: Mặc định cần phụ huynh duyệt
-**Quyết định:** `approval_mode = manual` là mặc định khi tạo task; phụ huynh có thể chuyển `auto`.
+
+> **ĐÃ BỊ THAY THẾ bởi ADR-023.** Mặc định giờ là **không cần duyệt**. Giữ nguyên nội dung dưới đây
+> để thấy lập luận cũ và vì sao nó bị lật — đừng đọc mục này như quy tắc đang có hiệu lực.
+
+**Quyết định (cũ):** `approval_mode = manual` là mặc định khi tạo task; phụ huynh có thể chuyển `auto`.
 **Lý do:** chống gian lận, giữ vai trò của phụ huynh trong vòng lặp động lực.
 **Hệ quả:** phụ huynh quên duyệt sẽ chặn phần thưởng → bù bằng nhắc nhở cuối ngày + "Duyệt tất cả".
 Xem lại chỉ số này sau beta; nếu tỷ lệ duyệt trễ cao, cân nhắc auto cho task ≤ 10 điểm.
@@ -277,6 +281,56 @@ Nghĩa là máy con vẫn ghi Drift trước rồi đẩy lên sau, đúng như 
 **Đã cân nhắc:** hướng B — v1.0 một-thiết-bị, ghép cặp ở v1.1. Bỏ vì nó hoãn đúng điểm bán chính,
 và vì đổi nơi cư trú của cấu hình **sau khi** đã có người dùng thật là việc di trú dữ liệu đau hơn
 nhiều so với làm đúng từ đầu.
+
+---
+
+## ADR-023: Mặc định "làm xong là xong"; duyệt là tính năng bố mẹ tự bật
+
+**Thay thế ADR-009.**
+
+**Bối cảnh:** ADR-009 đặt `manual` làm mặc định để chống gian lận và giữ bố mẹ trong vòng lặp động
+lực. Chính nó đã ghi sẵn rủi ro: *"phụ huynh quên duyệt sẽ chặn phần thưởng"*. Đó là rủi ro nặng
+hơn dự tính — với mặc định cũ, mọi việc con làm đều **đứng lại chờ** một người trưởng thành mở app.
+Con làm xong mà xu không nhúc nhích thì phản hồi tức thì biến mất, mà phản hồi tức thì là toàn bộ
+cơ chế của app này.
+
+**Quyết định:** `families.require_approval`, **mặc định `false`**.
+
+| Trạng thái | Con bấm xong | Bố mẹ |
+|---|---|---|
+| Tắt (mặc định) | `approved` ngay, **xu cộng ngay** | Mở lại việc nếu thấy chưa làm thật |
+| Bật | `pending_review` | Duyệt từng việc, hoặc **Duyệt tất cả** |
+
+Thứ tự ưu tiên hai tầng: nhà tắt duyệt → mọi việc xong luôn, không đọc tới `tasks.approval_mode`.
+Nhà bật duyệt → tôn trọng cấu hình từng task (mặc định của task vẫn là `manual`). Quy tắc này nằm
+ở **một** hàm thuần `needsApproval` để hai chỗ không lệch nhau.
+
+**Lý do đổi mặc định thay vì chỉ thêm công tắc:** mặc định là thứ 90% gia đình sẽ dùng. Đặt mặc
+định ở "phải duyệt" là chọn thay cho họ cái phương án có điểm gãy là sự chú ý của người lớn.
+
+**Chống gian lận vẫn còn, chỉ đổi hướng:** thay vì chặn trước, app cho bố mẹ **mở lại** việc (ADR-022).
+Sai sót được sửa sau, không phải chặn trước — và trẻ vẫn nhận phản hồi tức thì trong trường hợp
+thường gặp, tức là khi con làm thật.
+
+**Một lỗi thật lộ ra khi làm quyết định này:** việc cộng xu đang nằm **trong nút duyệt ở UI**. Đường
+tự động duyệt (đã có sẵn cho task đặt `auto`) đổi trạng thái sang `approved` mà **không cộng xu cho
+ai**. Lỗi này không lộ khi mặc định là phải duyệt, nhưng đổi mặc định mà không sửa thì con bấm xong
+được 0 xu. Đã dồn toàn bộ quy tắc cộng xu vào `TaskReviewService`; UI không gọi `WalletDao.credit`
+cho việc nhà nữa.
+
+**Hệ quả:**
+- (+) Con nhận xu ngay khi làm xong — đúng cơ chế app hứa.
+- (+) Bố mẹ quên mở app không còn chặn động lực của con.
+- (+) Cộng xu chỉ còn một đường đi, thay vì hai đường mà một đường bị hỏng.
+- (−) Gia đình đang dùng bản cũ nâng cấp lên sẽ **đổi hành vi**: trước đây mọi việc phải duyệt, giờ
+  xong là xong. Đây là đổi có chủ ý, có test migration chốt, và cần nói rõ trong ghi chú phát hành.
+- (−) `reviewed_by` để trống khi không ai duyệt. Đúng với thực tế, nhưng mọi báo cáo về sau phải
+  chịu được cột này rỗng.
+- (−) Cần một chỗ để bố mẹ mở lại việc **ngoài** hàng đợi duyệt, vì khi tắt duyệt thì không có hàng
+  đợi. Đã thêm danh sách "Đã xong hôm nay" trong thẻ mỗi con ở Trang chính.
+
+**Đã cân nhắc:** giữ mặc định `manual` và chỉ thêm nút "Duyệt tất cả" — vẫn để điểm gãy ở sự chú ý
+của người lớn. Bỏ hẳn tính năng duyệt — mất công cụ cho gia đình thật sự cần nó.
 
 ---
 

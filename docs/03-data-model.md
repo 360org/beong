@@ -198,6 +198,10 @@ hình gia đình nằm ở tài khoản bố mẹ (ADR-021). Khoá session dùng
 **Không đặt bí mật vào bảng này.** Token ghép cặp phải nằm ở Keychain / Keystore
 (`09-onboarding-pairing.md` §4) — file SQLite đọc được trên máy đã root hoặc qua bản sao lưu.
 
+### Cấu hình duyệt (trên `families`)
+`require_approval` — mặc định `false`: con bấm xong là xong (ADR-023). Bật lên thì tôn trọng
+`tasks.approval_mode` của từng task.
+
 ### Cấu hình trừ xu (trên `families`)
 `missed_penalty_pct, reopen_penalty_pct` — phần trăm điểm của việc, 0 = tắt (ADR-022).
 
@@ -283,6 +287,8 @@ create policy tasks_rw on tasks
 - Drift: `schemaVersion` tăng dần, mỗi bước có test dựng DB phiên bản cũ rồi migrate.
   Test: `test/unit/data/migration_test.dart`.
   - v1 → v2: thêm `device_settings`.
+  - v3 → v4: thêm `families.require_approval` (ADR-023). Default `false`, nên gia đình nâng cấp từ
+    bản cũ **đổi hành vi** — đây là đổi có chủ ý, có test chốt.
   - v2 → v3: thêm `families.missed_penalty_pct`, `families.reopen_penalty_pct`,
     `task_instances.reopen_count`, `task_instances.missed_penalty_at` (ADR-022). Mọi cột có
     default 0/NULL nên **nâng cấp không tự bật trừ xu** — có test khẳng định điều này.
