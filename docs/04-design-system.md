@@ -185,6 +185,11 @@ nhưng 5 preset đầu được xếp theo tần suất dùng của gia đình t
 - Nội dung mỗi buổi: **`RoutineCard` trước, task lẻ sau**
 - `TaskCard` với checkbox lớn; bấm xong → animation confetti + âm thanh + haptic
 - `JarTrio` — các hũ của con (số lượng do bố mẹ đặt), bấm vào từng hũ xem chi tiết
+- **Một** ô xu duy nhất trên thẻ dashboard, nhãn là **"XU"** (không phải "ĐIỂM" — ADR-015 chốt đơn
+  vị gọi là xu). Phần chưa chia hiện trong ngoặc ngay cạnh con số và **là một phần của** tổng đó,
+  không phải số cộng thêm; bấm vào ô để chia.
+- Thanh điều hướng: vai con **không có tab Cài đặt** — đó là chỗ đổi cấu hình cả nhà. Đường đổi
+  người dùng cho vai con nằm ở avatar đầu màn hình, không phải một nút riêng.
 - Dòng lịch sử trong "Sổ của con" gồm bốn thứ, thiếu một là hỏng: **tên** việc/phần thưởng,
   **trạng thái** (chữ + màu + icon), **lý do & chi tiết hũ**, **số xu**. Trạng thái phải đọc từ
   thực thể gốc bằng stream — duyệt hay mở lại không ghi dòng sổ cái nào, nên tra một lần là trạng

@@ -200,7 +200,8 @@ Chia pha theo thứ tự phụ thuộc. Pha 0 chặn tất cả phần còn lạ
 
 - [x] **Lưu session bền vững** — `device_settings` + `SessionStore`, nạp trước `runApp`
 - [ ] Màn chọn vai Bố mẹ / Con ở lần mở đầu, ghi nhớ vĩnh viễn
-- [ ] Tách điều hướng theo vai: app con không có tab Nhiệm vụ/Cài đặt của bố mẹ
+- [~] Tách điều hướng theo vai — **Cài đặt đã ẩn với vai con** (lọc tab + chặn ở router).
+      Tab Nhiệm vụ vẫn hiện cho con (chỉ xem); tách hẳn app con là việc của Pha 3.
 - [ ] Onboarding hiện tại tách làm hai: nhánh bố mẹ và nhánh con
 - [x] Test: mở lại app giữ đúng vai và đúng hồ sơ đang chọn
 
