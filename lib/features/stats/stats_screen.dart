@@ -297,6 +297,7 @@ class _JarCard extends StatelessWidget {
     Jar.spend => Icons.shopping_bag_rounded,
     Jar.save => Icons.savings_rounded,
     Jar.give => Icons.volunteer_activism_rounded,
+    Jar.inbox => Icons.inbox_rounded,
   };
 }
 
@@ -548,7 +549,13 @@ class _TransactionTileState extends State<_TransactionTile> {
     final subtitle = [
       if (status == null && subject != null) _reasonLabel(tx.reason),
       if (tx.note != null) tx.note!,
-      if (tx.byJar.length > 1) _jarBreakdown(tx.byJar),
+      if (tx.byJar.length > 1)
+        _jarBreakdown(
+          tx.byJar,
+          // Lần chia xu có hai chân bù nhau; hiện cả hai thành
+          // "Tiêu 5, Chờ chia 5" làm người đọc tưởng có 10 xu.
+          onlyPositive: tx.reason == 'jarTransfer',
+        ),
     ].join(' · ');
 
     return Padding(
@@ -612,9 +619,17 @@ class _TransactionTileState extends State<_TransactionTile> {
                 ),
               ),
               Text(
-                '${isPositive ? '+' : ''}${tx.delta}',
+                // Chuyển hũ có delta 0: không cộng cũng không mất, nên không
+                // dùng màu xanh hay đỏ — tô đỏ số 0 làm con tưởng bị trừ.
+                switch (tx.delta) {
+                  0 => '↔',
+                  final d when d > 0 => '+$d',
+                  final d => '$d',
+                },
                 style: context.text.titleSmall?.copyWith(
-                  color: isPositive
+                  color: tx.delta == 0
+                      ? context.semantic.onSurfaceMuted
+                      : isPositive
                       ? context.semantic.success
                       : context.semantic.danger,
                   fontWeight: FontWeight.w700,
@@ -631,7 +646,7 @@ class _TransactionTileState extends State<_TransactionTile> {
   ///
   /// Thứ tự **cố định**, không theo thứ tự dòng trả về từ DB: thứ tự đổi giữa
   /// các mục làm sổ trông như dữ liệu lộn xộn, dù số vẫn đúng.
-  String _jarBreakdown(Map<String, int> byJar) {
+  String _jarBreakdown(Map<String, int> byJar, {bool onlyPositive = false}) {
     const order = ['spend', 'save', 'give'];
     final keys = [
       ...order.where(byJar.containsKey),
@@ -643,6 +658,9 @@ class _TransactionTileState extends State<_TransactionTile> {
     for (final key in keys) {
       final value = byJar[key] ?? 0;
       if (value == 0) continue;
+      // Với lần chia xu, chân trừ ở hũ chờ chỉ là mặt sau của chân cộng — hiện
+      // cả hai thành "Tiêu 5, Chờ chia 5" làm người đọc tưởng có 10 xu.
+      if (onlyPositive && value < 0) continue;
       parts.add('${_jarLabel(key)} ${value.abs()}');
     }
     return parts.join(', ');
@@ -652,6 +670,7 @@ class _TransactionTileState extends State<_TransactionTile> {
     'spend' => 'Tiêu',
     'save' => 'Để dành',
     'give' => 'Cho đi',
+    'inbox' => 'Chờ chia',
     // Hũ do bố mẹ tự lập (ADR-024): chưa tra được tên nên hiện khoá.
     _ => jarKey,
   };
@@ -665,6 +684,7 @@ class _TransactionTileState extends State<_TransactionTile> {
     'manualAdjust' => Icons.edit,
     'bonus' => Icons.add_circle_outline,
     'penalty' => Icons.remove_circle_outline,
+    'jarTransfer' => Icons.pie_chart_outline_rounded,
     _ => Icons.receipt_long,
   };
 
@@ -677,6 +697,7 @@ class _TransactionTileState extends State<_TransactionTile> {
     'manualAdjust' => 'Điều chỉnh',
     'bonus' => 'Thưởng thêm',
     'penalty' => 'Trừ xu',
+    'jarTransfer' => 'Con chia xu vào hũ',
     _ => reason,
   };
 }

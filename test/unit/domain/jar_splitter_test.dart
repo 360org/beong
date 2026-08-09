@@ -55,13 +55,28 @@ void main() {
       final earned = splitAmount(25, JarSplit.defaultSplit);
       final refunded = splitAmount(-25, JarSplit.defaultSplit);
 
-      for (final jar in Jar.values) {
+      // Lặp theo khoá của map, không theo `Jar.values`: hũ chờ (`Jar.inbox`)
+      // **không** nằm trong kế hoạch chia (ADR-024) nên không có trong kết quả.
+      for (final jar in earned.keys) {
         expect(
           earned[jar]! + refunded[jar]!,
           0,
           reason: 'Hoàn xu không đưa hũ ${jar.name} về trạng thái cũ',
         );
       }
+    });
+
+    test('không bao giờ chia vào hũ chờ', () {
+      // Hũ chờ là nơi trung chuyển, không phải một giá trị được chia theo tỷ lệ.
+      // Chia vào đó nghĩa là xu vừa "đã chia" vừa "chờ chia" cùng lúc.
+      expect(
+        splitAmount(100, JarSplit.defaultSplit).keys,
+        isNot(contains(Jar.inbox)),
+      );
+      expect(
+        splitAmount(7, JarSplit.spendOnly).keys,
+        isNot(contains(Jar.inbox)),
+      );
     });
 
     test('không xu thì cả ba hũ đều bằng 0', () {

@@ -239,6 +239,19 @@ thân việc chia mới là bài học lớn nhất, mà app chia hộ thì con 
 
 Mỗi hũ có **emoji riêng**, không phải trang trí: trẻ chưa đọc thông nhận hũ bằng mặt, không bằng chữ.
 
+**Hai chế độ, đặt trong Cài đặt:**
+
+| Chế độ | Con làm xong việc thì | Ghi chú |
+|---|---|---|
+| Chia tự động (mặc định) | Xu chia ngay vào các hũ theo tỷ lệ bố mẹ đặt | Đúng ADR-016 |
+| Con tự chia | Xu dồn vào **hũ chờ**, con chia cuối ngày | Bài học phân bổ giá trị |
+
+Ở cả hai chế độ, **tổng điểm của con tính cả hũ chờ** — con làm xong việc là xu thuộc về con, việc
+chia là chuyện sau. Bỏ hũ chờ ra khỏi tổng thì màn hình con hiện 0 điểm sau khi vừa làm xong việc.
+
+Hũ chờ **không mua được phần thưởng**: muốn tiêu thì phải chia vào hũ Tiêu trước. Đó chính là bài
+học, không phải hạn chế kỹ thuật.
+
 Ba hũ mặc định:
 
 | Hũ | Dùng để | Ghi chú |

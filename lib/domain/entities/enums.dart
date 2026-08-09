@@ -43,8 +43,16 @@ enum InstanceStatus {
   missed,
 }
 
-/// Ba hũ — ADR-016. Xu được chia ngay khi kiếm được, không chia phần còn lại.
+/// Các hũ — ADR-016, mở rộng ở ADR-024.
 enum Jar {
+  /// **Hũ chờ** — xu đã kiếm nhưng chưa chia vào hũ nào.
+  ///
+  /// Chỉ dùng khi gia đình đặt `allocation_mode = manual`: con tự chia cuối
+  /// ngày. Không phải một giá trị gia đình muốn dạy, nên không nằm trong tỷ lệ
+  /// chia và không mua được phần thưởng — muốn tiêu thì phải chia vào hũ Tiêu
+  /// trước. Đó chính là bài học.
+  inbox,
+
   /// Tiêu — đổi phần thưởng nhỏ ngay.
   spend,
 
@@ -65,6 +73,10 @@ enum TxReason {
   manualAdjust,
   bonus,
   penalty,
+
+  /// Con chuyển xu từ hũ chờ sang một hũ — ADR-024. Không làm tổng xu đổi,
+  /// chỉ đổi chỗ, nên luôn đi thành **cặp** hai dòng bù nhau.
+  jarTransfer,
 }
 
 enum RewardType { screenTime, pocketMoney, experience, item, custom }

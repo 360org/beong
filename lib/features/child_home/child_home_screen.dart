@@ -16,6 +16,7 @@ import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/services/family_clock.dart';
+import 'package:beong/features/rewards/allocate_xu_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -86,12 +87,28 @@ class ChildHomeScreen extends ConsumerWidget {
                               return StreamBuilder<Streak?>(
                                 stream: memberDao.watchStreak(memberId),
                                 builder: (context, streakSnap) {
-                                  return _DashboardCard(
-                                    scale: scale,
-                                    points: balance.total,
-                                    streak: streakSnap.data?.currentLen ?? 0,
-                                    completed: completedCount,
-                                    total: total,
+                                  return Column(
+                                    children: [
+                                      _DashboardCard(
+                                        scale: scale,
+                                        points: balance.total,
+                                        streak:
+                                            streakSnap.data?.currentLen ?? 0,
+                                        completed: completedCount,
+                                        total: total,
+                                      ),
+                                      // Chỉ hiện khi có xu chờ chia (chế độ
+                                      // `manual` — ADR-024). Chế độ tự chia thì
+                                      // hũ chờ luôn rỗng nên khối này không bao
+                                      // giờ xuất hiện.
+                                      if (balance.inbox > 0)
+                                        _AllocateBanner(
+                                          familyId: session.familyId,
+                                          memberId: memberId,
+                                          inbox: balance.inbox,
+                                          walletDao: walletDao,
+                                        ),
+                                    ],
                                   );
                                 },
                               );
@@ -595,6 +612,81 @@ class _EmptyState extends StatelessWidget {
               child: const Text('TẠO VIỆC HÔM NAY'),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Lời gọi "chia xu" khi hũ chờ có xu — ADR-024, chế độ `manual`.
+///
+/// Đặt ngay dưới thẻ điểm chứ không nhét vào Cài đặt: nếu con không thấy thì hũ
+/// chờ cứ đầy lên mà xu nằm im, đúng cái ADR-016 muốn tránh.
+class _AllocateBanner extends StatelessWidget {
+  const _AllocateBanner({
+    required this.familyId,
+    required this.memberId,
+    required this.inbox,
+    required this.walletDao,
+  });
+
+  final String familyId;
+  final String memberId;
+  final int inbox;
+  final WalletDao walletDao;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.md),
+      child: GestureDetector(
+        onTap: () => unawaited(
+          showModalBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            builder: (context) => AllocateXuSheet(
+              familyId: familyId,
+              memberId: memberId,
+              inbox: inbox,
+              walletDao: walletDao,
+            ),
+          ),
+        ),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: context.colors.primaryContainer,
+            borderRadius: const BorderRadius.all(
+              Radius.circular(AppRadius.card),
+            ),
+          ),
+          child: Row(
+            children: [
+              const Text('📥', style: TextStyle(fontSize: 26)),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Có $inbox xu chờ chia',
+                      style: context.text.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      'Bấm để chia vào các hũ',
+                      style: context.text.bodySmall?.copyWith(
+                        color: context.semantic.onSurfaceMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: context.colors.primary),
+            ],
+          ),
         ),
       ),
     );

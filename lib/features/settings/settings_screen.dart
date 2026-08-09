@@ -9,6 +9,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,6 +88,7 @@ class SettingsScreen extends ConsumerWidget {
                     onTap: () {},
                   ),
                   _ApprovalTile(familyId: session.familyId),
+                  _AllocationTile(familyId: session.familyId),
                   _PenaltyTile(familyId: session.familyId),
                   _SettingsTile(
                     icon: Icons.info_outline,
@@ -364,6 +366,55 @@ class _ApprovalTile extends ConsumerWidget {
             on
                 ? 'Việc con bấm xong chờ bố mẹ duyệt mới được cộng xu'
                 : 'Con bấm xong là xong, xu cộng ngay',
+            style: context.text.bodySmall?.copyWith(
+              color: context.semantic.onSurfaceMuted,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Chọn cách xu vào hũ — ADR-024.
+///
+/// Mặc định `auto` (chia ngay theo tỷ lệ). Bật "con tự chia" thì xu dồn vào hũ
+/// chờ và con quyết định cuối ngày — bản thân việc chia mới là bài học.
+class _AllocationTile extends ConsumerWidget {
+  const _AllocationTile({required this.familyId});
+
+  final String familyId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final memberDao = ref.watch(memberDaoProvider);
+
+    return StreamBuilder<AllocationMode>(
+      stream: memberDao.watchAllocationMode(familyId),
+      builder: (context, snap) {
+        final mode = snap.data ?? AllocationMode.auto;
+        final manual = mode == AllocationMode.manual;
+
+        return SwitchListTile(
+          value: manual,
+          onChanged: (v) => unawaited(
+            memberDao.setAllocationMode(
+              familyId,
+              v ? AllocationMode.manual : AllocationMode.auto,
+            ),
+          ),
+          secondary: Icon(
+            Icons.pie_chart_outline_rounded,
+            color: context.colors.primary,
+          ),
+          title: Text('Con tự chia xu', style: context.text.bodyLarge),
+          subtitle: Text(
+            manual
+                ? 'Xu dồn lại, con tự chia vào các hũ cuối ngày'
+                : 'Xu tự chia vào các hũ theo tỷ lệ đã đặt',
             style: context.text.bodySmall?.copyWith(
               color: context.semantic.onSurfaceMuted,
             ),

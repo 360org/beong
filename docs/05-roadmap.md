@@ -148,9 +148,10 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 - [x] **Duyệt là tuỳ chọn, mặc định xong-là-xong** (ADR-023, thay ADR-009) — công tắc trong Cài đặt,
       nút "Duyệt tất cả", danh sách "Đã xong hôm nay" để mở lại. Sửa kèm một lỗi thật: đường tự
       động duyệt trước đây **không cộng xu**.
-- [~] **Hũ do bố mẹ tự lập + con tự chia xu** (ADR-024) — xong tầng domain (bảng `jars`,
-      `allocation_mode`, `splitByPlan`, 18 test); **chưa** nối vào DAO/UI: thiếu màn quản lý hũ của
-      bố mẹ và màn chia xu của con
+- [x] **Con tự chia xu** (ADR-024) — công tắc trong Cài đặt, hũ chờ (`Jar.inbox`), banner trên màn
+      con, màn "Chia xu vào hũ". Tổng điểm tính cả hũ chờ.
+- [ ] **Hũ do bố mẹ tự lập** (ADR-024) — bảng `jars` và `splitByPlan` đã có, **chưa** nối vào UI:
+      thiếu màn quản lý hũ (thêm/sửa/đổi tỷ lệ/chọn emoji). Màn chia xu hiện dùng ba hũ mặc định.
 - [x] **Trừ xu** (ADR-022) — làm sớm hơn kế hoạch: cấu hình hai mức ở cấp gia đình, nút "mở lại"
       trong hàng đợi duyệt, khoản trừ cuối ngày cho việc bỏ. Mặc định tắt.
 - [x] Trừ xu: cho phép tự nhập mức % bất kỳ (chip "Khác…")

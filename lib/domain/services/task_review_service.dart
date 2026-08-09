@@ -3,6 +3,7 @@ import 'package:beong/data/local/member_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/services/approval_rule.dart';
 import 'package:beong/domain/services/penalty_service.dart';
 
@@ -107,15 +108,35 @@ class TaskReviewService {
     // `pointsSnapshot` chứ không phải `tasks.points`: bố mẹ đổi giá task không
     // được làm thay đổi lượt đã sinh (ADR-007).
     if (instance.pointsSnapshot > 0) {
-      await _wallet.credit(
-        familyId: instance.familyId,
-        memberId: instance.memberId,
-        amount: instance.pointsSnapshot,
-        reason: TxReason.taskApproved,
-        clientOpId: 'task-approved:${instance.id}',
-        refType: 'task_instance',
-        refId: instance.id,
-      );
+      final family = await _members.getFamily(instance.familyId);
+      final mode = allocationModeFromDb(family.allocationMode);
+
+      if (mode == AllocationMode.manual) {
+        // Con tự chia: xu vào **hũ chờ**, chưa thuộc hũ nào (ADR-024). Vẫn tính
+        // vào tổng điểm của con — xu là của con ngay khi làm xong việc, việc
+        // chia là chuyện sau.
+        await _wallet.creditToJar(
+          familyId: instance.familyId,
+          memberId: instance.memberId,
+          jar: Jar.inbox,
+          amount: instance.pointsSnapshot,
+          reason: TxReason.taskApproved,
+          clientOpId: 'task-approved:${instance.id}',
+          opGroupId: 'task-approved:${instance.id}',
+          refType: 'task_instance',
+          refId: instance.id,
+        );
+      } else {
+        await _wallet.credit(
+          familyId: instance.familyId,
+          memberId: instance.memberId,
+          amount: instance.pointsSnapshot,
+          reason: TxReason.taskApproved,
+          clientOpId: 'task-approved:${instance.id}',
+          refType: 'task_instance',
+          refId: instance.id,
+        );
+      }
     }
 
     await _tasks.checkAndAwardRoutineBonus(

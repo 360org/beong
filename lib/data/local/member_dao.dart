@@ -1,6 +1,7 @@
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/tables/tables.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:drift/drift.dart';
 
@@ -75,6 +76,20 @@ class MemberDao extends DatabaseAccessor<AppDatabase> with _$MemberDaoMixin {
     await (update(families)..where((f) => f.id.equals(familyId))).write(
       FamiliesCompanion(
         requireApproval: Value(value),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  /// Chế độ chia xu — ADR-024.
+  Stream<AllocationMode> watchAllocationMode(String familyId) => watchFamily(
+    familyId,
+  ).map((f) => allocationModeFromDb(f.allocationMode));
+
+  Future<void> setAllocationMode(String familyId, AllocationMode mode) async {
+    await (update(families)..where((f) => f.id.equals(familyId))).write(
+      FamiliesCompanion(
+        allocationMode: Value(mode.name),
         updatedAt: Value(DateTime.now()),
       ),
     );
