@@ -136,6 +136,8 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
       từ chối **không hoàn xu**, và không có màn nào gọi `fulfillRedemption` nên phiếu
       nằm `pending` mãi mãi.
 - [x] Màn "Phiếu của con" + nút "Đã dùng"
+- [x] Bước duyệt của bố mẹ là **bắt buộc** cho mọi lượt đổi thưởng (ADR-025) — bịt lỗ
+      `requires_approval = false` cho phép tự duyệt
 - [x] Template phần thưởng và nhiệm vụ hiện **ngay trên trang trống**, không chôn trong
       bottom sheet sau nút "+"
 - [ ] `StreakFlame` + màn huy hiệu (8 huy hiệu MVP)

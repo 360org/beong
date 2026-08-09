@@ -15,7 +15,12 @@ class RedemptionException implements Exception {
   String toString() => 'RedemptionException: $message';
 }
 
-/// Vòng đời đổi thưởng: con đổi → bố mẹ duyệt → con dùng phiếu.
+/// Vòng đời đổi thưởng: con đổi → **bố mẹ duyệt** → con dùng phiếu.
+///
+/// Bước duyệt là **bắt buộc, không cấu hình được** (ADR-025). Khác với việc nhà,
+/// nơi duyệt là tuỳ chọn và mặc định tắt (ADR-023): làm xong một việc chỉ tạo ra
+/// con số trong app, còn đổi thưởng thì tiêu xu ra **thế giới thật** — tiền, thời
+/// gian của bố mẹ, một chuyến đi. Chỗ đó phải có người lớn ở giữa.
 ///
 /// Tồn tại vì luồng cũ có ba lỗi thật, và cả ba đều làm mất xu của trẻ:
 ///
@@ -84,12 +89,10 @@ class RedemptionService {
         memberId: memberId,
         costSnapshot: reward.costPoints,
         metaSnapshot: Value(reward.metaJson),
-        // Phần thưởng không cần duyệt thì thành phiếu dùng được ngay.
-        status: Value(
-          reward.requiresApproval
-              ? RedemptionStatus.pending.name
-              : RedemptionStatus.fulfilled.name,
-        ),
+        // **Luôn** chờ bố mẹ duyệt — ADR-025. Không đọc
+        // `rewards.requires_approval`: đổi thưởng là chỗ duy nhất trong app tiêu
+        // xu ra thế giới thật, nên phải có người lớn ở giữa, không có đường tắt.
+        status: Value(RedemptionStatus.pending.name),
       ),
     );
 

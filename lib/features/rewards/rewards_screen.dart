@@ -211,6 +211,27 @@ class _RewardCard extends StatelessWidget {
                       ],
                     ],
                   ),
+                  // Nói trước, không để con phát hiện sau khi bấm: xu đã trừ mà
+                  // phần thưởng chưa dùng được là chỗ dễ hiểu lầm nhất.
+                  if (isChild) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.verified_outlined,
+                          size: 14,
+                          color: context.semantic.onSurfaceMuted,
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Text(
+                          'Cần bố mẹ duyệt',
+                          style: context.text.labelSmall?.copyWith(
+                            color: context.semantic.onSurfaceMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -278,9 +299,7 @@ class _RedeemButtonState extends State<_RedeemButton> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              widget.reward.requiresApproval
-                  ? 'Đã gửi yêu cầu đổi "${widget.reward.title}". Chờ bố mẹ duyệt.'
-                  : 'Đã đổi "${widget.reward.title}"!',
+              'Đã gửi yêu cầu đổi "${widget.reward.title}". Chờ bố mẹ duyệt.',
             ),
           ),
         );

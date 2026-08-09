@@ -259,6 +259,12 @@ class Rewards extends Table with FamilyScoped, Syncable {
 
   /// NULL = không giới hạn.
   IntColumn get stock => integer().nullable()();
+
+  /// **Không còn được đọc** — ADR-025 buộc mọi lượt đổi thưởng phải qua bố mẹ.
+  ///
+  /// Giữ cột lại thay vì xoá: xoá cột cần migration mà chẳng được gì, và nếu
+  /// sau này mở lại đường "tự duyệt thưởng nhỏ" thì đã có chỗ. Bất kỳ ai định
+  /// đọc lại cột này phải đọc ADR-025 trước.
   BoolColumn get requiresApproval =>
       boolean().withDefault(const Constant(true))();
   BoolColumn get active => boolean().withDefault(const Constant(true))();

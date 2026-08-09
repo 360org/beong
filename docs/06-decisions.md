@@ -162,6 +162,45 @@ không KYC. Tiền tiêu vặt chỉ là ghi sổ giữa bố mẹ và con.
 
 ---
 
+## ADR-025: Đổi thưởng **luôn** cần bố mẹ duyệt, không cấu hình được
+
+**Bối cảnh:** ADR-023 vừa làm cho việc duyệt **việc nhà** thành tuỳ chọn và mặc định tắt. Bảng
+`rewards` có cột `requires_approval`, và service đọc nó: đặt `false` thì phiếu đổi thưởng thành
+"dùng được ngay", bỏ hẳn bố mẹ ra khỏi luồng.
+
+**Quyết định:** mọi lượt đổi thưởng vào trạng thái `pending` và **phải** có bố mẹ duyệt. Không có
+cờ nào tắt được bước này.
+
+**Lý do — và đây là chỗ dễ đọc lẫn với ADR-023:** hai việc trông giống nhau nhưng khác hẳn về hệ quả.
+
+| | Làm xong việc nhà | Đổi thưởng |
+|---|---|---|
+| Kết quả | Một con số trong app tăng lên | Tiêu xu ra **thế giới thật** |
+| Sai thì sao | Bố mẹ mở lại việc, trừ theo ADR-022 | Đã đi công viên rồi thì không rút lại được |
+| Ai phải có mặt | Không nhất thiết | **Bắt buộc** có người lớn |
+
+Phần thưởng là tiền thật, thời gian thật của bố mẹ, một chuyến đi thật. Không có "mở lại" cho những
+thứ đó. Vì vậy chỗ này đi ngược hướng ADR-023 một cách có chủ ý, không phải vì quên.
+
+**Cột `rewards.requires_approval` giữ lại nhưng không còn được đọc.** Xoá cột cần migration mà chẳng
+được gì, và nếu sau này mở lại đường "tự duyệt thưởng nhỏ" thì đã có chỗ. Đã ghi ngay tại định nghĩa
+cột rằng ai định đọc lại nó phải đọc ADR này trước — cột im lặng không dùng là chỗ dễ bị bật lại sau
+mấy tháng mà không ai nhớ lý do.
+
+**Hệ quả:**
+- (+) Bố mẹ luôn biết con đang tiêu xu vào gì, đúng lúc nó xảy ra.
+- (+) Một đường đi duy nhất, không có nhánh "tự duyệt" cần test riêng.
+- (−) Bố mẹ quên mở app thì phiếu nằm chờ. Với việc nhà đây là lý do lật ADR-009, nhưng ở đây chấp
+  nhận được: con vẫn kiếm xu bình thường, chỉ chưa dùng được — khác với bị chặn không kiếm được gì.
+  Thông báo đẩy ở Sprint 5 sẽ giảm chỗ này.
+- (−) Thưởng rất nhỏ (5 xu đổi một cái nhãn dán) cũng phải chờ. Nếu beta cho thấy đây là ma sát thật
+  thì mở lại bằng một ADR mới, không phải bằng cách lặng lẽ đọc lại cột cũ.
+
+**UI phải nói trước:** thẻ phần thưởng hiện dòng "Cần bố mẹ duyệt" ngay dưới giá, và snackbar sau
+khi đổi nói rõ đang chờ. Xu đã trừ mà phần thưởng chưa dùng được là chỗ dễ hiểu lầm nhất trong app.
+
+---
+
 ## ADR-024: Hũ do bố mẹ tự lập; con có thể tự chia xu
 
 **Sửa ADR-016, không lật.** Ba hũ Tiêu / Để dành / Cho đi vẫn là **mặc định**, và chia-ngay-khi-kiếm

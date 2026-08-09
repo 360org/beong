@@ -185,6 +185,11 @@ Quy tắc bắt buộc (chi tiết và lý do ở ADR-022):
 - Mỗi khoản trừ là một dòng sổ cái có lý do đọc được, hiện trong "Sổ của con".
 
 ### 4.5 Phần thưởng
+
+> **Đổi thưởng luôn cần bố mẹ duyệt** (ADR-025), không tắt được — khác với việc nhà, nơi duyệt là
+> tuỳ chọn (ADR-023). Làm xong một việc chỉ làm một con số tăng lên; đổi thưởng thì tiêu xu ra thế
+> giới thật và không có đường "mở lại".
+
 - Phụ huynh tạo: tên, icon, **loại**, giá điểm, số lượng còn (tùy chọn), có cần duyệt không
 - Trẻ đổi → `redemption` trạng thái `pending` → phụ huynh `fulfilled` / `rejected` (hoàn điểm)
 

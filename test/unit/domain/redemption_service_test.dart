@@ -102,8 +102,11 @@ void main() {
     });
 
     test(
-      'phần thưởng không cần duyệt thì thành phiếu dùng được ngay',
+      'dù phần thưởng đặt requiresApproval=false, **vẫn** phải chờ duyệt',
       () async {
+        // ADR-025: đổi thưởng không có đường tắt. Trước đây cột
+        // `requires_approval = false` biến phiếu thành dùng được ngay, tức là
+        // bố mẹ bị bỏ ra khỏi đúng chỗ cần họ nhất.
         await giveXu(100);
         final reward = await makeReward(requiresApproval: false);
 
@@ -116,10 +119,36 @@ void main() {
 
         expect(
           (await rewardDao.getRedemption(id))!.status,
-          RedemptionStatus.fulfilled.name,
+          RedemptionStatus.pending.name,
+        );
+        expect(
+          await rewardDao.watchPendingRedemptions(familyId).first,
+          hasLength(1),
+          reason: 'phải hiện trong hàng đợi của bố mẹ',
         );
       },
     );
+
+    test('mọi lượt đổi đều vào hàng đợi, không lượt nào tự duyệt', () async {
+      await giveXu(300);
+      for (var i = 1; i <= 3; i++) {
+        final reward = await makeReward(
+          id: 'r$i',
+          requiresApproval: i.isEven,
+        );
+        await service.redeem(
+          familyId: familyId,
+          memberId: childId,
+          reward: reward,
+          clientOpId: 'op-$i',
+        );
+      }
+
+      expect(
+        await rewardDao.watchPendingRedemptions(familyId).first,
+        hasLength(3),
+      );
+    });
 
     test('không đủ xu thì **không** trừ gì và không có phiếu nào', () async {
       await giveXu(10);
@@ -248,13 +277,14 @@ void main() {
 
     test('con bấm đã dùng thì phiếu đóng lại', () async {
       await giveXu(100);
-      final reward = await makeReward(requiresApproval: false);
+      final reward = await makeReward();
       final id = await service.redeem(
         familyId: familyId,
         memberId: childId,
         reward: reward,
         clientOpId: 'op-1',
       );
+      await service.approve(redemptionId: id, resolvedBy: parentId);
 
       await service.markUsed(id);
 
@@ -372,15 +402,16 @@ void main() {
       expect(await rewardDao.watchPendingRedemptions(familyId).first, isEmpty);
     });
 
-    test('phần thưởng không cần duyệt không vào hàng đợi', () async {
+    test('duyệt xong thì phiếu ra khỏi hàng đợi', () async {
       await giveXu(100);
-      final reward = await makeReward(requiresApproval: false);
-      await service.redeem(
+      final reward = await makeReward();
+      final id = await service.redeem(
         familyId: familyId,
         memberId: childId,
         reward: reward,
         clientOpId: 'op-1',
       );
+      await service.approve(redemptionId: id, resolvedBy: parentId);
 
       expect(await rewardDao.watchPendingRedemptions(familyId).first, isEmpty);
     });
