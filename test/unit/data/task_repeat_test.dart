@@ -1,6 +1,8 @@
+import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/member_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
+import 'package:beong/data/seed/presets.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:drift/drift.dart';
@@ -137,6 +139,86 @@ void main() {
 
       expect(await hasInstanceOn('rong', '2026-08-10'), isFalse);
       expect(await hasInstanceOn('rong', '2026-08-11'), isFalse);
+    });
+  });
+
+  group('bù icon cho việc thiếu icon', () {
+    test('việc tự tạo không icon được gán ✏️', () async {
+      await taskDao.createTask(
+        TasksCompanion.insert(
+          id: 'khong-icon',
+          familyId: familyId,
+          title: 'Việc cũ',
+        ),
+        [childId],
+      );
+
+      expect(await taskDao.backfillMissingIcons(familyId), 1);
+
+      final task = await taskDao.getTaskById('khong-icon');
+      expect(task.iconKey, kDefaultTaskIconKey);
+      expect(
+        iconForKey(task.iconKey),
+        isNot(taskIconFallback),
+        reason: '⭐ là dấu hiệu thiếu icon, không phải một lựa chọn',
+      );
+    });
+
+    test('việc sinh từ template lấy đúng icon của template', () async {
+      final preset = kTaskPresets.first;
+      await taskDao.createTask(
+        TasksCompanion.insert(
+          id: 'tu-preset',
+          familyId: familyId,
+          title: preset.titleVi,
+          presetKey: Value(preset.key),
+        ),
+        [childId],
+      );
+
+      await taskDao.backfillMissingIcons(familyId);
+
+      expect(
+        (await taskDao.getTaskById('tu-preset')).iconKey,
+        preset.iconKey,
+      );
+    });
+
+    test('không ghi đè icon bố mẹ đã chọn', () async {
+      await taskDao.createTask(
+        TasksCompanion.insert(
+          id: 'co-icon',
+          familyId: familyId,
+          title: 'Đọc sách',
+          iconKey: const Value('books'),
+        ),
+        [childId],
+      );
+
+      expect(
+        await taskDao.backfillMissingIcons(familyId),
+        0,
+        reason: 'không có việc nào thiếu icon',
+      );
+      expect((await taskDao.getTaskById('co-icon')).iconKey, 'books');
+    });
+
+    test('chuỗi rỗng cũng được coi là thiếu icon', () async {
+      await taskDao.createTask(
+        TasksCompanion.insert(
+          id: 'icon-rong',
+          familyId: familyId,
+          title: 'Việc lạ',
+          iconKey: const Value(''),
+        ),
+        [childId],
+      );
+
+      expect(await taskDao.backfillMissingIcons(familyId), 1);
+      expect(
+        (await taskDao.getTaskById('icon-rong')).iconKey,
+        kDefaultTaskIconKey,
+      );
     });
   });
 }

@@ -407,6 +407,46 @@ class _TaskTile extends StatelessWidget {
   };
 }
 
+/// Một hình để chọn. Vùng chạm đủ 48dp theo `AppSpacing.minTouchTarget` — ô nhỏ
+/// hơn thì ngón tay trẻ bấm trượt sang hình bên cạnh.
+class _IconChoice extends StatelessWidget {
+  const _IconChoice({
+    required this.emoji,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String emoji;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: AppSpacing.minTouchTarget,
+        height: AppSpacing.minTouchTarget,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected
+              ? context.colors.primaryContainer
+              : context.colors.surfaceContainerHighest,
+          borderRadius: const BorderRadius.all(
+            Radius.circular(AppRadius.field),
+          ),
+          // Viền chứ không chỉ đổi màu nền: nền đậm nhạt một chút thì người
+          // không phân biệt màu tốt sẽ không thấy ô nào đang chọn (WCAG 1.4.1).
+          border: selected
+              ? Border.all(color: context.colors.primary, width: 2)
+              : null,
+        ),
+        child: Text(emoji, style: const TextStyle(fontSize: 22)),
+      ),
+    );
+  }
+}
+
 class _AddTaskSheet extends StatefulWidget {
   const _AddTaskSheet({
     required this.taskDao,
@@ -435,6 +475,10 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
       _selectedChildren.add(child.id);
     }
   }
+
+  /// Icon của việc. Luôn có một giá trị — không có đường nào tạo ra việc không
+  /// icon, vì thẻ việc của con đọc bằng hình trước khi đọc chữ.
+  String _iconKey = kDefaultTaskIconKey;
 
   /// Lịch lặp. Mặc định hằng ngày — đúng với phần lớn việc nhà, và là hành vi
   /// duy nhất app có trước khi khối này tồn tại.
@@ -474,9 +518,6 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
     if (title.isEmpty || _selectedChildren.isEmpty) return;
 
     final id = 'task-${DateTime.now().millisecondsSinceEpoch}';
-    final preset = _selectedPreset == null
-        ? null
-        : presetByKey(_selectedPreset!);
     // `custom` mà không chọn thứ nào thì không sinh được lượt nào — việc tạo ra
     // sẽ không bao giờ xuất hiện. Coi như hằng ngày thay vì tạo một việc chết.
     final effectiveRepeat = _repeat == RepeatType.custom && _repeatDays.isEmpty
@@ -490,7 +531,9 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
         title: title,
         points: Value(points),
         presetKey: Value(_selectedPreset),
-        iconKey: Value(preset?.iconKey),
+        // Icon bố mẹ đang chọn, không phải icon của preset: bố mẹ có thể chọn
+        // template rồi đổi hình, và lần đổi sau cùng mới là ý của họ.
+        iconKey: Value(_iconKey),
         repeatType: Value(effectiveRepeat.name),
         repeatDays: Value(
           effectiveRepeat == RepeatType.custom
@@ -543,6 +586,9 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                         _titleController.text = preset.titleVi;
                         _pointsController.text = preset.defaultPoints
                             .toString();
+                        // Lấy luôn icon của template: bố mẹ chọn "Đánh răng" thì
+                        // không phải đi tìm 🪥 lần nữa.
+                        _iconKey = preset.iconKey;
                       }
                     });
                   },
@@ -564,6 +610,21 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                 suffixText: 'xu',
               ),
               keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text('Chọn hình', style: context.text.titleSmall),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                for (final key in kTaskIconKeys)
+                  _IconChoice(
+                    emoji: iconForKey(key),
+                    selected: key == _iconKey,
+                    onTap: () => setState(() => _iconKey = key),
+                  ),
+              ],
             ),
             const SizedBox(height: AppSpacing.lg),
             Text('Lặp lại', style: context.text.titleSmall),

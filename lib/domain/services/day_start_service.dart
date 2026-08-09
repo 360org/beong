@@ -67,6 +67,10 @@ class DayStartService {
     // nguồn.
     await _jars.seedDefaults(familyId);
 
+    // Bù icon cho việc tạo bằng sheet cũ (chưa có ô chọn hình). Cùng lý do với
+    // gieo hũ ở trên: sửa dữ liệu một lần thay vì vá chỗ hiển thị.
+    await _tasks.backfillMissingIcons(familyId);
+
     // Múi giờ lấy từ thiết bị, không từ `families.timezone`: cột đó lưu tên
     // IANA và tầng data chưa quy đổi (xem ADR-008). Đây là chỗ sẽ phải sửa khi
     // gia đình dùng nhiều thiết bị ở nhiều múi giờ.

@@ -1,5 +1,7 @@
+import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/tables/tables.dart';
+import 'package:beong/data/seed/presets.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/schedule.dart';
@@ -44,6 +46,43 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
               r.deletedAt.isNull(),
         ))
         .get();
+  }
+
+  /// Gán icon cho những việc còn thiếu icon.
+  ///
+  /// Sheet thêm việc trước đây không có ô chọn hình, nên mọi việc bố mẹ tự tạo
+  /// đều có `icon_key = NULL` và hiện ⭐ — giống hệt nhau, mất tác dụng của hình
+  /// (trẻ đọc hình trước khi đọc chữ). Việc mới thì không còn đường nào tạo ra
+  /// thiếu icon, nhưng dữ liệu cũ vẫn còn.
+  ///
+  /// Lấy icon của preset nếu việc đó sinh từ template; không thì dùng ✏️ — hình
+  /// trung tính đọc ra "có việc cần làm", thay vì ⭐ vốn là dấu hiệu **thiếu**
+  /// icon chứ không phải một lựa chọn.
+  ///
+  /// Trả về số việc đã sửa.
+  Future<int> backfillMissingIcons(String familyId) async {
+    final rows =
+        await (select(tasks)..where(
+              (t) =>
+                  t.familyId.equals(familyId) &
+                  (t.iconKey.isNull() | t.iconKey.equals('')),
+            ))
+            .get();
+    if (rows.isEmpty) return 0;
+
+    await batch((b) {
+      for (final row in rows) {
+        final fromPreset = row.presetKey == null
+            ? null
+            : presetByKey(row.presetKey!)?.iconKey;
+        b.update(
+          tasks,
+          TasksCompanion(iconKey: Value(fromPreset ?? kDefaultTaskIconKey)),
+          where: (t) => t.id.equals(row.id),
+        );
+      }
+    });
+    return rows.length;
   }
 
   /// Như [activeTasks] nhưng phát lại mỗi khi bảng đổi.
