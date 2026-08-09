@@ -9,6 +9,7 @@ import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
+import 'package:beong/data/local/member_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/seed/presets.dart';
 import 'package:beong/domain/entities/enums.dart';
@@ -37,6 +38,7 @@ class TasksScreen extends ConsumerWidget {
       body: _TaskList(
         familyId: session.familyId,
         taskDao: taskDao,
+        memberDao: ref.watch(memberDaoProvider),
         isParent: session.isParent,
       ),
       floatingActionButton: session.isParent
@@ -65,11 +67,13 @@ class _TaskList extends StatefulWidget {
   const _TaskList({
     required this.familyId,
     required this.taskDao,
+    required this.memberDao,
     required this.isParent,
   });
 
   final String familyId;
   final TaskDao taskDao;
+  final MemberDao memberDao;
   final bool isParent;
 
   @override
@@ -99,6 +103,26 @@ class _TaskListState extends State<_TaskList> {
     }
   }
 
+  /// Tạo nhiệm vụ ngay từ template, gán cho mọi bé trong nhà.
+  ///
+  /// Gán cho tất cả là mặc định đúng ở đây: bố mẹ đang ở trang trống, chưa nghĩ
+  /// tới việc chia người. Sửa lại được ở màn chi tiết.
+  Future<void> _createFromPreset(TaskPreset preset) async {
+    final children = await widget.memberDao.children(widget.familyId);
+    await widget.taskDao.createTask(
+      TasksCompanion.insert(
+        id: 'task-${preset.key}-${DateTime.now().millisecondsSinceEpoch}',
+        familyId: widget.familyId,
+        title: preset.titleVi,
+        points: Value(preset.defaultPoints),
+        iconKey: Value(preset.iconKey),
+        presetKey: Value(preset.key),
+      ),
+      [for (final c in children) c.id],
+    );
+    await _load();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_loaded) {
@@ -126,13 +150,20 @@ class _TaskListState extends State<_TaskList> {
               const SizedBox(height: AppSpacing.sm),
               Text(
                 widget.isParent
-                    ? 'Bấm + để thêm việc mới cho bé.'
-                    : 'Bố mẹ chưa tạo việc.',
+                    ? 'Chọn nhanh một nhiệm vụ có sẵn, hoặc bấm + để tự tạo.'
+                    : 'Bố mẹ chưa tạo nhiệm vụ.',
                 style: context.text.bodyMedium?.copyWith(
                   color: context.semantic.onSurfaceMuted,
                 ),
                 textAlign: TextAlign.center,
               ),
+              if (widget.isParent) ...[
+                const SizedBox(height: AppSpacing.xxxl),
+                // Cùng lý do với màn Phần thưởng: 25 template đang bị chôn
+                // trong bottom sheet sau nút "+", nên trang trống trông như
+                // app không có gì. Đưa vài cái ra ngoài.
+                _TaskPresetSuggestions(onPick: _createFromPreset),
+              ],
             ],
           ),
         ),
@@ -485,6 +516,78 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Vài template nhiệm vụ gợi ý ngay trên trang trống.
+class _TaskPresetSuggestions extends StatelessWidget {
+  const _TaskPresetSuggestions({required this.onPick});
+
+  final Future<void> Function(TaskPreset) onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final suggestions = kTaskPresets.take(6).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'CHỌN NHANH',
+          style: context.text.labelSmall?.copyWith(
+            color: context.semantic.onSurfaceMuted,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          alignment: WrapAlignment.center,
+          children: [
+            for (final preset in suggestions)
+              GestureDetector(
+                onTap: () => unawaited(onPick(preset)),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
+                  decoration: BoxDecoration(
+                    color: context.colors.primaryContainer,
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(AppRadius.field),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        iconForKey(preset.iconKey),
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        preset.titleVi,
+                        style: context.text.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        '${preset.defaultPoints}',
+                        style: context.text.bodySmall?.copyWith(
+                          color: context.semantic.xuText,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
     );
   }
 }

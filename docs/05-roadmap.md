@@ -129,9 +129,15 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 
 > Nội dung không đổi, chỉ **đi sau** Sprint 3 theo ADR-021.
 
-- [ ] CRUD phần thưởng **có phân loại** (5 `reward_type`, trường riêng theo loại)
-- [ ] Đổi thưởng + hàng chờ duyệt + hoàn điểm khi từ chối
-- [ ] Màn "Phiếu của con" + nút "Đã dùng"
+- [~] CRUD phần thưởng — tạo/xoá/đổi xong; **chưa** có màn sửa, và trường riêng theo loại
+      (`meta_json`: số phút, số tiền) chưa có UI nhập
+- [x] **Đổi thưởng + hàng chờ duyệt + hoàn điểm khi từ chối** — `RedemptionService`.
+      Sửa ba lỗi thật của luồng cũ: không nguyên tử (trừ xu trước khi kiểm còn hàng),
+      từ chối **không hoàn xu**, và không có màn nào gọi `fulfillRedemption` nên phiếu
+      nằm `pending` mãi mãi.
+- [x] Màn "Phiếu của con" + nút "Đã dùng"
+- [x] Template phần thưởng và nhiệm vụ hiện **ngay trên trang trống**, không chôn trong
+      bottom sheet sau nút "+"
 - [ ] `StreakFlame` + màn huy hiệu (8 huy hiệu MVP)
 - [ ] `JarTrio` — hiện các hũ của con, số hũ do bố mẹ đặt (ADR-024)
 - [ ] Tỷ giá quy đổi ra tiền thật (mặc định tắt — ADR-017)

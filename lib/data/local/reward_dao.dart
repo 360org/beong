@@ -105,6 +105,27 @@ class RewardDao extends DatabaseAccessor<AppDatabase> with _$RewardDaoMixin {
     });
   }
 
+  Future<Redemption?> getRedemption(String id) {
+    return (select(
+      redemptions,
+    )..where((r) => r.id.equals(id))).getSingleOrNull();
+  }
+
+  Stream<List<Redemption>> watchPendingRedemptions(String familyId) {
+    return (select(redemptions)
+          ..where(
+            (r) =>
+                r.familyId.equals(familyId) &
+                r.status.equals(RedemptionStatus.pending.name),
+          )
+          ..orderBy([(r) => OrderingTerm.asc(r.createdAt)]))
+        .watch();
+  }
+
+  Future<Reward?> getReward(String id) {
+    return (select(rewards)..where((r) => r.id.equals(id))).getSingleOrNull();
+  }
+
   /// Trẻ bấm "đã dùng" trên phiếu.
   Future<void> markUsed(String redemptionId) {
     return (update(redemptions)..where((r) => r.id.equals(redemptionId))).write(
