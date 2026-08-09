@@ -71,7 +71,7 @@ Phân tích đối thủ đầy đủ: [`07-competitive-analysis.md`](07-competi
 11. Offline-first + đồng bộ nhiều thiết bị
 12. Thông báo "nhắc nhẹ, không cằn nhằn": nhắc task, có việc chờ duyệt, đổi thưởng
 13. Đa ngôn ngữ: Tiếng Việt + English
-14. **Giáo dục tài chính** — ba hũ (Tiêu / Để dành / Cho đi), tỷ giá quy đổi ra tiền thật,
+14. **Giáo dục tài chính** — hũ (mặc định Tiêu / Để dành / Cho đi, bố mẹ lập thêm được — ADR-024), tỷ giá quy đổi ra tiền thật,
     mục tiêu tiết kiệm, sổ chi tiêu của con. Xem §4.8
 
 > Mục 3, 7, 8 được đôn từ v1.1 lên MVP sau khi phân tích ChoreReward — đây là phần cốt lõi
@@ -226,8 +226,15 @@ lại cùng một nhắc nhở; không thông báo mang giọng trách móc; kh�
 Trụ riêng của Bé Ong. Mục tiêu: con hiểu **công sức → giá trị → lựa chọn**, chứ không chỉ
 đổi điểm lấy quà.
 
-#### Ba hũ
-Xu con kiếm được tự chia vào ba hũ theo tỷ lệ bố mẹ đặt (mặc định 50/40/10):
+#### Các hũ
+Mặc định là **ba hũ** Tiêu / Để dành / Cho đi, chia tự động theo tỷ lệ bố mẹ đặt (mặc định 50/40/10).
+Từ ADR-024, bố mẹ **lập được hũ khác** (Sách, Quỹ đi chơi, Từ thiện…) với tỷ lệ riêng, và có thể
+chuyển sang chế độ **con tự chia**: xu vào hũ chờ, con quyết định chia bao nhiêu vào hũ nào — vì bản
+thân việc chia mới là bài học lớn nhất, mà app chia hộ thì con không bao giờ phải quyết định.
+
+Mỗi hũ có **emoji riêng**, không phải trang trí: trẻ chưa đọc thông nhận hũ bằng mặt, không bằng chữ.
+
+Ba hũ mặc định:
 
 | Hũ | Dùng để | Ghi chú |
 |---|---|---|

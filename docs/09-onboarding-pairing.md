@@ -217,7 +217,7 @@ Chia pha theo thứ tự phụ thuộc. Pha 0 chặn tất cả phần còn lạ
 
 - [ ] Tạo **nhiều** con (onboarding hiện chỉ tạo được 1)
 - [ ] Sửa / xoá / vô hiệu hồ sơ con
-- [ ] Chọn con khi thêm task (hiện gán cho tất cả)
+- [x] Chọn con khi thêm task — `_AddTaskSheet` có danh sách chọn con, không còn gán cho tất cả
 - [x] Hỏi tuổi bé để chọn nhóm tuổi giao diện — `_AgePicker` trong onboarding, lưu năm sinh
 - [ ] Test: task gán cho con A không hiện ở con B
 

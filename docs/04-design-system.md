@@ -118,7 +118,7 @@ Không lục giác hoá nút bấm, avatar hay ô nhập — vùng chạm phải
 | `RoutineProgressRing` | Vòng tròn tiến độ routine; đầy 100% → hiệu ứng phát sáng + hiện điểm bonus |
 | `RewardCard` | Icon theo `reward_type` + tên + giá gem; nếu chưa đủ điểm hiện "còn thiếu 30 💎" |
 | `XuBadge` | Đồng xu vàng + số; nếu gia đình bật quy đổi thì hiện thêm `≈ 35.000đ` cỡ nhỏ |
-| `JarTrio` | Ba hũ Tiêu · Để dành · Cho đi, mỗi hũ một cột mật đầy dần |
+| `JarTrio` | Các hũ của con, mỗi hũ một cột mật đầy dần. Số hũ là **dữ liệu**, không cố định 3 (ADR-024) — widget phải chịu được 1 hũ hoặc 6 hũ, và mỗi hũ hiện emoji của nó |
 | `GoalCard` | Ảnh món con muốn + thanh tiến độ + "còn 120 xu nữa" |
 | `StreakFlame` | Ngọn lửa + số ngày; xám khi streak = 0; nhấp nháy nhẹ khi hôm nay chưa đạt |
 | `BadgeGrid` | Lưới huy hiệu, cái chưa đạt hiện dạng bóng mờ + điều kiện đạt |
@@ -184,7 +184,7 @@ nhưng 5 preset đầu được xếp theo tần suất dùng của gia đình t
 - Tab theo buổi: Sáng / Chiều / Tối (chỉ hiện buổi có việc)
 - Nội dung mỗi buổi: **`RoutineCard` trước, task lẻ sau**
 - `TaskCard` với checkbox lớn; bấm xong → animation confetti + âm thanh + haptic
-- `JarTrio` — ba hũ của con, bấm vào từng hũ xem chi tiết
+- `JarTrio` — các hũ của con (số lượng do bố mẹ đặt), bấm vào từng hũ xem chi tiết
 - `GoalCard` — món con đang để dành, thanh tiến độ
 - Nút **Đổi thưởng** · **Sổ của con** · **Huy hiệu của con**
 
