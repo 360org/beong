@@ -45,6 +45,12 @@ class Families extends Table {
   TextColumn get jarSplit =>
       text().withDefault(const Constant('{"spend":50,"save":40,"give":10}'))();
 
+  /// Xu vào hũ thế nào — `AllocationMode`, ADR-024.
+  ///
+  /// `auto` (mặc định): chia ngay theo tỷ lệ, giữ đúng ADR-016.
+  /// `manual`: xu vào hũ chờ, **con tự chia** — để con học phân bổ giá trị.
+  TextColumn get allocationMode => text().withDefault(const Constant('auto'))();
+
   /// Con bấm xong thì có cần bố mẹ duyệt hay không — ADR-023.
   ///
   /// **Mặc định `false`**: làm xong là xong, xu cộng ngay. Bố mẹ bật lên thì
@@ -350,4 +356,42 @@ class DeviceSettings extends Table {
 
   @override
   Set<Column<Object>> get primaryKey => {settingKey};
+}
+
+/// Hũ của một gia đình — ADR-024 (sửa ADR-016).
+///
+/// Trước đây ba hũ là `enum Jar` cứng trong code. Giờ là bảng, để bố mẹ tự lập
+/// hũ theo giá trị nhà mình muốn dạy ("Sách", "Từ thiện", "Quỹ đi chơi").
+///
+/// **`key` là thứ đi vào sổ cái**, không phải `id`. Ba hũ mặc định dùng đúng
+/// `key` cũ (`spend`/`save`/`give`) nên toàn bộ `point_transactions` đã ghi
+/// trước đây vẫn đọc được, không cần di trú một dòng nào.
+class Jars extends Table with FamilyScoped {
+  /// Khoá bền, dùng trong `point_transactions.jar`. Không đổi sau khi đã có
+  /// giao dịch — đổi là làm hỏng lịch sử.
+  TextColumn get jarKey => text()();
+
+  TextColumn get title => text().withLength(min: 1, max: 40)();
+
+  /// Emoji. Hũ phải có mặt ngộ nghĩnh để trẻ nhớ được hũ nào là hũ nào.
+  TextColumn get emoji => text()();
+
+  /// Tỷ lệ chia mặc định, phần trăm. Tổng các hũ chưa lưu trữ phải bằng 100.
+  IntColumn get pct => integer().withDefault(const Constant(0))();
+
+  IntColumn get orderIndex => integer().withDefault(const Constant(0))();
+
+  /// Hũ đã nghỉ dùng: không nhận xu mới, nhưng số dư và lịch sử vẫn còn.
+  ///
+  /// Xoá thẳng thì lịch sử trỏ vào một hũ không tồn tại. Sổ cái là append-only
+  /// (ADR-005), nên hũ cũng chỉ được "nghỉ" chứ không được biến mất.
+  BoolColumn get isArchived => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {familyId, jarKey},
+  ];
 }

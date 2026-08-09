@@ -28,6 +28,7 @@ part 'database.g.dart';
     BadgesEarned,
     Outbox,
     DeviceSettings,
+    Jars,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -37,7 +38,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -56,6 +57,12 @@ class AppDatabase extends _$AppDatabase {
       }
       // v2 -> v3: cấu hình trừ xu (ADR-022). Mọi cột đều có default nên gia
       // đình đang dùng bản cũ nâng lên là **tắt** trừ xu, không tự bật.
+      // v4 -> v5: hũ thành bảng + chế độ chia xu (ADR-024). Không di trú
+      // `point_transactions`: ba hũ mặc định dùng đúng key cũ.
+      if (from < 5) {
+        await m.createTable(jars);
+        await m.addColumn(families, families.allocationMode);
+      }
       // v3 -> v4: cờ cần duyệt (ADR-023). Default false, tức là gia đình đang
       // dùng bản cũ nâng lên sẽ **đổi hành vi**: trước đây mọi việc phải duyệt.
       // Xem ADR-023 phần hệ quả — đây là đổi có chủ ý, không phải sơ suất.

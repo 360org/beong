@@ -162,7 +162,55 @@ không KYC. Tiền tiêu vặt chỉ là ghi sổ giữa bố mẹ và con.
 
 ---
 
+## ADR-024: Hũ do bố mẹ tự lập; con có thể tự chia xu
+
+**Sửa ADR-016, không lật.** Ba hũ Tiêu / Để dành / Cho đi vẫn là **mặc định**, và chia-ngay-khi-kiếm
+vẫn là chế độ mặc định. Thay đổi là: chúng thôi làm *giới hạn cứng*.
+
+**Bối cảnh:** ADR-016 hoá thân thành `enum Jar { spend, save, give }` trong code. Nhà nào muốn dạy
+một giá trị khác — "Sách", "Quỹ đi chơi", "Từ thiện" — thì không có đường. Và bản thân việc *chia*
+là bài học lớn nhất trong ba hũ, nhưng app đang chia hộ, nên đứa trẻ không bao giờ phải quyết định.
+
+**Quyết định:**
+
+1. **Hũ thành bảng `jars`**, mỗi hũ có `title`, `emoji`, `pct`, `order_index`. Bố mẹ thêm/sửa/nghỉ
+   dùng. Tổng `pct` của các hũ đang dùng phải bằng 100.
+2. **`families.allocation_mode`**: `auto` (mặc định, chia ngay theo tỷ lệ — đúng ADR-016) hoặc
+   `manual` (xu vào **hũ chờ**, con tự chia sang các hũ).
+3. Hũ phải có **emoji**, không phải tuỳ chọn: trẻ chưa đọc thông nhận hũ bằng mặt, không bằng chữ.
+
+**`key` là thứ đi vào sổ cái, không phải `id`.** Ba hũ mặc định dùng đúng khoá cũ
+(`spend`/`save`/`give`), nên **toàn bộ `point_transactions` đã ghi vẫn đọc được** và bước migration
+v4→v5 không sửa một dòng ledger nào.
+
+**Hũ chỉ được "nghỉ dùng", không được xoá.** Sổ cái là append-only (ADR-005); xoá hũ thì lịch sử trỏ
+vào một hũ không tồn tại. Hũ nghỉ dùng không nhận xu mới nhưng số dư và lịch sử vẫn còn.
+
+**Hũ chờ (`inbox`) không phải hũ thật.** Nó không nằm trong bảng `jars` và không tính vào tổng 100%:
+nó là nơi trung chuyển, không phải một giá trị gia đình muốn dạy. Con chia xu = hai dòng sổ cái
+(trừ ở hũ chờ, cộng ở hũ đích) với lý do `jarTransfer` — vẫn append-only, không sửa dòng cũ.
+
+**Hệ quả:**
+- (+) Gia đình dạy được giá trị của riêng mình, không bị bó vào ba hũ của người khác.
+- (+) Chế độ `manual` biến việc chia xu thành bài học thật: con phải tự quyết định.
+- (−) Chế độ `manual` cần con **chủ động**. Hũ chờ đầy lên mà không ai chia thì xu nằm im, không
+  sinh mục tiêu tiết kiệm nào — đúng cái ADR-016 muốn tránh. Vì vậy `auto` vẫn là mặc định, và app
+  phải nhắc khi hũ chờ có xu.
+- (−) Thứ tự hũ giờ là dữ liệu, không phải hằng số. Khoản trừ xu (ADR-022) lấy theo `order_index`
+  tăng dần, nên bố mẹ đổi thứ tự là đổi luôn hũ nào bị trừ trước — phải nói rõ trong UI.
+- (−) Bố mẹ đổi tỷ lệ không hồi tố: xu đã chia rồi thì nằm ở hũ cũ. Đúng tinh thần ADR-007.
+
+**Đã cân nhắc:** giữ ba hũ cứng và chỉ cho đổi tên (không đủ — nhà muốn bốn hũ thì vẫn tắc); cho
+xoá hũ thật (làm hỏng lịch sử); để con tự chia là mặc định (đa số gia đình sẽ thấy hũ chờ đầy xu
+không ai chia).
+
+---
+
 ## ADR-016: Ba hũ Tiêu / Để dành / Cho đi, chia tự động ngay khi kiếm được
+
+> **ĐÃ ĐƯỢC SỬA bởi ADR-024.** Ba hũ này vẫn là mặc định và chia-ngay vẫn là chế độ mặc định, nhưng
+> chúng không còn là giới hạn cứng: bố mẹ lập được hũ khác, và con có thể tự chia.
+
 **Bối cảnh:** cách dạy tài chính cho trẻ phổ biến nhất là chia thu nhập thành nhiều phần ngay
 khi nhận, thay vì tiêu trước rồi để dành phần còn lại.
 **Quyết định:** mỗi lần duyệt task, xu chia vào ba hũ theo tỷ lệ (mặc định 50/40/10) — sinh
