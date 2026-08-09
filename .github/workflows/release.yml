@@ -49,8 +49,26 @@ jobs:
       - run: flutter gen-l10n
 
       - name: Giải mã keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore.jks
+          set -euo pipefail
+
+          # Secret thiếu thì `base64 -d` vẫn thành công và cho ra file rỗng, rồi
+          # Gradle mới báo "keystore was tampered with, or password was
+          # incorrect" — thông báo dẫn người đọc đi tìm sai mật khẩu trong khi
+          # thật ra chưa nạp secret. Chặn ngay ở đây với lý do đúng.
+          if [ -z "${ANDROID_KEYSTORE_BASE64}" ]; then
+            echo "::error::Chưa nạp secret ANDROID_KEYSTORE_BASE64 (xem docs/08-release-cicd.md §A-3)"
+            exit 1
+          fi
+
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/release.keystore.jks
+
+          if [ ! -s android/app/release.keystore.jks ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 giải mã ra file rỗng — dán lại, dùng 'base64 -w0' để không lẫn newline"
+            exit 1
+          fi
 
       - name: Build App Bundle
         env:
@@ -130,10 +148,37 @@ jobs:
           IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
           IOS_PROVISIONING_PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
         run: |
-          sed \
-            -e "s/__TEAM_ID__/${IOS_TEAM_ID}/" \
-            -e "s/__PROFILE_NAME__/${IOS_PROVISIONING_PROFILE_NAME}/" \
-            ios/ExportOptions.plist.template > ios/ExportOptions.plist
+          set -euo pipefail
+
+          if [ -z "${IOS_TEAM_ID}" ] || [ -z "${IOS_PROVISIONING_PROFILE_NAME}" ]; then
+            echo "::error::Thiếu IOS_TEAM_ID hoặc IOS_PROVISIONING_PROFILE_NAME (xem docs/08-release-cicd.md §B-3)"
+            exit 1
+          fi
+
+          # Không dùng `sed` ở đây: trong chuỗi thay thế của sed, `&` có nghĩa là
+          # "toàn bộ phần khớp", nên tên profile kiểu "Bé Ong & Family" sẽ bị
+          # thay thành "__PROFILE_NAME__ Family" — plist vẫn hợp lệ, build vẫn
+          # chạy, rồi chết ở bước ký với "No profile matching ... found" mà không
+          # nói tên nó đang tìm. Dấu `/` trong tên cũng phá luôn dấu phân cách.
+          # plistlib thay theo khoá, không diễn giải ký tự nào.
+          python3 - "$IOS_TEAM_ID" "$IOS_PROVISIONING_PROFILE_NAME" <<'PY'
+          import plistlib
+          import sys
+
+          team_id, profile_name = sys.argv[1], sys.argv[2]
+          with open('ios/ExportOptions.plist.template', 'rb') as f:
+              plist = plistlib.load(f)
+
+          plist['teamID'] = team_id
+          # Khoá là bundle ID, phải khớp `net.beong.app` trong template.
+          (bundle_id,) = plist['provisioningProfiles']
+          plist['provisioningProfiles'][bundle_id] = profile_name
+
+          with open('ios/ExportOptions.plist', 'wb') as f:
+              plistlib.dump(plist, f)
+
+          print(f'ExportOptions.plist: {bundle_id} -> {profile_name!r}, team {team_id}')
+          PY
 
       - name: Build IPA
         run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist

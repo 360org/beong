@@ -58,9 +58,24 @@ android {
 
     buildTypes {
         release {
-            // Rơi về debug key khi chưa có `key.properties`/biến môi trường, để
-            // `flutter run --release` local vẫn chạy được không cần setup keystore.
-            signingConfig = if (signingProperty("storeFile", "ANDROID_KEYSTORE_PATH") != null) {
+            val hasReleaseKey = signingProperty("storeFile", "ANDROID_KEYSTORE_PATH") != null
+
+            // Trên CI thì **dừng hẳn**. Nếu để rơi về debug key ở đây, cả
+            // workflow vẫn xanh và AAB debug-signed đi thẳng tới Play, để Play
+            // từ chối bằng một thông báo không liên quan gì tới nguyên nhân
+            // ("not signed with the upload certificate"). Sai sót đáng phát hiện
+            // ở phút thứ ba của build, không phải ở phút thứ mười lăm.
+            if (!hasReleaseKey && System.getenv("CI") == "true") {
+                throw GradleException(
+                    "Build release trên CI mà không có keystore — kiểm secret " +
+                        "ANDROID_KEYSTORE_BASE64 và biến ANDROID_KEYSTORE_PATH " +
+                        "(xem docs/08-release-cicd.md §A-3).",
+                )
+            }
+
+            // Ở máy cá nhân thì rơi về debug key là đúng: `flutter run --release`
+            // chạy được ngay, không phải dựng keystore chỉ để thử bản release.
+            signingConfig = if (hasReleaseKey) {
                 signingConfigs.getByName("release")
             } else {
                 signingConfigs.getByName("debug")

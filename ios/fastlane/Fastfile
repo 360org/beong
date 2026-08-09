@@ -19,7 +19,13 @@ platform :ios do
     )
   end
 
-  desc "Đẩy build đã có trên TestFlight lên App Store (chờ Apple duyệt)"
+  # Lane này **upload một build mới** lên App Store Connect, không phải đề bạt
+  # build đã có sẵn trên TestFlight — nó nhận `IPA_PATH` mà workflow vừa build.
+  # Hệ quả phải biết: chạy `beta` rồi chạy `release` **cùng một build number** thì
+  # Apple từ chối ở lần sau ("The bundle version must be higher"). Muốn đưa đúng
+  # cái build đã test trên TestFlight lên App Store thì bấm tay trên App Store
+  # Connect; muốn dùng lane này thì tăng `+build` trong pubspec.yaml trước.
+  desc "Upload một build mới lên App Store Connect (không tự nộp duyệt)"
   lane :release do
     api_key = app_store_connect_api_key(
       key_id: ENV["APP_STORE_CONNECT_KEY_ID"],

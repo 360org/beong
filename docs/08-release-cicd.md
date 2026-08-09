@@ -229,6 +229,11 @@ Tab **Actions → Release → Run workflow**, chọn:
 **Luồng khuyến nghị:** `internal` + `beta` vài lần đầu để test kỹ trên máy thật qua
 Play Console Internal Testing / TestFlight, sau đó mới chạy `production` / `release`.
 
+> **`ios_lane: release` upload một build MỚI**, không đề bạt build đang có trên TestFlight.
+> Nên chạy `beta` rồi chạy `release` mà **không tăng `+build`** thì Apple từ chối lần sau
+> (*"The bundle version must be higher"*). Muốn đưa đúng cái build đã test trên TestFlight lên
+> App Store thì chọn build đó trên App Store Connect và bấm tay — nhanh hơn và chắc hơn.
+
 ## 4. Android: lần đầu lên Play Store
 
 Play Console không cho phép phát hành thẳng lên `production` nếu app chưa qua ít nhất một
