@@ -364,8 +364,27 @@ class _TransactionTile extends StatefulWidget {
   State<_TransactionTile> createState() => _TransactionTileState();
 }
 
+/// Trạng thái của mục lịch sử, để cột bên trái nói được điều gì.
+@immutable
+class _EntryStatus {
+  const _EntryStatus(this.label, this.icon, this.tone);
+
+  final String label;
+  final IconData icon;
+
+  /// Sắc thái: `ok` xanh, `wait` cam, `bad` đỏ, `neutral` xám.
+  final String tone;
+}
+
 class _TransactionTileState extends State<_TransactionTile> {
   String? _subject;
+
+  /// Tạo **một lần**, không tạo trong `build`.
+  ///
+  /// `StreamBuilder` nhận stream mới là huỷ đăng ký cũ rồi đăng ký lại; gọi
+  /// `_statusStream()` trong `build` nghĩa là mỗi lần dựng lại chạy lại truy vấn
+  /// drift và nháy về trạng thái rỗng một khung hình.
+  late Stream<_EntryStatus?> _status = _statusStream();
 
   @override
   void initState() {
@@ -376,13 +395,109 @@ class _TransactionTileState extends State<_TransactionTile> {
   @override
   void didUpdateWidget(_TransactionTile oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.tx.refId != widget.tx.refId) unawaited(_loadSubject());
+    if (oldWidget.tx.refId == widget.tx.refId) return;
+    unawaited(_loadSubject());
+    setState(() => _status = _statusStream());
+  }
+
+  /// Trạng thái đọc từ **thực thể gốc**, không đoán từ lý do giao dịch.
+  ///
+  /// Một dòng `rewardRedeemed` không nói được phiếu đó đã được duyệt hay chưa —
+  /// chỉ bảng `redemptions` biết. Đó là lý do phải tra ngược, và cũng là lý do
+  /// dòng lịch sử phải giữ `ref_type` / `ref_id`.
+  _EntryStatus? _statusOf(String? instanceStatus, String? redemptionStatus) {
+    if (instanceStatus != null) {
+      return switch (instanceStatus) {
+        'approved' => const _EntryStatus('Đã xong', Icons.check_circle, 'ok'),
+        'pendingReview' => const _EntryStatus(
+          'Chờ duyệt',
+          Icons.hourglass_bottom_rounded,
+          'wait',
+        ),
+        // Lượt đã bị bố mẹ mở lại: xu vẫn còn nhưng việc phải làm lại (ADR-022).
+        'scheduled' => const _EntryStatus(
+          'Phải làm lại',
+          Icons.replay_rounded,
+          'wait',
+        ),
+        'missed' => const _EntryStatus(
+          'Bỏ lỡ',
+          Icons.remove_circle_outline,
+          'bad',
+        ),
+        'rejected' => const _EntryStatus(
+          'Bị từ chối',
+          Icons.close_rounded,
+          'bad',
+        ),
+        _ => null,
+      };
+    }
+
+    if (redemptionStatus != null) {
+      return switch (redemptionStatus) {
+        'pending' => const _EntryStatus(
+          'Chờ bố mẹ duyệt',
+          Icons.hourglass_bottom_rounded,
+          'wait',
+        ),
+        'fulfilled' => const _EntryStatus(
+          'Dùng được',
+          Icons.check_circle,
+          'ok',
+        ),
+        'used' => const _EntryStatus(
+          'Đã dùng',
+          Icons.task_alt_rounded,
+          'neutral',
+        ),
+        'rejected' => const _EntryStatus(
+          'Bị từ chối',
+          Icons.close_rounded,
+          'bad',
+        ),
+        _ => null,
+      };
+    }
+
+    return null;
   }
 
   /// Tra tên của thứ giao dịch này nói về.
   ///
   /// Không tra được thì để `null` và chỉ hiện nhãn theo lý do — dữ liệu cũ hoặc
   /// việc đã bị xoá không được làm dòng lịch sử biến mất.
+  /// Tên thì tra một lần (không đổi), còn **trạng thái phải theo dõi**.
+  ///
+  /// Bố mẹ duyệt hoặc mở lại không ghi dòng sổ cái nào, nên stream lịch sử
+  /// không phát lại và widget không dựng lại. Tra một lần là cách chắc chắn để
+  /// dòng "Chờ bố mẹ duyệt" đứng nguyên sau khi phiếu đã bị từ chối — đúng lỗi
+  /// đã gặp.
+  Stream<_EntryStatus?> _statusStream() {
+    final tx = widget.tx;
+    final refId = tx.refId;
+    if (refId == null) return Stream.value(null);
+
+    switch (tx.refType) {
+      case 'task_instance':
+        return widget.taskDao
+            .watchInstance(refId)
+            .map((i) => _statusOf(i?.status, null));
+      case 'reward':
+        // Dòng trừ xu khi đổi thưởng trỏ vào `reward`, nhưng trạng thái nằm ở
+        // phiếu — mà phiếu dùng chính `client_op_id` làm id, tức `groupId`.
+        return widget.rewardDao
+            .watchRedemption(tx.groupId)
+            .map((r) => _statusOf(null, r?.status));
+      case 'redemption':
+        return widget.rewardDao
+            .watchRedemption(refId)
+            .map((r) => _statusOf(null, r?.status));
+      default:
+        return Stream.value(null);
+    }
+  }
+
   Future<void> _loadSubject() async {
     final tx = widget.tx;
     final refId = tx.refId;
@@ -409,11 +524,32 @@ class _TransactionTileState extends State<_TransactionTile> {
     if (mounted && name != null) setState(() => _subject = name);
   }
 
+  Color _toneColor(BuildContext context, String tone) => switch (tone) {
+    'ok' => context.semantic.success,
+    'wait' => context.semantic.warning,
+    'bad' => context.semantic.danger,
+    _ => context.semantic.onSurfaceMuted,
+  };
+
   @override
   Widget build(BuildContext context) {
+    return StreamBuilder<_EntryStatus?>(
+      stream: _status,
+      builder: (context, snap) => _buildRow(context, snap.data),
+    );
+  }
+
+  Widget _buildRow(BuildContext context, _EntryStatus? status) {
     final tx = widget.tx;
     final isPositive = tx.delta > 0;
     final subject = _subject;
+    // Ghép trước để biết dòng phụ có nội dung hay không: dòng phụ rỗng vẫn
+    // chiếm chỗ và làm các thẻ cao thấp không đều.
+    final subtitle = [
+      if (status == null && subject != null) _reasonLabel(tx.reason),
+      if (tx.note != null) tx.note!,
+      if (tx.byJar.length > 1) _jarBreakdown(tx.byJar),
+    ].join(' · ');
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -425,10 +561,15 @@ class _TransactionTileState extends State<_TransactionTile> {
           ),
           child: Row(
             children: [
+              // Cột trạng thái: icon + màu nói ngay việc/phiếu này đang thế
+              // nào. Trước đây cột này chỉ nhắc lại lý do giao dịch, tức là
+              // lặp lại thông tin đã có ở dòng chữ bên cạnh.
               Icon(
-                _reasonIcon(tx.reason),
-                color: context.semantic.onSurfaceMuted,
-                size: 20,
+                status?.icon ?? _reasonIcon(tx.reason),
+                color: status == null
+                    ? context.semantic.onSurfaceMuted
+                    : _toneColor(context, status.tone),
+                size: 22,
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -439,18 +580,34 @@ class _TransactionTileState extends State<_TransactionTile> {
                       subject ?? _reasonLabel(tx.reason),
                       style: context.text.bodyMedium,
                     ),
-                    Text(
-                      // Dòng phụ: lý do + chi tiết hũ. Trẻ thấy được 10 xu đã
-                      // chia đi đâu mà không phải mở thêm màn nào.
-                      [
-                        if (subject != null) _reasonLabel(tx.reason),
-                        if (tx.note != null) tx.note!,
-                        if (tx.byJar.length > 1) _jarBreakdown(tx.byJar),
-                      ].join(' · '),
-                      style: context.text.bodySmall?.copyWith(
-                        color: context.semantic.onSurfaceMuted,
+                    if (subtitle.isNotEmpty || status != null)
+                      Text.rich(
+                        // Trạng thái trước, rồi lý do và chi tiết hũ. Trạng thái
+                        // tô màu **và** có chữ: icon 22px một mình không đủ, và
+                        // màu một mình cũng không đủ (WCAG 1.4.1 — không dùng
+                        // màu hay hình làm phương tiện truyền đạt duy nhất).
+                        TextSpan(
+                          children: [
+                            if (status != null)
+                              TextSpan(
+                                text: status.label,
+                                style: context.text.bodySmall?.copyWith(
+                                  color: _toneColor(context, status.tone),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            if (subtitle.isNotEmpty)
+                              TextSpan(
+                                text: status == null
+                                    ? subtitle
+                                    : ' · $subtitle',
+                              ),
+                          ],
+                        ),
+                        style: context.text.bodySmall?.copyWith(
+                          color: context.semantic.onSurfaceMuted,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),

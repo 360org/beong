@@ -95,7 +95,7 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
 - [ ] Animation ăn mừng — nối `KidScale.celebrateOnTap`, hiện là cờ chết
 - [ ] PIN phụ huynh (chỉ có cột `pin_hash`, chưa có UI/logic)
 - [x] Gộp các dòng sổ cái của cùng một giao dịch trong "Sổ của con" (`op_group_id`), hiện **tên
-      việc / tên phần thưởng** và chi tiết từng hũ
+      việc / tên phần thưởng**, **trạng thái** (chữ + màu, theo dõi sống), và chi tiết từng hũ
 - [ ] `integration_test/` cho luồng đầy đủ
 
 **Backend & tài khoản:**

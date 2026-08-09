@@ -185,6 +185,10 @@ nhưng 5 preset đầu được xếp theo tần suất dùng của gia đình t
 - Nội dung mỗi buổi: **`RoutineCard` trước, task lẻ sau**
 - `TaskCard` với checkbox lớn; bấm xong → animation confetti + âm thanh + haptic
 - `JarTrio` — các hũ của con (số lượng do bố mẹ đặt), bấm vào từng hũ xem chi tiết
+- Dòng lịch sử trong "Sổ của con" gồm bốn thứ, thiếu một là hỏng: **tên** việc/phần thưởng,
+  **trạng thái** (chữ + màu + icon), **lý do & chi tiết hũ**, **số xu**. Trạng thái phải đọc từ
+  thực thể gốc bằng stream — duyệt hay mở lại không ghi dòng sổ cái nào, nên tra một lần là trạng
+  thái đứng lại.
 - `GoalCard` — món con đang để dành, thanh tiến độ
 - Nút **Đổi thưởng** · **Sổ của con** · **Huy hiệu của con**
 

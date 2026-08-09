@@ -111,6 +111,15 @@ class RewardDao extends DatabaseAccessor<AppDatabase> with _$RewardDaoMixin {
     )..where((r) => r.id.equals(id))).getSingleOrNull();
   }
 
+  /// Theo dõi một phiếu. Cùng lý do với `TaskDao.watchInstance`: duyệt hay từ
+  /// chối phiếu không ghi dòng sổ cái nào (trừ khoản hoàn xu), nên trạng thái
+  /// hiển thị phải theo dõi chứ không tra một lần.
+  Stream<Redemption?> watchRedemption(String id) {
+    return (select(
+      redemptions,
+    )..where((r) => r.id.equals(id))).watchSingleOrNull();
+  }
+
   Stream<List<Redemption>> watchPendingRedemptions(String familyId) {
     return (select(redemptions)
           ..where(
