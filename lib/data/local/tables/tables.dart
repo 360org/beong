@@ -366,6 +366,7 @@ class DeviceSettings extends Table {
 /// **`key` là thứ đi vào sổ cái**, không phải `id`. Ba hũ mặc định dùng đúng
 /// `key` cũ (`spend`/`save`/`give`) nên toàn bộ `point_transactions` đã ghi
 /// trước đây vẫn đọc được, không cần di trú một dòng nào.
+@DataClassName('JarRow')
 class Jars extends Table with FamilyScoped {
   /// Khoá bền, dùng trong `point_transactions.jar`. Không đổi sau khi đã có
   /// giao dịch — đổi là làm hỏng lịch sử.
