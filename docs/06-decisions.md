@@ -280,11 +280,60 @@ nhiều so với làm đúng từ đầu.
 
 ---
 
+## ADR-022: Trừ xu là tính năng bố mẹ tự bật, mặc định tắt
+
+**Bối cảnh:** câu hỏi mở #2 hỏi có cho phép trừ điểm hay không, và ghi rằng nhiều chuyên gia nuôi
+dạy phản đối. Chủ dự án yêu cầu có tính năng này với hai tình huống cụ thể: hết ngày mà việc chưa
+làm, và con bấm xong nhưng thực tế chưa làm rồi bố mẹ phát hiện.
+
+**Quyết định:** làm, nhưng **mặc định tắt** và bố mẹ phải tự bật với cảnh báo hiện trước các lựa
+chọn. Hai mức, cấu hình ở cấp gia đình, tính theo **phần trăm điểm của việc** chứ không phải số xu
+cố định:
+
+| Mức | Khi nào | Mặc định |
+|---|---|---|
+| `missedPenaltyPct` | Hết ngày, việc vẫn `scheduled` → chuyển `missed` | 0 (tắt) |
+| `reopenPenaltyPct` | Bố mẹ mở lại việc con đã bấm xong, **mỗi lần** mở lại | 0 (tắt) |
+
+**Lý do phần trăm chứ không phải số xu:** việc rửa bát 20 xu và việc gấp quần áo 5 xu không nên
+chịu cùng một khoản trừ. Phần trăm giữ được tỷ lệ giữa các việc mà bố mẹ đã tự cân.
+
+**Bảy quyết định nhỏ đi kèm, đều là chỗ dễ làm sai:**
+
+1. **Việc bị mở lại vẫn được tính xu đầy đủ khi cuối cùng làm xong.** Thu hồi xu *và* trừ phạt là
+   trừ hai lần cho một lỗi. `clientOpId` của khoản cộng gắn với lượt việc nên duyệt lần hai không
+   cộng thêm — việc đó cuối cùng vẫn chỉ đáng đúng số xu của nó, cộng một khoản trừ cho lần làm lại.
+2. **Không bao giờ để số dư âm.** Trừ tối đa đến 0 rồi thôi. Trẻ nhìn thấy số âm không hiểu chuyện
+   gì xảy ra, và app này không dạy nợ. Hệ quả phải biết: đứa trẻ đang 0 xu thì trừ bao nhiêu cũng
+   như nhau — tính năng mất tác dụng đúng lúc nó dễ gây tổn thương nhất.
+3. **Thứ tự hũ khi trừ: Tiêu → Để dành → Cho đi.** Không chia theo tỷ lệ ba hũ như khi cộng. Chia
+   theo tỷ lệ nghe công bằng nhưng nó lấy cả xu con đã tự nguyện dành để tặng, biến hũ Cho đi thành
+   công cụ trừng phạt. Hũ Để dành cũng cần được bảo vệ vì nó gắn với mục tiêu dài hạn app đang dạy.
+4. **Làm tròn xuống.** 50% của 15 xu ra 7, không phải 8. Chỗ nào phải chọn thì chọn bên không làm
+   trẻ cảm thấy bị xử ép.
+5. **Không trừ hồi tố.** Lượt việc bỏ được đánh dấu đã xử lý ngay cả khi chính sách đang tắt. Nếu
+   không, ngày bố mẹ bật tính năng lên là toàn bộ việc bỏ từ trước bị trừ một lượt — phạt cho hành
+   vi xảy ra khi luật chưa có.
+6. **Nâng cấp app không tự bật.** Cột mới có default 0, và có test migration khẳng định điều đó.
+7. **Mỗi lần trừ đều có dòng sổ cái với lý do đọc được** ("Hết ngày chưa làm", "Bố mẹ mở lại việc —
+   làm lại lần 2"). Xu biến mất mà không ai giải thích là đúng thứ làm trẻ mất niềm tin. Tuân ADR-005:
+   sổ cái append-only, không sửa dòng cũ.
+
+**Hệ quả:** (+) gia đình muốn thì có, gia đình không muốn thì không bao giờ gặp. (+) sổ cái vẫn là
+nguồn sự thật duy nhất về xu. (−) thêm bề mặt cấu hình mà bố mẹ phải hiểu, nên trang cấu hình có
+phần "Thử một ngày" tự tính bằng số thật thay vì để bố mẹ tự hình dung phần trăm ra bao nhiêu xu.
+(−) đây là tính năng dễ dùng sai nhất trong app; nếu phản hồi beta cho thấy nó gây hại, đường lùi
+là ẩn nó đi, không phải bỏ dữ liệu.
+
+**Đã cân nhắc:** trừ theo số xu cố định (mất tỷ lệ giữa các việc); trừ theo tỷ lệ ba hũ (lấy xu hũ
+Cho đi); thu hồi xu khi mở lại (trừ hai lần); cho số dư âm (không dạy nợ).
+
+---
+
 ## Câu hỏi còn mở
 
 | # | Câu hỏi | Cần chốt trước |
 |---|---|---|
-| 2 | Có cho phép trừ điểm (penalty) không? Nhiều chuyên gia nuôi dạy phản đối | v1.1 |
 | 4 | Tên & thương hiệu chính thức (Bé Ong chỉ là tên tạm) | Sprint 5 |
 | 5 | Self-host Supabase ngay từ đầu hay dùng cloud rồi chuyển sau? | Sprint 3 (sprint backend, đã đôn lên — ADR-021) |
 | 6 | Tiền tiêu vặt: chỉ ghi sổ "bố mẹ nợ con", hay v2 nối ví điện tử (MoMo/ZaloPay)? Nối ví kéo theo KYC và quy định tài chính — nặng | v2 |
@@ -292,3 +341,4 @@ nhiều so với làm đúng từ đầu.
 
 > Mục 1 và 3 đã chốt tại ADR-014: miễn phí hoàn toàn ở v1.
 > Mục 8 đã chốt tại ADR-021: cấu hình sống trên tài khoản bố mẹ, backend lên trước phần thưởng.
+> Mục 2 đã chốt tại ADR-022: có trừ xu, nhưng mặc định tắt và bố mẹ tự bật.

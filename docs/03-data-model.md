@@ -198,6 +198,14 @@ hình gia đình nằm ở tài khoản bố mẹ (ADR-021). Khoá session dùng
 **Không đặt bí mật vào bảng này.** Token ghép cặp phải nằm ở Keychain / Keystore
 (`09-onboarding-pairing.md` §4) — file SQLite đọc được trên máy đã root hoặc qua bản sao lưu.
 
+### Cấu hình trừ xu (trên `families`)
+`missed_penalty_pct, reopen_penalty_pct` — phần trăm điểm của việc, 0 = tắt (ADR-022).
+
+### Đếm trừ xu (trên `task_instances`)
+`reopen_count` — số lần bố mẹ mở lại lượt này; mỗi lần là một khoản trừ.
+`missed_penalty_at` — đã áp khoản trừ "bỏ việc" chưa. Có cột này thì bộ chạy cuối ngày chỉ quét
+phần chưa xử lý, và **không trừ hồi tố** khi bố mẹ bật tính năng muộn.
+
 ## 3. Sinh task_instances
 
 Chạy khi: mở app, đổi ngày, sửa task.
@@ -273,6 +281,10 @@ create policy tasks_rw on tasks
 ## 6. Migration
 
 - Drift: `schemaVersion` tăng dần, mỗi bước có test dựng DB phiên bản cũ rồi migrate.
-  - v1 → v2: thêm `device_settings`. Test: `test/unit/data/migration_v1_to_v2_test.dart`.
+  Test: `test/unit/data/migration_test.dart`.
+  - v1 → v2: thêm `device_settings`.
+  - v2 → v3: thêm `families.missed_penalty_pct`, `families.reopen_penalty_pct`,
+    `task_instances.reopen_count`, `task_instances.missed_penalty_at` (ADR-022). Mọi cột có
+    default 0/NULL nên **nâng cấp không tự bật trừ xu** — có test khẳng định điều này.
 - Supabase: file SQL đánh số trong `supabase/migrations/`, chạy qua CLI trong CI.
 - Quy tắc: chỉ thêm cột nullable hoặc có default; đổi tên = thêm mới + backfill + xóa ở release sau.

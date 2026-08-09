@@ -12,6 +12,7 @@ import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/services/family_clock.dart';
+import 'package:beong/domain/services/penalty_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,6 +27,7 @@ class ParentHomeScreen extends ConsumerWidget {
     final memberDao = ref.watch(memberDaoProvider);
     final taskDao = ref.watch(taskDaoProvider);
     final walletDao = ref.watch(walletDaoProvider);
+    final penaltyService = ref.watch(penaltyServiceProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -49,6 +51,7 @@ class ParentHomeScreen extends ConsumerWidget {
                 familyId: session.familyId,
                 taskDao: taskDao,
                 walletDao: walletDao,
+                penaltyService: penaltyService,
                 reviewerId: session.activeMemberId,
               ),
               const SizedBox(height: AppSpacing.xxl),
@@ -89,12 +92,14 @@ class _PendingReviewSection extends StatefulWidget {
     required this.familyId,
     required this.taskDao,
     required this.walletDao,
+    required this.penaltyService,
     required this.reviewerId,
   });
 
   final String familyId;
   final TaskDao taskDao;
   final WalletDao walletDao;
+  final PenaltyService penaltyService;
   final String reviewerId;
 
   @override
@@ -180,6 +185,7 @@ class _PendingReviewSectionState extends State<_PendingReviewSection> {
               instance: instance,
               taskDao: widget.taskDao,
               walletDao: widget.walletDao,
+              penaltyService: widget.penaltyService,
               reviewerId: widget.reviewerId,
               onActioned: _load,
             ),
@@ -195,6 +201,7 @@ class _PendingCard extends StatefulWidget {
     required this.instance,
     required this.taskDao,
     required this.walletDao,
+    required this.penaltyService,
     required this.reviewerId,
     required this.onActioned,
     super.key,
@@ -203,6 +210,7 @@ class _PendingCard extends StatefulWidget {
   final TaskInstance instance;
   final TaskDao taskDao;
   final WalletDao walletDao;
+  final PenaltyService penaltyService;
   final String reviewerId;
   final VoidCallback onActioned;
 
@@ -231,6 +239,28 @@ class _PendingCardState extends State<_PendingCard> {
   Future<void> _loadTask() async {
     final task = await widget.taskDao.getTaskById(widget.instance.taskId);
     if (mounted) setState(() => _task = task);
+  }
+
+  /// Bố mẹ phát hiện con bấm xong nhưng chưa làm — ADR-022.
+  Future<void> _reopen() async {
+    final result = await widget.penaltyService.reopenInstance(
+      instanceId: widget.instance.id,
+      reviewerId: widget.reviewerId,
+    );
+    if (!mounted) return;
+
+    // Nói rõ đã trừ bao nhiêu. Xu biến mất mà không ai giải thích là đúng thứ
+    // làm trẻ mất niềm tin vào app.
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          result.xuDeducted > 0
+              ? 'Đã mở lại việc. Trừ ${result.xuDeducted} xu.'
+              : 'Đã mở lại việc cho con làm lại.',
+        ),
+      ),
+    );
+    widget.onActioned();
   }
 
   @override
@@ -272,6 +302,17 @@ class _PendingCardState extends State<_PendingCard> {
                 color: context.semantic.danger,
               ),
               tooltip: 'Từ chối',
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            IconButton(
+              onPressed: _reopen,
+              icon: Icon(
+                Icons.replay_rounded,
+                color: context.semantic.warning,
+              ),
+              // "Chưa làm" chứ không phải "Từ chối": từ chối là đóng lượt lại,
+              // còn mở lại là trả việc về cho con làm tiếp.
+              tooltip: 'Chưa làm — mở lại',
             ),
             const SizedBox(width: AppSpacing.xs),
             IconButton.filled(

@@ -344,6 +344,72 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
         .get();
   }
 
+  /// Bố mẹ **mở lại** một lượt việc — ADR-022.
+  ///
+  /// Dùng khi con bấm xong nhưng thực tế chưa làm. Lượt về lại `scheduled` để
+  /// con làm lại, và `reopenCount` tăng một.
+  ///
+  /// Xu đã cộng (nếu việc đã được duyệt trước đó) **không** bị thu hồi ở đây.
+  /// Khi con làm lại và được duyệt, `clientOpId` của khoản cộng vẫn là cũ nên
+  /// không cộng thêm lần hai — tức việc này cuối cùng vẫn chỉ đáng đúng số xu
+  /// của nó, cộng thêm một khoản trừ cho lần phải làm lại. Thu hồi xu *và* trừ
+  /// phạt là trừ hai lần cho một lỗi.
+  ///
+  /// Trả về lượt sau khi cập nhật, để bên gọi biết `reopenCount` mới mà tính
+  /// khoản trừ.
+  Future<TaskInstance> reopen({
+    required String instanceId,
+    required String reviewerId,
+  }) async {
+    return transaction(() async {
+      final instance = await (select(
+        taskInstances,
+      )..where((i) => i.id.equals(instanceId))).getSingle();
+
+      await (update(
+        taskInstances,
+      )..where((i) => i.id.equals(instanceId))).write(
+        TaskInstancesCompanion(
+          status: Value(InstanceStatus.scheduled.name),
+          reopenCount: Value(instance.reopenCount + 1),
+          reviewedBy: Value(reviewerId),
+          reviewedAt: Value(DateTime.now()),
+          completedAt: const Value(null),
+        ),
+      );
+
+      return (select(
+        taskInstances,
+      )..where((i) => i.id.equals(instanceId))).getSingle();
+    });
+  }
+
+  /// Những lượt đã bỏ mà **chưa** bị áp khoản trừ — ADR-022.
+  ///
+  /// Có cột `missedPenaltyAt` nên chỉ quét phần chưa xử lý, thay vì quét lại cả
+  /// lịch sử mỗi lần mở app.
+  Future<List<TaskInstance>> pendingMissedPenalties(String familyId) {
+    return (select(taskInstances)
+          ..where(
+            (i) =>
+                i.familyId.equals(familyId) &
+                i.status.equals(InstanceStatus.missed.name) &
+                i.missedPenaltyAt.isNull(),
+          )
+          ..orderBy([(i) => OrderingTerm.asc(i.dueDate)]))
+        .get();
+  }
+
+  /// Ghi nhận đã xử lý khoản trừ "bỏ việc" cho lượt này.
+  ///
+  /// Gọi cả khi khoản trừ ra 0 xu (mức 0%, hoặc con đang hết xu) — nếu không,
+  /// lượt đó sẽ bị quét lại mãi mãi.
+  Future<void> markMissedPenaltyApplied(String instanceId) async {
+    await (update(taskInstances)..where((i) => i.id.equals(instanceId))).write(
+      TaskInstancesCompanion(missedPenaltyAt: Value(DateTime.now())),
+    );
+  }
+
   /// Đánh dấu missed cho instance quá hạn.
   Future<void> _markMissed(String familyId, CalendarDate today) async {
     final todayStr = today.toString();

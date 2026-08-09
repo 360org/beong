@@ -45,6 +45,14 @@ class Families extends Table {
   TextColumn get jarSplit =>
       text().withDefault(const Constant('{"spend":50,"save":40,"give":10}'))();
 
+  /// Phần trăm điểm bị trừ khi hết ngày mà việc chưa làm — ADR-022.
+  /// 0 = tắt, và đây là **mặc định** của mọi gia đình mới.
+  IntColumn get missedPenaltyPct => integer().withDefault(const Constant(0))();
+
+  /// Phần trăm điểm bị trừ mỗi lần bố mẹ mở lại việc con bấm xong nhưng chưa
+  /// làm — ADR-022. 0 = tắt.
+  IntColumn get reopenPenaltyPct => integer().withDefault(const Constant(0))();
+
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
@@ -169,6 +177,16 @@ class TaskInstances extends Table with FamilyScoped {
   TextColumn get reviewedBy => text().nullable()();
   TextColumn get proofUrl => text().nullable()();
   TextColumn get proofNote => text().nullable()();
+
+  /// Số lần bố mẹ mở lại lượt này — ADR-022. Mỗi lần mở lại là một khoản trừ,
+  /// nên phải đếm chứ không chỉ ghi cờ boolean.
+  IntColumn get reopenCount => integer().withDefault(const Constant(0))();
+
+  /// Lúc đã áp khoản trừ "bỏ việc" cho lượt này. NULL = chưa áp.
+  ///
+  /// Có cột này thì bộ chạy cuối ngày chỉ cần quét những lượt chưa xử lý, thay
+  /// vì quét lại toàn bộ lịch sử mỗi lần mở app.
+  DateTimeColumn get missedPenaltyAt => dateTime().nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};

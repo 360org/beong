@@ -128,8 +128,12 @@ Gấp chăn màn → Soạn cặp sách.
 scheduled → (trẻ bấm xong) → pending_review → (parent duyệt) → approved → điểm cộng ví
                             ↘ (auto-approve)  → approved
                             ↘ (parent từ chối) → rejected → quay lại scheduled
-        → (hết ngày chưa làm) → missed
+                            ↘ (parent mở lại)  → scheduled, reopen_count++ , trừ xu
+        → (hết ngày chưa làm) → missed, trừ xu
 ```
+
+**Từ chối** và **mở lại** khác nhau, và UI phải nói rõ: từ chối là đóng lượt lại, mở lại là trả
+việc về cho con làm tiếp. Chỉ mở lại mới cộng `reopen_count` và mới bị trừ xu (ADR-022).
 
 Task thuộc routine: khi **mọi** instance của routine trong ngày đạt `approved` → ghi thêm một
 giao dịch `routine_bonus` (idempotent theo `(routine_id, member_id, due_date)`).
@@ -145,6 +149,32 @@ giao dịch `routine_bonus` (idempotent theo `(routine_id, member_id, due_date)`
 - Mọi thay đổi số dư ghi vào **sổ cái (ledger)**, không sửa số dư trực tiếp
 - Loại giao dịch: `task_approved`, `routine_bonus`, `streak_bonus`, `reward_redeemed`,
   `reward_refund`, `manual_adjust`, `penalty`, `bonus`
+
+#### Trừ xu (mặc định tắt — ADR-022)
+Bố mẹ bật được hai mức, tính theo **phần trăm điểm của việc**:
+
+| Mức | Khi nào áp | Ví dụ với việc 10 xu |
+|---|---|---|
+| Hết ngày chưa làm | Lượt việc chuyển `missed` | 50% → trừ 5 xu |
+| Bấm xong nhưng chưa làm | Mỗi lần bố mẹ mở lại lượt | 20% → trừ 2 xu |
+
+Ví dụ đầy đủ một ngày — con đang có 100 xu, 10 việc mỗi việc 10 xu, làm xong 8 việc, trong đó 3
+việc phải làm lại một lần:
+
+```
+100  (đang có)
++80  8 việc x 10 xu
+-10  2 việc chưa làm x 50% x 10 xu
+- 6  3 lần làm lại x 20% x 10 xu
+= 164
+```
+
+Quy tắc bắt buộc (chi tiết và lý do ở ADR-022):
+- Việc bị mở lại **vẫn được tính xu đầy đủ** khi cuối cùng làm xong — không trừ hai lần cho một lỗi.
+- Số dư **không bao giờ âm**: trừ tối đa đến 0.
+- Thứ tự lấy xu: hũ Tiêu → Để dành → **Cho đi cuối cùng**.
+- Làm tròn xuống. Không trừ hồi tố khi bố mẹ bật tính năng muộn.
+- Mỗi khoản trừ là một dòng sổ cái có lý do đọc được, hiện trong "Sổ của con".
 
 ### 4.5 Phần thưởng
 - Phụ huynh tạo: tên, icon, **loại**, giá điểm, số lượng còn (tùy chọn), có cần duyệt không

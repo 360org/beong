@@ -225,6 +225,75 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     });
   }
 
+  /// Trừ xu theo chính sách trừ điểm — ADR-022.
+  ///
+  /// Khác [debit] ở hai chỗ, và cả hai đều là quyết định có chủ ý:
+  ///
+  /// **1. Thứ tự hũ: Tiêu → Để dành → Cho đi.** Không chia theo tỷ lệ ba hũ
+  /// như khi cộng xu. Chia theo tỷ lệ nghe công bằng nhưng nó lấy cả xu con đã
+  /// dành cho hũ Cho đi — biến một khoản con tự nguyện dành để tặng thành công
+  /// cụ trừng phạt. Hũ Để dành cũng cần được bảo vệ, vì nó gắn với mục tiêu dài
+  /// hạn mà app đang dạy. Nên trừ từ hũ dễ nhất trước, và chỉ lấn sang hũ khác
+  /// khi thật sự không đủ.
+  ///
+  /// **2. Không bao giờ làm số dư âm.** [debit] báo lỗi khi không đủ xu (đổi
+  /// thưởng phải thất bại rõ ràng), còn ở đây trừ tối đa đến 0 rồi thôi. Một
+  /// đứa trẻ nhìn thấy số âm không hiểu chuyện gì xảy ra, và app này không dạy
+  /// nợ. Hệ quả cần biết: đứa trẻ đang 0 xu thì trừ bao nhiêu cũng như nhau —
+  /// tính năng này mất tác dụng đúng lúc nó dễ gây tổn thương nhất.
+  ///
+  /// Trả về số xu **thực sự** đã trừ, có thể nhỏ hơn [amount] hoặc bằng 0. Gọi
+  /// lại cùng [clientOpId] không trừ thêm lần nữa.
+  Future<int> penalize({
+    required String familyId,
+    required String memberId,
+    required int amount,
+    required String clientOpId,
+    String? refType,
+    String? refId,
+    String? note,
+    String? createdBy,
+  }) async {
+    if (amount < 0) {
+      throw WalletException('Số xu trừ không được âm, nhận được $amount');
+    }
+    if (amount == 0) return 0;
+
+    return transaction(() async {
+      final balance = await balanceOf(memberId);
+      var remaining = amount;
+      var deducted = 0;
+
+      // Thứ tự cố định, xem doc comment ở trên.
+      for (final jar in const [Jar.spend, Jar.save, Jar.give]) {
+        if (remaining <= 0) break;
+        final available = balance.of(jar);
+        if (available <= 0) continue;
+
+        final take = available < remaining ? available : remaining;
+        final written = await _insertIfNew(
+          familyId: familyId,
+          memberId: memberId,
+          jar: jar,
+          delta: -take,
+          reason: TxReason.penalty,
+          clientOpId: '$clientOpId:${jar.name}',
+          refType: refType,
+          refId: refId,
+          note: note,
+          createdBy: createdBy,
+        );
+        // written == 0 nghĩa là lần gọi trước đã ghi dòng này rồi. Không cộng
+        // vào tổng, nếu không hàm sẽ báo đã trừ hai lần cho cùng một thao tác.
+        if (written == 0) return 0;
+        deducted += take;
+        remaining -= take;
+      }
+
+      return deducted;
+    });
+  }
+
   /// Bố mẹ tự điều chỉnh xu. **Bắt buộc có lý do** — giá trị "minh bạch"
   /// trong `docs/00-brand-values.md`: không có con số nào rơi từ trên trời
   /// xuống, và lý do này sẽ hiện cho trẻ thấy trong "Sổ của con".

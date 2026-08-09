@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:beong/app/router.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
@@ -8,8 +9,10 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -83,6 +86,7 @@ class SettingsScreen extends ConsumerWidget {
                     subtitle: 'Bật',
                     onTap: () {},
                   ),
+                  _PenaltyTile(familyId: session.familyId),
                   _SettingsTile(
                     icon: Icons.info_outline,
                     title: 'Phiên bản',
@@ -294,6 +298,36 @@ class _SettingsTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Ô "Trừ xu" trong Cài đặt.
+///
+/// Hiện luôn mức đang đặt ngay ở dòng phụ, không chỉ ghi "Cấu hình": bố mẹ phải
+/// thấy được nhà mình đang bật trừ xu hay không mà không cần bấm vào.
+class _PenaltyTile extends ConsumerWidget {
+  const _PenaltyTile({required this.familyId});
+
+  final String familyId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final memberDao = ref.watch(memberDaoProvider);
+
+    return StreamBuilder<PenaltyPolicy>(
+      stream: memberDao.watchPenaltyPolicy(familyId),
+      builder: (context, snap) {
+        final policy = snap.data ?? PenaltyPolicy.off;
+        return _SettingsTile(
+          icon: Icons.remove_circle_outline,
+          title: 'Trừ xu',
+          subtitle: policy.isEnabled
+              ? 'Chưa làm ${policy.missedPct}% · Làm lại ${policy.reopenPct}%'
+              : 'Đang tắt',
+          onTap: () => context.go(Routes.penaltySettings),
+        );
+      },
     );
   }
 }

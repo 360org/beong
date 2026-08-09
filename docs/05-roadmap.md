@@ -104,6 +104,11 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 - [ ] Tỷ giá quy đổi ra tiền thật (mặc định tắt — ADR-017)
 - [ ] Mục tiêu tiết kiệm + thanh tiến độ
 - [ ] **Sổ của con** — lịch sử đầy đủ, `manual_adjust` bắt buộc có lý do
+- [x] **Trừ xu** (ADR-022) — làm sớm hơn kế hoạch: cấu hình hai mức ở cấp gia đình, nút "mở lại"
+      trong hàng đợi duyệt, khoản trừ cuối ngày cho việc bỏ. Mặc định tắt.
+- [ ] Trừ xu: cho phép đặt mức riêng theo từng task (hiện chỉ có mức chung của gia đình)
+- [ ] Trừ xu: thông báo đẩy sang máy bố mẹ khi con bấm xong (hiện chỉ hiện trong hàng đợi duyệt —
+      push nằm ở Sprint 5)
 
 ## Sprint 5 — Thông báo & hoàn thiện (1 tuần)
 - [ ] FCM push (mobile) + local notification (desktop)

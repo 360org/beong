@@ -1,6 +1,7 @@
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/tables/tables.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:drift/drift.dart';
 
 part 'member_dao.g.dart';
@@ -61,6 +62,43 @@ class MemberDao extends DatabaseAccessor<AppDatabase> with _$MemberDaoMixin {
     return (select(
       members,
     )..where((m) => m.id.equals(memberId))).watchSingle();
+  }
+
+  /// Chính sách trừ xu của gia đình — ADR-022.
+  Future<PenaltyPolicy> penaltyPolicyOf(String familyId) async {
+    final family = await getFamily(familyId);
+    return PenaltyPolicy(
+      missedPct: family.missedPenaltyPct,
+      reopenPct: family.reopenPenaltyPct,
+    );
+  }
+
+  Stream<PenaltyPolicy> watchPenaltyPolicy(String familyId) {
+    return watchFamily(familyId).map(
+      (f) => PenaltyPolicy(
+        missedPct: f.missedPenaltyPct,
+        reopenPct: f.reopenPenaltyPct,
+      ),
+    );
+  }
+
+  /// Đặt chính sách trừ xu. Từ chối mức ngoài 0–100 thay vì kẹp lặng lẽ: đây là
+  /// con số bố mẹ nhập, sai thì phải biết là mình nhập sai.
+  Future<void> setPenaltyPolicy(String familyId, PenaltyPolicy policy) async {
+    if (!policy.isValid) {
+      throw ArgumentError.value(
+        policy,
+        'policy',
+        'Mức trừ xu phải nằm trong 0–100',
+      );
+    }
+    await (update(families)..where((f) => f.id.equals(familyId))).write(
+      FamiliesCompanion(
+        missedPenaltyPct: Value(policy.missedPct),
+        reopenPenaltyPct: Value(policy.reopenPct),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
   }
 
   Future<void> updateMember(String id, MembersCompanion companion) {

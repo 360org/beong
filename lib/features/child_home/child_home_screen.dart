@@ -31,6 +31,7 @@ class ChildHomeScreen extends ConsumerWidget {
     final memberDao = ref.watch(memberDaoProvider);
     final walletDao = ref.watch(walletDaoProvider);
     final taskDao = ref.watch(taskDaoProvider);
+    final penaltyService = ref.watch(penaltyServiceProvider);
 
     final today = FamilyClock(
       timeZoneOffset: DateTime.now().timeZoneOffset,
@@ -113,6 +114,12 @@ class ChildHomeScreen extends ConsumerWidget {
                       await taskDao.generateInstances(
                         familyId: session.familyId,
                         today: today,
+                      );
+                      // generateInstances đánh dấu missed cho lượt quá hạn;
+                      // khoản trừ phải chạy ngay sau đó, không để tới lần mở
+                      // app sau (ADR-022). Gọi lại nhiều lần vô hại.
+                      await penaltyService.applyMissedPenalties(
+                        familyId: session.familyId,
                       );
                     },
                   )

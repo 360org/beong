@@ -37,7 +37,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -53,6 +53,14 @@ class AppDatabase extends _$AppDatabase {
       // v1 -> v2: bảng cấu hình thiết bị, để session sống qua lần mở app sau.
       if (from < 2) {
         await m.createTable(deviceSettings);
+      }
+      // v2 -> v3: cấu hình trừ xu (ADR-022). Mọi cột đều có default nên gia
+      // đình đang dùng bản cũ nâng lên là **tắt** trừ xu, không tự bật.
+      if (from < 3) {
+        await m.addColumn(families, families.missedPenaltyPct);
+        await m.addColumn(families, families.reopenPenaltyPct);
+        await m.addColumn(taskInstances, taskInstances.reopenCount);
+        await m.addColumn(taskInstances, taskInstances.missedPenaltyAt);
       }
     },
     // Mỗi lần tăng schemaVersion phải thêm một bước ở đây kèm test dựng DB
