@@ -158,7 +158,8 @@ giao dịch `routine_bonus` (idempotent theo `(routine_id, member_id, due_date)`
   `reward_refund`, `manual_adjust`, `penalty`, `bonus`
 
 #### Trừ xu (mặc định tắt — ADR-022)
-Bố mẹ bật được hai mức, tính theo **phần trăm điểm của việc**:
+Bố mẹ bật được hai mức, tính theo **phần trăm điểm của việc**. Có các mức dựng sẵn
+(0/10/20/25/50/75/100) và chip "Khác…" để tự nhập con số bất kỳ trong 0–100:
 
 | Mức | Khi nào áp | Ví dụ với việc 10 xu |
 |---|---|---|

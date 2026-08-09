@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
@@ -28,7 +29,10 @@ class TasksScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Việc nhà', style: context.text.titleLarge),
+        title: Text(
+          L10n.of(context).tasksTitle,
+          style: context.text.titleLarge,
+        ),
       ),
       body: _TaskList(
         familyId: session.familyId,

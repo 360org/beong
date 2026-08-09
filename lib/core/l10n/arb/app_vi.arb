@@ -17,14 +17,14 @@
   },
 
   "navHome": "Trang chính",
-  "navTasks": "Việc nhà",
+  "navTasks": "Nhiệm vụ",
   "navRewards": "Phần thưởng",
   "navStats": "Thống kê",
   "navSettings": "Cài đặt",
 
   "parentHomeTitle": "Trang chính",
   "childHomeTitle": "Việc của con",
-  "tasksTitle": "Việc nhà",
+  "tasksTitle": "Nhiệm vụ",
   "rewardsTitle": "Phần thưởng",
   "statsTitle": "Thống kê",
   "settingsTitle": "Cài đặt",

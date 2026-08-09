@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
@@ -6,9 +8,12 @@ import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Các mức bố mẹ chọn được. Danh sách rời chứ không phải thanh trượt: 0–100
-/// liên tục gợi ý một độ chính xác không có thật, và bố mẹ nghĩ theo "một nửa",
-/// "một phần tư", không nghĩ theo 37%.
+/// Các mức dựng sẵn. Chip rời chứ không phải thanh trượt: bố mẹ nghĩ theo "một
+/// nửa", "một phần tư", không nghĩ theo 37%, và thanh trượt gợi ý một độ chính
+/// xác không có thật.
+///
+/// Ai cần con số khác thì có chip "Khác…" để tự nhập (xem [_CustomChip]) — mức
+/// dựng sẵn là đường nhanh, không phải giới hạn.
 const List<int> kPenaltyLevels = [0, 10, 20, 25, 50, 75, 100];
 
 /// Cấu hình trừ xu của gia đình — ADR-022.
@@ -140,42 +145,169 @@ class _LevelPicker extends StatelessWidget {
         Wrap(
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
-          children: kPenaltyLevels.map((level) {
-            final selected = level == value;
-            return GestureDetector(
-              onTap: () => onChanged(level),
-              // Không đặt `alignment` ở Container: trong Wrap ràng buộc là
-              // lỏng, và Container có alignment sẽ nở ra chiếm hết bề rộng —
-              // các chip xếp thành cột thay vì nằm cạnh nhau. Căn giữa bằng
-              // padding dọc, và bề rộng để nó tự co theo chữ.
-              child: Container(
-                constraints: const BoxConstraints(minWidth: 64),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xl,
-                  vertical: AppSpacing.lg,
-                ),
-                decoration: BoxDecoration(
-                  color: selected
-                      ? context.colors.primary
-                      : context.colors.primaryContainer,
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(AppRadius.field),
-                  ),
-                ),
-                child: Text(
-                  level == 0 ? 'Tắt' : '$level%',
-                  textAlign: TextAlign.center,
-                  style: context.text.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: selected
-                        ? context.colors.onPrimary
-                        : context.colors.onPrimaryContainer,
-                  ),
-                ),
+          children: [
+            for (final level in kPenaltyLevels)
+              _LevelChip(
+                label: level == 0 ? 'Tắt' : '$level%',
+                selected: level == value,
+                onTap: () => onChanged(level),
               ),
-            );
-          }).toList(),
+            _CustomChip(value: value, onChanged: onChanged),
+          ],
         ),
+      ],
+    );
+  }
+}
+
+/// Một chip mức.
+///
+/// Không đặt `alignment` ở Container: trong Wrap ràng buộc là lỏng, và Container
+/// có alignment sẽ nở ra chiếm hết bề rộng — các chip xếp thành cột thay vì nằm
+/// cạnh nhau. Căn giữa bằng padding dọc, bề rộng để nó tự co theo chữ.
+class _LevelChip extends StatelessWidget {
+  const _LevelChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.outlined = false,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  /// Viền thay cho nền đặc — dùng cho chip "Khác…" để nó khác nhóm mức cố định.
+  final bool outlined;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        constraints: const BoxConstraints(minWidth: 64),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.lg,
+        ),
+        decoration: BoxDecoration(
+          color: selected
+              ? context.colors.primary
+              : context.colors.primaryContainer,
+          borderRadius: const BorderRadius.all(
+            Radius.circular(AppRadius.field),
+          ),
+          border: outlined && !selected
+              ? Border.all(color: context.colors.primary, width: 1.5)
+              : null,
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: context.text.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: selected
+                ? context.colors.onPrimary
+                : outlined
+                ? context.colors.primary
+                : context.colors.onPrimaryContainer,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Chip mở hộp nhập số phần trăm tuỳ ý.
+///
+/// Danh sách mức dựng sẵn phủ phần lớn nhu cầu, nhưng có nhà muốn đúng 15% hay
+/// 35%. Chip này hiện **đang chọn** khi mức hiện tại không nằm trong danh sách,
+/// nên bố mẹ luôn thấy được con số mình đã nhập.
+class _CustomChip extends StatelessWidget {
+  const _CustomChip({required this.value, required this.onChanged});
+
+  final int value;
+  final ValueChanged<int> onChanged;
+
+  bool get _isCustom => !kPenaltyLevels.contains(value);
+
+  Future<void> _ask(BuildContext context) async {
+    final picked = await showDialog<int>(
+      context: context,
+      builder: (context) => _PercentDialog(initial: _isCustom ? value : null),
+    );
+    if (picked != null) onChanged(picked);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _LevelChip(
+      label: _isCustom ? '$value%' : 'Khác…',
+      selected: _isCustom,
+      outlined: true,
+      onTap: () => unawaited(_ask(context)),
+    );
+  }
+}
+
+/// Hộp nhập phần trăm. Từ chối giá trị ngoài 0–100 kèm lời giải thích, không
+/// kẹp lặng lẽ: đây là con số bố mẹ nhập, nhập sai thì phải biết là mình sai.
+class _PercentDialog extends StatefulWidget {
+  const _PercentDialog({required this.initial});
+
+  final int? initial;
+
+  @override
+  State<_PercentDialog> createState() => _PercentDialogState();
+}
+
+class _PercentDialogState extends State<_PercentDialog> {
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initial?.toString() ?? '',
+  );
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final raw = _controller.text.trim();
+    final parsed = int.tryParse(raw);
+    if (parsed == null) {
+      setState(() => _error = 'Nhập một số nguyên, ví dụ 15');
+      return;
+    }
+    if (parsed < 0 || parsed > 100) {
+      setState(() => _error = 'Phải trong khoảng 0 đến 100');
+      return;
+    }
+    Navigator.of(context).pop(parsed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Nhập mức trừ'),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        keyboardType: TextInputType.number,
+        onSubmitted: (_) => _submit(),
+        decoration: InputDecoration(
+          suffixText: '%',
+          hintText: '0 – 100',
+          errorText: _error,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Thôi'),
+        ),
+        TextButton(onPressed: _submit, child: const Text('Xong')),
       ],
     );
   }
