@@ -126,6 +126,22 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Secret rỗng thì `security import` báo "SecKeychainItemImport: Unable to
+          # decode the provided data" — nghe như file .p12 hỏng, nên người đọc đi
+          # export lại chứng chỉ, trong khi thật ra chưa nạp secret. Đã mất một lần
+          # chạy vì đúng câu này; chặn ở đây với lý do đúng.
+          missing=""
+          for name in IOS_DIST_CERTIFICATE_BASE64 IOS_DIST_CERTIFICATE_PASSWORD \
+                      IOS_PROVISIONING_PROFILE_BASE64; do
+            if [ -z "${!name}" ]; then
+              missing="$missing $name"
+            fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Chưa nạp secret iOS:$missing (xem docs/08-release-cicd.md §B-2, §B-3)"
+            exit 1
+          fi
+
           CERT_PATH="$RUNNER_TEMP/dist_certificate.p12"
           KEYCHAIN_PATH="$RUNNER_TEMP/ci-signing.keychain-db"
           PROFILE_PATH="$RUNNER_TEMP/profile.mobileprovision"
