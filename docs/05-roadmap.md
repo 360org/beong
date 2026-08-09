@@ -14,7 +14,7 @@ Cập nhật bằng cách **đọc code**, không tick theo cảm giác — xem 
 | 1 — Dữ liệu local | ✅ Xong | Trừ **tầng repository** (`lib/domain/repositories/` rỗng) |
 | 2 — Luồng UI cốt lõi | 🟡 Gần xong | Thiếu Task Editor đủ khối, Routine Editor, animation ăn mừng, PIN, integration test |
 | 3 — Backend & ghép cặp | 🔴 Chưa bắt đầu | Pha 0 đã xong 2/4; phần backend chờ dựng Supabase |
-| 4 — Phần thưởng & tài chính | 🟡 Đang làm | Đổi thưởng + duyệt + hoàn xu ✅, trừ xu ✅, con tự chia xu ✅. Thiếu streak/huy hiệu/JarTrio/quản lý hũ |
+| 4 — Phần thưởng & tài chính | 🟡 Đang làm | Đổi thưởng + duyệt + hoàn xu ✅, trừ xu ✅, con tự chia xu ✅, hũ tự lập ✅. Thiếu UI streak/huy hiệu, tỷ giá tiền thật, mục tiêu tiết kiệm |
 | 5 — Thông báo & hoàn thiện | 🔴 Chưa bắt đầu | |
 | 6 — Phát hành v1.0 | 🟡 Hạ tầng sẵn | CI/CD 7 job + Fastlane ✅; chưa có tài khoản store, chưa có icon/ảnh chụp |
 
@@ -174,10 +174,12 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 - [x] Ẩn tab Cài đặt với vai con, thêm đường đổi người dùng ở avatar
 - [x] **Con tự chia xu** (ADR-024) — công tắc trong Cài đặt, hũ chờ (`Jar.inbox`), banner trên màn
       con, màn "Chia xu vào hũ". Tổng điểm tính cả hũ chờ.
-- [ ] **Hũ do bố mẹ tự lập** (ADR-024) — 🟡 **đang làm**: bảng `jars`, `JarPlan`, `splitByPlan` và
-      18 test đã có; **chưa** nối vào UI. Thiếu màn quản lý hũ (thêm/sửa/đổi tỷ lệ/chọn emoji), và
-      màn chia xu hiện hard-code ba hũ mặc định thay vì đọc bảng.
-- [ ] Đổi tên `JarTrio` → tên không hàm ý đúng 3 hũ (`JarList`?) trước khi widget này được viết
+- [x] **Hũ do bố mẹ tự lập** (ADR-024) — xong: `JarDao`, màn Cài đặt → Các hũ (thêm/sửa/emoji/tỷ
+      lệ/xếp lại), chia tự động đọc bảng `jars`, màn chia xu và Sổ của con hiện mọi hũ. Sửa kèm một
+      lỗi mất xu có sẵn: `WalletBalance` chỉ đếm bốn khoá cứng nên xu trong hũ tự lập không hiện ở
+      đâu cả dù vẫn nằm trong sổ cái.
+- [x] ~~Đổi tên `JarTrio`~~ — **không cần nữa**: widget đó chưa từng được viết, chỗ hiện các hũ là
+      `_JarOverview` và nó không hàm ý số hũ nào.
 - [x] **Trừ xu** (ADR-022) — làm sớm hơn kế hoạch: cấu hình hai mức ở cấp gia đình, nút "mở lại"
       trong hàng đợi duyệt, khoản trừ cuối ngày cho việc bỏ. Mặc định tắt.
 - [x] Trừ xu: cho phép tự nhập mức % bất kỳ (chip "Khác…")

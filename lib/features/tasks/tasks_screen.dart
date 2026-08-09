@@ -81,27 +81,14 @@ class _TaskList extends StatefulWidget {
 }
 
 class _TaskListState extends State<_TaskList> {
-  List<Task> _tasks = [];
-  Map<String, Routine> _routinesById = {};
-  bool _loaded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_load());
-  }
-
-  Future<void> _load() async {
-    final tasks = await widget.taskDao.activeTasks(widget.familyId);
-    final routines = await widget.taskDao.activeRoutines(widget.familyId);
-    if (mounted) {
-      setState(() {
-        _tasks = tasks;
-        _routinesById = {for (final r in routines) r.id: r};
-        _loaded = true;
-      });
-    }
-  }
+  /// Hai stream tạo **một lần** và giữ trong field. Tạo trong `build()` thì mỗi
+  /// lần dựng lại là một lần đăng ký mới: truy vấn chạy lại và danh sách nháy
+  /// rỗng một khung hình.
+  late final Stream<List<Task>> _taskStream = widget.taskDao.watchActiveTasks(
+    widget.familyId,
+  );
+  late final Stream<List<Routine>> _routineStream = widget.taskDao
+      .watchActiveRoutines(widget.familyId);
 
   /// Tạo nhiệm vụ ngay từ template, gán cho mọi bé trong nhà.
   ///
@@ -120,16 +107,37 @@ class _TaskListState extends State<_TaskList> {
       ),
       [for (final c in children) c.id],
     );
-    await _load();
+    // Không cần nạp lại tay: `watchActiveTasks` tự phát lại.
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_loaded) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    return StreamBuilder<List<Task>>(
+      stream: _taskStream,
+      builder: (context, taskSnap) {
+        if (!taskSnap.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return StreamBuilder<List<Routine>>(
+          stream: _routineStream,
+          builder: (context, routineSnap) => _buildList(
+            context,
+            taskSnap.data!,
+            {
+              for (final r in routineSnap.data ?? const <Routine>[]) r.id: r,
+            },
+          ),
+        );
+      },
+    );
+  }
 
-    if (_tasks.isEmpty) {
+  Widget _buildList(
+    BuildContext context,
+    List<Task> allTasks,
+    Map<String, Routine> routinesById,
+  ) {
+    if (allTasks.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xxxl),
@@ -173,7 +181,7 @@ class _TaskListState extends State<_TaskList> {
     final routineTasks = <String, List<Task>>{};
     final standaloneTasks = <Task>[];
 
-    for (final task in _tasks) {
+    for (final task in allTasks) {
       if (task.routineId != null) {
         routineTasks.putIfAbsent(task.routineId!, () => []).add(task);
       } else {
@@ -182,9 +190,13 @@ class _TaskListState extends State<_TaskList> {
     }
 
     return ListView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.screenPaddingMobile,
-        vertical: AppSpacing.lg,
+      // Đệm đáy dư ra một khoảng: nút "+" nổi ở góc phải dưới **che mất thẻ việc
+      // cuối cùng** nếu danh sách chỉ đệm bằng khoảng thường.
+      padding: const EdgeInsets.only(
+        left: AppSpacing.screenPaddingMobile,
+        right: AppSpacing.screenPaddingMobile,
+        top: AppSpacing.lg,
+        bottom: AppSpacing.xxxl * 2,
       ),
       children: [
         if (routineTasks.isNotEmpty) ...[
@@ -194,7 +206,7 @@ class _TaskListState extends State<_TaskList> {
             (entry) => Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.md),
               child: _RoutineGroupCard(
-                title: _routinesById[entry.key]?.title ?? entry.key,
+                title: routinesById[entry.key]?.title ?? entry.key,
                 tasks: entry.value,
               ),
             ),
@@ -361,10 +373,38 @@ class _TaskTile extends StatelessWidget {
     final type = RepeatType.values.firstWhere((e) => e.name == task.repeatType);
     return switch (type) {
       RepeatType.daily => 'Hằng ngày',
-      RepeatType.custom => 'Tuỳ chọn',
-      RepeatType.once => 'Một lần',
+      // "Tuỳ chọn" không trả lời được câu bố mẹ đang hỏi — *thứ nào?* — nên liệt
+      // kê thẳng các thứ đã chọn.
+      RepeatType.custom => _weekdaysLabel(task.repeatDays),
+      RepeatType.once =>
+        task.onceDate == null ? 'Một lần' : 'Một lần · ${task.onceDate}',
     };
   }
+
+  /// `'1,3,5'` -> `'T2, T4, T6'`.
+  String _weekdaysLabel(String repeatDays) {
+    final days =
+        repeatDays
+            .split(',')
+            .where((s) => s.isNotEmpty)
+            .map(int.tryParse)
+            .whereType<int>()
+            .toList()
+          ..sort();
+    if (days.isEmpty) return 'Chưa chọn thứ';
+    if (days.length == 7) return 'Hằng ngày';
+    return days.map(_shortWeekday).join(', ');
+  }
+
+  String _shortWeekday(int weekday) => switch (weekday) {
+    1 => 'T2',
+    2 => 'T3',
+    3 => 'T4',
+    4 => 'T5',
+    5 => 'T6',
+    6 => 'T7',
+    _ => 'CN',
+  };
 }
 
 class _AddTaskSheet extends StatefulWidget {
@@ -396,12 +436,37 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
     }
   }
 
+  /// Lịch lặp. Mặc định hằng ngày — đúng với phần lớn việc nhà, và là hành vi
+  /// duy nhất app có trước khi khối này tồn tại.
+  RepeatType _repeat = RepeatType.daily;
+
+  /// Thứ trong tuần khi [_repeat] là `custom`. 1 = thứ Hai … 7 = Chủ nhật, khớp
+  /// `DateTime.weekday` để tầng lịch không phải quy đổi.
+  final Set<int> _repeatDays = {};
+
   @override
   void dispose() {
     _titleController.dispose();
     _pointsController.dispose();
     super.dispose();
   }
+
+  String _repeatTypeLabel(RepeatType type) => switch (type) {
+    RepeatType.daily => 'Hằng ngày',
+    RepeatType.custom => 'Chọn thứ',
+    RepeatType.once => 'Một lần',
+  };
+
+  /// 1 = thứ Hai … 7 = Chủ nhật.
+  String _weekdayLabel(int weekday) => switch (weekday) {
+    1 => 'T2',
+    2 => 'T3',
+    3 => 'T4',
+    4 => 'T5',
+    5 => 'T6',
+    6 => 'T7',
+    _ => 'CN',
+  };
 
   Future<void> _save() async {
     final title = _titleController.text.trim();
@@ -412,6 +477,12 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
     final preset = _selectedPreset == null
         ? null
         : presetByKey(_selectedPreset!);
+    // `custom` mà không chọn thứ nào thì không sinh được lượt nào — việc tạo ra
+    // sẽ không bao giờ xuất hiện. Coi như hằng ngày thay vì tạo một việc chết.
+    final effectiveRepeat = _repeat == RepeatType.custom && _repeatDays.isEmpty
+        ? RepeatType.daily
+        : _repeat;
+
     await widget.taskDao.createTask(
       TasksCompanion.insert(
         id: id,
@@ -420,6 +491,17 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
         points: Value(points),
         presetKey: Value(_selectedPreset),
         iconKey: Value(preset?.iconKey),
+        repeatType: Value(effectiveRepeat.name),
+        repeatDays: Value(
+          effectiveRepeat == RepeatType.custom
+              ? (_repeatDays.toList()..sort()).join(',')
+              : '',
+        ),
+        onceDate: Value(
+          effectiveRepeat == RepeatType.once
+              ? DateTime.now().toIso8601String().substring(0, 10)
+              : null,
+        ),
       ),
       _selectedChildren.toList(),
     );
@@ -483,6 +565,50 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
               ),
               keyboardType: TextInputType.number,
             ),
+            const SizedBox(height: AppSpacing.lg),
+            Text('Lặp lại', style: context.text.titleSmall),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              children: [
+                for (final type in RepeatType.values)
+                  ChoiceChip(
+                    label: Text(_repeatTypeLabel(type)),
+                    selected: _repeat == type,
+                    onSelected: (_) => setState(() => _repeat = type),
+                  ),
+              ],
+            ),
+            if (_repeat == RepeatType.custom) ...[
+              const SizedBox(height: AppSpacing.md),
+              Wrap(
+                spacing: AppSpacing.xs,
+                runSpacing: AppSpacing.xs,
+                children: [
+                  for (var day = 1; day <= 7; day++)
+                    FilterChip(
+                      label: Text(_weekdayLabel(day)),
+                      selected: _repeatDays.contains(day),
+                      onSelected: (on) => setState(() {
+                        if (on) {
+                          _repeatDays.add(day);
+                        } else {
+                          _repeatDays.remove(day);
+                        }
+                      }),
+                    ),
+                ],
+              ),
+              if (_repeatDays.isEmpty) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Chưa chọn thứ nào — việc sẽ lặp hằng ngày.',
+                  style: context.text.bodySmall?.copyWith(
+                    color: context.semantic.onSurfaceMuted,
+                  ),
+                ),
+              ],
+            ],
             const SizedBox(height: AppSpacing.lg),
             Text('Giao cho', style: context.text.titleSmall),
             const SizedBox(height: AppSpacing.sm),

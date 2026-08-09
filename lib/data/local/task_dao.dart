@@ -46,6 +46,34 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
         .get();
   }
 
+  /// Như [activeTasks] nhưng phát lại mỗi khi bảng đổi.
+  ///
+  /// Màn Nhiệm vụ trước đây nạp một lần trong `initState`, nên việc vừa tạo từ
+  /// sheet "+" **không hiện ra**: sheet đóng lại mà không có ai bảo danh sách nạp
+  /// lại, và đổi tab cũng không giúp vì mỗi tab giữ state riêng
+  /// (`StatefulShellRoute`). Bố mẹ thấy việc mình vừa tạo biến mất, trong khi nó
+  /// nằm đúng trong DB.
+  Stream<List<Task>> watchActiveTasks(String familyId) {
+    return (select(tasks)..where(
+          (t) =>
+              t.familyId.equals(familyId) &
+              t.active.equals(true) &
+              t.deletedAt.isNull(),
+        ))
+        .watch();
+  }
+
+  /// Như [activeRoutines] nhưng phát lại mỗi khi bảng đổi.
+  Stream<List<Routine>> watchActiveRoutines(String familyId) {
+    return (select(routines)..where(
+          (r) =>
+              r.familyId.equals(familyId) &
+              r.active.equals(true) &
+              r.deletedAt.isNull(),
+        ))
+        .watch();
+  }
+
   /// Danh sách người được giao cho một task lẻ.
   Future<List<String>> assigneesOf(String taskId) async {
     final rows = await (select(
