@@ -67,8 +67,9 @@ toàn bộ offline. ✅ đạt.
 
 ## Sprint 2 — Luồng cốt lõi UI (gần xong)
 - [x] Onboarding 4 bước (thêm bước chọn tuổi ngoài kế hoạch — xem ghi chú dưới)
-- [~] **Task Editor** — có `_AddTaskSheet` với 5 khối: tên, điểm, preset, icon, **chọn con nào**.
-      Thiếu 3 khối: lịch lặp, chế độ duyệt riêng của task, chế độ bằng chứng.
+- [~] **Task Editor** — có `_AddTaskSheet` với 6 khối: tên, điểm, preset, icon, **chọn con nào**,
+      **lịch lặp** (hằng ngày / chọn thứ / một lần). Thiếu 2 khối: chế độ duyệt riêng của task,
+      chế độ bằng chứng.
 - [ ] **Routine Editor** + kéo thả đổi thứ tự task — chưa làm. Tab Nhiệm vụ chỉ **xem** routine
       (`_RoutineGroupCard`), chưa sửa được.
 - [~] Child Home — vòng tiến độ ✅, linh vật đổi tâm trạng theo tiến độ ✅, nhưng:
@@ -111,7 +112,7 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
 
 **Việc còn nợ từ Sprint 1–2, không cần backend:**
 - [ ] Tầng repository (`lib/domain/repositories/` đang rỗng) — phải có trước khi thêm sync
-- [ ] Task Editor đủ 8 khối (thiếu lịch lặp, chế độ duyệt, chế độ bằng chứng)
+- [ ] Task Editor đủ 8 khối (còn thiếu chế độ duyệt riêng, chế độ bằng chứng)
 - [ ] Routine Editor + kéo thả thứ tự
 - [ ] Animation ăn mừng — nối `KidScale.celebrateOnTap`, hiện là cờ chết
 - [ ] PIN phụ huynh (chỉ có cột `pin_hash`, chưa có UI/logic)
