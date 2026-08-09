@@ -33,7 +33,7 @@ families
 | day_rollover_hour | int | mặc định 4 (ngày mới bắt đầu 4h sáng) |
 | exchange_rate_xu | int NULL | bao nhiêu xu = 1 đơn vị tiền; NULL = tắt quy đổi |
 | currency | text | mặc định `VND` |
-| jar_split | jsonb | tỷ lệ ba hũ, mặc định `{"spend":50,"save":40,"give":10}` |
+| jar_split | jsonb | tỷ lệ hũ, mặc định `{"spend":50,"save":40,"give":10}`. Từ ADR-024 tỷ lệ nằm ở bảng `jars`; cột này giữ cho dữ liệu cũ và cho `members.jar_split_override` |
 | created_at / updated_at | timestamptz | |
 
 ### memberships
@@ -179,7 +179,7 @@ Unique `(member_id, badge_key)` — huy hiệu chỉ nhận một lần.
 | created_at | timestamptz | |
 
 > Số dư mỗi hũ = `SELECT SUM(delta) FROM point_transactions WHERE member_id = ? AND jar = ?`.
-> Tổng số dư = tổng ba hũ. Không có cột số dư nào được ghi trực tiếp.
+> Tổng số dư = tổng các hũ. Không có cột số dư nào được ghi trực tiếp.
 >
 > Một lần duyệt task sinh **ba dòng ledger** (một cho mỗi hũ) theo `jar_split`, chia phần dư
 > vào hũ Tiêu để tổng luôn khớp. Cả ba dòng dùng chung `client_op_id` gốc kèm hậu tố hũ để
@@ -189,6 +189,16 @@ Unique `(member_id, badge_key)` — huy hiệu chỉ nhận một lần.
 ### outbox (chỉ local)
 `id, op, entity, entity_id, payload_json, client_op_id, created_at, retry_count, last_error`
 
+### jars
+`id, family_id, jar_key, title, emoji, pct, order_index, is_archived, created_at, updated_at`
+
+Hũ do bố mẹ lập — ADR-024. **`jar_key` là thứ đi vào `point_transactions.jar`**, không phải `id`:
+ba hũ mặc định dùng đúng khoá cũ (`spend`/`save`/`give`) nên sổ cái đã ghi không phải di trú.
+Tổng `pct` của các hũ chưa lưu trữ phải bằng 100. Hũ chỉ được đặt `is_archived`, **không xoá** — sổ
+cái append-only (ADR-005) nên xoá hũ là làm lịch sử trỏ vào hũ không tồn tại.
+
+Khoá `inbox` (hũ chờ, chế độ `manual`) **không** nằm trong bảng này và không tính vào 100%.
+
 ### device_settings (chỉ local, không đồng bộ)
 `setting_key (PK), setting_value`
 
@@ -197,6 +207,10 @@ hình gia đình nằm ở tài khoản bố mẹ (ADR-021). Khoá session dùng
 
 **Không đặt bí mật vào bảng này.** Token ghép cặp phải nằm ở Keychain / Keystore
 (`09-onboarding-pairing.md` §4) — file SQLite đọc được trên máy đã root hoặc qua bản sao lưu.
+
+### Cấu hình chia xu (trên `families`)
+`allocation_mode` — `auto` (mặc định, chia ngay theo tỷ lệ) hoặc `manual` (vào hũ chờ, con tự
+chia) — ADR-024.
 
 ### Cấu hình duyệt (trên `families`)
 `require_approval` — mặc định `false`: con bấm xong là xong (ADR-023). Bật lên thì tôn trọng
@@ -214,9 +228,10 @@ phần chưa xử lý, và **không trừ hồi tố** khi bố mẹ bật tính
 
 Chạy khi: mở app, đổi ngày, sửa task.
 
-> **Lệch với code hiện tại:** `TaskDao.generateInstances` chỉ được gọi từ nút "Tạo việc hôm nay"
-> trên màn hình con, không chạy lúc mở app. Hệ quả thấy được: bố mẹ mở app sau khi tạo routine thì
-> thấy "0 / 0 việc hôm nay", tưởng routine chưa lưu. Việc còn lại nằm ở `05-roadmap.md` Sprint 3.
+Nơi gọi: `DayStartService.runIfNeeded` — chạy lúc **mở app** (trong `main`, sau khi nạp session),
+lúc app **quay lại từ nền** (ngày có thể đã đổi khi máy để qua đêm), và ngay **sau onboarding**
+(`force: true`, vì routine vừa tạo cần có việc ngay). Có khoá theo ngày trong `device_settings`
+(`rollover.last_run_date`) nên gọi nhiều lần chỉ thực sự chạy một lần mỗi ngày.
 
 ```
 Với mỗi task active của family:
@@ -287,6 +302,11 @@ create policy tasks_rw on tasks
 - Drift: `schemaVersion` tăng dần, mỗi bước có test dựng DB phiên bản cũ rồi migrate.
   Test: `test/unit/data/migration_test.dart`.
   - v1 → v2: thêm `device_settings`.
+  - v5 → v6: thêm `point_transactions.op_group_id` — nhóm các dòng của cùng một thao tác để
+    "Sổ của con" hiện một việc thành **một** mục. Dòng cũ để NULL, tầng hiển thị lấy `id` làm nhóm;
+    **không backfill** vì suy ngược từ `client_op_id` không đáng tin.
+  - v4 → v5: thêm bảng `jars` + `families.allocation_mode` (ADR-024). Không sửa một dòng
+    `point_transactions` nào.
   - v3 → v4: thêm `families.require_approval` (ADR-023). Default `false`, nên gia đình nâng cấp từ
     bản cũ **đổi hành vi** — đây là đổi có chủ ý, có test chốt.
   - v2 → v3: thêm `families.missed_penalty_pct`, `families.reopen_penalty_pct`,

@@ -16,6 +16,7 @@ class WalletBalance {
     required this.spend,
     required this.save,
     required this.give,
+    this.inbox = 0,
   });
 
   static const zero = WalletBalance(spend: 0, save: 0, give: 0);
@@ -24,12 +25,21 @@ class WalletBalance {
   final int save;
   final int give;
 
-  int get total => spend + save + give;
+  /// Xu đã kiếm nhưng con chưa chia vào hũ nào — ADR-024, chế độ `manual`.
+  final int inbox;
+
+  /// **Tính cả hũ chờ.** Con làm việc xong là xu thuộc về con, dù chưa chia.
+  /// Bỏ hũ chờ ra khỏi tổng thì màn hình con hiện 0 điểm sau khi làm xong việc.
+  int get total => spend + save + give + inbox;
+
+  /// Tổng đã chia — dùng khi cần phân biệt với phần chưa chia.
+  int get allocated => spend + save + give;
 
   int of(Jar jar) => switch (jar) {
     Jar.spend => spend,
     Jar.save => save,
     Jar.give => give,
+    Jar.inbox => inbox,
   };
 
   @override
@@ -37,14 +47,15 @@ class WalletBalance {
       other is WalletBalance &&
       other.spend == spend &&
       other.save == save &&
-      other.give == give;
+      other.give == give &&
+      other.inbox == inbox;
 
   @override
-  int get hashCode => Object.hash(spend, save, give);
+  int get hashCode => Object.hash(spend, save, give, inbox);
 
   @override
   String toString() =>
-      'WalletBalance(tiêu $spend, để dành $save, cho đi $give)';
+      'WalletBalance(tiêu $spend, để dành $save, cho đi $give, chờ $inbox)';
 }
 
 /// Lỗi khi thao tác ví.
@@ -78,6 +89,7 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     var spend = 0;
     var save = 0;
     var give = 0;
+    var inbox = 0;
     for (final row in rows) {
       final total = row.read(deltaSum) ?? 0;
       switch (row.read(pointTransactions.jar)) {
@@ -87,9 +99,16 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
           save = total;
         case 'give':
           give = total;
+        case 'inbox':
+          inbox = total;
       }
     }
-    return WalletBalance(spend: spend, save: save, give: give);
+    return WalletBalance(
+      spend: spend,
+      save: save,
+      give: give,
+      inbox: inbox,
+    );
   }
 
   /// Theo dõi số dư, phát lại mỗi khi sổ cái đổi.
@@ -100,6 +119,7 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
       var spend = 0;
       var save = 0;
       var give = 0;
+      var inbox = 0;
       for (final row in rows) {
         switch (row.jar) {
           case 'spend':
@@ -108,9 +128,16 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
             save += row.delta;
           case 'give':
             give += row.delta;
+          case 'inbox':
+            inbox += row.delta;
         }
       }
-      return WalletBalance(spend: spend, save: save, give: give);
+      return WalletBalance(
+        spend: spend,
+        save: save,
+        give: give,
+        inbox: inbox,
+      );
     });
   }
 
@@ -173,6 +200,9 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
           delta: entry.value,
           reason: reason,
           clientOpId: '$clientOpId:${entry.key.name}',
+          // Ba dòng của cùng một lần cộng chung một nhóm, để "Sổ của con" hiện
+          // một mục thay vì ba.
+          opGroupId: clientOpId,
           refType: refType,
           refId: refId,
           note: note,
@@ -180,6 +210,91 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
         );
       }
       return written;
+    });
+  }
+
+  /// Cộng xu vào **một hũ duy nhất**, không chia.
+  ///
+  /// Dùng cho chế độ `manual` (ADR-024): xu vào hũ chờ, con tự chia sau. Cũng
+  /// dùng cho bước chuyển hũ khi con chia.
+  ///
+  /// Trả về số dòng thực sự ghi (0 nghĩa là đã ghi từ trước).
+  Future<int> creditToJar({
+    required String familyId,
+    required String memberId,
+    required Jar jar,
+    required int amount,
+    required TxReason reason,
+    required String clientOpId,
+    String? opGroupId,
+    String? refType,
+    String? refId,
+    String? note,
+    String? createdBy,
+  }) async {
+    if (amount <= 0) {
+      throw WalletException('Số xu cộng vào phải dương, nhận được $amount');
+    }
+    return _insertIfNew(
+      familyId: familyId,
+      memberId: memberId,
+      jar: jar,
+      delta: amount,
+      reason: reason,
+      clientOpId: clientOpId,
+      opGroupId: opGroupId,
+      refType: refType,
+      refId: refId,
+      note: note,
+      createdBy: createdBy,
+    );
+  }
+
+  /// Con chuyển xu từ hũ chờ sang một hũ thật — ADR-024.
+  ///
+  /// Ghi **hai** dòng bù nhau trong một transaction (rút ở hũ chờ, nộp vào hũ
+  /// đích), dùng chung `op_group_id` nên "Sổ của con" hiện một mục. Tổng xu
+  /// không đổi — đây là đổi chỗ, không phải kiếm thêm.
+  Future<void> moveFromInbox({
+    required String familyId,
+    required String memberId,
+    required Jar toJar,
+    required int amount,
+    required String clientOpId,
+  }) async {
+    if (toJar == Jar.inbox) {
+      throw const WalletException('Không chuyển hũ chờ sang chính nó');
+    }
+    if (amount <= 0) {
+      throw WalletException('Số xu chuyển phải dương, nhận được $amount');
+    }
+
+    await transaction(() async {
+      final balance = await balanceOf(memberId);
+      if (balance.inbox < amount) {
+        throw WalletException(
+          'Hũ chờ còn ${balance.inbox} xu, không đủ $amount xu',
+        );
+      }
+
+      await _insertIfNew(
+        familyId: familyId,
+        memberId: memberId,
+        jar: Jar.inbox,
+        delta: -amount,
+        reason: TxReason.jarTransfer,
+        clientOpId: '$clientOpId:inbox',
+        opGroupId: clientOpId,
+      );
+      await _insertIfNew(
+        familyId: familyId,
+        memberId: memberId,
+        jar: toJar,
+        delta: amount,
+        reason: TxReason.jarTransfer,
+        clientOpId: '$clientOpId:${toJar.name}',
+        opGroupId: clientOpId,
+      );
     });
   }
 
@@ -264,8 +379,9 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
       var remaining = amount;
       var deducted = 0;
 
-      // Thứ tự cố định, xem doc comment ở trên.
-      for (final jar in const [Jar.spend, Jar.save, Jar.give]) {
+      // Thứ tự cố định, xem doc comment ở trên. Hũ chờ đứng **đầu**: đó là xu
+      // con chưa cam kết vào giá trị nào, nên lấy ở đó ít phá vỡ nhất.
+      for (final jar in const [Jar.inbox, Jar.spend, Jar.save, Jar.give]) {
         if (remaining <= 0) break;
         final available = balance.of(jar);
         if (available <= 0) continue;
@@ -278,6 +394,7 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
           delta: -take,
           reason: TxReason.penalty,
           clientOpId: '$clientOpId:${jar.name}',
+          opGroupId: clientOpId,
           refType: refType,
           refId: refId,
           note: note,
@@ -337,7 +454,9 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     });
   }
 
-  /// Lịch sử giao dịch cho màn "Sổ của con" — mới nhất trước.
+  /// Lịch sử giao dịch thô, **mỗi hũ một dòng** — mới nhất trước.
+  ///
+  /// Màn hình nên dùng `watchGroupedHistory` để trẻ thấy một việc là một mục.
   ///
   /// Không có tham số nào giới hạn thời gian: trẻ xem lại được từ ngày đầu tiên.
   Stream<List<PointTransaction>> watchHistory(String memberId, {Jar? jar}) {
@@ -360,6 +479,7 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     required int delta,
     required TxReason reason,
     required String clientOpId,
+    String? opGroupId,
     String? refType,
     String? refId,
     String? note,
@@ -384,6 +504,7 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
         delta: delta,
         reason: reason.name,
         clientOpId: clientOpId,
+        opGroupId: Value(opGroupId),
         refType: Value(refType),
         refId: Value(refId),
         note: Value(note),
@@ -393,4 +514,92 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     );
     return 1;
   }
+}
+
+/// Một mục lịch sử đã gộp — xem `WalletHistory.watchGroupedHistory`.
+@immutable
+class LedgerEntry {
+  const LedgerEntry({
+    required this.groupId,
+    required this.reason,
+    required this.delta,
+    required this.createdAt,
+    required this.byJar,
+    this.refType,
+    this.refId,
+    this.note,
+  });
+
+  final String groupId;
+
+  /// `TxReason` dạng chuỗi.
+  final String reason;
+
+  /// Tổng thay đổi của cả thao tác, cộng dồn các hũ.
+  final int delta;
+
+  final DateTime createdAt;
+
+  /// Chi tiết từng hũ, để mở ra xem khi cần.
+  final Map<String, int> byJar;
+
+  final String? refType;
+  final String? refId;
+  final String? note;
+
+  @override
+  String toString() => 'LedgerEntry($reason $delta, ${byJar.length} hũ)';
+}
+
+extension WalletHistory on WalletDao {
+  /// Lịch sử **đã gộp** cho "Sổ của con".
+  ///
+  /// Sổ cái ghi mỗi hũ một dòng (ADR-016), nên một việc 10 xu thành ba dòng
+  /// (+5, +4, +1). Đúng về kế toán, nhưng hiện thẳng ra cho trẻ thì thành "làm
+  /// một việc sao lại ba mục?". Hàm này gộp theo `op_group_id`, rơi về `id` với
+  /// dòng cũ ghi trước v6.
+  ///
+  /// Gộp ở tầng Dart chứ không bằng GROUP BY: cần giữ chi tiết từng hũ để màn
+  /// hình mở ra xem được, và số dòng một trẻ có trong một ngày là hàng chục,
+  /// không phải hàng vạn.
+  Stream<List<LedgerEntry>> watchGroupedHistory(String memberId) {
+    return watchHistory(memberId).map(groupLedgerRows);
+  }
+}
+
+/// Gộp các dòng sổ cái theo thao tác. Hàm thuần để test được không cần DB.
+List<LedgerEntry> groupLedgerRows(List<PointTransaction> rows) {
+  final order = <String>[];
+  final buckets = <String, List<PointTransaction>>{};
+
+  for (final row in rows) {
+    final key = row.opGroupId ?? row.id;
+    if (!buckets.containsKey(key)) {
+      buckets[key] = [];
+      order.add(key);
+    }
+    buckets[key]!.add(row);
+  }
+
+  return [
+    for (final key in order)
+      () {
+        final group = buckets[key]!;
+        final first = group.first;
+        return LedgerEntry(
+          groupId: key,
+          reason: first.reason,
+          delta: group.fold(0, (sum, r) => sum + r.delta),
+          // Mốc thời gian sớm nhất trong nhóm: ba dòng ghi trong cùng một
+          // transaction nhưng `currentDateAndTime` có thể lệch nhau một giây.
+          createdAt: group
+              .map((r) => r.createdAt)
+              .reduce((a, b) => a.isBefore(b) ? a : b),
+          byJar: {for (final r in group) r.jar: r.delta},
+          refType: first.refType,
+          refId: first.refId,
+          note: first.note,
+        );
+      }(),
+  ];
 }

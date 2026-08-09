@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
@@ -5,6 +7,8 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/member_dao.dart';
+import 'package:beong/data/local/reward_dao.dart';
+import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +24,8 @@ class StatsScreen extends ConsumerWidget {
 
     final memberDao = ref.watch(memberDaoProvider);
     final walletDao = ref.watch(walletDaoProvider);
+    final taskDao = ref.watch(taskDaoProvider);
+    final rewardDao = ref.watch(rewardDaoProvider);
 
     if (session.isParent) {
       return _ParentStats(
@@ -33,6 +39,8 @@ class StatsScreen extends ConsumerWidget {
       memberId: session.activeMemberId,
       walletDao: walletDao,
       memberDao: memberDao,
+      taskDao: taskDao,
+      rewardDao: rewardDao,
     );
   }
 }
@@ -139,11 +147,15 @@ class _ChildStats extends StatelessWidget {
     required this.memberId,
     required this.walletDao,
     required this.memberDao,
+    required this.taskDao,
+    required this.rewardDao,
   });
 
   final String memberId;
   final WalletDao walletDao;
   final MemberDao memberDao;
+  final TaskDao taskDao;
+  final RewardDao rewardDao;
 
   @override
   Widget build(BuildContext context) {
@@ -176,8 +188,9 @@ class _ChildStats extends StatelessWidget {
           const SizedBox(height: AppSpacing.xxl),
           Text('Lịch sử', style: context.text.titleMedium),
           const SizedBox(height: AppSpacing.md),
-          StreamBuilder<List<PointTransaction>>(
-            stream: walletDao.watchHistory(memberId),
+          StreamBuilder<List<LedgerEntry>>(
+            // Đã gộp: một việc là **một** mục, không phải ba dòng theo hũ.
+            stream: walletDao.watchGroupedHistory(memberId),
             builder: (context, snap) {
               final txns = snap.data ?? [];
               if (txns.isEmpty) {
@@ -194,7 +207,17 @@ class _ChildStats extends StatelessWidget {
                 );
               }
               return Column(
-                children: txns.map((tx) => _TransactionTile(tx: tx)).toList(),
+                children: [
+                  for (final tx in txns)
+                    _TransactionTile(
+                      // Key theo nhóm: thiếu key thì State bị tái dùng theo vị
+                      // trí và dòng hiện tên của giao dịch cũ.
+                      key: ValueKey(tx.groupId),
+                      tx: tx,
+                      taskDao: taskDao,
+                      rewardDao: rewardDao,
+                    ),
+                ],
               );
             },
           ),
@@ -274,6 +297,7 @@ class _JarCard extends StatelessWidget {
     Jar.spend => Icons.shopping_bag_rounded,
     Jar.save => Icons.savings_rounded,
     Jar.give => Icons.volunteer_activism_rounded,
+    Jar.inbox => Icons.inbox_rounded,
   };
 }
 
@@ -320,14 +344,219 @@ class _StreakCard extends StatelessWidget {
   }
 }
 
-class _TransactionTile extends StatelessWidget {
-  const _TransactionTile({required this.tx});
+/// Một mục trong Sổ của con.
+///
+/// Hiện **tên việc / tên phần thưởng** chứ không chỉ "Hoàn thành việc": trước
+/// đây mọi dòng đều mang cùng một chữ, nên sổ chín việc trông như chín dòng
+/// giống hệt nhau và trẻ không tra được xu đến từ đâu.
+class _TransactionTile extends StatefulWidget {
+  const _TransactionTile({
+    required this.tx,
+    required this.taskDao,
+    required this.rewardDao,
+    super.key,
+  });
 
-  final PointTransaction tx;
+  final LedgerEntry tx;
+  final TaskDao taskDao;
+  final RewardDao rewardDao;
+
+  @override
+  State<_TransactionTile> createState() => _TransactionTileState();
+}
+
+/// Trạng thái của mục lịch sử, để cột bên trái nói được điều gì.
+@immutable
+class _EntryStatus {
+  const _EntryStatus(this.label, this.icon, this.tone);
+
+  final String label;
+  final IconData icon;
+
+  /// Sắc thái: `ok` xanh, `wait` cam, `bad` đỏ, `neutral` xám.
+  final String tone;
+}
+
+class _TransactionTileState extends State<_TransactionTile> {
+  String? _subject;
+
+  /// Tạo **một lần**, không tạo trong `build`.
+  ///
+  /// `StreamBuilder` nhận stream mới là huỷ đăng ký cũ rồi đăng ký lại; gọi
+  /// `_statusStream()` trong `build` nghĩa là mỗi lần dựng lại chạy lại truy vấn
+  /// drift và nháy về trạng thái rỗng một khung hình.
+  late Stream<_EntryStatus?> _status = _statusStream();
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadSubject());
+  }
+
+  @override
+  void didUpdateWidget(_TransactionTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.tx.refId == widget.tx.refId) return;
+    unawaited(_loadSubject());
+    setState(() => _status = _statusStream());
+  }
+
+  /// Trạng thái đọc từ **thực thể gốc**, không đoán từ lý do giao dịch.
+  ///
+  /// Một dòng `rewardRedeemed` không nói được phiếu đó đã được duyệt hay chưa —
+  /// chỉ bảng `redemptions` biết. Đó là lý do phải tra ngược, và cũng là lý do
+  /// dòng lịch sử phải giữ `ref_type` / `ref_id`.
+  _EntryStatus? _statusOf(String? instanceStatus, String? redemptionStatus) {
+    if (instanceStatus != null) {
+      return switch (instanceStatus) {
+        'approved' => const _EntryStatus('Đã xong', Icons.check_circle, 'ok'),
+        'pendingReview' => const _EntryStatus(
+          'Chờ duyệt',
+          Icons.hourglass_bottom_rounded,
+          'wait',
+        ),
+        // Lượt đã bị bố mẹ mở lại: xu vẫn còn nhưng việc phải làm lại (ADR-022).
+        'scheduled' => const _EntryStatus(
+          'Phải làm lại',
+          Icons.replay_rounded,
+          'wait',
+        ),
+        'missed' => const _EntryStatus(
+          'Bỏ lỡ',
+          Icons.remove_circle_outline,
+          'bad',
+        ),
+        'rejected' => const _EntryStatus(
+          'Bị từ chối',
+          Icons.close_rounded,
+          'bad',
+        ),
+        _ => null,
+      };
+    }
+
+    if (redemptionStatus != null) {
+      return switch (redemptionStatus) {
+        'pending' => const _EntryStatus(
+          'Chờ bố mẹ duyệt',
+          Icons.hourglass_bottom_rounded,
+          'wait',
+        ),
+        'fulfilled' => const _EntryStatus(
+          'Dùng được',
+          Icons.check_circle,
+          'ok',
+        ),
+        'used' => const _EntryStatus(
+          'Đã dùng',
+          Icons.task_alt_rounded,
+          'neutral',
+        ),
+        'rejected' => const _EntryStatus(
+          'Bị từ chối',
+          Icons.close_rounded,
+          'bad',
+        ),
+        _ => null,
+      };
+    }
+
+    return null;
+  }
+
+  /// Tra tên của thứ giao dịch này nói về.
+  ///
+  /// Không tra được thì để `null` và chỉ hiện nhãn theo lý do — dữ liệu cũ hoặc
+  /// việc đã bị xoá không được làm dòng lịch sử biến mất.
+  /// Tên thì tra một lần (không đổi), còn **trạng thái phải theo dõi**.
+  ///
+  /// Bố mẹ duyệt hoặc mở lại không ghi dòng sổ cái nào, nên stream lịch sử
+  /// không phát lại và widget không dựng lại. Tra một lần là cách chắc chắn để
+  /// dòng "Chờ bố mẹ duyệt" đứng nguyên sau khi phiếu đã bị từ chối — đúng lỗi
+  /// đã gặp.
+  Stream<_EntryStatus?> _statusStream() {
+    final tx = widget.tx;
+    final refId = tx.refId;
+    if (refId == null) return Stream.value(null);
+
+    switch (tx.refType) {
+      case 'task_instance':
+        return widget.taskDao
+            .watchInstance(refId)
+            .map((i) => _statusOf(i?.status, null));
+      case 'reward':
+        // Dòng trừ xu khi đổi thưởng trỏ vào `reward`, nhưng trạng thái nằm ở
+        // phiếu — mà phiếu dùng chính `client_op_id` làm id, tức `groupId`.
+        return widget.rewardDao
+            .watchRedemption(tx.groupId)
+            .map((r) => _statusOf(null, r?.status));
+      case 'redemption':
+        return widget.rewardDao
+            .watchRedemption(refId)
+            .map((r) => _statusOf(null, r?.status));
+      default:
+        return Stream.value(null);
+    }
+  }
+
+  Future<void> _loadSubject() async {
+    final tx = widget.tx;
+    final refId = tx.refId;
+    if (refId == null) return;
+
+    String? name;
+    switch (tx.refType) {
+      case 'task_instance':
+        final instance = await widget.taskDao.getInstanceById(refId);
+        if (instance != null) {
+          name = (await widget.taskDao.getTaskById(instance.taskId)).title;
+        }
+      case 'reward':
+        name = (await widget.rewardDao.getReward(refId))?.title;
+      case 'redemption':
+        final redemption = await widget.rewardDao.getRedemption(refId);
+        if (redemption != null) {
+          name = (await widget.rewardDao.getReward(redemption.rewardId))?.title;
+        }
+      default:
+        name = null;
+    }
+
+    if (mounted && name != null) setState(() => _subject = name);
+  }
+
+  Color _toneColor(BuildContext context, String tone) => switch (tone) {
+    'ok' => context.semantic.success,
+    'wait' => context.semantic.warning,
+    'bad' => context.semantic.danger,
+    _ => context.semantic.onSurfaceMuted,
+  };
 
   @override
   Widget build(BuildContext context) {
+    return StreamBuilder<_EntryStatus?>(
+      stream: _status,
+      builder: (context, snap) => _buildRow(context, snap.data),
+    );
+  }
+
+  Widget _buildRow(BuildContext context, _EntryStatus? status) {
+    final tx = widget.tx;
     final isPositive = tx.delta > 0;
+    final subject = _subject;
+    // Ghép trước để biết dòng phụ có nội dung hay không: dòng phụ rỗng vẫn
+    // chiếm chỗ và làm các thẻ cao thấp không đều.
+    final subtitle = [
+      if (status == null && subject != null) _reasonLabel(tx.reason),
+      if (tx.note != null) tx.note!,
+      if (tx.byJar.length > 1)
+        _jarBreakdown(
+          tx.byJar,
+          // Lần chia xu có hai chân bù nhau; hiện cả hai thành
+          // "Tiêu 5, Chờ chia 5" làm người đọc tưởng có 10 xu.
+          onlyPositive: tx.reason == 'jarTransfer',
+        ),
+    ].join(' · ');
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -339,10 +568,15 @@ class _TransactionTile extends StatelessWidget {
           ),
           child: Row(
             children: [
+              // Cột trạng thái: icon + màu nói ngay việc/phiếu này đang thế
+              // nào. Trước đây cột này chỉ nhắc lại lý do giao dịch, tức là
+              // lặp lại thông tin đã có ở dòng chữ bên cạnh.
               Icon(
-                _reasonIcon(tx.reason),
-                color: context.semantic.onSurfaceMuted,
-                size: 20,
+                status?.icon ?? _reasonIcon(tx.reason),
+                color: status == null
+                    ? context.semantic.onSurfaceMuted
+                    : _toneColor(context, status.tone),
+                size: 22,
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -350,12 +584,33 @@ class _TransactionTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _reasonLabel(tx.reason),
+                      subject ?? _reasonLabel(tx.reason),
                       style: context.text.bodyMedium,
                     ),
-                    if (tx.note != null)
-                      Text(
-                        tx.note!,
+                    if (subtitle.isNotEmpty || status != null)
+                      Text.rich(
+                        // Trạng thái trước, rồi lý do và chi tiết hũ. Trạng thái
+                        // tô màu **và** có chữ: icon 22px một mình không đủ, và
+                        // màu một mình cũng không đủ (WCAG 1.4.1 — không dùng
+                        // màu hay hình làm phương tiện truyền đạt duy nhất).
+                        TextSpan(
+                          children: [
+                            if (status != null)
+                              TextSpan(
+                                text: status.label,
+                                style: context.text.bodySmall?.copyWith(
+                                  color: _toneColor(context, status.tone),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            if (subtitle.isNotEmpty)
+                              TextSpan(
+                                text: status == null
+                                    ? subtitle
+                                    : ' · $subtitle',
+                              ),
+                          ],
+                        ),
                         style: context.text.bodySmall?.copyWith(
                           color: context.semantic.onSurfaceMuted,
                         ),
@@ -364,9 +619,17 @@ class _TransactionTile extends StatelessWidget {
                 ),
               ),
               Text(
-                '${isPositive ? '+' : ''}${tx.delta}',
+                // Chuyển hũ có delta 0: không cộng cũng không mất, nên không
+                // dùng màu xanh hay đỏ — tô đỏ số 0 làm con tưởng bị trừ.
+                switch (tx.delta) {
+                  0 => '↔',
+                  final d when d > 0 => '+$d',
+                  final d => '$d',
+                },
                 style: context.text.titleSmall?.copyWith(
-                  color: isPositive
+                  color: tx.delta == 0
+                      ? context.semantic.onSurfaceMuted
+                      : isPositive
                       ? context.semantic.success
                       : context.semantic.danger,
                   fontWeight: FontWeight.w700,
@@ -379,6 +642,39 @@ class _TransactionTile extends StatelessWidget {
     );
   }
 
+  /// "Tiêu 5, Để dành 4, Cho đi 1" — gọn, không cần mở thêm.
+  ///
+  /// Thứ tự **cố định**, không theo thứ tự dòng trả về từ DB: thứ tự đổi giữa
+  /// các mục làm sổ trông như dữ liệu lộn xộn, dù số vẫn đúng.
+  String _jarBreakdown(Map<String, int> byJar, {bool onlyPositive = false}) {
+    const order = ['spend', 'save', 'give'];
+    final keys = [
+      ...order.where(byJar.containsKey),
+      // Hũ do bố mẹ tự lập (ADR-024) xếp sau, theo thứ tự chữ cái cho ổn định.
+      ...byJar.keys.where((k) => !order.contains(k)).toList()..sort(),
+    ];
+
+    final parts = <String>[];
+    for (final key in keys) {
+      final value = byJar[key] ?? 0;
+      if (value == 0) continue;
+      // Với lần chia xu, chân trừ ở hũ chờ chỉ là mặt sau của chân cộng — hiện
+      // cả hai thành "Tiêu 5, Chờ chia 5" làm người đọc tưởng có 10 xu.
+      if (onlyPositive && value < 0) continue;
+      parts.add('${_jarLabel(key)} ${value.abs()}');
+    }
+    return parts.join(', ');
+  }
+
+  String _jarLabel(String jarKey) => switch (jarKey) {
+    'spend' => 'Tiêu',
+    'save' => 'Để dành',
+    'give' => 'Cho đi',
+    'inbox' => 'Chờ chia',
+    // Hũ do bố mẹ tự lập (ADR-024): chưa tra được tên nên hiện khoá.
+    _ => jarKey,
+  };
+
   IconData _reasonIcon(String reason) => switch (reason) {
     'taskApproved' => Icons.check_circle_outline,
     'routineBonus' => Icons.stars_rounded,
@@ -388,6 +684,7 @@ class _TransactionTile extends StatelessWidget {
     'manualAdjust' => Icons.edit,
     'bonus' => Icons.add_circle_outline,
     'penalty' => Icons.remove_circle_outline,
+    'jarTransfer' => Icons.pie_chart_outline_rounded,
     _ => Icons.receipt_long,
   };
 
@@ -400,6 +697,7 @@ class _TransactionTile extends StatelessWidget {
     'manualAdjust' => 'Điều chỉnh',
     'bonus' => 'Thưởng thêm',
     'penalty' => 'Trừ xu',
+    'jarTransfer' => 'Con chia xu vào hũ',
     _ => reason,
   };
 }

@@ -105,6 +105,36 @@ class RewardDao extends DatabaseAccessor<AppDatabase> with _$RewardDaoMixin {
     });
   }
 
+  Future<Redemption?> getRedemption(String id) {
+    return (select(
+      redemptions,
+    )..where((r) => r.id.equals(id))).getSingleOrNull();
+  }
+
+  /// Theo dõi một phiếu. Cùng lý do với `TaskDao.watchInstance`: duyệt hay từ
+  /// chối phiếu không ghi dòng sổ cái nào (trừ khoản hoàn xu), nên trạng thái
+  /// hiển thị phải theo dõi chứ không tra một lần.
+  Stream<Redemption?> watchRedemption(String id) {
+    return (select(
+      redemptions,
+    )..where((r) => r.id.equals(id))).watchSingleOrNull();
+  }
+
+  Stream<List<Redemption>> watchPendingRedemptions(String familyId) {
+    return (select(redemptions)
+          ..where(
+            (r) =>
+                r.familyId.equals(familyId) &
+                r.status.equals(RedemptionStatus.pending.name),
+          )
+          ..orderBy([(r) => OrderingTerm.asc(r.createdAt)]))
+        .watch();
+  }
+
+  Future<Reward?> getReward(String id) {
+    return (select(rewards)..where((r) => r.id.equals(id))).getSingleOrNull();
+  }
+
   /// Trẻ bấm "đã dùng" trên phiếu.
   Future<void> markUsed(String redemptionId) {
     return (update(redemptions)..where((r) => r.id.equals(redemptionId))).write(

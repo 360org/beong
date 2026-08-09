@@ -16,6 +16,7 @@ import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/services/family_clock.dart';
+import 'package:beong/features/rewards/allocate_xu_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -89,6 +90,18 @@ class ChildHomeScreen extends ConsumerWidget {
                                   return _DashboardCard(
                                     scale: scale,
                                     points: balance.total,
+                                    unallocated: balance.inbox,
+                                    onAllocate: balance.inbox > 0
+                                        ? () => unawaited(
+                                            _openAllocateSheet(
+                                              context: context,
+                                              familyId: session.familyId,
+                                              memberId: memberId,
+                                              inbox: balance.inbox,
+                                              walletDao: walletDao,
+                                            ),
+                                          )
+                                        : null,
                                     streak: streakSnap.data?.currentLen ?? 0,
                                     completed: completedCount,
                                     total: total,
@@ -206,39 +219,108 @@ class ChildHomeScreen extends ConsumerWidget {
   }
 }
 
-class _ChildHeader extends StatelessWidget {
+/// Đầu màn hình con: avatar + tên, bấm vào để **đổi người dùng**.
+///
+/// Vai con không có tab Cài đặt (chỗ vốn chứa nút chuyển hồ sơ), nên nếu không
+/// có đường này thì máy dùng chung bị kẹt ở vai con — bố mẹ không về lại được.
+///
+/// Cố ý đặt ở avatar chứ không thành một nút riêng: nó là đường cho người lớn,
+/// không phải thứ cần mời con bấm.
+class _ChildHeader extends ConsumerWidget {
   const _ChildHeader({required this.member});
 
   final Member? member;
 
+  Future<void> _switchProfile(BuildContext context, WidgetRef ref) async {
+    final session = ref.read(sessionProvider);
+    if (session == null) return;
+    final members = await ref
+        .read(memberDaoProvider)
+        .watchMembers(session.familyId)
+        .first;
+    if (!context.mounted) return;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Text('Đổi người dùng', style: context.text.titleMedium),
+            ),
+            for (final m in members)
+              ListTile(
+                leading: Text(
+                  avatarForKey(m.avatarKey),
+                  style: const TextStyle(fontSize: 26),
+                ),
+                title: Text(m.displayName),
+                subtitle: Text(
+                  m.kind == MemberKind.parent.name ? 'Bố mẹ' : 'Trẻ',
+                ),
+                trailing: m.id == session.activeMemberId
+                    ? Icon(Icons.check_circle, color: context.colors.primary)
+                    : null,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  unawaited(
+                    ref
+                        .read(sessionProvider.notifier)
+                        .switchMember(
+                          m.id,
+                          isParent: m.kind == MemberKind.parent.name,
+                        ),
+                  );
+                },
+              ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final member = this.member;
     final color = member == null
         ? context.colors.primary
         : AppColors.profileColor(member.colorIndex);
 
-    return Row(
-      children: [
-        Container(
-          width: 48,
-          height: 48,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.18),
-            shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: () => unawaited(_switchProfile(context, ref)),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.18),
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              avatarForKey(member?.avatarKey),
+              style: const TextStyle(fontSize: 26),
+            ),
           ),
-          child: Text(
-            avatarForKey(member?.avatarKey),
-            style: const TextStyle(fontSize: 26),
+          const SizedBox(width: AppSpacing.md),
+          Text(
+            member?.displayName ?? '',
+            style: context.text.titleLarge?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
           ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Text(
-          member?.displayName ?? '',
-          style: context.text.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-        ),
-      ],
+          const SizedBox(width: AppSpacing.xs),
+          Icon(
+            Icons.expand_more_rounded,
+            size: 20,
+            color: context.semantic.onSurfaceMuted,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -247,13 +329,23 @@ class _DashboardCard extends StatelessWidget {
   const _DashboardCard({
     required this.scale,
     required this.points,
+    required this.unallocated,
+    required this.onAllocate,
     required this.streak,
     required this.completed,
     required this.total,
   });
 
   final KidScale scale;
+
+  /// Tổng xu của con, **tính cả phần chưa chia** (ADR-024).
   final int points;
+
+  /// Phần chưa chia. 0 khi nhà đặt chế độ chia tự động.
+  final int unallocated;
+
+  /// Mở màn chia xu. Null khi không có gì để chia.
+  final VoidCallback? onAllocate;
   final int streak;
   final int completed;
   final int total;
@@ -312,8 +404,33 @@ class _DashboardCard extends StatelessWidget {
                   // độ dài nội dung.
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // Một ô duy nhất cho xu. Trước đây có "ĐIỂM" ở đây và một
+                    // banner "Có N xu chờ chia" riêng bên dưới — hai chỗ nói về
+                    // cùng một số tiền, mà điểm **chính là** xu (ADR-015), nên
+                    // người đọc phải tự cộng trừ để biết mình có bao nhiêu.
+                    //
+                    // Nhãn cũ ghi "ĐIỂM" là tự trái ADR-015: đơn vị trong app
+                    // gọi là **xu**, không gọi điểm.
                     _StatTile(
-                      label: 'ĐIỂM',
+                      // Nhãn luôn chỉ là "XU": phần chưa chia đã nói ngay bên
+                      // cạnh con số, thêm vào nhãn là lặp lại lần thứ ba.
+                      label: 'XU',
+                      onTap: unallocated > 0 ? onAllocate : null,
+                      // Xuống dòng riêng, không nằm cạnh con số: đứng cùng dòng
+                      // thì hai con số dính nhau và ô bị chật ở 412dp.
+                      //
+                      // Đặt **dưới** nhãn "XU" để đọc theo thứ tự: bao nhiêu →
+                      // đơn vị gì → còn bao nhiêu chưa chia.
+                      footer: unallocated > 0
+                          ? Text(
+                              '$unallocated chưa chia ›',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white.withValues(alpha: 0.92),
+                              ),
+                            )
+                          : null,
                       child: XuBadgeStat(amount: points),
                     ),
                     if (scale.showStreakFlame) ...[
@@ -399,13 +516,41 @@ class _BusyBeeBadge extends StatelessWidget {
 }
 
 class _StatTile extends StatelessWidget {
-  const _StatTile({required this.child, required this.label});
+  const _StatTile({
+    required this.child,
+    required this.label,
+    this.onTap,
+    this.footer,
+  });
 
   final Widget child;
   final String label;
 
+  /// Dòng phụ dưới nhãn. Null = ô chỉ có số và nhãn.
+  final Widget? footer;
+
+  /// Bấm được thì ô thành nút. Null = chỉ để đọc.
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
+    final tile = _tile(context);
+    if (onTap == null) return tile;
+
+    // Bọc InkWell **bên trong** để hiệu ứng gợn nằm trong bo góc của ô, và giữ
+    // được vùng chạm bằng cả ô chứ không chỉ phần chữ.
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(AppRadius.field),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.field),
+        child: tile,
+      ),
+    );
+  }
+
+  Widget _tile(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -429,6 +574,10 @@ class _StatTile extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.85),
             ),
           ),
+          if (footer != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            footer!,
+          ],
         ],
       ),
     );
@@ -599,4 +748,27 @@ class _EmptyState extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Mở màn chia xu — ADR-024, chế độ `manual`.
+///
+/// Vào bằng cách bấm chính ô xu, không phải một banner riêng: banner riêng là
+/// chỗ thứ hai nói về cùng một số tiền.
+Future<void> _openAllocateSheet({
+  required BuildContext context,
+  required String familyId,
+  required String memberId,
+  required int inbox,
+  required WalletDao walletDao,
+}) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => AllocateXuSheet(
+      familyId: familyId,
+      memberId: memberId,
+      inbox: inbox,
+      walletDao: walletDao,
+    ),
+  );
 }

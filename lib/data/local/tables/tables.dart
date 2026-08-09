@@ -45,6 +45,12 @@ class Families extends Table {
   TextColumn get jarSplit =>
       text().withDefault(const Constant('{"spend":50,"save":40,"give":10}'))();
 
+  /// Xu vào hũ thế nào — `AllocationMode`, ADR-024.
+  ///
+  /// `auto` (mặc định): chia ngay theo tỷ lệ, giữ đúng ADR-016.
+  /// `manual`: xu vào hũ chờ, **con tự chia** — để con học phân bổ giá trị.
+  TextColumn get allocationMode => text().withDefault(const Constant('auto'))();
+
   /// Con bấm xong thì có cần bố mẹ duyệt hay không — ADR-023.
   ///
   /// **Mặc định `false`**: làm xong là xong, xu cộng ngay. Bố mẹ bật lên thì
@@ -231,6 +237,20 @@ class PointTransactions extends Table with FamilyScoped {
   /// Idempotency: gửi lại cùng một thao tác không nhân đôi xu.
   TextColumn get clientOpId => text()();
 
+  /// Nhóm các dòng sinh ra từ **cùng một thao tác**.
+  ///
+  /// Cộng 10 xu tạo ra ba dòng (một hũ một dòng — ADR-016), cả ba dùng chung
+  /// `op_group_id`. Không có cột này thì "Sổ của con" hiện một việc thành ba
+  /// dòng rời (+5, +4, +1) và trẻ không hiểu vì sao làm một việc lại ra ba mục.
+  ///
+  /// Suy từ `client_op_id` bằng cách cắt hậu tố tên hũ là **không đáng tin**:
+  /// hậu tố là khoá hũ do bố mẹ đặt (ADR-024) nên có thể chứa dấu hai chấm, và
+  /// thao tác một dòng (`debit`) không có hậu tố nào.
+  ///
+  /// NULL với dòng cũ ghi trước v6 và với thao tác chỉ có một dòng; lúc đó lấy
+  /// `id` làm nhóm.
+  TextColumn get opGroupId => text().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 
@@ -253,6 +273,12 @@ class Rewards extends Table with FamilyScoped, Syncable {
 
   /// NULL = không giới hạn.
   IntColumn get stock => integer().nullable()();
+
+  /// **Không còn được đọc** — ADR-025 buộc mọi lượt đổi thưởng phải qua bố mẹ.
+  ///
+  /// Giữ cột lại thay vì xoá: xoá cột cần migration mà chẳng được gì, và nếu
+  /// sau này mở lại đường "tự duyệt thưởng nhỏ" thì đã có chỗ. Bất kỳ ai định
+  /// đọc lại cột này phải đọc ADR-025 trước.
   BoolColumn get requiresApproval =>
       boolean().withDefault(const Constant(true))();
   BoolColumn get active => boolean().withDefault(const Constant(true))();
@@ -350,4 +376,43 @@ class DeviceSettings extends Table {
 
   @override
   Set<Column<Object>> get primaryKey => {settingKey};
+}
+
+/// Hũ của một gia đình — ADR-024 (sửa ADR-016).
+///
+/// Trước đây ba hũ là `enum Jar` cứng trong code. Giờ là bảng, để bố mẹ tự lập
+/// hũ theo giá trị nhà mình muốn dạy ("Sách", "Từ thiện", "Quỹ đi chơi").
+///
+/// **`key` là thứ đi vào sổ cái**, không phải `id`. Ba hũ mặc định dùng đúng
+/// `key` cũ (`spend`/`save`/`give`) nên toàn bộ `point_transactions` đã ghi
+/// trước đây vẫn đọc được, không cần di trú một dòng nào.
+@DataClassName('JarRow')
+class Jars extends Table with FamilyScoped {
+  /// Khoá bền, dùng trong `point_transactions.jar`. Không đổi sau khi đã có
+  /// giao dịch — đổi là làm hỏng lịch sử.
+  TextColumn get jarKey => text()();
+
+  TextColumn get title => text().withLength(min: 1, max: 40)();
+
+  /// Emoji. Hũ phải có mặt ngộ nghĩnh để trẻ nhớ được hũ nào là hũ nào.
+  TextColumn get emoji => text()();
+
+  /// Tỷ lệ chia mặc định, phần trăm. Tổng các hũ chưa lưu trữ phải bằng 100.
+  IntColumn get pct => integer().withDefault(const Constant(0))();
+
+  IntColumn get orderIndex => integer().withDefault(const Constant(0))();
+
+  /// Hũ đã nghỉ dùng: không nhận xu mới, nhưng số dư và lịch sử vẫn còn.
+  ///
+  /// Xoá thẳng thì lịch sử trỏ vào một hũ không tồn tại. Sổ cái là append-only
+  /// (ADR-005), nên hũ cũng chỉ được "nghỉ" chứ không được biến mất.
+  BoolColumn get isArchived => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {familyId, jarKey},
+  ];
 }

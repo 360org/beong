@@ -171,6 +171,15 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
     )..where((i) => i.id.equals(instanceId))).getSingleOrNull();
   }
 
+  /// Theo dõi một lượt việc. Dùng cho chỗ cần trạng thái **sống**, ví dụ dòng
+  /// lịch sử trong Sổ của con: bố mẹ duyệt hay mở lại không ghi dòng sổ cái nào,
+  /// nên nếu chỉ tra một lần thì trạng thái hiển thị sẽ đứng lại.
+  Stream<TaskInstance?> watchInstance(String instanceId) {
+    return (select(
+      taskInstances,
+    )..where((i) => i.id.equals(instanceId))).watchSingleOrNull();
+  }
+
   /// Con bấm xong, việc vào hàng đợi duyệt.
   ///
   /// **Quyết định auto/manual không nằm ở đây** mà ở `TaskReviewService`: nó

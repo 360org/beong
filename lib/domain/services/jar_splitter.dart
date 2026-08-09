@@ -38,6 +38,9 @@ class JarSplit {
     Jar.spend => spend,
     Jar.save => save,
     Jar.give => give,
+    // Hũ chờ không có tỷ lệ: nó là nơi trung chuyển, không phải một phần của
+    // kế hoạch chia (ADR-024).
+    Jar.inbox => 0,
   };
 
   Map<String, int> toJson() => {'spend': spend, 'save': save, 'give': give};

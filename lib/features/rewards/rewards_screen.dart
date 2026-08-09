@@ -12,6 +12,8 @@ import 'package:beong/data/local/reward_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/data/seed/reward_presets.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/services/redemption_service.dart';
+import 'package:beong/features/rewards/redemption_queue.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,6 +28,7 @@ class RewardsScreen extends ConsumerWidget {
 
     final rewardDao = ref.watch(rewardDaoProvider);
     final walletDao = ref.watch(walletDaoProvider);
+    final redemptionService = ref.watch(redemptionServiceProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -49,19 +52,37 @@ class RewardsScreen extends ConsumerWidget {
         builder: (context, snap) {
           final rewards = snap.data ?? [];
 
-          if (rewards.isEmpty) {
-            return _EmptyState(
-              isParent: session.isParent,
-              onAdd: () => _showAddReward(context, rewardDao, session.familyId),
-            );
-          }
-
           return ListView(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.screenPaddingMobile,
               vertical: AppSpacing.lg,
             ),
             children: [
+              // Hàng đợi/phiếu hiện **trên** danh sách phần thưởng, và hiện cả
+              // khi chưa có phần thưởng nào: phiếu đang chờ là việc phải làm,
+              // không được ẩn sau một trang trống.
+              if (session.isParent)
+                RedemptionQueue(
+                  familyId: session.familyId,
+                  reviewerId: session.activeMemberId,
+                  rewardDao: rewardDao,
+                  redemptionService: redemptionService,
+                )
+              else
+                MyVouchers(
+                  memberId: session.activeMemberId,
+                  rewardDao: rewardDao,
+                  redemptionService: redemptionService,
+                ),
+              if (rewards.isEmpty)
+                _EmptyState(
+                  isParent: session.isParent,
+                  onAdd: () =>
+                      _showAddReward(context, rewardDao, session.familyId),
+                  onPickPreset: (preset) => unawaited(
+                    _createFromPreset(rewardDao, session.familyId, preset),
+                  ),
+                ),
               ...rewards.map(
                 (reward) => Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -70,6 +91,7 @@ class RewardsScreen extends ConsumerWidget {
                     session: session,
                     rewardDao: rewardDao,
                     walletDao: walletDao,
+                    redemptionService: redemptionService,
                   ),
                 ),
               ),
@@ -84,6 +106,27 @@ class RewardsScreen extends ConsumerWidget {
               child: const Icon(Icons.add),
             )
           : null,
+    );
+  }
+
+  /// Tạo phần thưởng trực tiếp từ template, không mở thêm màn nào.
+  ///
+  /// Bố mẹ sửa lại tên/giá sau được — mục đích là để trang không còn trống sau
+  /// **một** cú chạm.
+  Future<void> _createFromPreset(
+    RewardDao rewardDao,
+    String familyId,
+    RewardPreset preset,
+  ) async {
+    await rewardDao.createReward(
+      RewardsCompanion.insert(
+        id: 'reward-${preset.key}-${DateTime.now().millisecondsSinceEpoch}',
+        familyId: familyId,
+        title: preset.titleVi,
+        costPoints: preset.defaultCost,
+        iconKey: Value(preset.iconKey),
+        rewardType: Value(preset.rewardType),
+      ),
     );
   }
 
@@ -111,12 +154,14 @@ class _RewardCard extends StatelessWidget {
     required this.session,
     required this.rewardDao,
     required this.walletDao,
+    required this.redemptionService,
   });
 
   final Reward reward;
   final AppSession session;
   final RewardDao rewardDao;
   final WalletDao walletDao;
+  final RedemptionService redemptionService;
 
   @override
   Widget build(BuildContext context) {
@@ -166,6 +211,27 @@ class _RewardCard extends StatelessWidget {
                       ],
                     ],
                   ),
+                  // Nói trước, không để con phát hiện sau khi bấm: xu đã trừ mà
+                  // phần thưởng chưa dùng được là chỗ dễ hiểu lầm nhất.
+                  if (isChild) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.verified_outlined,
+                          size: 14,
+                          color: context.semantic.onSurfaceMuted,
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Text(
+                          'Cần bố mẹ duyệt',
+                          style: context.text.labelSmall?.copyWith(
+                            color: context.semantic.onSurfaceMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -175,6 +241,7 @@ class _RewardCard extends StatelessWidget {
                 session: session,
                 rewardDao: rewardDao,
                 walletDao: walletDao,
+                redemptionService: redemptionService,
               ),
             if (session.isParent)
               IconButton(
@@ -198,12 +265,14 @@ class _RedeemButton extends StatefulWidget {
     required this.session,
     required this.rewardDao,
     required this.walletDao,
+    required this.redemptionService,
   });
 
   final Reward reward;
   final AppSession session;
   final RewardDao rewardDao;
   final WalletDao walletDao;
+  final RedemptionService redemptionService;
 
   @override
   State<_RedeemButton> createState() => _RedeemButtonState();
@@ -215,34 +284,30 @@ class _RedeemButtonState extends State<_RedeemButton> {
   Future<void> _redeem() async {
     setState(() => _loading = true);
     try {
-      final redemptionId =
-          'redeem-${widget.reward.id}-${DateTime.now().millisecondsSinceEpoch}';
-
-      await widget.walletDao.debit(
+      // Đi qua service: nó kiểm còn hàng và đủ xu **trước khi** trừ xu. Bản cũ
+      // trừ xu rồi mới ghi phiếu, nên phần thưởng hết hàng là con mất xu mà
+      // không có phiếu nào.
+      await widget.redemptionService.redeem(
         familyId: widget.session.familyId,
         memberId: widget.session.activeMemberId,
-        jar: Jar.spend,
-        amount: widget.reward.costPoints,
-        reason: TxReason.rewardRedeemed,
-        clientOpId: redemptionId,
-        refType: 'reward',
-        refId: widget.reward.id,
-      );
-
-      await widget.rewardDao.redeem(
-        redemption: RedemptionsCompanion.insert(
-          id: redemptionId,
-          familyId: widget.session.familyId,
-          rewardId: widget.reward.id,
-          memberId: widget.session.activeMemberId,
-          costSnapshot: widget.reward.costPoints,
-          metaSnapshot: Value(widget.reward.metaJson),
-        ),
+        reward: widget.reward,
+        clientOpId:
+            'redeem-${widget.reward.id}-${DateTime.now().millisecondsSinceEpoch}',
       );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đã đổi "${widget.reward.title}"!')),
+          SnackBar(
+            content: Text(
+              'Đã gửi yêu cầu đổi "${widget.reward.title}". Chờ bố mẹ duyệt.',
+            ),
+          ),
+        );
+      }
+    } on RedemptionException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
         );
       }
     } on WalletException catch (e) {
@@ -274,10 +339,15 @@ class _RedeemButtonState extends State<_RedeemButton> {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.isParent, required this.onAdd});
+  const _EmptyState({
+    required this.isParent,
+    required this.onAdd,
+    required this.onPickPreset,
+  });
 
   final bool isParent;
   final VoidCallback onAdd;
+  final ValueChanged<RewardPreset> onPickPreset;
 
   @override
   Widget build(BuildContext context) {
@@ -310,10 +380,90 @@ class _EmptyState extends StatelessWidget {
                 onPressed: onAdd,
                 child: const Text('THÊM PHẦN THƯỞNG'),
               ),
+              const SizedBox(height: AppSpacing.xxxl),
+              // Template hiện **ngay ở trang trống**, không chôn trong bottom
+              // sheet sau nút "+". Trang trống kèm một nút là chỗ nhiều bố mẹ
+              // bỏ app: không phải vì thiếu tính năng, mà vì không biết bắt đầu
+              // từ đâu. Thấy vài gợi ý cụ thể thì bấm một cái là có ngay.
+              _PresetSuggestions(onPick: onPickPreset),
             ],
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Vài template gợi ý, bấm một cái là tạo luôn.
+class _PresetSuggestions extends StatelessWidget {
+  const _PresetSuggestions({required this.onPick});
+
+  final ValueChanged<RewardPreset> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    // Sáu cái đầu, không phải cả 12: trang trống cần **gợi ý**, không cần
+    // catalogue. Còn lại xem trong bottom sheet.
+    final suggestions = kRewardPresets.take(6).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'HOẶC CHỌN NHANH',
+          style: context.text.labelSmall?.copyWith(
+            color: context.semantic.onSurfaceMuted,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          alignment: WrapAlignment.center,
+          children: [
+            for (final preset in suggestions)
+              GestureDetector(
+                onTap: () => onPick(preset),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
+                  decoration: BoxDecoration(
+                    color: context.colors.primaryContainer,
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(AppRadius.field),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        iconForKey(preset.iconKey),
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        preset.titleVi,
+                        style: context.text.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        '${preset.defaultCost}',
+                        style: context.text.bodySmall?.copyWith(
+                          color: context.semantic.xuText,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
     );
   }
 }

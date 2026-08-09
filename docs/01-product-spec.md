@@ -71,7 +71,7 @@ Phân tích đối thủ đầy đủ: [`07-competitive-analysis.md`](07-competi
 11. Offline-first + đồng bộ nhiều thiết bị
 12. Thông báo "nhắc nhẹ, không cằn nhằn": nhắc task, có việc chờ duyệt, đổi thưởng
 13. Đa ngôn ngữ: Tiếng Việt + English
-14. **Giáo dục tài chính** — ba hũ (Tiêu / Để dành / Cho đi), tỷ giá quy đổi ra tiền thật,
+14. **Giáo dục tài chính** — hũ (mặc định Tiêu / Để dành / Cho đi, bố mẹ lập thêm được — ADR-024), tỷ giá quy đổi ra tiền thật,
     mục tiêu tiết kiệm, sổ chi tiêu của con. Xem §4.8
 
 > Mục 3, 7, 8 được đôn từ v1.1 lên MVP sau khi phân tích ChoreReward — đây là phần cốt lõi
@@ -158,7 +158,8 @@ giao dịch `routine_bonus` (idempotent theo `(routine_id, member_id, due_date)`
   `reward_refund`, `manual_adjust`, `penalty`, `bonus`
 
 #### Trừ xu (mặc định tắt — ADR-022)
-Bố mẹ bật được hai mức, tính theo **phần trăm điểm của việc**:
+Bố mẹ bật được hai mức, tính theo **phần trăm điểm của việc**. Có các mức dựng sẵn
+(0/10/20/25/50/75/100) và chip "Khác…" để tự nhập con số bất kỳ trong 0–100:
 
 | Mức | Khi nào áp | Ví dụ với việc 10 xu |
 |---|---|---|
@@ -184,6 +185,11 @@ Quy tắc bắt buộc (chi tiết và lý do ở ADR-022):
 - Mỗi khoản trừ là một dòng sổ cái có lý do đọc được, hiện trong "Sổ của con".
 
 ### 4.5 Phần thưởng
+
+> **Đổi thưởng luôn cần bố mẹ duyệt** (ADR-025), không tắt được — khác với việc nhà, nơi duyệt là
+> tuỳ chọn (ADR-023). Làm xong một việc chỉ làm một con số tăng lên; đổi thưởng thì tiêu xu ra thế
+> giới thật và không có đường "mở lại".
+
 - Phụ huynh tạo: tên, icon, **loại**, giá điểm, số lượng còn (tùy chọn), có cần duyệt không
 - Trẻ đổi → `redemption` trạng thái `pending` → phụ huynh `fulfilled` / `rejected` (hoàn điểm)
 
@@ -225,8 +231,28 @@ lại cùng một nhắc nhở; không thông báo mang giọng trách móc; kh�
 Trụ riêng của Bé Ong. Mục tiêu: con hiểu **công sức → giá trị → lựa chọn**, chứ không chỉ
 đổi điểm lấy quà.
 
-#### Ba hũ
-Xu con kiếm được tự chia vào ba hũ theo tỷ lệ bố mẹ đặt (mặc định 50/40/10):
+#### Các hũ
+Mặc định là **ba hũ** Tiêu / Để dành / Cho đi, chia tự động theo tỷ lệ bố mẹ đặt (mặc định 50/40/10).
+Từ ADR-024, bố mẹ **lập được hũ khác** (Sách, Quỹ đi chơi, Từ thiện…) với tỷ lệ riêng, và có thể
+chuyển sang chế độ **con tự chia**: xu vào hũ chờ, con quyết định chia bao nhiêu vào hũ nào — vì bản
+thân việc chia mới là bài học lớn nhất, mà app chia hộ thì con không bao giờ phải quyết định.
+
+Mỗi hũ có **emoji riêng**, không phải trang trí: trẻ chưa đọc thông nhận hũ bằng mặt, không bằng chữ.
+
+**Hai chế độ, đặt trong Cài đặt:**
+
+| Chế độ | Con làm xong việc thì | Ghi chú |
+|---|---|---|
+| Chia tự động (mặc định) | Xu chia ngay vào các hũ theo tỷ lệ bố mẹ đặt | Đúng ADR-016 |
+| Con tự chia | Xu dồn vào **hũ chờ**, con chia cuối ngày | Bài học phân bổ giá trị |
+
+Ở cả hai chế độ, **tổng điểm của con tính cả hũ chờ** — con làm xong việc là xu thuộc về con, việc
+chia là chuyện sau. Bỏ hũ chờ ra khỏi tổng thì màn hình con hiện 0 điểm sau khi vừa làm xong việc.
+
+Hũ chờ **không mua được phần thưởng**: muốn tiêu thì phải chia vào hũ Tiêu trước. Đó chính là bài
+học, không phải hạn chế kỹ thuật.
+
+Ba hũ mặc định:
 
 | Hũ | Dùng để | Ghi chú |
 |---|---|---|
