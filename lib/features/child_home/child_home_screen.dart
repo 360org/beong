@@ -10,6 +10,7 @@ import 'package:beong/core/theme/kid_scale.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/bee_mascot.dart';
+import 'package:beong/core/widgets/celebration.dart';
 import 'package:beong/core/widgets/progress_ring.dart';
 import 'package:beong/core/widgets/task_card.dart';
 import 'package:beong/data/local/database.dart';
@@ -22,11 +23,31 @@ import 'package:beong/features/rewards/allocate_xu_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ChildHomeScreen extends ConsumerWidget {
+class ChildHomeScreen extends ConsumerStatefulWidget {
   const ChildHomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ChildHomeScreen> createState() => _ChildHomeScreenState();
+}
+
+class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
+  /// Hoa giấy nổ ở **cấp màn hình**, không ở trong thẻ việc.
+  ///
+  /// Đặt trong thẻ thì hiệu ứng không bao giờ được thấy: bấm xong là việc rời
+  /// mục "Cần làm" xuống "Đã xong" ngay, thẻ bị tháo và mang theo cả hoa giấy.
+  /// Ở cấp màn hình thì hiệu ứng sống qua lần xếp lại danh sách, và nổ giữa màn
+  /// còn dễ thấy hơn nổ trong một hàng cao 70px.
+  bool _celebrate = false;
+
+  Future<void> _celebrateOnce() async {
+    setState(() => _celebrate = true);
+    // Nhả cờ sau khi hiệu ứng chạy xong để lần bấm sau nổ lại được.
+    await Future<void>.delayed(const Duration(milliseconds: 950));
+    if (mounted) setState(() => _celebrate = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final session = ref.watch(sessionProvider);
     if (session == null) return const SizedBox.shrink();
 
@@ -41,109 +62,114 @@ class ChildHomeScreen extends ConsumerWidget {
     ).today();
 
     return Scaffold(
-      body: SafeArea(
-        child: StreamBuilder<List<TaskInstance>>(
-          stream: taskDao.watchInstancesForMember(
-            memberId: memberId,
-            date: today,
-          ),
-          builder: (context, instSnap) {
-            final instances = instSnap.data ?? [];
-            final total = instances.length;
-            final completedCount = instances
-                .where(
-                  (i) =>
-                      i.status == InstanceStatus.approved.name ||
-                      i.status == InstanceStatus.pendingReview.name,
-                )
-                .length;
-
-            return ListView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPaddingMobile,
-                vertical: AppSpacing.lg,
-              ),
-              children: [
-                StreamBuilder<Member>(
-                  stream: memberDao.watchMember(memberId),
-                  builder: (context, memberSnap) {
-                    final member = memberSnap.data;
-                    // Giao diện điều chỉnh theo tuổi của chính bé đang xem —
-                    // xem `core/theme/kid_scale.dart`.
-                    final scale = KidScale.forBirthYear(
-                      member?.birthYear,
-                      currentYear: today.year,
-                    );
-
-                    return KidScaleScope(
-                      scale: scale,
-                      child: Column(
-                        children: [
-                          _ChildHeader(member: member),
-                          const SizedBox(height: AppSpacing.lg),
-                          StreamBuilder<WalletBalance>(
-                            stream: walletDao.watchBalance(memberId),
-                            builder: (context, balSnap) {
-                              final balance =
-                                  balSnap.data ?? WalletBalance.zero;
-                              return StreamBuilder<Streak?>(
-                                stream: memberDao.watchStreak(memberId),
-                                builder: (context, streakSnap) {
-                                  return _DashboardCard(
-                                    scale: scale,
-                                    points: balance.total,
-                                    unallocated: balance.inbox,
-                                    onAllocate: balance.inbox > 0
-                                        ? () => unawaited(
-                                            _openAllocateSheet(
-                                              context: context,
-                                              familyId: session.familyId,
-                                              memberId: memberId,
-                                              inbox: balance.inbox,
-                                              walletDao: walletDao,
-                                              jarDao: ref.read(jarDaoProvider),
-                                            ),
-                                          )
-                                        : null,
-                                    streak: streakSnap.data?.currentLen ?? 0,
-                                    completed: completedCount,
-                                    total: total,
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: AppSpacing.xxl),
-                if (instSnap.connectionState == ConnectionState.waiting)
-                  const Padding(
-                    padding: EdgeInsets.only(top: AppSpacing.xxxl),
-                    child: Center(child: CircularProgressIndicator()),
+      body: ConfettiBurst(
+        play: _celebrate,
+        child: SafeArea(
+          child: StreamBuilder<List<TaskInstance>>(
+            stream: taskDao.watchInstancesForMember(
+              memberId: memberId,
+              date: today,
+            ),
+            builder: (context, instSnap) {
+              final instances = instSnap.data ?? [];
+              final total = instances.length;
+              final completedCount = instances
+                  .where(
+                    (i) =>
+                        i.status == InstanceStatus.approved.name ||
+                        i.status == InstanceStatus.pendingReview.name,
                   )
-                else if (instances.isEmpty)
-                  _EmptyState(
-                    onGenerate: () async {
-                      await taskDao.generateInstances(
-                        familyId: session.familyId,
-                        today: today,
+                  .length;
+
+              return ListView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPaddingMobile,
+                  vertical: AppSpacing.lg,
+                ),
+                children: [
+                  StreamBuilder<Member>(
+                    stream: memberDao.watchMember(memberId),
+                    builder: (context, memberSnap) {
+                      final member = memberSnap.data;
+                      // Giao diện điều chỉnh theo tuổi của chính bé đang xem —
+                      // xem `core/theme/kid_scale.dart`.
+                      final scale = KidScale.forBirthYear(
+                        member?.birthYear,
+                        currentYear: today.year,
                       );
-                      // generateInstances đánh dấu missed cho lượt quá hạn;
-                      // khoản trừ phải chạy ngay sau đó, không để tới lần mở
-                      // app sau (ADR-022). Gọi lại nhiều lần vô hại.
-                      await penaltyService.applyMissedPenalties(
-                        familyId: session.familyId,
+
+                      return KidScaleScope(
+                        scale: scale,
+                        child: Column(
+                          children: [
+                            _ChildHeader(member: member),
+                            const SizedBox(height: AppSpacing.lg),
+                            StreamBuilder<WalletBalance>(
+                              stream: walletDao.watchBalance(memberId),
+                              builder: (context, balSnap) {
+                                final balance =
+                                    balSnap.data ?? WalletBalance.zero;
+                                return StreamBuilder<Streak?>(
+                                  stream: memberDao.watchStreak(memberId),
+                                  builder: (context, streakSnap) {
+                                    return _DashboardCard(
+                                      scale: scale,
+                                      points: balance.total,
+                                      unallocated: balance.inbox,
+                                      onAllocate: balance.inbox > 0
+                                          ? () => unawaited(
+                                              _openAllocateSheet(
+                                                context: context,
+                                                familyId: session.familyId,
+                                                memberId: memberId,
+                                                inbox: balance.inbox,
+                                                walletDao: walletDao,
+                                                jarDao: ref.read(
+                                                  jarDaoProvider,
+                                                ),
+                                              ),
+                                            )
+                                          : null,
+                                      streak: streakSnap.data?.currentLen ?? 0,
+                                      completed: completedCount,
+                                      total: total,
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                       );
                     },
-                  )
-                else
-                  ..._buildTaskSections(instances, taskDao),
-              ],
-            );
-          },
+                  ),
+                  const SizedBox(height: AppSpacing.xxl),
+                  if (instSnap.connectionState == ConnectionState.waiting)
+                    const Padding(
+                      padding: EdgeInsets.only(top: AppSpacing.xxxl),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (instances.isEmpty)
+                    _EmptyState(
+                      onGenerate: () async {
+                        await taskDao.generateInstances(
+                          familyId: session.familyId,
+                          today: today,
+                        );
+                        // generateInstances đánh dấu missed cho lượt quá hạn;
+                        // khoản trừ phải chạy ngay sau đó, không để tới lần mở
+                        // app sau (ADR-022). Gọi lại nhiều lần vô hại.
+                        await penaltyService.applyMissedPenalties(
+                          familyId: session.familyId,
+                        );
+                      },
+                    )
+                  else
+                    ..._buildTaskSections(instances, taskDao),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -180,6 +206,7 @@ class ChildHomeScreen extends ConsumerWidget {
               key: ValueKey(instance.id),
               instance: instance,
               taskDao: taskDao,
+              onCompleted: _celebrateOnce,
             ),
           ),
         ),
@@ -197,6 +224,7 @@ class ChildHomeScreen extends ConsumerWidget {
               key: ValueKey(instance.id),
               instance: instance,
               taskDao: taskDao,
+              onCompleted: _celebrateOnce,
             ),
           ),
         ),
@@ -214,6 +242,7 @@ class ChildHomeScreen extends ConsumerWidget {
               key: ValueKey(instance.id),
               instance: instance,
               taskDao: taskDao,
+              onCompleted: _celebrateOnce,
             ),
           ),
         ),
@@ -657,11 +686,16 @@ class _InstanceCard extends ConsumerStatefulWidget {
   const _InstanceCard({
     required this.instance,
     required this.taskDao,
+    required this.onCompleted,
     super.key,
   });
 
   final TaskInstance instance;
   final TaskDao taskDao;
+
+  /// Gọi khi con vừa bấm xong việc, để màn hình nổ hoa giấy. Thẻ không tự nổ:
+  /// nó bị tháo ngay sau khi bấm vì danh sách xếp lại theo trạng thái.
+  final VoidCallback onCompleted;
 
   @override
   ConsumerState<_InstanceCard> createState() => _InstanceCardState();
@@ -697,6 +731,9 @@ class _InstanceCardState extends ConsumerState<_InstanceCard> {
     final task = _task;
     if (task == null) return const SizedBox.shrink();
 
+    // `celebrateOnTap` tắt với tuổi teen: hoa giấy với bé 14 tuổi là rườm rà.
+    final scale = KidScaleScope.of(context);
+
     return TaskCard(
       title: task.title,
       points: task.points,
@@ -706,9 +743,12 @@ class _InstanceCardState extends ConsumerState<_InstanceCard> {
       isMissed: widget.instance.status == InstanceStatus.missed.name,
       // Đi qua TaskReviewService chứ không gọi thẳng DAO: nó là chỗ duy nhất
       // biết nhà này có bật duyệt hay không, và là chỗ cộng xu (ADR-023).
-      onToggle: () => unawaited(
-        ref.read(taskReviewServiceProvider).complete(widget.instance.id),
-      ),
+      onToggle: () {
+        if (scale.celebrateOnTap) widget.onCompleted();
+        unawaited(
+          ref.read(taskReviewServiceProvider).complete(widget.instance.id),
+        );
+      },
     );
   }
 }

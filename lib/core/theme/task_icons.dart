@@ -120,6 +120,43 @@ const Map<String, String> taskIcons = {
 
 const String taskIconFallback = '⭐';
 
+/// Icon chọn được khi bố mẹ tự tạo **phần thưởng**.
+///
+/// Tách khỏi [kTaskIconKeys] chứ không dùng chung một bộ: chọn 🧹 cho một phần
+/// thưởng thì cũng vô nghĩa như chọn 🍦 cho một việc nhà. Hai danh sách này cố ý
+/// **không giao nhau nhiều** — chỉ trùng ở những hình đúng cho cả hai vai
+/// (`books`, `soccer`, `bike`, `park`, `palette`, `music`, `toy`).
+const List<String> kRewardIconKeys = [
+  'ice_cream',
+  'pizza',
+  'popcorn',
+  'game',
+  'console',
+  'phone',
+  'money',
+  'ticket',
+  'suitcase',
+  'jar_gift',
+  'jar_circus',
+  'jar_plane',
+  'park',
+  'soccer',
+  'bike',
+  'books',
+  'palette',
+  'music',
+  'toy',
+  'jar_guitar',
+  'clock',
+  'heart',
+];
+
+/// Icon mặc định của phần thưởng khi bố mẹ chưa chọn gì.
+///
+/// 🎁 đọc ra "phần thưởng" ngay, khác với ✏️ của nhiệm vụ — dùng chung một mặc
+/// định thì mọi phần thưởng tự nhập trông như một việc phải làm.
+const String kDefaultRewardIconKey = 'jar_gift';
+
 /// Icon mặc định khi bố mẹ chưa chọn gì, và khi bù icon cho dữ liệu cũ.
 ///
 /// ✏️ đọc ra "có việc cần làm" và đúng với hầu hết nhiệm vụ. Không dùng `star`:

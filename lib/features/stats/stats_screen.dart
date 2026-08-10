@@ -5,6 +5,7 @@ import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/utils/ngay_viet.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
@@ -611,6 +612,10 @@ class _TransactionTileState extends State<_TransactionTile> {
     // Ghép trước để biết dòng phụ có nội dung hay không: dòng phụ rỗng vẫn
     // chiếm chỗ và làm các thẻ cao thấp không đều.
     final subtitle = [
+      // Mốc thời gian đứng đầu dòng phụ: một quyển sổ không có ngày thì không tra
+      // được "hôm qua con được bao nhiêu". Ghi `10/08 14:05` chứ không ghi cả năm
+      // — gần như mọi dòng đều của năm nay, thêm năm chỉ chiếm chỗ.
+      ngayGio(tx.createdAt),
       if (status == null && subject != null) _reasonLabel(tx.reason),
       if (tx.note != null) tx.note!,
       if (tx.byJar.length > 1)

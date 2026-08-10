@@ -4,6 +4,7 @@ import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
@@ -462,6 +463,44 @@ class _PresetSuggestions extends StatelessWidget {
   }
 }
 
+/// Một hình để chọn cho phần thưởng. Vùng chạm 48dp; ô đang chọn có **viền**
+/// chứ không chỉ đổi nền (WCAG 1.4.1).
+class _RewardIconChoice extends StatelessWidget {
+  const _RewardIconChoice({
+    required this.iconKey,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String iconKey;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: AppSpacing.minTouchTarget,
+        height: AppSpacing.minTouchTarget,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected
+              ? context.colors.primaryContainer
+              : context.colors.surfaceContainerHighest,
+          borderRadius: const BorderRadius.all(
+            Radius.circular(AppRadius.field),
+          ),
+          border: selected
+              ? Border.all(color: context.colors.primary, width: 2)
+              : null,
+        ),
+        child: AppIcon(iconKey, size: 26),
+      ),
+    );
+  }
+}
+
 class _AddRewardSheet extends StatefulWidget {
   const _AddRewardSheet({
     required this.rewardDao,
@@ -481,9 +520,26 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
   String _type = RewardType.custom.name;
   String? _selectedPreset;
 
+  /// Hình của phần thưởng. Luôn có giá trị — không có đường nào tạo ra phần
+  /// thưởng thiếu hình. Mặc định 🎁 chứ không phải ✏️ của nhiệm vụ: dùng chung
+  /// một mặc định thì mọi phần thưởng tự nhập trông như một việc phải làm.
+  String _iconKey = kDefaultRewardIconKey;
+
+  @override
+  void initState() {
+    super.initState();
+    // Nút LƯU đọc `_titleController.text` lúc build; gõ chữ không tự dựng lại
+    // widget nên thiếu listener này thì nút không bao giờ đổi trạng thái.
+    _titleController.addListener(_onTitleChanged);
+  }
+
+  void _onTitleChanged() => setState(() {});
+
   @override
   void dispose() {
-    _titleController.dispose();
+    _titleController
+      ..removeListener(_onTitleChanged)
+      ..dispose();
     super.dispose();
   }
 
@@ -491,9 +547,6 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
     final title = _titleController.text.trim();
     if (title.isEmpty || _cost <= 0) return;
 
-    final preset = _selectedPreset == null
-        ? null
-        : rewardPresetByKey(_selectedPreset!);
     final id = 'reward-${DateTime.now().millisecondsSinceEpoch}';
     await widget.rewardDao.createReward(
       RewardsCompanion.insert(
@@ -502,7 +555,9 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
         title: title,
         costPoints: _cost,
         rewardType: Value(_type),
-        iconKey: Value(preset?.iconKey),
+        // Hình đang chọn, không phải hình của template: bố mẹ chọn template rồi
+        // đổi hình vẫn được, và lần đổi sau cùng mới là ý của họ.
+        iconKey: Value(_iconKey),
       ),
     );
 
@@ -543,6 +598,7 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
                         _titleController.text = preset.titleVi;
                         _cost = preset.defaultCost;
                         _type = preset.rewardType;
+                        _iconKey = preset.iconKey;
                       }
                     });
                   },
@@ -574,6 +630,21 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
               ],
             ),
             const SizedBox(height: AppSpacing.xl),
+            Text('Chọn hình', style: context.text.titleSmall),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                for (final key in kRewardIconKeys)
+                  _RewardIconChoice(
+                    iconKey: key,
+                    selected: key == _iconKey,
+                    onTap: () => setState(() => _iconKey = key),
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xl),
             Text('Tên phần thưởng', style: context.text.titleSmall),
             const SizedBox(height: AppSpacing.sm),
             TextField(
@@ -585,7 +656,7 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _save,
+                onPressed: _titleController.text.trim().isEmpty ? null : _save,
                 child: const Text('LƯU'),
               ),
             ),

@@ -6,6 +6,7 @@ import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/utils/ngay_viet.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
@@ -14,6 +15,7 @@ import 'package:beong/data/local/member_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/seed/presets.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/services/family_clock.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -201,7 +203,10 @@ class _TaskListState extends State<_TaskList> {
       ),
       children: [
         if (routineTasks.isNotEmpty) ...[
-          Text('Routine', style: context.text.titleMedium),
+          // "Routine" là chữ tiếng Anh duy nhất còn lọt vào UI. App cho gia đình
+          // Việt thì nhãn phải là tiếng Việt, và onboarding đã gọi đây là "thói
+          // quen" — hai chỗ phải dùng cùng một từ.
+          Text('Thói quen', style: context.text.titleMedium),
           const SizedBox(height: AppSpacing.md),
           ...routineTasks.entries.map(
             (entry) => Padding(
@@ -371,35 +376,19 @@ class _TaskTile extends StatelessWidget {
       // "Tuỳ chọn" không trả lời được câu bố mẹ đang hỏi — *thứ nào?* — nên liệt
       // kê thẳng các thứ đã chọn.
       RepeatType.custom => _weekdaysLabel(task.repeatDays),
+      // Ngày hiện dạng 10/08/2026 chứ không phải 2026-08-10: dạng ISO là dạng
+      // lưu trong DB, không phải dạng người Việt đọc.
       RepeatType.once =>
-        task.onceDate == null ? 'Một lần' : 'Một lần · ${task.onceDate}',
+        task.onceDate == null
+            ? 'Một lần'
+            : 'Một lần · ${ngayDayDu(CalendarDate.parse(task.onceDate!))}',
     };
   }
 
-  /// `'1,3,5'` -> `'T2, T4, T6'`.
-  String _weekdaysLabel(String repeatDays) {
-    final days =
-        repeatDays
-            .split(',')
-            .where((s) => s.isNotEmpty)
-            .map(int.tryParse)
-            .whereType<int>()
-            .toList()
-          ..sort();
-    if (days.isEmpty) return 'Chưa chọn thứ';
-    if (days.length == 7) return 'Hằng ngày';
-    return days.map(_shortWeekday).join(', ');
-  }
-
-  String _shortWeekday(int weekday) => switch (weekday) {
-    1 => 'T2',
-    2 => 'T3',
-    3 => 'T4',
-    4 => 'T5',
-    5 => 'T6',
-    6 => 'T7',
-    _ => 'CN',
-  };
+  /// `'1,3,5'` -> `'T2, T4, T6'`. Dùng helper chung ở `core/utils/ngay_viet.dart`
+  /// để màn này và sheet thêm việc không lệch cách viết thứ.
+  String _weekdaysLabel(String repeatDays) =>
+      thuTuChuoi(repeatDays) ?? 'Chưa chọn thứ';
 }
 
 /// Một hình để chọn. Vùng chạm đủ 48dp theo `AppSpacing.minTouchTarget` — ô nhỏ
@@ -494,17 +483,6 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
     RepeatType.daily => 'Hằng ngày',
     RepeatType.custom => 'Chọn thứ',
     RepeatType.once => 'Một lần',
-  };
-
-  /// 1 = thứ Hai … 7 = Chủ nhật.
-  String _weekdayLabel(int weekday) => switch (weekday) {
-    1 => 'T2',
-    2 => 'T3',
-    3 => 'T4',
-    4 => 'T5',
-    5 => 'T6',
-    6 => 'T7',
-    _ => 'CN',
   };
 
   Future<void> _save() async {
@@ -643,7 +621,7 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                 children: [
                   for (var day = 1; day <= 7; day++)
                     FilterChip(
-                      label: Text(_weekdayLabel(day)),
+                      label: Text(thuNganGon(day)),
                       selected: _repeatDays.contains(day),
                       onSelected: (on) => setState(() {
                         if (on) {

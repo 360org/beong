@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:beong/app/router.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
@@ -16,6 +17,7 @@ import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/task_review_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class ParentHomeScreen extends ConsumerWidget {
   const ParentHomeScreen({super.key});
@@ -55,6 +57,7 @@ class ParentHomeScreen extends ConsumerWidget {
                 reviewService: reviewService,
                 reviewerId: session.activeMemberId,
               ),
+              _PendingRedemptionBanner(familyId: session.familyId),
               const SizedBox(height: AppSpacing.xxl),
               Text('Con của bạn', style: context.text.titleMedium),
               const SizedBox(height: AppSpacing.md),
@@ -86,6 +89,60 @@ class ParentHomeScreen extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+}
+
+/// Nhắc bố mẹ có phiếu đổi thưởng đang chờ.
+///
+/// Hàng chờ phiếu nằm ở tab **Phần thưởng**, đúng về mặt phân loại, nhưng bố mẹ
+/// mở app là vào Trang chính — không có dòng này thì họ **không biết** có việc
+/// cần mình, và con thì cứ chờ. Chỉ hiện khi thật sự có phiếu chờ, để trang chính
+/// không thêm một dòng luôn nằm đó mà chẳng nói gì.
+class _PendingRedemptionBanner extends ConsumerWidget {
+  const _PendingRedemptionBanner({required this.familyId});
+
+  final String familyId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return StreamBuilder<List<Redemption>>(
+      stream: ref.watch(rewardDaoProvider).watchPendingRedemptions(familyId),
+      builder: (context, snap) {
+        final count = snap.data?.length ?? 0;
+        if (count == 0) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.md),
+          child: Card(
+            color: context.colors.primaryContainer,
+            child: InkWell(
+              onTap: () => context.go(Routes.rewards),
+              borderRadius: BorderRadius.circular(AppRadius.card),
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Row(
+                  children: [
+                    const AppIcon('jar_gift', size: 26),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        count == 1
+                            ? 'Con xin đổi 1 phần thưởng'
+                            : 'Con xin đổi $count phần thưởng',
+                        style: context.text.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right_rounded),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

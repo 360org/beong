@@ -1,5 +1,6 @@
 import 'package:beong/data/local/jar_dao.dart';
 import 'package:beong/data/local/member_dao.dart';
+import 'package:beong/data/local/reward_dao.dart';
 import 'package:beong/data/local/settings_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/domain/services/family_clock.dart';
@@ -25,17 +26,20 @@ class DayStartService {
     required SettingsDao settingsDao,
     required PenaltyService penaltyService,
     required JarDao jarDao,
+    required RewardDao rewardDao,
   }) : _tasks = taskDao,
        _members = memberDao,
        _settings = settingsDao,
        _penalties = penaltyService,
-       _jars = jarDao;
+       _jars = jarDao,
+       _rewards = rewardDao;
 
   final TaskDao _tasks;
   final MemberDao _members;
   final SettingsDao _settings;
   final PenaltyService _penalties;
   final JarDao _jars;
+  final RewardDao _rewards;
 
   /// Khoá ghi ngày đã chạy gần nhất, theo thiết bị.
   static const _lastRunKey = 'rollover.last_run_date';
@@ -70,6 +74,7 @@ class DayStartService {
     // Bù icon cho việc tạo bằng sheet cũ (chưa có ô chọn hình). Cùng lý do với
     // gieo hũ ở trên: sửa dữ liệu một lần thay vì vá chỗ hiển thị.
     await _tasks.backfillMissingIcons(familyId);
+    await _rewards.backfillMissingIcons(familyId);
 
     // Múi giờ lấy từ thiết bị, không từ `families.timezone`: cột đó lưu tên
     // IANA và tầng data chưa quy đổi (xem ADR-008). Đây là chỗ sẽ phải sửa khi

@@ -63,4 +63,5 @@ DayStartService dayStartService(Ref ref) => DayStartService(
   settingsDao: ref.watch(settingsDaoProvider),
   penaltyService: ref.watch(penaltyServiceProvider),
   jarDao: ref.watch(jarDaoProvider),
+  rewardDao: ref.watch(rewardDaoProvider),
 );

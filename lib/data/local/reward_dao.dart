@@ -1,3 +1,4 @@
+import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/tables/tables.dart';
 import 'package:beong/domain/entities/enums.dart';
@@ -20,6 +21,38 @@ class RewardDao extends DatabaseAccessor<AppDatabase> with _$RewardDaoMixin {
           )
           ..orderBy([(r) => OrderingTerm.asc(r.costPoints)]))
         .watch();
+  }
+
+  /// Gán hình cho phần thưởng còn thiếu hình.
+  ///
+  /// Sheet thêm phần thưởng trước đây chỉ gán `icon_key` khi bố mẹ bấm vào một
+  /// template, nên phần thưởng tự nhập để NULL và hiện ✏️ — hình mặc định của
+  /// **nhiệm vụ**, đọc ra "việc phải làm" chứ không phải "thưởng". Việc mới thì
+  /// không còn đường nào tạo ra thiếu hình, nhưng dữ liệu cũ vẫn còn.
+  ///
+  /// Lấy hình của template nếu có, không thì 🎁.
+  ///
+  /// Trả về số phần thưởng đã sửa.
+  Future<int> backfillMissingIcons(String familyId) async {
+    final rows =
+        await (select(rewards)..where(
+              (r) =>
+                  r.familyId.equals(familyId) &
+                  (r.iconKey.isNull() | r.iconKey.equals('')),
+            ))
+            .get();
+    if (rows.isEmpty) return 0;
+
+    await batch((b) {
+      for (final row in rows) {
+        b.update(
+          rewards,
+          const RewardsCompanion(iconKey: Value(kDefaultRewardIconKey)),
+          where: (r) => r.id.equals(row.id),
+        );
+      }
+    });
+    return rows.length;
   }
 
   Future<void> createReward(RewardsCompanion reward) {
