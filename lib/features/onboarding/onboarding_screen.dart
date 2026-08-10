@@ -567,11 +567,13 @@ class _RoutineStep extends StatelessWidget {
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Row(
                     children: [
-                      Icon(
-                        _routineIcon(preset.dayPart),
-                        color: isSelected
-                            ? context.colors.primary
-                            : context.semantic.onSurfaceMuted,
+                      // Icon của chính routine (`preset.iconKey`), không phải
+                      // Material icon suy từ buổi trong ngày: cả app dùng một bộ
+                      // hình, trộn hai kiểu ở đúng màn đầu tiên người dùng thấy
+                      // là mất ngay cảm giác đồng bộ.
+                      Opacity(
+                        opacity: isSelected ? 1 : 0.55,
+                        child: AppIcon(preset.iconKey, size: 26),
                       ),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(
@@ -606,11 +608,4 @@ class _RoutineStep extends StatelessWidget {
       ],
     );
   }
-
-  IconData _routineIcon(String dayPart) => switch (dayPart) {
-    'morning' => Icons.wb_sunny_rounded,
-    'afternoon' => Icons.wb_cloudy_rounded,
-    'evening' => Icons.nightlight_round,
-    _ => Icons.schedule,
-  };
 }
