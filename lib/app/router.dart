@@ -8,6 +8,7 @@ import 'package:beong/features/rewards/rewards_screen.dart';
 import 'package:beong/features/settings/jar_settings_screen.dart';
 import 'package:beong/features/settings/penalty_settings_screen.dart';
 import 'package:beong/features/settings/settings_screen.dart';
+import 'package:beong/features/stats/badges_screen.dart';
 import 'package:beong/features/stats/stats_screen.dart';
 import 'package:beong/features/tasks/routine_editor_screen.dart';
 import 'package:beong/features/tasks/tasks_screen.dart';
@@ -25,6 +26,7 @@ abstract final class Routes {
   /// Trang con của Cài đặt — cấu hình trừ xu (ADR-022).
   static const penaltySettings = '/settings/penalty';
   static const jarSettings = '/settings/jars';
+  static const badges = '/stats/badges';
 
   /// Sửa một thói quen. Nhận `routineId` qua đường dẫn.
   static String routineEditor(String routineId) => '/tasks/routine/$routineId';
@@ -117,6 +119,12 @@ GoRouter createRouter({
               GoRoute(
                 path: Routes.stats,
                 builder: (context, state) => const StatsScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'badges',
+                    builder: (context, state) => const BadgesScreen(),
+                  ),
+                ],
               ),
             ],
           ),

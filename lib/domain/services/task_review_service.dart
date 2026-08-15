@@ -1,3 +1,4 @@
+import 'package:beong/data/local/badge_dao.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/member_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
@@ -22,15 +23,18 @@ class TaskReviewService {
     required WalletDao walletDao,
     required MemberDao memberDao,
     required PenaltyService penaltyService,
+    required BadgeDao badgeDao,
   }) : _tasks = taskDao,
        _wallet = walletDao,
        _members = memberDao,
-       _penalties = penaltyService;
+       _penalties = penaltyService,
+       _badges = badgeDao;
 
   final TaskDao _tasks;
   final WalletDao _wallet;
   final MemberDao _members;
   final PenaltyService _penalties;
+  final BadgeDao _badges;
 
   /// Con bấm xong một việc.
   ///
@@ -142,6 +146,14 @@ class TaskReviewService {
     await _tasks.checkAndAwardRoutineBonus(
       instanceId: instance.id,
       familyId: instance.familyId,
+    );
+
+    // Xét huy hiệu **sau** khi đã cộng xu và tính thưởng trọn bộ: huy hiệu đọc
+    // số việc đã duyệt, xét trước thì lượt vừa xong chưa được tính và con phải
+    // chờ tới lần bấm sau mới thấy huy hiệu.
+    await _badges.awardNewBadges(
+      familyId: instance.familyId,
+      memberId: instance.memberId,
     );
   }
 }

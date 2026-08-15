@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:beong/app/router.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
@@ -13,10 +14,12 @@ import 'package:beong/data/local/member_dao.dart';
 import 'package:beong/data/local/reward_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
+import 'package:beong/domain/entities/badge_def.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class StatsScreen extends ConsumerWidget {
   const StatsScreen({super.key});
@@ -195,6 +198,8 @@ class _ChildStats extends StatelessWidget {
               return _StreakCard(streak: streak);
             },
           ),
+          const SizedBox(height: AppSpacing.xl),
+          _BadgesEntry(memberId: memberId),
           const SizedBox(height: AppSpacing.xxl),
           Text('Lịch sử', style: context.text.titleMedium),
           const SizedBox(height: AppSpacing.md),
@@ -240,6 +245,50 @@ class _ChildStats extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Lối vào bảng huy hiệu, kèm số đã đạt.
+///
+/// Đặt ngay trên "Lịch sử" chứ không giấu trong Cài đặt: huy hiệu là phần thưởng
+/// tinh thần, phải nằm ở chỗ con hay nhìn.
+class _BadgesEntry extends ConsumerWidget {
+  const _BadgesEntry({required this.memberId});
+
+  final String memberId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return StreamBuilder<Set<String>>(
+      stream: ref.watch(badgeDaoProvider).watchEarnedKeys(memberId),
+      builder: (context, snap) {
+        final earned = snap.data?.length ?? 0;
+        return Card(
+          child: InkWell(
+            onTap: () => context.go(Routes.badges),
+            borderRadius: BorderRadius.circular(AppRadius.card),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Row(
+                children: [
+                  const AppIcon('star', size: 28),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Text(
+                      'Huy hiệu · $earned/${kBadges.length}',
+                      style: context.text.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right_rounded),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

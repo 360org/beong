@@ -527,6 +527,21 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
     });
   }
 
+  /// Mọi lượt việc của một trẻ từ ngày [from] trở đi — dùng để tính lại streak.
+  Future<List<TaskInstance>> instancesForMemberSince({
+    required String memberId,
+    required CalendarDate from,
+  }) {
+    return (select(taskInstances)
+          ..where(
+            (i) =>
+                i.memberId.equals(memberId) &
+                i.dueDate.isBiggerOrEqualValue(from.toString()),
+          )
+          ..orderBy([(i) => OrderingTerm.desc(i.dueDate)]))
+        .get();
+  }
+
   /// Instance đang chờ duyệt của một gia đình.
   Future<List<TaskInstance>> pendingReview(String familyId) {
     return (select(taskInstances)

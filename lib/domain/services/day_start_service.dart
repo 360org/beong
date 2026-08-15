@@ -1,3 +1,4 @@
+import 'package:beong/data/local/badge_dao.dart';
 import 'package:beong/data/local/jar_dao.dart';
 import 'package:beong/data/local/member_dao.dart';
 import 'package:beong/data/local/reward_dao.dart';
@@ -5,6 +6,7 @@ import 'package:beong/data/local/settings_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/penalty_service.dart';
+import 'package:beong/domain/services/streak_service.dart';
 
 /// Việc phải chạy mỗi khi bắt đầu một ngày mới của gia đình.
 ///
@@ -27,12 +29,16 @@ class DayStartService {
     required PenaltyService penaltyService,
     required JarDao jarDao,
     required RewardDao rewardDao,
+    required BadgeDao badgeDao,
+    required StreakService streakService,
   }) : _tasks = taskDao,
        _members = memberDao,
        _settings = settingsDao,
        _penalties = penaltyService,
        _jars = jarDao,
-       _rewards = rewardDao;
+       _rewards = rewardDao,
+       _badges = badgeDao,
+       _streaks = streakService;
 
   final TaskDao _tasks;
   final MemberDao _members;
@@ -40,6 +46,8 @@ class DayStartService {
   final PenaltyService _penalties;
   final JarDao _jars;
   final RewardDao _rewards;
+  final BadgeDao _badges;
+  final StreakService _streaks;
 
   /// Khoá ghi ngày đã chạy gần nhất, theo thiết bị.
   static const _lastRunKey = 'rollover.last_run_date';
@@ -84,6 +92,21 @@ class DayStartService {
       dayRolloverHour: family.dayRolloverHour,
     );
     final today = clock.today(now).toString();
+
+    // Streak và huy hiệu tính lại **mỗi lần mở app**, nằm ngoài khoá một-lần-
+    // mỗi-ngày ở dưới.
+    //
+    // Để trong khoá thì hôm nay đã chạy một lần là thôi, mà cả hai đều đổi trong
+    // ngày: bố mẹ mở lại một việc, con làm nốt việc còn thiếu. Đó cũng chính là
+    // lý do bảng `streaks` vẫn rỗng sau khi nối `calculateStreak` vào lần đầu —
+    // khối tính nằm sau khoá nên không bao giờ chạy tới.
+    //
+    // Streak **trước** huy hiệu: ba huy hiệu streak đọc `streaks.best_len`, xét
+    // ngược lại thì chúng luôn đọc số của lần chạy trước.
+    for (final child in await _members.children(familyId)) {
+      await _streaks.recalculate(memberId: child.id, today: clock.today(now));
+      await _badges.awardNewBadges(familyId: familyId, memberId: child.id);
+    }
 
     if (!force) {
       final lastRun = await _settings.read(_lastRunKey);

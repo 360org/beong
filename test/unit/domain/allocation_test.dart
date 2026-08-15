@@ -1,3 +1,4 @@
+import 'package:beong/data/local/badge_dao.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/member_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
@@ -58,6 +59,7 @@ void main() {
       taskDao: taskDao,
       walletDao: walletDao,
       memberDao: memberDao,
+      badgeDao: BadgeDao(db),
       penaltyService: PenaltyService(
         taskDao: taskDao,
         walletDao: walletDao,
