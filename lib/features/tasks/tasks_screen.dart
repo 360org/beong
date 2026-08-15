@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:beong/app/router.dart';
 import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
@@ -19,6 +20,7 @@ import 'package:beong/domain/services/family_clock.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class TasksScreen extends ConsumerWidget {
   const TasksScreen({super.key});
@@ -213,7 +215,12 @@ class _TaskListState extends State<_TaskList> {
               padding: const EdgeInsets.only(bottom: AppSpacing.md),
               child: _RoutineGroupCard(
                 title: routinesById[entry.key]?.title ?? entry.key,
+                iconKey: routinesById[entry.key]?.iconKey,
                 tasks: entry.value,
+                // Chỉ bố mẹ sửa được thói quen; con chỉ xem.
+                onEdit: widget.isParent
+                    ? () => context.go(Routes.routineEditor(entry.key))
+                    : null,
               ),
             ),
           ),
@@ -238,10 +245,16 @@ class _RoutineGroupCard extends StatelessWidget {
   const _RoutineGroupCard({
     required this.title,
     required this.tasks,
+    required this.iconKey,
+    required this.onEdit,
   });
 
   final String title;
   final List<Task> tasks;
+  final String? iconKey;
+
+  /// `null` với vai con — thẻ vẫn hiện nhưng không bấm vào sửa được.
+  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -249,67 +262,71 @@ class _RoutineGroupCard extends StatelessWidget {
       ..sort((a, b) => (a.orderIndex ?? 0).compareTo(b.orderIndex ?? 0));
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: context.colors.primaryContainer,
-                    borderRadius: BorderRadius.circular(AppRadius.field),
+      child: InkWell(
+        onTap: onEdit,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: context.colors.primaryContainer,
+                      borderRadius: BorderRadius.circular(AppRadius.field),
+                    ),
+                    child: AppIcon(iconKey ?? 'clipboard', size: 20),
                   ),
-                  child: const AppIcon('clipboard', size: 20),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: context.text.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: context.text.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: context.colors.primaryContainer,
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                  ),
-                  child: Text(
-                    '${tasks.length} việc',
-                    style: context.text.labelSmall?.copyWith(
-                      color: context.colors.primary,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: context.colors.primaryContainer,
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                    ),
+                    child: Text(
+                      '${tasks.length} việc',
+                      style: context.text.labelSmall?.copyWith(
+                        color: context.colors.primary,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            ...sorted.map(
-              (task) => Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                child: Row(
-                  children: [
-                    AppIcon.task(task.iconKey, size: 18),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Text(task.title, style: context.text.bodyMedium),
-                    ),
-                    XuBadge(amount: task.points, pill: true),
-                  ],
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              ...sorted.map(
+                (task) => Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: Row(
+                    children: [
+                      AppIcon.task(task.iconKey, size: 18),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(task.title, style: context.text.bodyMedium),
+                      ),
+                      XuBadge(amount: task.points, pill: true),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

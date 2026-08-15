@@ -206,6 +206,11 @@ const List<String> kTaskIconKeys = [
   'heart',
   'phone_off',
   'clock',
+  // Hai hình của routine dựng sẵn ("Buổi sáng", "Sau giờ học"). Thiếu chúng thì
+  // mở màn sửa thói quen ra, lưới không ô nào sáng và bố mẹ đổi hình xong không
+  // lấy lại được hình cũ.
+  'sunrise',
+  'wb_cloudy',
 ];
 
 /// Avatar mặt con vật — chọn lúc thêm bé, lưu vào `members.avatarKey`.

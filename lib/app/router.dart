@@ -9,6 +9,7 @@ import 'package:beong/features/settings/jar_settings_screen.dart';
 import 'package:beong/features/settings/penalty_settings_screen.dart';
 import 'package:beong/features/settings/settings_screen.dart';
 import 'package:beong/features/stats/stats_screen.dart';
+import 'package:beong/features/tasks/routine_editor_screen.dart';
 import 'package:beong/features/tasks/tasks_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,6 +25,9 @@ abstract final class Routes {
   /// Trang con của Cài đặt — cấu hình trừ xu (ADR-022).
   static const penaltySettings = '/settings/penalty';
   static const jarSettings = '/settings/jars';
+
+  /// Sửa một thói quen. Nhận `routineId` qua đường dẫn.
+  static String routineEditor(String routineId) => '/tasks/routine/$routineId';
   static const onboarding = '/onboarding';
 
   static const List<String> shellBranches = [
@@ -87,6 +91,16 @@ GoRouter createRouter({
               GoRoute(
                 path: Routes.tasks,
                 builder: (context, state) => const TasksScreen(),
+                routes: [
+                  GoRoute(
+                    // Đường dẫn con nên thanh điều hướng vẫn hiện và nút back
+                    // quay về đúng tab Nhiệm vụ.
+                    path: 'routine/:routineId',
+                    builder: (context, state) => RoutineEditorScreen(
+                      routineId: state.pathParameters['routineId']!,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

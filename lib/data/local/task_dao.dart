@@ -424,6 +424,109 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
     });
   }
 
+  /// Sửa thông tin của một routine.
+  Future<void> updateRoutine({
+    required String routineId,
+    String? title,
+    String? iconKey,
+    int? completionBonus,
+    String? repeatType,
+    String? repeatDays,
+  }) {
+    return (update(routines)..where((r) => r.id.equals(routineId))).write(
+      RoutinesCompanion(
+        title: title == null ? const Value.absent() : Value(title.trim()),
+        iconKey: iconKey == null ? const Value.absent() : Value(iconKey),
+        completionBonus: completionBonus == null
+            ? const Value.absent()
+            : Value(completionBonus),
+        repeatType: repeatType == null
+            ? const Value.absent()
+            : Value(repeatType),
+        repeatDays: repeatDays == null
+            ? const Value.absent()
+            : Value(repeatDays),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  /// Ghi lại thứ tự việc trong routine theo danh sách id truyền vào.
+  ///
+  /// Thứ tự là **nội dung** của routine chứ không phải chuyện hiển thị: "Buổi
+  /// sáng" mà đánh răng trước khi ăn sáng là sai quy trình, và trẻ nhỏ làm theo
+  /// đúng thứ tự nhìn thấy.
+  Future<void> reorderRoutineTasks({
+    required String routineId,
+    required List<String> taskIds,
+  }) {
+    return batch((b) {
+      for (var i = 0; i < taskIds.length; i++) {
+        b.update(
+          tasks,
+          TasksCompanion(
+            orderIndex: Value(i),
+            updatedAt: Value(DateTime.now()),
+          ),
+          where: (t) => t.id.equals(taskIds[i]) & t.routineId.equals(routineId),
+        );
+      }
+    });
+  }
+
+  /// Bỏ một việc ra khỏi routine — việc vẫn còn, chỉ thành việc lẻ.
+  ///
+  /// Không xoá hẳn: lượt đã sinh và các dòng sổ cái vẫn trỏ tới `task_id` này
+  /// (ADR-005 append-only). Xoá đi thì "Sổ của con" mất tên việc.
+  Future<void> detachTaskFromRoutine(String taskId) {
+    return (update(tasks)..where((t) => t.id.equals(taskId))).write(
+      TasksCompanion(
+        routineId: const Value(null),
+        orderIndex: const Value(null),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  /// Đưa một việc lẻ vào cuối một routine.
+  Future<void> attachTaskToRoutine({
+    required String taskId,
+    required String routineId,
+  }) async {
+    final existing = await (select(
+      tasks,
+    )..where((t) => t.routineId.equals(routineId))).get();
+    final nextOrder = existing.fold(
+      0,
+      (max, t) => (t.orderIndex ?? 0) >= max ? (t.orderIndex ?? 0) + 1 : max,
+    );
+    await (update(tasks)..where((t) => t.id.equals(taskId))).write(
+      TasksCompanion(
+        routineId: Value(routineId),
+        orderIndex: Value(nextOrder),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  /// Ngừng dùng một routine. Việc bên trong tách ra thành việc lẻ, không mất.
+  Future<void> archiveRoutine(String routineId) {
+    return transaction(() async {
+      final inside = await (select(
+        tasks,
+      )..where((t) => t.routineId.equals(routineId))).get();
+      for (final task in inside) {
+        await detachTaskFromRoutine(task.id);
+      }
+      await (update(routines)..where((r) => r.id.equals(routineId))).write(
+        RoutinesCompanion(
+          active: const Value(false),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    });
+  }
+
   /// Instance đang chờ duyệt của một gia đình.
   Future<List<TaskInstance>> pendingReview(String familyId) {
     return (select(taskInstances)
