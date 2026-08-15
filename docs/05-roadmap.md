@@ -12,9 +12,9 @@ Cập nhật bằng cách **đọc code**, không tick theo cảm giác — xem 
 |---|---|---|
 | 0 — Nền móng | ✅ Xong | Còn pre-commit hook, cố ý hoãn |
 | 1 — Dữ liệu local | ✅ Xong | Trừ **tầng repository** (`lib/domain/repositories/` rỗng) |
-| 2 — Luồng UI cốt lõi | 🟡 Gần xong | Thiếu Task Editor đủ khối, Routine Editor, animation ăn mừng, PIN, integration test |
+| 2 — Luồng UI cốt lõi | 🟡 Gần xong | Còn 2 khối cuối của Task Editor, PIN phụ huynh, integration test |
 | 3 — Backend & ghép cặp | 🔴 Chưa bắt đầu | Pha 0 đã xong 2/4; phần backend chờ dựng Supabase |
-| 4 — Phần thưởng & tài chính | 🟡 Đang làm | Đổi thưởng + duyệt + hoàn xu ✅, trừ xu ✅, con tự chia xu ✅, hũ tự lập ✅. Thiếu UI streak/huy hiệu, tỷ giá tiền thật, mục tiêu tiết kiệm |
+| 4 — Phần thưởng & tài chính | 🟡 Đang làm | Đổi thưởng + duyệt + hoàn xu ✅, trừ xu ✅, con tự chia xu ✅, hũ tự lập ✅, huy hiệu + streak ✅. Thiếu tỷ giá tiền thật, mục tiêu tiết kiệm |
 | 5 — Thông báo & hoàn thiện | 🔴 Chưa bắt đầu | |
 | 6 — Phát hành v1.0 | 🟡 Hạ tầng sẵn | CI/CD 7 job + Fastlane ✅; chưa có tài khoản store, chưa có icon/ảnh chụp |
 
@@ -70,8 +70,8 @@ toàn bộ offline. ✅ đạt.
 - [~] **Task Editor** — có `_AddTaskSheet` với 6 khối: tên, điểm, preset, icon, **chọn con nào**,
       **lịch lặp** (hằng ngày / chọn thứ / một lần). Thiếu 2 khối: chế độ duyệt riêng của task,
       chế độ bằng chứng.
-- [ ] **Routine Editor** + kéo thả đổi thứ tự task — chưa làm. Tab Nhiệm vụ chỉ **xem** routine
-      (`_RoutineGroupCard`), chưa sửa được.
+- [x] **Routine Editor** + kéo thả đổi thứ tự task — xong: sửa tên/hình/xu thưởng trọn bộ, kéo thả
+      thứ tự việc, bỏ việc ra và đưa việc lẻ vào, ngừng dùng thói quen (việc bên trong không mất).
 - [~] Child Home — vòng tiến độ ✅, linh vật đổi tâm trạng theo tiến độ ✅, nhưng:
   - Nhóm theo **trạng thái** (Cần làm / Đã xong / Bỏ lỡ), **không** nhóm theo routine như tài liệu tả.
   - **Chưa có animation ăn mừng.** `KidScale.celebrateOnTap` đã khai nhưng không nối vào hiệu ứng
@@ -113,8 +113,8 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
 **Việc còn nợ từ Sprint 1–2, không cần backend:**
 - [ ] Tầng repository (`lib/domain/repositories/` đang rỗng) — phải có trước khi thêm sync
 - [ ] Task Editor đủ 8 khối (còn thiếu chế độ duyệt riêng, chế độ bằng chứng)
-- [ ] Routine Editor + kéo thả thứ tự
-- [ ] Animation ăn mừng — nối `KidScale.celebrateOnTap`, hiện là cờ chết
+- [x] Routine Editor + kéo thả thứ tự
+- [x] Animation ăn mừng — `ConfettiBurst`, nổ ở cấp màn hình vì thẻ việc bị tháo ngay sau khi bấm
 - [ ] PIN phụ huynh (chỉ có cột `pin_hash`, chưa có UI/logic)
 - [x] Gộp các dòng sổ cái của cùng một giao dịch trong "Sổ của con" (`op_group_id`), hiện **tên
       việc / tên phần thưởng**, **trạng thái** (chữ + màu, theo dõi sống), và chi tiết từng hũ
@@ -162,7 +162,10 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
       `requires_approval = false` cho phép tự duyệt
 - [x] Template phần thưởng và nhiệm vụ hiện **ngay trên trang trống**, không chôn trong
       bottom sheet sau nút "+"
-- [ ] `StreakFlame` + màn huy hiệu (8 huy hiệu MVP) — logic streak đã có và có test, chỉ thiếu UI
+- [x] Màn huy hiệu (8 huy hiệu MVP) + **nối `calculateStreak` vào dữ liệu thật**. Hai thứ này có
+      logic và test từ Sprint 1 nhưng chưa từng chạy: bảng `badges_earned` không ai đọc/ghi, và
+      `calculateStreak` không được gọi từ đâu nên bảng `streaks` luôn rỗng. `StreakFlame` như một
+      widget riêng thì **không cần** — ngọn lửa đã nằm trong thẻ tổng quan của màn hình con.
 - [ ] `JarTrio` — hiện các hũ của con, số hũ do bố mẹ đặt (ADR-024)
 - [ ] Tỷ giá quy đổi ra tiền thật (mặc định tắt — ADR-017)
 - [ ] Mục tiêu tiết kiệm + thanh tiến độ
