@@ -12,6 +12,7 @@ import 'package:beong/data/local/database.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
+import 'package:beong/features/settings/parent_pin_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -58,18 +59,14 @@ class SettingsScreen extends ConsumerWidget {
                   child: _MemberTile(
                     member: member,
                     isActive: member.id == session.activeMemberId,
-                    onTap: () {
-                      // Không chờ: state đổi ngay trong bộ nhớ, việc ghi xuống
-                      // DB chạy nền — không nên chặn UI chỉ để lưu vai.
-                      unawaited(
-                        ref
-                            .read(sessionProvider.notifier)
-                            .switchMember(
-                              member.id,
-                              isParent: member.kind == MemberKind.parent.name,
-                            ),
-                      );
-                    },
+                    onTap: () => unawaited(
+                      _switchMember(
+                        context,
+                        ref,
+                        member: member,
+                        familyId: session.familyId,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -88,6 +85,7 @@ class SettingsScreen extends ConsumerWidget {
                     subtitle: 'Bật',
                     onTap: () {},
                   ),
+                  _PinTile(familyId: session.familyId),
                   _ApprovalTile(familyId: session.familyId),
                   _AllocationTile(familyId: session.familyId),
                   _JarsTile(familyId: session.familyId),
@@ -289,13 +287,27 @@ class _SettingsTile extends StatelessWidget {
           children: [
             Icon(icon, color: context.semantic.onSurfaceMuted),
             const SizedBox(width: AppSpacing.lg),
+            // Tiêu đề `Expanded` để đẩy giá trị sang sát mép phải; giá trị
+            // `Flexible` để nó chỉ rộng bằng chữ của nó. Trần một nửa chiều
+            // rộng là phần quan trọng: không có trần thì phụ đề dài chiếm hết
+            // chỗ và ép tiêu đề còn **0 chiều rộng**, chữ xuống dòng mỗi dòng
+            // một ký tự. Đã xảy ra thật với dòng "PIN của bố mẹ".
             Expanded(
-              child: Text(title, style: context.text.bodyLarge),
+              child: Text(
+                title,
+                style: context.text.bodyLarge,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-            Text(
-              subtitle,
-              style: context.text.bodyMedium?.copyWith(
-                color: context.semantic.onSurfaceMuted,
+            const SizedBox(width: AppSpacing.sm),
+            Flexible(
+              child: Text(
+                subtitle,
+                textAlign: TextAlign.end,
+                overflow: TextOverflow.ellipsis,
+                style: context.text.bodyMedium?.copyWith(
+                  color: context.semantic.onSurfaceMuted,
+                ),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -310,10 +322,133 @@ class _SettingsTile extends StatelessWidget {
   }
 }
 
-/// Ô "Trừ xu" trong Cài đặt.
+/// Đổi hồ sơ, hỏi PIN nếu đích đến là vai bố mẹ.
 ///
-/// Hiện luôn mức đang đặt ngay ở dòng phụ, không chỉ ghi "Cấu hình": bố mẹ phải
-/// thấy được nhà mình đang bật trừ xu hay không mà không cần bấm vào.
+/// Màn Cài đặt chỉ vai bố mẹ mới vào được, nhưng chỗ này vẫn phải hỏi: bố mẹ đưa
+/// máy cho con rồi quên đổi lại vai là chuyện thường, và lúc đó con vẫn đang
+/// đứng trong Cài đặt.
+Future<void> _switchMember(
+  BuildContext context,
+  WidgetRef ref, {
+  required Member member,
+  required String familyId,
+}) async {
+  final isParent = member.kind == MemberKind.parent.name;
+  if (isParent) {
+    final ok = await askParentPin(
+      context,
+      familyId: familyId,
+      service: ref.read(parentPinServiceProvider),
+    );
+    if (!ok) return;
+  }
+  await ref
+      .read(sessionProvider.notifier)
+      .switchMember(member.id, isParent: isParent);
+}
+
+/// Bật/tắt PIN phụ huynh.
+class _PinTile extends ConsumerStatefulWidget {
+  const _PinTile({required this.familyId});
+
+  final String familyId;
+
+  @override
+  ConsumerState<_PinTile> createState() => _PinTileState();
+}
+
+class _PinTileState extends ConsumerState<_PinTile> {
+  bool? _isSet;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_load());
+  }
+
+  Future<void> _load() async {
+    final isSet = await ref
+        .read(parentPinServiceProvider)
+        .isSet(widget.familyId);
+    if (mounted) setState(() => _isSet = isSet);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isSet = _isSet;
+    return _SettingsTile(
+      icon: Icons.lock_outline_rounded,
+      title: 'PIN của bố mẹ',
+      // Chữ ngắn như các dòng khác; lời giải thích dài nằm trong sheet, không
+      // nhét vào một hàng cao 48px.
+      subtitle: isSet == null
+          ? '…'
+          : isSet
+          ? 'Đang bật'
+          : 'Chưa đặt',
+      onTap: () => unawaited(_open(isSet ?? false)),
+    );
+  }
+
+  Future<void> _open(bool isSet) async {
+    final service = ref.read(parentPinServiceProvider);
+
+    if (!isSet) {
+      await askNewParentPin(
+        context,
+        familyId: widget.familyId,
+        service: service,
+      );
+      await _load();
+      return;
+    }
+
+    // Đã có PIN: phải nhập PIN cũ trước khi đổi hay bỏ. Không hỏi thì đứa trẻ
+    // đang cầm máy chỉ việc bấm "Bỏ PIN" là xong.
+    if (!await askParentPin(
+      context,
+      familyId: widget.familyId,
+      service: service,
+    )) {
+      return;
+    }
+    if (!mounted) return;
+
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.password_rounded),
+              title: const Text('Đổi PIN'),
+              onTap: () => Navigator.pop(sheetContext, 'change'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.lock_open_rounded),
+              title: const Text('Bỏ PIN'),
+              onTap: () => Navigator.pop(sheetContext, 'clear'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted) return;
+
+    if (action == 'change') {
+      await askNewParentPin(
+        context,
+        familyId: widget.familyId,
+        service: service,
+      );
+    } else if (action == 'clear') {
+      await service.clearPin(widget.familyId);
+    }
+    await _load();
+  }
+}
+
 /// Lối vào màn quản lý hũ, kèm tổng tỷ lệ ngay trên dòng.
 ///
 /// Hiện tổng ở đây vì tổng khác 100% làm việc chia xu **âm thầm** rơi về ba hũ
@@ -338,8 +473,8 @@ class _JarsTile extends ConsumerWidget {
           subtitle: jars.isEmpty
               ? 'Đang tải…'
               : total == 100
-              ? '${jars.length} hũ · chia đủ 100%'
-              : '${jars.length} hũ · tổng $total%, chưa đủ 100%',
+              ? '${jars.length} hũ · đủ 100%'
+              : '${jars.length} hũ · mới $total%',
           onTap: () => context.go(Routes.jarSettings),
         );
       },
@@ -347,6 +482,10 @@ class _JarsTile extends ConsumerWidget {
   }
 }
 
+/// Ô "Trừ xu" trong Cài đặt.
+///
+/// Hiện luôn mức đang đặt ngay ở dòng phụ, không chỉ ghi "Cấu hình": bố mẹ phải
+/// thấy được nhà mình đang bật trừ xu hay không mà không cần bấm vào.
 class _PenaltyTile extends ConsumerWidget {
   const _PenaltyTile({required this.familyId});
 

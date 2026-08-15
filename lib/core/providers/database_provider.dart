@@ -7,6 +7,7 @@ import 'package:beong/data/local/reward_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/services/day_start_service.dart';
+import 'package:beong/domain/services/parent_pin_service.dart';
 import 'package:beong/domain/services/penalty_service.dart';
 import 'package:beong/domain/services/redemption_service.dart';
 import 'package:beong/domain/services/streak_service.dart';
@@ -39,6 +40,10 @@ JarDao jarDao(Ref ref) => JarDao(ref.watch(appDatabaseProvider));
 
 @riverpod
 BadgeDao badgeDao(Ref ref) => BadgeDao(ref.watch(appDatabaseProvider));
+
+@riverpod
+ParentPinService parentPinService(Ref ref) =>
+    ParentPinService(memberDao: ref.watch(memberDaoProvider));
 
 @riverpod
 PenaltyService penaltyService(Ref ref) => PenaltyService(

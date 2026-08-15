@@ -12,6 +12,10 @@ environment:
 # Vai trò của từng gói: xem docs/02-architecture.md §2.
 dependencies:
   collection: ^1.19.1
+  # Băm PIN phụ huynh. Là dep gián tiếp sẵn có, nhưng khai tường minh vì code
+  # của app import trực tiếp — dựa vào dep gián tiếp là để nó biến mất bất cứ
+  # lúc nào một gói khác đổi phụ thuộc.
+  crypto: ^3.0.7
   drift: ^2.34.3 # DB local, offline-first — ADR-002
   flutter:
     sdk: flutter

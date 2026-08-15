@@ -56,6 +56,7 @@ class TasksScreen extends ConsumerWidget {
                   isScrollControlled: true,
                   builder: (context) => _AddTaskSheet(
                     taskDao: taskDao,
+                    memberDao: memberDao,
                     familyId: session.familyId,
                     children: children,
                   ),
@@ -451,11 +452,13 @@ class _IconChoice extends StatelessWidget {
 class _AddTaskSheet extends StatefulWidget {
   const _AddTaskSheet({
     required this.taskDao,
+    required this.memberDao,
     required this.familyId,
     required this.children,
   });
 
   final TaskDao taskDao;
+  final MemberDao memberDao;
   final String familyId;
   final List<Member> children;
 
@@ -481,6 +484,13 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
   /// icon, vì thẻ việc của con đọc bằng hình trước khi đọc chữ.
   String _iconKey = kDefaultTaskIconKey;
 
+  /// Việc này có cần bố mẹ duyệt riêng không — ADR-023.
+  ///
+  /// Chỉ có tác dụng khi gia đình **bật** duyệt: nhà tắt duyệt thì
+  /// `needsApproval` không đọc tới giá trị này. Mặc định `manual` khớp default
+  /// của cột trong DB.
+  ApprovalMode _approval = ApprovalMode.manual;
+
   /// Lịch lặp. Mặc định hằng ngày — đúng với phần lớn việc nhà, và là hành vi
   /// duy nhất app có trước khi khối này tồn tại.
   RepeatType _repeat = RepeatType.daily;
@@ -495,6 +505,11 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
     _pointsController.dispose();
     super.dispose();
   }
+
+  String _approvalLabel(ApprovalMode mode) => switch (mode) {
+    ApprovalMode.auto => 'Xong là xong',
+    ApprovalMode.manual => 'Bố mẹ duyệt',
+  };
 
   String _repeatTypeLabel(RepeatType type) => switch (type) {
     RepeatType.daily => 'Hằng ngày',
@@ -524,6 +539,7 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
         // Icon bố mẹ đang chọn, không phải icon của preset: bố mẹ có thể chọn
         // template rồi đổi hình, và lần đổi sau cùng mới là ý của họ.
         iconKey: Value(_iconKey),
+        approvalMode: Value(_approval.name),
         repeatType: Value(effectiveRepeat.name),
         repeatDays: Value(
           effectiveRepeat == RepeatType.custom
@@ -681,6 +697,39 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                   },
                 );
               }).toList(),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text('Cần bố mẹ duyệt', style: context.text.titleSmall),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              children: [
+                for (final mode in ApprovalMode.values)
+                  ChoiceChip(
+                    label: Text(_approvalLabel(mode)),
+                    selected: _approval == mode,
+                    onSelected: (_) => setState(() => _approval = mode),
+                  ),
+              ],
+            ),
+            // Nhà đang tắt duyệt thì lựa chọn ở đây **không có tác dụng gì**
+            // (ADR-023). Nói thẳng ra, thay vì để bố mẹ đặt "cần duyệt" rồi
+            // ngồi đợi một hàng chờ không bao giờ có gì.
+            StreamBuilder<bool>(
+              stream: widget.memberDao.watchRequireApproval(widget.familyId),
+              builder: (context, snap) {
+                if (snap.data ?? false) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.xs),
+                  child: Text(
+                    'Nhà đang tắt duyệt nên con bấm xong là xong. '
+                    'Bật trong Cài đặt thì lựa chọn này mới có tác dụng.',
+                    style: context.text.bodySmall?.copyWith(
+                      color: context.semantic.onSurfaceMuted,
+                    ),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: AppSpacing.xxl),
             SizedBox(

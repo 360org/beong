@@ -136,6 +136,30 @@ class MemberDao extends DatabaseAccessor<AppDatabase> with _$MemberDaoMixin {
     return (update(members)..where((m) => m.id.equals(id))).write(companion);
   }
 
+  /// Hồ sơ bố mẹ của một gia đình.
+  Future<List<Member>> parents(String familyId) {
+    return (select(members)..where(
+          (m) =>
+              m.familyId.equals(familyId) &
+              m.kind.equals(MemberKind.parent.name) &
+              m.deletedAt.isNull(),
+        ))
+        .get();
+  }
+
+  /// Ghi hash PIN cho một hồ sơ. `null` là bỏ PIN.
+  Future<void> setPinHash({
+    required String memberId,
+    required String? pinHash,
+  }) {
+    return (update(members)..where((m) => m.id.equals(memberId))).write(
+      MembersCompanion(
+        pinHash: Value(pinHash),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   /// Cập nhật streak cache cho một trẻ.
   Future<void> upsertStreak({
     required String memberId,

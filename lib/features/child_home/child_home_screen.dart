@@ -20,6 +20,7 @@ import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/features/rewards/allocate_xu_sheet.dart';
+import 'package:beong/features/settings/parent_pin_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -263,6 +264,34 @@ class _ChildHeader extends ConsumerWidget {
 
   final Member? member;
 
+  /// Đổi sang hồ sơ [member], hỏi PIN nếu đó là vai bố mẹ.
+  ///
+  /// Đây là **cửa duy nhất** con có thể tự đi vào vai bố mẹ. Không chặn ở đây
+  /// thì cả vòng "bố mẹ duyệt" (ADR-023, ADR-025) chỉ là hình thức: con đổi vai
+  /// rồi tự duyệt việc của mình.
+  static Future<void> _switchTo(
+    BuildContext context,
+    WidgetRef ref, {
+    required Member member,
+    required String familyId,
+  }) async {
+    final isParent = member.kind == MemberKind.parent.name;
+    if (isParent) {
+      final ok = await askParentPin(
+        context,
+        familyId: familyId,
+        service: ref.read(parentPinServiceProvider),
+      );
+      if (!ok) return;
+    }
+    if (!context.mounted) return;
+
+    Navigator.of(context).pop();
+    await ref
+        .read(sessionProvider.notifier)
+        .switchMember(member.id, isParent: isParent);
+  }
+
   Future<void> _switchProfile(BuildContext context, WidgetRef ref) async {
     final session = ref.read(sessionProvider);
     if (session == null) return;
@@ -295,17 +324,14 @@ class _ChildHeader extends ConsumerWidget {
                 trailing: m.id == session.activeMemberId
                     ? Icon(Icons.check_circle, color: context.colors.primary)
                     : null,
-                onTap: () {
-                  Navigator.of(context).pop();
-                  unawaited(
-                    ref
-                        .read(sessionProvider.notifier)
-                        .switchMember(
-                          m.id,
-                          isParent: m.kind == MemberKind.parent.name,
-                        ),
-                  );
-                },
+                onTap: () => unawaited(
+                  _switchTo(
+                    context,
+                    ref,
+                    member: m,
+                    familyId: session.familyId,
+                  ),
+                ),
               ),
             const SizedBox(height: AppSpacing.lg),
           ],
