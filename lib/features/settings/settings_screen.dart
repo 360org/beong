@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:beong/app/router.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
+import 'package:beong/core/providers/theme_mode_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
@@ -73,18 +74,10 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.xxl),
               _SettingsSection(
                 children: [
-                  _SettingsTile(
-                    icon: Icons.dark_mode_outlined,
-                    title: 'Giao diện',
-                    subtitle: 'Theo hệ thống',
-                    onTap: () {},
-                  ),
-                  _SettingsTile(
-                    icon: Icons.notifications_outlined,
-                    title: 'Thông báo',
-                    subtitle: 'Bật',
-                    onTap: () {},
-                  ),
+                  // Không có ô "Thông báo" ở đây: app chưa gửi thông báo nào
+                  // (Sprint 5). Một dòng ghi "Bật" mà không có gì bật là lời
+                  // hứa suông — bố mẹ sẽ ngồi đợi nhắc nhở không bao giờ tới.
+                  const _ThemeTile(),
                   _PinTile(familyId: session.familyId),
                   _ApprovalTile(familyId: session.familyId),
                   _AllocationTile(familyId: session.familyId),
@@ -345,6 +338,58 @@ Future<void> _switchMember(
   await ref
       .read(sessionProvider.notifier)
       .switchMember(member.id, isParent: isParent);
+}
+
+/// Chọn giao diện sáng / tối / theo hệ thống.
+class _ThemeTile extends ConsumerWidget {
+  const _ThemeTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(themeModeSettingProvider);
+    return _SettingsTile(
+      icon: Icons.dark_mode_outlined,
+      title: 'Giao diện',
+      subtitle: tenCheDoGiaoDien(mode),
+      onTap: () => unawaited(_pick(context, ref, mode)),
+    );
+  }
+
+  Future<void> _pick(
+    BuildContext context,
+    WidgetRef ref,
+    ThemeMode current,
+  ) async {
+    final chosen = await showModalBottomSheet<ThemeMode>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final mode in ThemeMode.values)
+              ListTile(
+                leading: Icon(
+                  switch (mode) {
+                    ThemeMode.system => Icons.brightness_auto_rounded,
+                    ThemeMode.light => Icons.light_mode_rounded,
+                    ThemeMode.dark => Icons.dark_mode_rounded,
+                  },
+                ),
+                title: Text(tenCheDoGiaoDien(mode)),
+                // Dấu tích, không phải chỉ tô màu chữ: WCAG 1.4.1 — không được
+                // dùng mỗi màu để phân biệt.
+                trailing: mode == current
+                    ? Icon(Icons.check_circle, color: context.colors.primary)
+                    : null,
+                onTap: () => Navigator.pop(sheetContext, mode),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (chosen == null) return;
+    await ref.read(themeModeSettingProvider.notifier).set(chosen);
+  }
 }
 
 /// Bật/tắt PIN phụ huynh.

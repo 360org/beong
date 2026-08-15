@@ -1,6 +1,7 @@
 import 'package:beong/app/app.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
+import 'package:beong/core/providers/theme_mode_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,6 +12,10 @@ Future<void> main() async {
   // session dùng **đúng** connection DB mà app sẽ dùng sau đó. Nếu mở một DB
   // riêng chỉ để đọc session thì có hai connection tới cùng file SQLite.
   final container = ProviderContainer();
+
+  // Màu trước khung hình đầu: nạp sau `runApp` thì máy đang để chế độ tối sẽ
+  // thấy một nhịp màn hình trắng.
+  await container.read(themeModeSettingProvider.notifier).restore();
 
   // Nạp trước khung hình đầu: nếu để router chạy trước rồi mới nạp, người dùng
   // thấy màn hình onboarding nháy lên rồi mới về đúng chỗ.

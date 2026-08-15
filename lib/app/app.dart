@@ -4,6 +4,7 @@ import 'package:beong/app/router.dart';
 import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
+import 'package:beong/core/providers/theme_mode_provider.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
@@ -83,6 +84,7 @@ class _BeOngAppState extends ConsumerState<BeOngApp>
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
+      themeMode: ref.watch(themeModeSettingProvider),
       localizationsDelegates: L10n.localizationsDelegates,
       supportedLocales: L10n.supportedLocales,
       // Máy đặt ngôn ngữ ngoài danh sách hỗ trợ thì rơi về tiếng Việt, không
