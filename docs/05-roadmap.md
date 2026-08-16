@@ -126,7 +126,10 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
 - [ ] Dự án Supabase, migration SQL, RLS policy theo `family_id`
 - [ ] Auth phụ huynh: Sign in with Apple + Google (cả hai — `09` §5.2)
 - [ ] Liên kết tài khoản ↔ hồ sơ gia đình; ca "đăng nhập lại trên máy mới"
-- [ ] Tạo **nhiều** con (onboarding hiện chỉ tạo được 1); chọn con khi thêm task
+- [x] Tạo **nhiều** con — ô "Thêm bé" trong Cài đặt, dùng chung `ChildProfileForm` với
+      onboarding. Onboarding vẫn chỉ khai một bé (đường nhanh), nhưng nhà hai con không còn
+      phải đăng xuất làm lại từ đầu và mất dữ liệu cũ. Màu hồ sơ tự né màu các bé đã dùng.
+      Phần "chọn con khi thêm task" thì **đã có sẵn** — hàng chip "Giao cho" trong ô thêm việc.
 
 **Ghép cặp máy con:**
 - [ ] Bảng `pairing_codes` (lưu hash, TTL, cờ đã dùng) + bảng `devices`
@@ -168,12 +171,13 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
       logic và test từ Sprint 1 nhưng chưa từng chạy: bảng `badges_earned` không ai đọc/ghi, và
       `calculateStreak` không được gọi từ đâu nên bảng `streaks` luôn rỗng. `StreakFlame` như một
       widget riêng thì **không cần** — ngọn lửa đã nằm trong thẻ tổng quan của màn hình con.
-- [ ] `JarTrio` — hiện các hũ của con, số hũ do bố mẹ đặt (ADR-024)
 - [ ] Tỷ giá quy đổi ra tiền thật (mặc định tắt — ADR-017)
 - [x] **Mục tiêu tiết kiệm + thanh tiến độ** — `GoalDao` + `GoalService`. Bảng `savings_goals` có
       từ v1 nhưng không ai đọc/ghi. Tiến độ đo bằng **hũ Để dành**, không phải tổng xu; tới đích
       **không trừ xu**. Bố mẹ đặt từ Thống kê, con chỉ xem.
-- [ ] **Sổ của con** — lịch sử đầy đủ, `manual_adjust` bắt buộc có lý do
+- [x] **Sổ của con** — lịch sử đầy đủ, và `manual_adjust` **bắt buộc có lý do**. `WalletDao
+      .manualAdjust` viết từ Sprint 1 nhưng không có chỗ nào gọi; nay có sheet "Sửa xu" trong
+      Thống kê, cộng/trừ vào hũ bất kỳ kể cả hũ tự lập, lý do hiện trong sổ cho con đọc.
 - [x] **Duyệt là tuỳ chọn, mặc định xong-là-xong** (ADR-023, thay ADR-009) — công tắc trong Cài đặt,
       nút "Duyệt tất cả", danh sách "Đã xong hôm nay" để mở lại. Sửa kèm một lỗi thật: đường tự
       động duyệt trước đây **không cộng xu**.

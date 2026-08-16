@@ -13,6 +13,7 @@ import 'package:beong/data/local/database.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
+import 'package:beong/features/members/add_child_sheet.dart';
 import 'package:beong/features/settings/parent_pin_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -69,6 +70,20 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => unawaited(
+                    showAddChildSheet(
+                      context,
+                      familyId: session.familyId,
+                      nextColorIndex: nextFreeColorIndex(members),
+                    ),
+                  ),
+                  icon: const Icon(Icons.person_add_alt_rounded),
+                  label: const Text('Thêm bé'),
                 ),
               ),
               const SizedBox(height: AppSpacing.xxl),
