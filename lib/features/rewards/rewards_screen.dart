@@ -577,6 +577,7 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton.filledTonal(
+                  tooltip: 'Bớt 10 xu',
                   onPressed: _cost > 10
                       ? () => setState(() => _cost -= 10)
                       : null,
@@ -589,6 +590,7 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
                   ),
                 ),
                 IconButton.filledTonal(
+                  tooltip: 'Thêm 10 xu',
                   onPressed: () => setState(() => _cost += 10),
                   icon: const Icon(Icons.add_rounded),
                 ),

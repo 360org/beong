@@ -150,6 +150,7 @@ class _GoalSheetState extends ConsumerState<_GoalSheet> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton.filledTonal(
+                tooltip: 'Bớt 50 xu',
                 // Chặn ở đúng một bước: mục tiêu 0 xu thì tới đích ngay lúc
                 // đặt, và thanh tiến độ không có gì để nói.
                 onPressed: _target > _step
@@ -162,6 +163,7 @@ class _GoalSheetState extends ConsumerState<_GoalSheet> {
                 child: Center(child: XuBadge(amount: _target, large: true)),
               ),
               IconButton.filledTonal(
+                tooltip: 'Thêm 50 xu',
                 onPressed: () => setState(() => _target += _step),
                 icon: const Icon(Icons.add_rounded),
               ),

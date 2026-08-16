@@ -215,7 +215,11 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
       `day_rollover_hour` mà `DayStartService` vẫn đọc — hai bên sẽ lệch ngày ngay khi có ai đổi.
 - [ ] Cài đặt: ngôn ngữ, âm thanh
 - [ ] Trang trống, trạng thái lỗi, màn hình mất mạng
-- [ ] Rà soát khả dụng (TalkBack/VoiceOver, contrast, text scale)
+- [x] Rà soát khả dụng — thành **test tự động** (`test/unit/kha_dung_test.dart`), theo đúng bài
+      học Sprint 0: ràng buộc khả dụng không có test thì chỉ là ước muốn. Canh tooltip cho mọi
+      `IconButton`, `excludeFromSemantics` cho icon trang trí, trần phóng chữ ở gốc app, và
+      không màu hard-code trong `lib/features`. Bắt được một màu lọt lưới, nay là token `onXu`.
+      Vẫn cần một lượt bật TalkBack thật trước khi phát hành.
 
 ## Sprint 6 — Phát hành v1.0 (1 tuần)
 

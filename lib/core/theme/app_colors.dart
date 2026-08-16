@@ -107,6 +107,13 @@ abstract final class AppColors {
   static const xuTextLight = Color(0xFF906500);
   static const xuTextDark = Color(0xFFFFD166);
 
+  /// Chữ đặt **trên nền mật** ([xuLight]/[xuDark]) — huy hiệu xu, danh hiệu.
+  ///
+  /// Khác [xuTextLight]: cái kia là màu chữ xu trên nền trang, còn đây là trên
+  /// chính nền vàng. Không đảo theo chủ đề, vì nền mật ở cả hai chủ đề đều
+  /// sáng — dùng màu chữ sáng của chủ đề tối lên đó là vàng trên vàng.
+  static const Color onXu = onSurfaceLight;
+
   /// Màu hồ sơ trẻ — dùng làm nền avatar, viền card, cột biểu đồ.
   ///
   /// Mỗi màu đạt contrast >= 4.8:1 với chữ trắng (ngưỡng WCAG AA là 4.5, chừa
@@ -158,6 +165,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.danger,
     required this.xu,
     required this.xuText,
+    required this.onXu,
     required this.onSurfaceMuted,
   });
 
@@ -171,6 +179,9 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   /// Màu **chữ số** xu — xem [AppColors.xuTextLight] để biết vì sao phải tách.
   final Color xuText;
 
+  /// Chữ đặt trên nền mật [xu].
+  final Color onXu;
+
   final Color onSurfaceMuted;
 
   static const light = AppSemanticColors(
@@ -179,6 +190,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     danger: AppColors.dangerLight,
     xu: AppColors.xuLight,
     xuText: AppColors.xuTextLight,
+    onXu: AppColors.onXu,
     onSurfaceMuted: AppColors.onSurfaceMutedLight,
   );
 
@@ -188,6 +200,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     danger: AppColors.dangerDark,
     xu: AppColors.xuDark,
     xuText: AppColors.xuTextDark,
+    onXu: AppColors.onXu,
     onSurfaceMuted: AppColors.onSurfaceMutedDark,
   );
 
@@ -198,6 +211,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? danger,
     Color? xu,
     Color? xuText,
+    Color? onXu,
     Color? onSurfaceMuted,
   }) {
     return AppSemanticColors(
@@ -206,6 +220,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       danger: danger ?? this.danger,
       xu: xu ?? this.xu,
       xuText: xuText ?? this.xuText,
+      onXu: onXu ?? this.onXu,
       onSurfaceMuted: onSurfaceMuted ?? this.onSurfaceMuted,
     );
   }
@@ -219,6 +234,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       danger: Color.lerp(danger, other.danger, t)!,
       xu: Color.lerp(xu, other.xu, t)!,
       xuText: Color.lerp(xuText, other.xuText, t)!,
+      onXu: Color.lerp(onXu, other.onXu, t)!,
       onSurfaceMuted: Color.lerp(onSurfaceMuted, other.onSurfaceMuted, t)!,
     );
   }

@@ -165,6 +165,7 @@ class _AdjustSheetState extends ConsumerState<_AdjustSheet> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton.filledTonal(
+                tooltip: 'Bớt 5 xu',
                 onPressed: _amount > 5
                     ? () => setState(() => _amount -= 5)
                     : null,
@@ -175,6 +176,7 @@ class _AdjustSheetState extends ConsumerState<_AdjustSheet> {
                 child: Center(child: XuBadge(amount: _amount, large: true)),
               ),
               IconButton.filledTonal(
+                tooltip: 'Thêm 5 xu',
                 onPressed: () => setState(() => _amount += 5),
                 icon: const Icon(Icons.add_rounded),
               ),

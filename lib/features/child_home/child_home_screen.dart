@@ -566,10 +566,10 @@ class _BusyBeeBadge extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF1B1046),
+              color: context.semantic.onXu,
             ),
           ),
         ],
