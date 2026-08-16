@@ -222,12 +222,10 @@ bundle ID `net.beong.app`) trước khi `upload_to_testflight` hoạt động.
 
 ## 3. Chạy release
 
-Tab **Actions → Release → Run workflow**, chọn:
-- `platforms`: `both` / `android` / `ios`
-- `android_track`: `internal` (kiểm thử nội bộ, lên máy ngay) hoặc `production`
-- `ios_lane`: `beta` (đẩy lên TestFlight) hoặc `release` (đẩy build đã duyệt lên bản chờ
-  submit — vẫn phải tự bấm "Submit for Review" trên App Store Connect, workflow không tự
-  submit để tránh nộp nhầm bản chưa test)
+Workflow được kích hoạt tự động khi **push tag `v*`** (VD: `v0.2.0`), hoặc chạy tay từ tab **Actions → Release → Run workflow**:
+- `platforms`: `both` / `android` / `ios` (mặc định: `both`)
+- `android_track`: `production` (hoặc `internal` nếu chỉ test)
+- `ios_lane`: `release` (tự động submit nộp duyệt và auto-release khi Apple duyệt) hoặc `beta` (chỉ đẩy TestFlight)
 
 **Luồng khuyến nghị:** `internal` + `beta` vài lần đầu để test kỹ trên máy thật qua
 Play Console Internal Testing / TestFlight, sau đó mới chạy `production` / `release`.

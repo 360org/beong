@@ -4,18 +4,21 @@ name: Release
 # Trước khi chạy: tăng `version:` trong pubspec.yaml (build number phải tăng
 # mỗi lần nộp lên store).
 on:
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
       android_track:
         description: "Play Console track"
         type: choice
         options: [internal, production]
-        default: internal
+        default: production
       ios_lane:
         description: "Fastlane iOS lane"
         type: choice
-        options: [beta, release]
-        default: beta
+        options: [release, beta]
+        default: release
       platforms:
         description: "Nền tảng cần phát hành"
         type: choice
