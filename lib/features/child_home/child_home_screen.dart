@@ -480,11 +480,10 @@ class _DashboardCard extends StatelessWidget {
                       // cạnh con số, thêm vào nhãn là lặp lại lần thứ ba.
                       label: 'XU',
                       onTap: unallocated > 0 ? onAllocate : null,
-                      // Xuống dòng riêng, không nằm cạnh con số: đứng cùng dòng
-                      // thì hai con số dính nhau và ô bị chật ở 412dp.
-                      //
-                      // Đặt **dưới** nhãn "XU" để đọc theo thứ tự: bao nhiêu →
-                      // đơn vị gì → còn bao nhiêu chưa chia.
+                      // Phần chưa chia xuống dòng riêng, không nằm cạnh con
+                      // số: đứng cùng dòng thì hai con số dính nhau và ô bị
+                      // chật ở 412dp. Thứ tự đọc: bao nhiêu xu → còn bao nhiêu
+                      // chưa chia.
                       footer: unallocated > 0
                           ? Text(
                               '$unallocated chưa chia ›',
@@ -627,16 +626,27 @@ class _StatTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          child,
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.6,
-              color: Colors.white.withValues(alpha: 0.85),
-            ),
+          // Nhãn nằm **cùng hàng** với con số, không xuống dòng riêng: "60"
+          // rồi "XU" ở dòng dưới đọc như hai thông tin rời, trong khi nó là
+          // một cụm — sáu mươi xu.
+          Row(
+            children: [
+              child,
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.6,
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
+                ),
+              ),
+            ],
           ),
           if (footer != null) ...[
             const SizedBox(height: AppSpacing.xs),

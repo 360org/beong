@@ -389,6 +389,10 @@ class _JarOverview extends ConsumerWidget {
               label: 'Chờ chia',
               iconKey: 'jar_inbox',
               amount: balance.inbox,
+              // Khác hẳn các hũ thật: đây **không phải một hũ**, mà là số xu
+              // chưa vào hũ nào. Trông giống hệt các ô kia thì con đếm nó như
+              // hũ thứ tư và tưởng mình đang để dành ở đâu đó.
+              pending: true,
             ),
         ];
 
@@ -418,6 +422,7 @@ class _JarCard extends StatelessWidget {
     required this.label,
     required this.amount,
     required this.iconKey,
+    this.pending = false,
   });
 
   final String label;
@@ -427,26 +432,45 @@ class _JarCard extends StatelessWidget {
   /// trước đây — hũ tự lập không có icon nào trong bộ đó.
   final String iconKey;
 
+  /// Ô "chờ chia" — số xu **chưa** vào hũ nào.
+  ///
+  /// Vẽ khác hẳn: nền vàng xu, viền rõ, nhãn in đậm — thay vì thẻ trắng phẳng
+  /// như các hũ thật. Có viền chứ không chỉ đổi nền, vì nền đậm nhạt một chút
+  /// thì người không phân biệt màu tốt sẽ thấy mọi ô như nhau (WCAG 1.4.1).
+  final bool pending;
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          children: [
-            AppIcon(iconKey, size: 26),
-            const SizedBox(height: AppSpacing.sm),
-            XuBadge(amount: amount),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              label,
-              style: context.text.bodySmall?.copyWith(
-                color: context.semantic.onSurfaceMuted,
-              ),
+    final body = Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        children: [
+          AppIcon(iconKey, size: 26),
+          const SizedBox(height: AppSpacing.sm),
+          XuBadge(amount: amount),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            label,
+            style: context.text.bodySmall?.copyWith(
+              color: pending
+                  ? context.semantic.xuText
+                  : context.semantic.onSurfaceMuted,
+              fontWeight: pending ? FontWeight.w700 : null,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+
+    if (!pending) return Card(child: body);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: context.semantic.xu.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(color: context.semantic.xuText, width: 1.5),
+      ),
+      child: body,
     );
   }
 }
