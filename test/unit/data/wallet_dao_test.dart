@@ -234,6 +234,85 @@ void main() {
         throwsA(isA<WalletException>()),
       );
     });
+
+    test('điều chỉnh 0 xu bị từ chối', () async {
+      expect(
+        () => dao.manualAdjust(
+          familyId: familyId,
+          memberId: memberId,
+          jar: Jar.spend,
+          delta: 0,
+          reasonNote: 'Không làm gì',
+          clientOpId: 'sua-4',
+          createdBy: 'bo',
+        ),
+        throwsA(isA<WalletException>()),
+      );
+    });
+
+    test('sửa được xu trong hũ bố mẹ tự lập', () async {
+      // Bản nhận `Jar` chỉ với tới bốn hũ cứng; từ ADR-024 nhà nào cũng lập
+      // được hũ riêng, và sửa xu trong hũ đó thì không có đường nào gọi tới.
+      const jarKey = 'jar-hoc-tap';
+
+      await dao.manualAdjustToJarKey(
+        familyId: familyId,
+        memberId: memberId,
+        jarKey: jarKey,
+        delta: 30,
+        reasonNote: 'Thưởng điểm 10 môn Toán',
+        clientOpId: 'sua-5',
+        createdBy: 'me',
+      );
+
+      final balance = await dao.balanceOf(memberId);
+      expect(balance.ofKey(jarKey), 30);
+
+      final history = await dao.watchHistory(memberId).first;
+      expect(history.single.note, 'Thưởng điểm 10 môn Toán');
+    });
+
+    test('trừ quá số xu trong hũ tự lập cũng bị chặn', () async {
+      const jarKey = 'jar-hoc-tap';
+      await dao.manualAdjustToJarKey(
+        familyId: familyId,
+        memberId: memberId,
+        jarKey: jarKey,
+        delta: 10,
+        reasonNote: 'Thưởng',
+        clientOpId: 'sua-6',
+        createdBy: 'me',
+      );
+
+      await expectLater(
+        dao.manualAdjustToJarKey(
+          familyId: familyId,
+          memberId: memberId,
+          jarKey: jarKey,
+          delta: -20,
+          reasonNote: 'Phạt',
+          clientOpId: 'sua-7',
+          createdBy: 'bo',
+        ),
+        throwsA(isA<WalletException>()),
+      );
+      expect((await dao.balanceOf(memberId)).ofKey(jarKey), 10);
+    });
+
+    test('gửi lại cùng clientOpId không nhân đôi xu', () async {
+      for (var i = 0; i < 2; i++) {
+        await dao.manualAdjust(
+          familyId: familyId,
+          memberId: memberId,
+          jar: Jar.spend,
+          delta: 15,
+          reasonNote: 'Giúp bà xách đồ',
+          clientOpId: 'sua-lap',
+          createdBy: 'me',
+        );
+      }
+      expect((await dao.balanceOf(memberId)).spend, 15);
+    });
   });
 
   group('splitFor', () {

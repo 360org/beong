@@ -19,6 +19,7 @@ import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/features/goals/goal_section.dart';
 import 'package:beong/features/goals/goal_sheet.dart';
+import 'package:beong/features/stats/adjust_xu_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -138,10 +139,32 @@ class _ChildStatsCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.watch(sessionProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(child.displayName, style: context.text.titleMedium),
+        Row(
+          children: [
+            Expanded(
+              child: Text(child.displayName, style: context.text.titleMedium),
+            ),
+            if (session != null)
+              TextButton.icon(
+                onPressed: () => unawaited(
+                  showAdjustXuSheet(
+                    context,
+                    familyId: child.familyId,
+                    memberId: child.id,
+                    childName: child.displayName,
+                    reviewerId: session.activeMemberId,
+                  ),
+                ),
+                icon: const Icon(Icons.edit_rounded, size: 18),
+                label: const Text('Sửa xu'),
+              ),
+          ],
+        ),
         const SizedBox(height: AppSpacing.md),
         StreamBuilder<WalletBalance>(
           stream: walletDao.watchBalance(child.id),

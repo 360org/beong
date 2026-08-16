@@ -513,6 +513,28 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     required String reasonNote,
     required String clientOpId,
     required String createdBy,
+  }) => manualAdjustToJarKey(
+    familyId: familyId,
+    memberId: memberId,
+    jarKey: jar.name,
+    delta: delta,
+    reasonNote: reasonNote,
+    clientOpId: clientOpId,
+    createdBy: createdBy,
+  );
+
+  /// Như [manualAdjust] nhưng nhận **khoá hũ** bất kỳ.
+  ///
+  /// Bản nhận `Jar` chỉ với tới bốn hũ cứng, mà từ ADR-024 bố mẹ lập được hũ
+  /// riêng — sửa xu trong hũ tự lập thì không có đường nào gọi tới.
+  Future<void> manualAdjustToJarKey({
+    required String familyId,
+    required String memberId,
+    required String jarKey,
+    required int delta,
+    required String reasonNote,
+    required String clientOpId,
+    required String createdBy,
   }) async {
     if (reasonNote.trim().isEmpty) {
       throw const WalletException(
@@ -526,16 +548,16 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     await transaction(() async {
       if (delta < 0) {
         final balance = await balanceOf(memberId);
-        if (balance.of(jar) + delta < 0) {
+        if (balance.ofKey(jarKey) + delta < 0) {
           throw WalletException(
-            'Trừ $delta xu sẽ làm hũ ${jar.name} âm — không cho phép',
+            'Trừ ${-delta} xu sẽ làm hũ này âm — không cho phép',
           );
         }
       }
-      await _insertIfNew(
+      await _insertIfNewKey(
         familyId: familyId,
         memberId: memberId,
-        jar: jar,
+        jarKey: jarKey,
         delta: delta,
         reason: TxReason.manualAdjust,
         clientOpId: clientOpId,
