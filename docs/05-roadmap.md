@@ -12,7 +12,7 @@ Cập nhật bằng cách **đọc code**, không tick theo cảm giác — xem 
 |---|---|---|
 | 0 — Nền móng | ✅ Xong | Còn pre-commit hook, cố ý hoãn |
 | 1 — Dữ liệu local | ✅ Xong | Trừ **tầng repository** (`lib/domain/repositories/` rỗng) |
-| 2 — Luồng UI cốt lõi | 🟡 Gần xong | PIN phụ huynh ✅. Còn khối chế độ bằng chứng của Task Editor, integration test |
+| 2 — Luồng UI cốt lõi | 🟡 Gần xong | PIN phụ huynh ✅, integration test ✅. Còn khối chế độ bằng chứng của Task Editor |
 | 3 — Backend & ghép cặp | 🔴 Chưa bắt đầu | Pha 0 đã xong 2/4; phần backend chờ dựng Supabase |
 | 4 — Phần thưởng & tài chính | ✅ Xong | Đổi thưởng + duyệt + hoàn xu, trừ xu (chung + riêng theo việc), con tự chia xu, hũ tự lập, huy hiệu + streak, mục tiêu tiết kiệm, tỷ giá tiền thật, sửa xu tay |
 | 5 — Thông báo & hoàn thiện | 🔴 Chưa bắt đầu | |
@@ -80,7 +80,9 @@ toàn bộ offline. ✅ đạt.
 - [x] Chuyển hồ sơ + **PIN phụ huynh** — `09` §6 ca "máy bố mẹ cũng là máy con dùng". Trước đó
       đổi vai không cần gì cả, tức là cả vòng duyệt của ADR-023/ADR-025 dựa trên một giả định
       chưa từng được bảo vệ: con bấm avatar, chọn "Bố mẹ", rồi tự duyệt việc của mình.
-- [ ] Integration test luồng đầy đủ — chưa có, thư mục `integration_test/` chưa tồn tại.
+- [x] **Integration test luồng đầy đủ** — `integration_test/luong_day_du_test.dart`, dựng nguyên
+      `BeOngApp` với router thật trên Linux desktop dưới Xvfb, có job CI riêng. Ba luồng:
+      onboarding → con bấm xong việc, xu vào ví ngay → đổi thưởng vào hàng chờ duyệt.
 
 **Xong khi:** dùng được thật trên 1 thiết bị, không cần mạng. ✅ đạt — đã chạy thật và chụp 27 ảnh
 qua toàn bộ luồng.
@@ -120,7 +122,6 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
       Không phải bảo mật thật: 4 số băm SHA-256 chặn được trẻ con, không chặn được ai cầm file DB.
 - [x] Gộp các dòng sổ cái của cùng một giao dịch trong "Sổ của con" (`op_group_id`), hiện **tên
       việc / tên phần thưởng**, **trạng thái** (chữ + màu, theo dõi sống), và chi tiết từng hũ
-- [ ] `integration_test/` cho luồng đầy đủ
 
 **Backend & tài khoản:**
 - [ ] Dự án Supabase, migration SQL, RLS policy theo `family_id`

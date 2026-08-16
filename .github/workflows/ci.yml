@@ -25,7 +25,7 @@ jobs:
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
       - run: flutter gen-l10n
-      - run: dart format --set-exit-if-changed lib test
+      - run: dart format --set-exit-if-changed lib test integration_test
       - run: flutter analyze --fatal-infos
 
   test:
@@ -46,6 +46,29 @@ jobs:
         with:
           name: coverage
           path: coverage/lcov.info
+
+  integration:
+    name: Kiểm thử tích hợp (luồng đầy đủ)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Cài thư viện hệ thống cho Linux desktop
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libgtk-3-dev xvfb
+      - run: flutter pub get
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: flutter gen-l10n
+      # Chạy trên Linux desktop dưới Xvfb: đây là nền tảng duy nhất dựng được
+      # trên runner rẻ, và luồng cần kiểm là logic chứ không phải thứ riêng của
+      # iOS/Android.
+      - name: Chạy integration test
+        run: xvfb-run -a flutter test integration_test -d linux
 
   build:
     name: Build ${{ matrix.target }}
