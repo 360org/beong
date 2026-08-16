@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:beong/core/diagnostics/bao_cao_loi.dart';
@@ -7,9 +8,12 @@ import 'package:beong/features/settings/bao_loi_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
-/// Báo cáo lỗi người dùng gửi lên GitHub.
+/// Báo cáo lỗi người dùng gửi cho nhà phát triển.
 void main() {
   ThongTinThietBi thietBi() => ThongTinThietBi.thuThap(
     phienBanApp: '0.2.0',
@@ -103,7 +107,111 @@ void main() {
     });
   });
 
-  group('URL tạo issue', () {
+  group('gói gửi lên máy chủ', () {
+    test('mang đủ tiêu đề, thân và thông tin bản dựng', () async {
+      final goi = await taoGoiGui(baoCao());
+
+      expect(goi['tieu_de'], 'Bấm xong việc mà xu không cộng');
+      expect(goi['than'], contains('### Thiết bị'));
+      expect(goi['phien_ban_app'], '0.2.0');
+      expect(goi['he_dieu_hanh'], Platform.operatingSystem);
+    });
+
+    test('không có ảnh thì không có khoá ảnh', () async {
+      expect(
+        (await taoGoiGui(baoCao())).containsKey('anh_png_base64'),
+        isFalse,
+      );
+    });
+
+    test('ảnh đọc hỏng thì vẫn gửi được, chỉ là không kèm ảnh', () async {
+      // Mất ảnh còn hơn mất cả báo cáo.
+      final goi = await taoGoiGui(baoCao(anh: '/khong/ton/tai.png'));
+
+      expect(goi.containsKey('anh_png_base64'), isFalse);
+      expect(goi['than'], isNotEmpty);
+    });
+
+    test('ảnh có thật thì đi kèm dạng base64', () async {
+      final file = File(
+        p.join(Directory.systemTemp.path, 'beong-test-anh.png'),
+      )..writeAsBytesSync([1, 2, 3, 4]);
+      addTearDown(file.deleteSync);
+
+      final goi = await taoGoiGui(baoCao(anh: file.path));
+      expect(goi['anh_png_base64'], base64Encode([1, 2, 3, 4]));
+    });
+  });
+
+  group('gửi', () {
+    const diaChi = 'https://vi-du.test/bao-loi';
+
+    test('bản dựng chưa cấu hình endpoint thì báo đúng như vậy', () async {
+      // Không lẫn với `that`: hai ca cần hai cách xử lý khác hẳn nhau — một cái
+      // mở đường dự phòng, một cái hiện nút thử lại.
+      expect(
+        kEndpointBaoCao,
+        isEmpty,
+        reason: 'test chạy không có dart-define',
+      );
+      expect(await guiBaoCao(baoCao()), KetQuaGui.chuaCauHinh);
+    });
+
+    test('máy chủ nhận (2xx) là thành công', () async {
+      for (final ma in [200, 201, 204]) {
+        final ketQua = await guiBaoCao(
+          baoCao(),
+          endpoint: diaChi,
+          client: MockClient((_) async => http.Response('', ma)),
+        );
+        expect(ketQua, KetQuaGui.thanhCong, reason: 'mã $ma');
+      }
+    });
+
+    test('máy chủ từ chối hoặc hỏng là thất bại', () async {
+      for (final ma in [400, 401, 429, 500, 502]) {
+        final ketQua = await guiBaoCao(
+          baoCao(),
+          endpoint: diaChi,
+          client: MockClient((_) async => http.Response('lỗi', ma)),
+        );
+        expect(ketQua, KetQuaGui.that, reason: 'mã $ma');
+      }
+    });
+
+    test('mất mạng là thất bại, không ném ra ngoài', () async {
+      // Màn báo lỗi mà tự nó ném lỗi thì người dùng hết đường.
+      final ketQua = await guiBaoCao(
+        baoCao(),
+        endpoint: diaChi,
+        client: MockClient((_) async => throw const SocketException('rớt')),
+      );
+      expect(ketQua, KetQuaGui.that);
+    });
+
+    test('gửi đúng JSON lên đúng địa chỉ, chữ tiếng Việt nguyên vẹn', () async {
+      Map<String, Object?>? nhanDuoc;
+      Uri? diaChiNhan;
+
+      await guiBaoCao(
+        baoCao(moTa: 'Xu không cộng lên'),
+        endpoint: diaChi,
+        client: MockClient((req) async {
+          diaChiNhan = req.url;
+          nhanDuoc =
+              jsonDecode(utf8.decode(req.bodyBytes)) as Map<String, Object?>;
+          return http.Response('', 201);
+        }),
+      );
+
+      expect(diaChiNhan.toString(), diaChi);
+      expect(nhanDuoc!['tieu_de'], 'Xu không cộng lên');
+      // Gửi sai bảng mã thì báo cáo lên tới nơi thành một mớ dấu hỏi.
+      expect(nhanDuoc!['than'], contains('Xu không cộng lên'));
+    });
+  });
+
+  group('URL dự phòng', () {
     test('trỏ đúng repo và mang theo tiêu đề, thân, nhãn', () {
       final url = urlTaoIssue(baoCao());
 

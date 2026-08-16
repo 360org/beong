@@ -207,10 +207,13 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 
 ## Sprint 5 — Thông báo & hoàn thiện (1 tuần)
 - [x] **Báo lỗi trong app** (ngoài kế hoạch) — gom nhật ký lỗi + thiết bị + ảnh chụp màn hình,
-      mở sẵn form issue GitHub để người dùng xem lại rồi tự bấm gửi. **Cố ý không gọi API
-      GitHub**: token nhúng trong APK/IPA thì ai cũng rút ra được và nó có quyền ghi vào repo.
-      Cần tạo hai nhãn `bug` và `from-app` trong repo. Khi có backend (Sprint 3) thì thay bằng
-      endpoint giữ token phía máy chủ, lúc đó gửi được cả ảnh mà không phải rời app.
+      bấm một nút là **gửi thẳng**, người dùng không phải biết GitHub là gì. App POST tới một
+      endpoint nhỏ giữ token phía máy chủ (`11-bao-loi-endpoint.md`); **không nhúng token vào
+      app** vì token trong APK/IPA thì ai cũng rút ra được và nó có quyền ghi vào repo.
+      Bản dựng thiếu `--dart-define=BEONG_REPORT_ENDPOINT` rơi về đường mở trang, và nói rõ là
+      **chưa gửi** chứ không giả vờ đã xong.
+- [ ] Dựng endpoint nhận báo lỗi (Cloudflare Worker) + tạo nhãn `bug`, `from-app` — cần tài
+      khoản của chủ dự án, xem `11-bao-loi-endpoint.md`
 - [ ] FCM push (mobile) + local notification (desktop)
 - [ ] 7 loại thông báo trong bảng ở `01-product-spec.md` §4.7
 - [ ] Bộ điều tiết "nhắc nhẹ, không cằn nhằn": trần 2 thông báo/ngày cho trẻ, gộp sự kiện,

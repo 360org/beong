@@ -98,16 +98,18 @@ cỡ màn hình, cỡ chữ, phiên bản app), nhật ký lỗi kỹ thuật c�
 
 Ba điều quan trọng:
 
-1. **App không tự gửi.** Nó mở trang tạo issue trên GitHub với nội dung đã điền sẵn. Bạn đọc
-   lại rồi mới bấm gửi. Không bấm thì không có gì rời khỏi máy.
-2. **Issue trên GitHub là công khai** — ai cũng đọc được. Ảnh màn hình có thể chứa tên con và số
-   xu, nên màn Báo lỗi hiện ảnh xem trước và có công tắc tắt ảnh đi.
+1. **Chỉ gửi khi bạn bấm nút.** Không có nền, không tự động, không định kỳ.
+2. **Báo cáo thành một issue công khai trên GitHub** — ai cũng đọc được. Ảnh màn hình có thể
+   chứa tên con và số xu, nên màn Báo lỗi hiện ảnh **xem trước** và có công tắc tắt ảnh đi.
 3. **Nhật ký lỗi chỉ có thông điệp kỹ thuật**, không chứa tên, tuổi hay dữ liệu gia đình, và chỉ
    nằm trong bộ nhớ tạm — đóng app là mất.
 
-Sau khi gửi, nội dung đó nằm trên GitHub và chịu
+Về đường đi kỹ thuật: app gửi tới một endpoint của nhà phát triển, endpoint đó tạo issue hộ.
+App **không** chứa khoá truy cập GitHub — xem `11-bao-loi-endpoint.md` để biết vì sao.
+
+Sau khi gửi, nội dung nằm trên GitHub và chịu
 [chính sách quyền riêng tư của GitHub](https://docs.github.com/site-policy/privacy-policies).
-Muốn xoá thì xoá hoặc sửa chính issue đó trên GitHub.
+Muốn xoá thì báo cho chúng tôi, hoặc tự xoá nếu bạn có tài khoản GitHub và là người tạo issue.
 
 ---
 
@@ -162,7 +164,8 @@ thường.
   hiện chính chức năng bạn yêu cầu.
 - **Thời gian lưu**: cho tới khi bạn xoá — dữ liệu ở trên máy bạn, chúng tôi không giữ bản sao
   nào.
-- **Chuyển dữ liệu ra nước ngoài**: không có, vì không có truyền dữ liệu.
+- **Chuyển dữ liệu ra nước ngoài**: chỉ khi bạn gửi báo lỗi — máy chủ GitHub đặt ngoài Việt Nam.
+  Ngoài đường đó ra, không có truyền dữ liệu nào.
 
 ---
 
@@ -187,14 +190,17 @@ Thay đổi có ảnh hưởng thật (thu thập thêm dữ liệu, thêm bên 
 Dùng khi điền form; giữ khớp với các mục trên.
 
 **Apple — App Privacy (App Store Connect):**
-- Data Not Collected cho phần app tự thu thập. Riêng mục **Báo lỗi**: nội dung do người dùng
-  chủ động soạn và tự đăng lên GitHub bằng trình duyệt, app không truyền đi — nhưng nếu
-  reviewer hỏi thì mô tả đúng như mục 4b, đừng giấu.
+- Phần app tự thu thập: **Data Not Collected**.
+- Riêng mục **Báo lỗi**: khai là *Diagnostics → Crash Data / Other Diagnostic Data*, mục đích
+  *App Functionality*, **không** liên kết với danh tính người dùng, **không** dùng để theo dõi.
+  Nội dung chỉ rời máy khi người dùng chủ động bấm gửi — nhưng đây vẫn là truyền dữ liệu, nên
+  khai đúng như mục 4b, đừng giấu.
 - Phải khai lại khi bật đồng bộ ở Sprint 3.
 
 **Google — Data safety (Play Console):**
-- "Does your app collect or share any of the required user data types?" → **No** cho v1.0.
-- "Is all of the user data collected by your app encrypted in transit?" → không áp dụng.
+- "Does your app collect or share any of the required user data types?" → **Yes**, đúng một
+  mục: *App info and performance → Crash logs / Diagnostics*, "Optional" (người dùng tự bấm).
+- "Is all of the user data collected by your app encrypted in transit?" → **Yes** (HTTPS).
 - "Do you provide a way for users to request that their data is deleted?" → **Yes**, gỡ cài đặt
   xoá toàn bộ dữ liệu.
 

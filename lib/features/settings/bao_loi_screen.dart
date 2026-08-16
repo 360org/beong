@@ -8,20 +8,20 @@ import 'package:beong/core/diagnostics/nhat_ky_loi.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Phiên bản app hiện lên báo cáo.
 ///
 /// Chép tay từ `pubspec.yaml`. Đọc tự động cần `package_info_plus` — một gói
-/// nữa cho đúng một chuỗi; test `bao_loi_test.dart` canh hai chỗ không lệch.
+/// nữa cho đúng một chuỗi; test `bao_cao_loi_test.dart` canh hai chỗ không lệch.
 const kPhienBanApp = '0.2.0';
 
-/// Màn báo lỗi: gom nhật ký + thiết bị + ảnh màn hình rồi mở issue GitHub.
+/// Màn báo lỗi: gom nhật ký + thiết bị + ảnh màn hình rồi **gửi thẳng** cho
+/// nhà phát triển.
 ///
-/// Chụp ảnh **trước khi** màn này được đẩy lên, không phải sau: người dùng muốn
-/// báo cái màn hình đang hỏng, mà mở màn báo lỗi là màn đó đã bị che.
+/// Màn này cố ý không nhắc tới GitHub, token hay máy chủ. Bố mẹ đang bực vì
+/// app hỏng; bắt họ hiểu quy trình nội bộ của đội phát triển là đẩy việc của
+/// mình sang cho người dùng.
 class BaoLoiScreen extends StatefulWidget {
   const BaoLoiScreen({required this.duongDanAnh, super.key});
 
@@ -32,11 +32,30 @@ class BaoLoiScreen extends StatefulWidget {
   State<BaoLoiScreen> createState() => _BaoLoiScreenState();
 }
 
+/// Trạng thái của màn, quyết định người dùng thấy gì.
+enum _TrangThai {
+  dangSoan,
+  dangGui,
+
+  /// App đã gửi xong, người dùng không phải làm gì nữa.
+  daGui,
+
+  /// Bản dựng thiếu endpoint nên chỉ **mở được trang gửi**, người dùng còn
+  /// phải bấm nút gửi ở đó.
+  ///
+  /// Tách khỏi [daGui] vì gộp lại là nói dối: hiện "đã gửi rồi, cảm ơn" trong
+  /// khi báo cáo vẫn nằm im trong một tab trình duyệt là cách chắc chắn nhất để
+  /// không bao giờ nhận được nó.
+  daMoTrang,
+
+  guiHong,
+}
+
 class _BaoLoiScreenState extends State<BaoLoiScreen> {
   final _moTa = TextEditingController();
   late final List<MucNhatKy> _nhatKy = nhatKyLoi.muc;
   late bool _kemAnh = widget.duongDanAnh != null;
-  bool _dangGui = false;
+  _TrangThai _trangThai = _TrangThai.dangSoan;
 
   @override
   void initState() {
@@ -69,53 +88,40 @@ class _BaoLoiScreenState extends State<BaoLoiScreen> {
   }
 
   Future<void> _gui() async {
-    setState(() => _dangGui = true);
+    setState(() => _trangThai = _TrangThai.dangGui);
     final baoCao = _dungBaoCao();
-    final anh = baoCao.duongDanAnh;
+    final ketQua = await guiBaoCao(baoCao);
+    if (!mounted) return;
 
-    // Chia sẻ ảnh **trước** khi mở trình duyệt: mở GitHub trước thì app rơi
-    // xuống nền và bảng chia sẻ có thể không hiện lên.
-    if (anh != null) {
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(anh)],
-          text: 'Ảnh màn hình kèm báo lỗi Bé Ong — lưu lại để đính vào issue.',
-        ),
-      );
+    switch (ketQua) {
+      case KetQuaGui.thanhCong:
+        setState(() => _trangThai = _TrangThai.daGui);
+      case KetQuaGui.that:
+        setState(() => _trangThai = _TrangThai.guiHong);
+      case KetQuaGui.chuaCauHinh:
+        // Bản dựng chưa có endpoint — người dùng thật gần như không gặp ca này.
+        // Mở trang tạo báo lỗi để nội dung không bị mất trắng.
+        final moDuoc = await launchUrl(
+          urlTaoIssue(baoCao),
+          mode: LaunchMode.externalApplication,
+        );
+        if (!mounted) return;
+        setState(
+          () => _trangThai = moDuoc ? _TrangThai.daMoTrang : _TrangThai.guiHong,
+        );
     }
-    if (!mounted) return;
-
-    final url = urlTaoIssue(baoCao);
-    final moDuoc = await launchUrl(url, mode: LaunchMode.externalApplication);
-    if (!mounted) return;
-
-    setState(() => _dangGui = false);
-    if (!moDuoc) {
-      // Máy không mở được trình duyệt thì báo cáo vẫn phải tới được tay người
-      // xử lý — chép vào clipboard còn hơn để người dùng gõ lại bằng tay.
-      await Clipboard.setData(ClipboardData(text: baoCao.than));
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Không mở được trình duyệt. Nội dung báo lỗi đã chép vào bộ nhớ '
-            'tạm, anh chị dán vào GitHub giúp nhé.',
-          ),
-        ),
-      );
-    }
-  }
-
-  Future<void> _chep() async {
-    await Clipboard.setData(ClipboardData(text: _dungBaoCao().than));
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Đã chép nội dung báo lỗi')),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_trangThai == _TrangThai.daGui) {
+      return const _ManKetThuc(tuGui: true);
+    }
+    if (_trangThai == _TrangThai.daMoTrang) {
+      return const _ManKetThuc(tuGui: false);
+    }
+
+    final dangGui = _trangThai == _TrangThai.dangGui;
     final anh = widget.duongDanAnh;
 
     return Scaffold(
@@ -127,9 +133,9 @@ class _BaoLoiScreenState extends State<BaoLoiScreen> {
         ),
         children: [
           Text(
-            'App sẽ mở trang tạo báo lỗi trên GitHub với nội dung điền sẵn. '
-            'Anh chị xem lại rồi mới bấm gửi — không có gì được gửi đi trước '
-            'lúc đó.',
+            'Kể giúp chúng tôi chuyện gì đang hỏng. Báo cáo gửi kèm thông tin '
+            'máy và nhật ký lỗi kỹ thuật; nhật ký chỉ có thông điệp lỗi, không '
+            'có tên con hay số xu.',
             style: context.text.bodyMedium?.copyWith(
               color: context.semantic.onSurfaceMuted,
             ),
@@ -140,6 +146,7 @@ class _BaoLoiScreenState extends State<BaoLoiScreen> {
           TextField(
             controller: _moTa,
             maxLines: 4,
+            enabled: !dangGui,
             textCapitalization: TextCapitalization.sentences,
             decoration: const InputDecoration(
               hintText:
@@ -150,30 +157,34 @@ class _BaoLoiScreenState extends State<BaoLoiScreen> {
           _KhoiAnh(
             duongDan: anh,
             kem: _kemAnh,
-            onChanged: (v) => setState(() => _kemAnh = v),
+            onChanged: dangGui ? null : (v) => setState(() => _kemAnh = v),
           ),
           const SizedBox(height: AppSpacing.xl),
           _KhoiNhatKy(nhatKy: _nhatKy),
+          if (_trangThai == _TrangThai.guiHong) ...[
+            const SizedBox(height: AppSpacing.xl),
+            _KhoiGuiHong(),
+          ],
           const SizedBox(height: AppSpacing.xxl),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton.icon(
-              // Bắt buộc mô tả: một issue chỉ có stack trace mà không biết
-              // người ta đang làm gì thì gần như không lần lại được.
-              onPressed: _dangGui || _moTa.text.trim().isEmpty
+            child: ElevatedButton(
+              // Bắt buộc mô tả: một báo cáo chỉ có nhật ký mà không biết người
+              // ta đang làm gì thì gần như không lần lại được.
+              onPressed: dangGui || _moTa.text.trim().isEmpty
                   ? null
                   : () => unawaited(_gui()),
-              icon: const Icon(Icons.open_in_new_rounded),
-              label: const Text('MỞ GITHUB ĐỂ GỬI'),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => unawaited(_chep()),
-              icon: const Icon(Icons.copy_rounded),
-              label: const Text('CHÉP NỘI DUNG'),
+              child: dangGui
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      _trangThai == _TrangThai.guiHong
+                          ? 'THỬ GỬI LẠI'
+                          : 'GỬI BÁO CÁO',
+                    ),
             ),
           ),
           const SizedBox(height: AppSpacing.xxl),
@@ -183,11 +194,100 @@ class _BaoLoiScreenState extends State<BaoLoiScreen> {
   }
 }
 
+/// Màn kết thúc.
+///
+/// Thay hẳn màn soạn chứ không chỉ hiện một SnackBar rồi quay lại: người dùng
+/// cần một dấu chấm hết rõ ràng, nếu không họ sẽ bấm gửi lần nữa cho chắc.
+class _ManKetThuc extends StatelessWidget {
+  const _ManKetThuc({required this.tuGui});
+
+  /// `true` = app đã gửi xong. `false` = mới mở trang, người dùng còn phải bấm
+  /// gửi ở đó.
+  final bool tuGui;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Báo lỗi', style: context.text.titleLarge)),
+      body: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              tuGui ? Icons.check_circle_rounded : Icons.open_in_new_rounded,
+              size: 64,
+              color: tuGui ? context.semantic.success : context.colors.primary,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              tuGui ? 'Đã gửi rồi, cảm ơn anh chị!' : 'Đã mở trang gửi báo cáo',
+              style: context.text.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              tuGui
+                  ? 'Chúng tôi sẽ xem và sửa. Nếu cần hỏi thêm thì chưa có '
+                        'cách liên hệ lại — app không lưu email của anh chị.'
+                  : 'Nội dung đã điền sẵn ở đó. Anh chị bấm nút gửi trên trang '
+                        'vừa mở giúp nhé — báo cáo chưa được gửi đi.',
+              style: context.text.bodyMedium?.copyWith(
+                color: context.semantic.onSurfaceMuted,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.xxl),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('XONG'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Báo gửi hỏng, kèm lý do người dùng làm được gì đó.
+class _KhoiGuiHong extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: context.semantic.danger.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(color: context.semantic.danger),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.wifi_off_rounded, color: context.semantic.danger),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                'Chưa gửi được. Kiểm tra kết nối mạng rồi thử lại — nội dung '
+                'anh chị vừa viết vẫn còn nguyên ở trên.',
+                style: context.text.bodySmall,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Ảnh chụp kèm theo, xem trước và bật/tắt được.
 ///
 /// Cho xem trước chứ không chỉ ghi "đã đính kèm ảnh": ảnh chụp đúng lúc màn
 /// hình đang hiện tên con và số xu, nên người gửi phải **nhìn thấy** thứ mình
-/// sắp đăng lên một nơi công khai.
+/// sắp gửi đi.
 class _KhoiAnh extends StatelessWidget {
   const _KhoiAnh({
     required this.duongDan,
@@ -197,7 +297,9 @@ class _KhoiAnh extends StatelessWidget {
 
   final String? duongDan;
   final bool kem;
-  final ValueChanged<bool> onChanged;
+
+  /// `null` là đang gửi, khoá công tắc lại.
+  final ValueChanged<bool>? onChanged;
 
   @override
   Widget build(BuildContext context) {

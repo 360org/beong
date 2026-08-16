@@ -105,7 +105,7 @@ class SettingsScreen extends ConsumerWidget {
                   _SettingsTile(
                     icon: Icons.bug_report_outlined,
                     title: 'Báo lỗi',
-                    subtitle: 'Gửi lên GitHub',
+                    subtitle: 'Gửi cho nhà phát triển',
                     onTap: () => unawaited(moManBaoLoi(context)),
                   ),
                   _SettingsTile(
