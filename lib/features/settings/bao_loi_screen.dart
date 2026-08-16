@@ -115,10 +115,10 @@ class _BaoLoiScreenState extends State<BaoLoiScreen> {
   @override
   Widget build(BuildContext context) {
     if (_trangThai == _TrangThai.daGui) {
-      return const _ManKetThuc(tuGui: true);
+      return const ManKetThucBaoLoi(tuGui: true);
     }
     if (_trangThai == _TrangThai.daMoTrang) {
-      return const _ManKetThuc(tuGui: false);
+      return const ManKetThucBaoLoi(tuGui: false);
     }
 
     final dangGui = _trangThai == _TrangThai.dangGui;
@@ -198,8 +198,13 @@ class _BaoLoiScreenState extends State<BaoLoiScreen> {
 ///
 /// Thay hẳn màn soạn chứ không chỉ hiện một SnackBar rồi quay lại: người dùng
 /// cần một dấu chấm hết rõ ràng, nếu không họ sẽ bấm gửi lần nữa cho chắc.
-class _ManKetThuc extends StatelessWidget {
-  const _ManKetThuc({required this.tuGui});
+///
+/// Công khai (không `_`) để test dựng thẳng được cả hai ca: phân biệt "đã gửi"
+/// với "mới mở trang" là chỗ dễ sai nhất ở đây, và đi vòng qua cả luồng gửi
+/// mới kiểm được thì sẽ không ai kiểm.
+@visibleForTesting
+class ManKetThucBaoLoi extends StatelessWidget {
+  const ManKetThucBaoLoi({required this.tuGui, super.key});
 
   /// `true` = app đã gửi xong. `false` = mới mở trang, người dùng còn phải bấm
   /// gửi ở đó.

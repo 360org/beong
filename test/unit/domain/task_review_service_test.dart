@@ -155,7 +155,7 @@ void main() {
 
       final doneNow = await service.complete('i1');
 
-      expect(doneNow, isTrue);
+      expect(doneNow.xuCongNgay, isTrue);
       expect((await reload('i1')).status, InstanceStatus.approved.name);
       expect(
         (await walletDao.balanceOf(childId)).total,
@@ -202,7 +202,7 @@ void main() {
 
       final doneNow = await service.complete('i1');
 
-      expect(doneNow, isFalse);
+      expect(doneNow.xuCongNgay, isFalse);
       expect((await reload('i1')).status, InstanceStatus.pendingReview.name);
       expect((await walletDao.balanceOf(childId)).total, 0);
     });
@@ -222,7 +222,7 @@ void main() {
     test('task đặt riêng auto vẫn xong luôn dù nhà bật duyệt', () async {
       await makeInstance(id: 'i1', approvalMode: 'auto');
 
-      expect(await service.complete('i1'), isTrue);
+      expect((await service.complete('i1')).xuCongNgay, isTrue);
       expect((await walletDao.balanceOf(childId)).total, 10);
     });
 
@@ -316,6 +316,47 @@ void main() {
           .first;
 
       expect(done.map((i) => i.id), ['i1']);
+    });
+  });
+
+  group('huy hiệu vừa nhận được trả ra ngoài', () {
+    test('lượt thứ 10 mở khoá huy hiệu và complete() nói tên nó', () async {
+      // `awardNewBadges` vẫn luôn trả danh sách huy hiệu mới, nhưng trước đây
+      // chỗ gọi **vứt đi** — con đạt huy hiệu mà màn hình không nói gì cả, phải
+      // tự mò vào màn Huy hiệu mới biết.
+      for (var i = 1; i <= 9; i++) {
+        await makeInstance(id: 'v$i');
+        await service.complete('v$i');
+      }
+      await makeInstance(id: 'v10');
+
+      final ketQua = await service.complete('v10');
+
+      expect(ketQua.xuCongNgay, isTrue);
+      expect(
+        ketQua.huyHieuMoi.map((b) => b.key),
+        contains('tasks_10'),
+        reason: 'việc thứ 10 mở khoá "Mười việc đầu tiên"',
+      );
+    });
+
+    test('lượt bình thường thì không có huy hiệu nào', () async {
+      await makeInstance(id: 'v1');
+      final ketQua = await service.complete('v1');
+
+      // Rỗng là chuyện thường; nhầm chỗ này thành "luôn có" sẽ nổ hoa giấy mỗi
+      // lần bấm và huy hiệu mất hết ý nghĩa.
+      expect(ketQua.huyHieuMoi, isEmpty);
+    });
+
+    test('việc vào hàng đợi duyệt thì chưa xét huy hiệu', () async {
+      await memberDao.setRequireApproval(familyId, value: true);
+      await makeInstance(id: 'v1');
+
+      final ketQua = await service.complete('v1');
+
+      expect(ketQua.xuCongNgay, isFalse);
+      expect(ketQua.huyHieuMoi, isEmpty);
     });
   });
 }

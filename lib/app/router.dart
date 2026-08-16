@@ -98,8 +98,16 @@ GoRouter createRouter({
                     // Đường dẫn con nên thanh điều hướng vẫn hiện và nút back
                     // quay về đúng tab Nhiệm vụ.
                     path: 'routine/:routineId',
+                    // `redirect` chứ không phải `?? ''`: chuỗi rỗng lọt xuống
+                    // thì màn sửa thói quen mở ra **trống trơn**, không báo gì
+                    // — im lặng sai còn khó lần ra hơn một cú crash. Về thẳng
+                    // danh sách là thứ người dùng hiểu được ngay.
+                    redirect: (context, state) =>
+                        (state.pathParameters['routineId'] ?? '').isEmpty
+                        ? Routes.tasks
+                        : null,
                     builder: (context, state) => RoutineEditorScreen(
-                      routineId: state.pathParameters['routineId'] ?? '',
+                      routineId: state.pathParameters['routineId']!,
                     ),
                   ),
                 ],

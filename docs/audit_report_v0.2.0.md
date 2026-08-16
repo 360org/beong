@@ -51,10 +51,9 @@ Dự án **Bé Ong** (DailyChildren) là ứng dụng quản lý việc nhà, x�
   thiếu đúng tầng ở giữa.
 
 ### B. Chất Lượng Mã Nguồn (Code Quality & Flutter Best Practices)
-* **Null Safety**: Đã bỏ một unwrap cưỡng chế trong router
-  (`state.pathParameters['routineId']!` → `?? ''`). Lưu ý đánh đổi: hết crash, nhưng
-  `routineId` rỗng nay mở ra màn sửa thói quen **trống trơn** thay vì báo lỗi — im lặng sai còn
-  khó lần ra hơn crash. Nên điều hướng về danh sách kèm thông báo.
+* **Null Safety**: unwrap cưỡng chế trong router đã xử lý bằng `redirect` — `routineId` rỗng
+  đưa về danh sách Nhiệm vụ, không crash mà cũng không mở ra một màn trống trơn. (Bản sửa
+  trung gian `?? ''` đổi crash lấy im lặng sai, còn khó lần ra hơn.)
 * **Asynchronous Safety**: Các màn hình BottomSheet (`adjust_xu_sheet.dart`, `parent_pin_sheet.dart`, `goal_sheet.dart`) đã đảm bảo kiểm tra `mounted` sau `await` trước khi điều hướng hoặc gọi context.
 * **Immutability**: Các entity và state provider đều sử dụng thuộc tính `final` và cập nhật thông qua phương thức `copyWith`.
 
@@ -82,7 +81,7 @@ Dự án **Bé Ong** (DailyChildren) là ứng dụng quản lý việc nhà, x�
    - Vòng tròn tiến độ hoàn thành nhiệm vụ theo ngày.
    - Linh vật Bé Ong hoạt ảnh biểu cảm theo mức độ hoàn thành.
    - Danh sách công việc chia rõ: Cần làm / Đã xong / Bỏ lỡ.
-   - Hiệu ứng pháo hoa ăn mừng khi hoàn thành nhiệm vụ. (**Không** nổ khi nhận huy hiệu — `ConfettiBurst` chỉ nối vào `onCompleted` của thẻ việc.)
+   - Hiệu ứng pháo hoa ăn mừng khi hoàn thành nhiệm vụ, và khi **nhận huy hiệu mới** thì nổ kèm SnackBar nêu tên huy hiệu.
    - Quản lý mục tiêu tiết kiệm và thanh tiến độ tích lũy xu.
    - Màn hình đổi phần thưởng và xem các phiếu thưởng đã được duyệt.
    - Giao diện tự chia xu từ hũ Chờ vào các hũ của gia đình. Số hũ **không cố định ba**: từ ADR-024 bố mẹ tự lập, sửa tên/emoji/tỷ lệ và xếp lại hũ.
@@ -120,9 +119,10 @@ Xếp theo mức chặn thật, không theo độ khó.
 | 3 | **Icon app, splash, ảnh chụp store** | Cùng lý do, và cần thiết kế chứ không phải code |
 | 4 | **Đưa chuỗi màn hình vào ARB** | Đang có 3 chỗ dùng ARB / 95 chuỗi cứng; đây là việc thật đứng sau ô chọn ngôn ngữ |
 | 5 | **Tầng repository** | Phải có trước sync, và Sprint 3 là việc kế tiếp |
-| 6 | **Widget test cho màn báo lỗi** | Bốn trạng thái đang chỉ kiểm bằng tay |
-| 7 | Router: `routineId` rỗng → về danh sách kèm thông báo | Hiện mở màn trống trơn, im lặng sai |
+| 6 | ~~Widget test cho màn báo lỗi~~ ✅ | `test/widget/bao_loi_screen_test.dart`, 7 test |
+| 7 | ~~Router: `routineId` rỗng~~ ✅ | Nay `redirect` về danh sách Nhiệm vụ |
 | 8 | Task Editor: khối **chế độ bằng chứng** | Khối thứ 8 còn thiếu; docs xếp ở v1.1 |
+| 9 | ~~Nhận huy hiệu mà không có phản hồi gì~~ ✅ | `complete()` nay trả huy hiệu vừa mở khoá; màn con nổ hoa giấy + hiện tên |
 
 **Cố ý chưa làm** (ghi ra để lần audit sau không đề xuất lại): ô cài đặt âm thanh — app chưa
 phát âm thanh nào, thêm một công tắc không điều khiển gì là cờ chết, đúng loại lỗi dự án này đã

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:beong/app/router.dart';
 import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/family_clock_provider.dart';
@@ -19,12 +20,14 @@ import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/jar_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
+import 'package:beong/domain/entities/badge_def.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/features/goals/goal_section.dart';
 import 'package:beong/features/rewards/allocate_xu_sheet.dart';
 import 'package:beong/features/settings/parent_pin_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class ChildHomeScreen extends ConsumerStatefulWidget {
   const ChildHomeScreen({super.key});
@@ -41,6 +44,37 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
   /// Ở cấp màn hình thì hiệu ứng sống qua lần xếp lại danh sách, và nổ giữa màn
   /// còn dễ thấy hơn nổ trong một hàng cao 70px.
   bool _celebrate = false;
+
+  /// Con bấm xong một lượt việc.
+  ///
+  /// Ở **cấp màn hình** chứ không trong thẻ việc: thẻ bị tháo ngay khi việc đổi
+  /// mục, nên `mounted` của nó đã `false` lúc `complete()` trả về và huy hiệu
+  /// vừa nhận sẽ rơi vào im lặng.
+  Future<void> _hoanThanhViec(String instanceId) async {
+    final ketQua = await ref
+        .read(taskReviewServiceProvider)
+        .complete(instanceId);
+    if (!mounted || ketQua.huyHieuMoi.isEmpty) return;
+    _khoeHuyHieu(ketQua.huyHieuMoi);
+  }
+
+  /// Khoe huy hiệu vừa nhận.
+  ///
+  /// Nổ hoa giấy **và** hiện tên huy hiệu: hoa giấy một mình thì con tưởng là
+  /// hiệu ứng của việc vừa bấm, không biết mình vừa đạt được thứ gì.
+  void _khoeHuyHieu(List<BadgeDef> huyHieu) {
+    unawaited(_celebrateOnce());
+    final ten = huyHieu.map((b) => b.title).join(', ');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Con vừa nhận huy hiệu "$ten"!'),
+        action: SnackBarAction(
+          label: 'XEM',
+          onPressed: () => context.go(Routes.badges),
+        ),
+      ),
+    );
+  }
 
   Future<void> _celebrateOnce() async {
     setState(() => _celebrate = true);
@@ -220,6 +254,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
               instance: instance,
               taskDao: taskDao,
               onCompleted: _celebrateOnce,
+              onComplete: _hoanThanhViec,
             ),
           ),
         ),
@@ -238,6 +273,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
               instance: instance,
               taskDao: taskDao,
               onCompleted: _celebrateOnce,
+              onComplete: _hoanThanhViec,
             ),
           ),
         ),
@@ -256,6 +292,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
               instance: instance,
               taskDao: taskDao,
               onCompleted: _celebrateOnce,
+              onComplete: _hoanThanhViec,
             ),
           ),
         ),
@@ -735,6 +772,7 @@ class _InstanceCard extends ConsumerStatefulWidget {
     required this.instance,
     required this.taskDao,
     required this.onCompleted,
+    required this.onComplete,
     super.key,
   });
 
@@ -744,6 +782,10 @@ class _InstanceCard extends ConsumerStatefulWidget {
   /// Gọi khi con vừa bấm xong việc, để màn hình nổ hoa giấy. Thẻ không tự nổ:
   /// nó bị tháo ngay sau khi bấm vì danh sách xếp lại theo trạng thái.
   final VoidCallback onCompleted;
+
+  /// Báo lên màn hình rằng con vừa bấm xong lượt này. Màn hình gọi service và
+  /// xử lý kết quả — nó sống qua lần xếp lại danh sách, còn thẻ thì không.
+  final Future<void> Function(String instanceId) onComplete;
 
   @override
   ConsumerState<_InstanceCard> createState() => _InstanceCardState();
@@ -793,9 +835,11 @@ class _InstanceCardState extends ConsumerState<_InstanceCard> {
       // biết nhà này có bật duyệt hay không, và là chỗ cộng xu (ADR-023).
       onToggle: () {
         if (scale.celebrateOnTap) widget.onCompleted();
-        unawaited(
-          ref.read(taskReviewServiceProvider).complete(widget.instance.id),
-        );
+        // Gọi lên **màn hình**, không tự `await` ở đây: bấm xong là việc rời
+        // mục "Cần làm" xuống "Đã xong" ngay, thẻ này bị tháo, và mọi
+        // `if (!mounted) return` sau `await` sẽ nuốt mất kết quả — đúng cái bẫy
+        // đã làm hoa giấy không bao giờ hiện.
+        unawaited(widget.onComplete(widget.instance.id));
       },
     );
   }
