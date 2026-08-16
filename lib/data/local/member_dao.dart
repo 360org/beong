@@ -95,6 +95,27 @@ class MemberDao extends DatabaseAccessor<AppDatabase> with _$MemberDaoMixin {
     );
   }
 
+  /// Giờ bắt đầu ngày mới của gia đình. 4 nghĩa là 03:59 vẫn thuộc hôm qua.
+  Stream<int> watchDayRolloverHour(String familyId) =>
+      watchFamily(familyId).map((f) => f.dayRolloverHour);
+
+  /// Đặt giờ đổi ngày.
+  ///
+  /// Chặn ngoài 0–12 ở đây chứ không chỉ ở UI: `FamilyClock` có `assert` cùng
+  /// khoảng, mà `assert` bị tắt ở bản release — giá trị hỏng sẽ lọt xuống và
+  /// làm lệch ngày của cả nhà thay vì báo lỗi.
+  Future<void> setDayRolloverHour(String familyId, int hour) async {
+    if (hour < 0 || hour > 12) {
+      throw ArgumentError.value(hour, 'hour', 'Giờ đổi ngày phải trong 0..12');
+    }
+    await (update(families)..where((f) => f.id.equals(familyId))).write(
+      FamiliesCompanion(
+        dayRolloverHour: Value(hour),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   /// Chính sách trừ xu của gia đình — ADR-022.
   Future<PenaltyPolicy> penaltyPolicyOf(String familyId) async {
     final family = await getFamily(familyId);

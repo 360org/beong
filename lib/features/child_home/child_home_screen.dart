@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/database_provider.dart';
+import 'package:beong/core/providers/family_clock_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
@@ -18,7 +19,6 @@ import 'package:beong/data/local/jar_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
-import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/features/goals/goal_section.dart';
 import 'package:beong/features/rewards/allocate_xu_sheet.dart';
 import 'package:beong/features/settings/parent_pin_sheet.dart';
@@ -59,9 +59,10 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
     final taskDao = ref.watch(taskDaoProvider);
     final penaltyService = ref.watch(penaltyServiceProvider);
 
-    final today = FamilyClock(
-      timeZoneOffset: DateTime.now().timeZoneOffset,
-    ).today();
+    final today =
+        (ref.watch(familyClockProvider(session.familyId)).value ??
+                fallbackFamilyClock())
+            .today();
 
     return Scaffold(
       body: ConfettiBurst(

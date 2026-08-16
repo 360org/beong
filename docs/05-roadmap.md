@@ -12,9 +12,9 @@ Cập nhật bằng cách **đọc code**, không tick theo cảm giác — xem 
 |---|---|---|
 | 0 — Nền móng | ✅ Xong | Còn pre-commit hook, cố ý hoãn |
 | 1 — Dữ liệu local | ✅ Xong | Trừ **tầng repository** (`lib/domain/repositories/` rỗng) |
-| 2 — Luồng UI cốt lõi | 🟡 Gần xong | Còn 2 khối cuối của Task Editor, PIN phụ huynh, integration test |
+| 2 — Luồng UI cốt lõi | 🟡 Gần xong | PIN phụ huynh ✅. Còn khối chế độ bằng chứng của Task Editor, integration test |
 | 3 — Backend & ghép cặp | 🔴 Chưa bắt đầu | Pha 0 đã xong 2/4; phần backend chờ dựng Supabase |
-| 4 — Phần thưởng & tài chính | 🟡 Đang làm | Đổi thưởng + duyệt + hoàn xu ✅, trừ xu ✅, con tự chia xu ✅, hũ tự lập ✅, huy hiệu + streak ✅. Thiếu tỷ giá tiền thật, mục tiêu tiết kiệm |
+| 4 — Phần thưởng & tài chính | 🟡 Đang làm | Đổi thưởng + duyệt + hoàn xu ✅, trừ xu ✅, con tự chia xu ✅, hũ tự lập ✅, huy hiệu + streak ✅, mục tiêu tiết kiệm ✅. Thiếu tỷ giá tiền thật |
 | 5 — Thông báo & hoàn thiện | 🔴 Chưa bắt đầu | |
 | 6 — Phát hành v1.0 | 🟡 Hạ tầng sẵn | CI/CD 7 job + Fastlane ✅; chưa có tài khoản store, chưa có icon/ảnh chụp |
 
@@ -77,9 +77,9 @@ toàn bộ offline. ✅ đạt.
   - **Chưa có animation ăn mừng.** `KidScale.celebrateOnTap` đã khai nhưng không nối vào hiệu ứng
     nào — vẫn là cờ chết.
 - [x] Parent Home + hàng đợi duyệt (+ nút Duyệt tất cả, + danh sách "Đã xong hôm nay" để mở lại)
-- [~] Chuyển hồ sơ ✅ — **PIN phụ huynh chưa làm.** Chỉ có cột `members.pin_hash` trong schema,
-      không có UI, không có logic. Hiện đổi vai không cần gì cả; vô hại theo ADR-018 nhưng
-      `09` §6 có ghi ca "máy bố mẹ cũng là máy con dùng" cần PIN.
+- [x] Chuyển hồ sơ + **PIN phụ huynh** — `09` §6 ca "máy bố mẹ cũng là máy con dùng". Trước đó
+      đổi vai không cần gì cả, tức là cả vòng duyệt của ADR-023/ADR-025 dựa trên một giả định
+      chưa từng được bảo vệ: con bấm avatar, chọn "Bố mẹ", rồi tự duyệt việc của mình.
 - [ ] Integration test luồng đầy đủ — chưa có, thư mục `integration_test/` chưa tồn tại.
 
 **Xong khi:** dùng được thật trên 1 thiết bị, không cần mạng. ✅ đạt — đã chạy thật và chụp 27 ảnh
@@ -112,10 +112,12 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
 
 **Việc còn nợ từ Sprint 1–2, không cần backend:**
 - [ ] Tầng repository (`lib/domain/repositories/` đang rỗng) — phải có trước khi thêm sync
-- [ ] Task Editor đủ 8 khối (còn thiếu chế độ duyệt riêng, chế độ bằng chứng)
+- [ ] Task Editor đủ 8 khối (còn thiếu **chế độ bằng chứng**; chế độ duyệt riêng đã xong)
 - [x] Routine Editor + kéo thả thứ tự
 - [x] Animation ăn mừng — `ConfettiBurst`, nổ ở cấp màn hình vì thẻ việc bị tháo ngay sau khi bấm
-- [ ] PIN phụ huynh (chỉ có cột `pin_hash`, chưa có UI/logic)
+- [x] **PIN phụ huynh** — `ParentPinService` + sheet nhập PIN, hỏi ở cả hai cửa đổi vai (màn con
+      và màn Cài đặt) và hỏi lại PIN cũ trước khi đổi/bỏ. Nhà chưa đặt PIN thì không chặn gì.
+      Không phải bảo mật thật: 4 số băm SHA-256 chặn được trẻ con, không chặn được ai cầm file DB.
 - [x] Gộp các dòng sổ cái của cùng một giao dịch trong "Sổ của con" (`op_group_id`), hiện **tên
       việc / tên phần thưởng**, **trạng thái** (chữ + màu, theo dõi sống), và chi tiết từng hũ
 - [ ] `integration_test/` cho luồng đầy đủ
@@ -168,7 +170,9 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
       widget riêng thì **không cần** — ngọn lửa đã nằm trong thẻ tổng quan của màn hình con.
 - [ ] `JarTrio` — hiện các hũ của con, số hũ do bố mẹ đặt (ADR-024)
 - [ ] Tỷ giá quy đổi ra tiền thật (mặc định tắt — ADR-017)
-- [ ] Mục tiêu tiết kiệm + thanh tiến độ
+- [x] **Mục tiêu tiết kiệm + thanh tiến độ** — `GoalDao` + `GoalService`. Bảng `savings_goals` có
+      từ v1 nhưng không ai đọc/ghi. Tiến độ đo bằng **hũ Để dành**, không phải tổng xu; tới đích
+      **không trừ xu**. Bố mẹ đặt từ Thống kê, con chỉ xem.
 - [ ] **Sổ của con** — lịch sử đầy đủ, `manual_adjust` bắt buộc có lý do
 - [x] **Duyệt là tuỳ chọn, mặc định xong-là-xong** (ADR-023, thay ADR-009) — công tắc trong Cài đặt,
       nút "Duyệt tất cả", danh sách "Đã xong hôm nay" để mở lại. Sửa kèm một lỗi thật: đường tự
@@ -196,7 +200,10 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 - [ ] 7 loại thông báo trong bảng ở `01-product-spec.md` §4.7
 - [ ] Bộ điều tiết "nhắc nhẹ, không cằn nhằn": trần 2 thông báo/ngày cho trẻ, gộp sự kiện,
       chặn gửi sau giờ đi ngủ — có unit test riêng
-- [ ] Cài đặt: ngôn ngữ, chủ đề sáng/tối, giờ đổi ngày, âm thanh
+- [x] Cài đặt: **chủ đề sáng/tối** (lưu theo thiết bị) và **giờ đổi ngày** (0/3/4/5/6 giờ). Sửa
+      kèm một lỗi chờ sẵn: các màn hình tự dựng `FamilyClock` với mặc định 4 và bỏ qua cột
+      `day_rollover_hour` mà `DayStartService` vẫn đọc — hai bên sẽ lệch ngày ngay khi có ai đổi.
+- [ ] Cài đặt: ngôn ngữ, âm thanh
 - [ ] Trang trống, trạng thái lỗi, màn hình mất mạng
 - [ ] Rà soát khả dụng (TalkBack/VoiceOver, contrast, text scale)
 

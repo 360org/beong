@@ -83,6 +83,7 @@ class SettingsScreen extends ConsumerWidget {
                   _AllocationTile(familyId: session.familyId),
                   _JarsTile(familyId: session.familyId),
                   _PenaltyTile(familyId: session.familyId),
+                  _RolloverTile(familyId: session.familyId),
                   _SettingsTile(
                     icon: Icons.info_outline,
                     title: 'Phiên bản',
@@ -389,6 +390,75 @@ class _ThemeTile extends ConsumerWidget {
     );
     if (chosen == null) return;
     await ref.read(themeModeSettingProvider.notifier).set(chosen);
+  }
+}
+
+/// Giờ đổi ngày của gia đình.
+///
+/// Không phải chi tiết kỹ thuật: giờ này quyết định lúc nào việc chưa làm bị
+/// tính là bỏ lỡ. Nhà cho con thức khuya làm bài mà để 0 giờ thì việc làm lúc
+/// 00:10 rơi sang ngày hôm sau và ngày hôm trước bị đánh bỏ lỡ.
+class _RolloverTile extends ConsumerWidget {
+  const _RolloverTile({required this.familyId});
+
+  final String familyId;
+
+  /// Các mốc cho chọn. Không cho gõ số tuỳ ý: 0–12 là khoảng `FamilyClock` chấp
+  /// nhận, và các mốc này phủ hết các kiểu sinh hoạt thật.
+  static const _choices = <int, String>{
+    0: 'Nửa đêm',
+    3: '3 giờ sáng',
+    4: '4 giờ sáng',
+    5: '5 giờ sáng',
+    6: '6 giờ sáng',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return StreamBuilder<int>(
+      stream: ref.watch(memberDaoProvider).watchDayRolloverHour(familyId),
+      builder: (context, snap) {
+        final hour = snap.data;
+        return _SettingsTile(
+          icon: Icons.schedule_rounded,
+          title: 'Giờ đổi ngày',
+          subtitle: hour == null ? '…' : (_choices[hour] ?? '$hour giờ'),
+          onTap: () => unawaited(_pick(context, ref, hour ?? 4)),
+        );
+      },
+    );
+  }
+
+  Future<void> _pick(BuildContext context, WidgetRef ref, int current) async {
+    final chosen = await showModalBottomSheet<int>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Text(
+                'Việc chưa làm xong trước giờ này tính là bỏ lỡ của hôm trước.',
+                style: context.text.bodySmall?.copyWith(
+                  color: context.semantic.onSurfaceMuted,
+                ),
+              ),
+            ),
+            for (final entry in _choices.entries)
+              ListTile(
+                title: Text(entry.value),
+                trailing: entry.key == current
+                    ? Icon(Icons.check_circle, color: context.colors.primary)
+                    : null,
+                onTap: () => Navigator.pop(sheetContext, entry.key),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (chosen == null) return;
+    await ref.read(memberDaoProvider).setDayRolloverHour(familyId, chosen);
   }
 }
 

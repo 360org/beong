@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:beong/app/router.dart';
 import 'package:beong/core/providers/database_provider.dart';
+import 'package:beong/core/providers/family_clock_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
@@ -443,7 +444,7 @@ class _PendingCardState extends State<_PendingCard> {
   }
 }
 
-class _ChildSummaryCard extends StatelessWidget {
+class _ChildSummaryCard extends ConsumerWidget {
   const _ChildSummaryCard({
     required this.child,
     required this.taskDao,
@@ -459,12 +460,13 @@ class _ChildSummaryCard extends StatelessWidget {
   final String reviewerId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = AppColors.profileColor(child.colorIndex);
 
-    final today = FamilyClock(
-      timeZoneOffset: DateTime.now().timeZoneOffset,
-    ).today();
+    final today =
+        (ref.watch(familyClockProvider(child.familyId)).value ??
+                fallbackFamilyClock())
+            .today();
 
     return Card(
       child: Padding(
