@@ -1,4 +1,5 @@
 import 'package:beong/app/app.dart';
+import 'package:beong/core/diagnostics/nhat_ky_loi.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/providers/theme_mode_provider.dart';
@@ -7,6 +8,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Gắn **trước** mọi thứ khác: lỗi lúc mở DB hay lúc nạp session cũng phải vào
+  // được nhật ký, và đó chính là loại lỗi khó tái tạo nhất.
+  ganBatLoiToanCuc();
 
   // Container dựng ở đây chứ không để `ProviderScope` tự tạo, để phần nạp lại
   // session dùng **đúng** connection DB mà app sẽ dùng sau đó. Nếu mở một DB

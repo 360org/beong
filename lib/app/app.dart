@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:beong/app/router.dart';
+import 'package:beong/core/diagnostics/chup_man_hinh.dart';
 import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
@@ -98,7 +99,12 @@ class _BeOngAppState extends ConsumerState<BeOngApp>
         ).clamp(maxScaleFactor: AppTypography.maxTextScale);
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaler: scale),
-          child: child ?? const SizedBox.shrink(),
+          // Bọc cả app trong một `RepaintBoundary` để màn "Báo lỗi" chụp được
+          // đúng thứ người dùng đang nhìn — xem `core/diagnostics`.
+          child: RepaintBoundary(
+            key: khoaChupManHinh,
+            child: child ?? const SizedBox.shrink(),
+          ),
         );
       },
     );

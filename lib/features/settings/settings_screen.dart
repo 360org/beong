@@ -15,6 +15,7 @@ import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/services/money_exchange.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:beong/features/members/add_child_sheet.dart';
+import 'package:beong/features/settings/bao_loi_screen.dart';
 import 'package:beong/features/settings/parent_pin_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -102,9 +103,18 @@ class SettingsScreen extends ConsumerWidget {
                   _RolloverTile(familyId: session.familyId),
                   _ExchangeRateTile(familyId: session.familyId),
                   _SettingsTile(
+                    icon: Icons.bug_report_outlined,
+                    title: 'Báo lỗi',
+                    subtitle: 'Gửi lên GitHub',
+                    onTap: () => unawaited(moManBaoLoi(context)),
+                  ),
+                  _SettingsTile(
                     icon: Icons.info_outline,
                     title: 'Phiên bản',
-                    subtitle: '0.2.0',
+                    // Cùng một hằng số với báo cáo lỗi: hai chỗ tự chép số
+                    // riêng thì có ngày màn Cài đặt nói một đằng, issue gửi
+                    // lên nói một nẻo.
+                    subtitle: kPhienBanApp,
                     onTap: () {},
                   ),
                 ],

@@ -87,9 +87,33 @@ không cần liên hệ ai.
 
 ---
 
+## 4b. Gửi báo lỗi
+
+Trong Cài đặt có mục **Báo lỗi**. Đây là chỗ **duy nhất** trong app có thể đưa dữ liệu ra khỏi
+máy, và nó chỉ chạy khi bạn chủ động bấm.
+
+Khi bạn bấm, app soạn sẵn một nội dung gồm: mô tả bạn tự viết, thông tin thiết bị (hệ điều hành,
+cỡ màn hình, cỡ chữ, phiên bản app), nhật ký lỗi kỹ thuật của phiên chạy hiện tại, và — nếu bạn
+để bật — một ảnh chụp màn hình.
+
+Ba điều quan trọng:
+
+1. **App không tự gửi.** Nó mở trang tạo issue trên GitHub với nội dung đã điền sẵn. Bạn đọc
+   lại rồi mới bấm gửi. Không bấm thì không có gì rời khỏi máy.
+2. **Issue trên GitHub là công khai** — ai cũng đọc được. Ảnh màn hình có thể chứa tên con và số
+   xu, nên màn Báo lỗi hiện ảnh xem trước và có công tắc tắt ảnh đi.
+3. **Nhật ký lỗi chỉ có thông điệp kỹ thuật**, không chứa tên, tuổi hay dữ liệu gia đình, và chỉ
+   nằm trong bộ nhớ tạm — đóng app là mất.
+
+Sau khi gửi, nội dung đó nằm trên GitHub và chịu
+[chính sách quyền riêng tư của GitHub](https://docs.github.com/site-policy/privacy-policies).
+Muốn xoá thì xoá hoặc sửa chính issue đó trên GitHub.
+
+---
+
 ## 5. Chia sẻ với bên thứ ba
 
-**Không.** App hiện không gửi dữ liệu gia đình đi đâu cả.
+**Không**, trừ báo lỗi bạn tự gửi (mục 4b). App không tự gửi dữ liệu gia đình đi đâu cả.
 
 Các thư viện mã nguồn mở app dùng (Flutter, Drift, SQLite, Riverpod, go_router) chạy hoàn toàn
 trên thiết bị và không tự gửi dữ liệu ra ngoài.
@@ -121,6 +145,10 @@ liệu ra file.
 
 App hiện **không** xin quyền nào: không máy ảnh, không micro, không vị trí, không danh bạ,
 không thông báo, không thư viện ảnh.
+
+Ảnh chụp màn hình ở mục Báo lỗi do chính app tự vẽ lại từ giao diện của mình, không dùng chức
+năng chụp màn hình của hệ điều hành — nên không cần quyền, và cũng **không** lấy được thanh
+thông báo hay nội dung của ứng dụng khác.
 
 Bản sau sẽ xin **thông báo** (để nhắc việc) và có thể xin **máy ảnh** (để trẻ chụp ảnh chứng
 minh đã làm việc). Cả hai đều sẽ là tuỳ chọn, hỏi đúng lúc dùng, và từ chối vẫn dùng app bình
@@ -159,7 +187,9 @@ Thay đổi có ảnh hưởng thật (thu thập thêm dữ liệu, thêm bên 
 Dùng khi điền form; giữ khớp với các mục trên.
 
 **Apple — App Privacy (App Store Connect):**
-- Data Not Collected — chọn mục này cho bản v1.0, vì app không truyền dữ liệu nào ra khỏi máy.
+- Data Not Collected cho phần app tự thu thập. Riêng mục **Báo lỗi**: nội dung do người dùng
+  chủ động soạn và tự đăng lên GitHub bằng trình duyệt, app không truyền đi — nhưng nếu
+  reviewer hỏi thì mô tả đúng như mục 4b, đừng giấu.
 - Phải khai lại khi bật đồng bộ ở Sprint 3.
 
 **Google — Data safety (Play Console):**

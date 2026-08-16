@@ -3,7 +3,7 @@ description: "Ứng dụng việc nhà và phần thưởng hằng ngày cho gia
 publish_to: "none"
 
 # <phiên bản hiển thị>+<build number>
-version: 0.1.0+1
+version: 0.2.0+1
 
 environment:
   sdk: ^3.12.0
@@ -30,7 +30,9 @@ dependencies:
   path: ^1.9.1
   path_provider: ^2.1.5
   riverpod_annotation: ^4.0.3
+  share_plus: ^13.3.0
   sqlite3: ^3.5.0 # kèm sẵn thư viện native; sqlite3_flutter_libs đã EOL
+  url_launcher: ^6.3.2
   uuid: ^4.5.1
 
 dev_dependencies:

@@ -206,6 +206,11 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
       push nằm ở Sprint 5)
 
 ## Sprint 5 — Thông báo & hoàn thiện (1 tuần)
+- [x] **Báo lỗi trong app** (ngoài kế hoạch) — gom nhật ký lỗi + thiết bị + ảnh chụp màn hình,
+      mở sẵn form issue GitHub để người dùng xem lại rồi tự bấm gửi. **Cố ý không gọi API
+      GitHub**: token nhúng trong APK/IPA thì ai cũng rút ra được và nó có quyền ghi vào repo.
+      Cần tạo hai nhãn `bug` và `from-app` trong repo. Khi có backend (Sprint 3) thì thay bằng
+      endpoint giữ token phía máy chủ, lúc đó gửi được cả ảnh mà không phải rời app.
 - [ ] FCM push (mobile) + local notification (desktop)
 - [ ] 7 loại thông báo trong bảng ở `01-product-spec.md` §4.7
 - [ ] Bộ điều tiết "nhắc nhẹ, không cằn nhằn": trần 2 thông báo/ngày cho trẻ, gộp sự kiện,
