@@ -67,15 +67,14 @@ toàn bộ offline. ✅ đạt.
 
 ## Sprint 2 — Luồng cốt lõi UI (gần xong)
 - [x] Onboarding 4 bước (thêm bước chọn tuổi ngoài kế hoạch — xem ghi chú dưới)
-- [~] **Task Editor** — có `_AddTaskSheet` với 6 khối: tên, điểm, preset, icon, **chọn con nào**,
-      **lịch lặp** (hằng ngày / chọn thứ / một lần). Thiếu 2 khối: chế độ duyệt riêng của task,
-      chế độ bằng chứng.
+- [~] **Task Editor** — có 7 khối: tên, điểm, preset, icon, **chọn con nào**, **lịch lặp**
+      (hằng ngày / chọn thứ / một lần), **chế độ duyệt riêng**, và mức **trừ xu riêng** cho
+      từng việc. Thiếu đúng 1 khối: **chế độ bằng chứng** (docs xếp ở v1.1).
 - [x] **Routine Editor** + kéo thả đổi thứ tự task — xong: sửa tên/hình/xu thưởng trọn bộ, kéo thả
       thứ tự việc, bỏ việc ra và đưa việc lẻ vào, ngừng dùng thói quen (việc bên trong không mất).
-- [~] Child Home — vòng tiến độ ✅, linh vật đổi tâm trạng theo tiến độ ✅, nhưng:
-  - Nhóm theo **trạng thái** (Cần làm / Đã xong / Bỏ lỡ), **không** nhóm theo routine như tài liệu tả.
-  - **Chưa có animation ăn mừng.** `KidScale.celebrateOnTap` đã khai nhưng không nối vào hiệu ứng
-    nào — vẫn là cờ chết.
+- [~] Child Home — vòng tiến độ ✅, linh vật đổi tâm trạng theo tiến độ ✅, hoa giấy ăn mừng ✅
+      (kèm báo tên huy hiệu khi vừa mở khoá), mục tiêu tiết kiệm ✅. Khác tài liệu một chỗ:
+      nhóm theo **trạng thái** (Cần làm / Đã xong / Bỏ lỡ), **không** nhóm theo routine.
 - [x] Parent Home + hàng đợi duyệt (+ nút Duyệt tất cả, + danh sách "Đã xong hôm nay" để mở lại)
 - [x] Chuyển hồ sơ + **PIN phụ huynh** — `09` §6 ca "máy bố mẹ cũng là máy con dùng". Trước đó
       đổi vai không cần gì cả, tức là cả vòng duyệt của ADR-023/ADR-025 dựa trên một giả định
@@ -113,7 +112,8 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
 - [ ] Tách điều hướng theo vai; onboarding tách hai nhánh
 
 **Việc còn nợ từ Sprint 1–2, không cần backend:**
-- [ ] Tầng repository (`lib/domain/repositories/` đang rỗng) — phải có trước khi thêm sync
+- [ ] Tầng repository — cùng mục ở Sprint 1 (dòng trên), nhắc lại vì đây là hạn chót thật:
+      phải có **trước** khi thêm sync
 - [ ] Task Editor đủ 8 khối (còn thiếu **chế độ bằng chứng**; chế độ duyệt riêng đã xong)
 - [x] Routine Editor + kéo thả thứ tự
 - [x] Animation ăn mừng — `ConfettiBurst`, nổ ở cấp màn hình vì thẻ việc bị tháo ngay sau khi bấm
