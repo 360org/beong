@@ -213,7 +213,12 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 - [x] Cài đặt: **chủ đề sáng/tối** (lưu theo thiết bị) và **giờ đổi ngày** (0/3/4/5/6 giờ). Sửa
       kèm một lỗi chờ sẵn: các màn hình tự dựng `FamilyClock` với mặc định 4 và bỏ qua cột
       `day_rollover_hour` mà `DayStartService` vẫn đọc — hai bên sẽ lệch ngày ngay khi có ai đổi.
-- [ ] Cài đặt: ngôn ngữ, âm thanh
+- [~] Cài đặt: **ngôn ngữ** — đã làm rồi **gỡ ra**. Ô chọn chạy đúng về mặt kỹ thuật, nhưng chỉ
+      3 chỗ trong `lib/features` dùng ARB còn hơn 89 chuỗi là tiếng Việt viết cứng, nên chọn
+      "English" ra một app nửa Việt nửa Anh. Đó đúng là loại lời hứa suông vừa gỡ ở ô "Thông báo".
+      Việc thật cần làm trước là **đưa toàn bộ chuỗi màn hình vào ARB**; ô chọn chỉ là phần ngọn.
+- [ ] Cài đặt: âm thanh — hoãn có chủ ý. App chưa phát âm thanh nào; một công tắc không điều
+      khiển gì là cờ chết, đúng thứ dự án này đã phải đi dọn năm lần.
 - [x] Trang trống ✅ (đã có sẵn ở mọi màn chính) và **trạng thái lỗi** — `LoiManHinh` +
       `LuongDuLieu`. Trước đó **không một `StreamBuilder` nào** kiểm `hasError`: luồng hỏng thì
       màn hình rơi về mặc định và hiện như thể nhà chưa có việc nào. Áp cho 5 chỗ mà hiện sai
