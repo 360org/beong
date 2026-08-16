@@ -214,7 +214,12 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
       kèm một lỗi chờ sẵn: các màn hình tự dựng `FamilyClock` với mặc định 4 và bỏ qua cột
       `day_rollover_hour` mà `DayStartService` vẫn đọc — hai bên sẽ lệch ngày ngay khi có ai đổi.
 - [ ] Cài đặt: ngôn ngữ, âm thanh
-- [ ] Trang trống, trạng thái lỗi, màn hình mất mạng
+- [x] Trang trống ✅ (đã có sẵn ở mọi màn chính) và **trạng thái lỗi** — `LoiManHinh` +
+      `LuongDuLieu`. Trước đó **không một `StreamBuilder` nào** kiểm `hasError`: luồng hỏng thì
+      màn hình rơi về mặc định và hiện như thể nhà chưa có việc nào. Áp cho 5 chỗ mà hiện sai
+      tệ hơn hiện lỗi: việc của con, việc của nhà, phần thưởng, thành viên, sổ cái.
+- [ ] ~~Màn hình mất mạng~~ — **không cần**: app là offline-first (ADR-002), không có màn nào
+      chờ mạng. Sẽ cần lại khi có sync ở Sprint 3.
 - [x] Rà soát khả dụng — thành **test tự động** (`test/unit/kha_dung_test.dart`), theo đúng bài
       học Sprint 0: ràng buộc khả dụng không có test thì chỉ là ước muốn. Canh tooltip cho mọi
       `IconButton`, `excludeFromSemantics` cho icon trang trí, trần phóng chữ ở gốc app, và

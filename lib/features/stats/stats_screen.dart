@@ -8,6 +8,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/utils/ngay_viet.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/member_dao.dart';
@@ -272,11 +273,10 @@ class _ChildStats extends StatelessWidget {
           // "jar1786289533739171 14" — con đọc không hiểu gì.
           _JarTitles(
             familyId: familyId,
-            builder: (context, jarTitles) => StreamBuilder<List<LedgerEntry>>(
+            builder: (context, jarTitles) => LuongDuLieu<List<LedgerEntry>>(
               // Đã gộp: một việc là **một** mục, không phải ba dòng theo hũ.
               stream: walletDao.watchGroupedHistory(memberId),
-              builder: (context, snap) {
-                final txns = snap.data ?? [];
+              builder: (context, txns) {
                 if (txns.isEmpty) {
                   return Padding(
                     padding: const EdgeInsets.all(AppSpacing.xxl),

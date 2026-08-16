@@ -9,6 +9,7 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/task_dao.dart';
@@ -40,6 +41,11 @@ class ParentHomeScreen extends ConsumerWidget {
       body: StreamBuilder<List<Member>>(
         stream: memberDao.watchMembers(session.familyId),
         builder: (context, membersSnap) {
+          // Không có thành viên nào **có thể** là lỗi luồng chứ không phải nhà
+          // trống: rơi về rỗng lặng lẽ thì bố mẹ tưởng hồ sơ con bị mất.
+          if (membersSnap.hasError) {
+            return LoiManHinh(error: membersSnap.error!);
+          }
           final members = membersSnap.data ?? [];
           final children = members
               .where((m) => m.kind == MemberKind.child.name)

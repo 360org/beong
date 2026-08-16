@@ -10,6 +10,7 @@ import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/utils/ngay_viet.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/icon_picker.dart';
+import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
@@ -123,6 +124,7 @@ class _TaskListState extends State<_TaskList> {
     return StreamBuilder<List<Task>>(
       stream: _taskStream,
       builder: (context, taskSnap) {
+        if (taskSnap.hasError) return LoiManHinh(error: taskSnap.error!);
         if (!taskSnap.hasData) {
           return const Center(child: CircularProgressIndicator());
         }

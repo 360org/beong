@@ -12,6 +12,7 @@ import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/bee_mascot.dart';
 import 'package:beong/core/widgets/celebration.dart';
+import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/progress_ring.dart';
 import 'package:beong/core/widgets/task_card.dart';
 import 'package:beong/data/local/database.dart';
@@ -74,6 +75,11 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
               date: today,
             ),
             builder: (context, instSnap) {
+              // Danh sách việc là chỗ hiện sai tệ nhất: luồng hỏng mà rơi về
+              // rỗng thì con thấy "chưa có việc nào hôm nay" và tin là thật.
+              if (instSnap.hasError) {
+                return LoiManHinh(error: instSnap.error!);
+              }
               final instances = instSnap.data ?? [];
               final total = instances.length;
               final completedCount = instances

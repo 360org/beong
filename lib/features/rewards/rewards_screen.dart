@@ -7,6 +7,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/icon_picker.dart';
+import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
@@ -49,11 +50,12 @@ class RewardsScreen extends ConsumerWidget {
             ),
         ],
       ),
-      body: StreamBuilder<List<Reward>>(
+      // `LuongDuLieu` chứ không `StreamBuilder` trần: luồng hỏng mà rơi về
+      // danh sách rỗng thì màn hình nói "chưa có phần thưởng nào" — người dùng
+      // thấy dữ liệu **sai** chứ không thấy lỗi.
+      body: LuongDuLieu<List<Reward>>(
         stream: rewardDao.watchRewards(session.familyId),
-        builder: (context, snap) {
-          final rewards = snap.data ?? [];
-
+        builder: (context, rewards) {
           return ListView(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.screenPaddingMobile,
