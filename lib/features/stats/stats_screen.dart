@@ -17,6 +17,7 @@ import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/badge_def.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
+import 'package:beong/domain/services/money_exchange.dart';
 import 'package:beong/features/goals/goal_section.dart';
 import 'package:beong/features/goals/goal_sheet.dart';
 import 'package:beong/features/stats/adjust_xu_sheet.dart';
@@ -421,19 +422,58 @@ class _JarOverview extends ConsumerWidget {
 
         // Wrap chứ không Row: bốn hũ trở lên thì Row bóp mỗi ô còn quá hẹp để
         // đọc số.
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            const gap = AppSpacing.sm;
-            final perRow = tiles.length <= 3 ? tiles.length : 3;
-            final width = (constraints.maxWidth - gap * (perRow - 1)) / perRow;
-            return Wrap(
-              spacing: gap,
-              runSpacing: gap,
-              children: [
-                for (final tile in tiles) SizedBox(width: width, child: tile),
-              ],
-            );
-          },
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                const gap = AppSpacing.sm;
+                final perRow = tiles.length <= 3 ? tiles.length : 3;
+                final width =
+                    (constraints.maxWidth - gap * (perRow - 1)) / perRow;
+                return Wrap(
+                  spacing: gap,
+                  runSpacing: gap,
+                  children: [
+                    for (final tile in tiles)
+                      SizedBox(width: width, child: tile),
+                  ],
+                );
+              },
+            ),
+            _MoneyValue(familyId: familyId, xu: balance.total),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Giá trị tiền thật của cả ví — ADR-017, chỉ hiện khi nhà đã bật quy đổi.
+///
+/// Đặt dưới **tổng** chứ không gắn vào từng hũ: bốn ô mỗi ô hai con số thì màn
+/// hình thành bảng kế toán, mà đây là màn hình cho trẻ con đọc.
+class _MoneyValue extends ConsumerWidget {
+  const _MoneyValue({required this.familyId, required this.xu});
+
+  final String familyId;
+  final int xu;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return StreamBuilder<MoneyExchange>(
+      stream: ref.watch(memberDaoProvider).watchExchangeRate(familyId),
+      builder: (context, snap) {
+        final label = snap.data?.labelFor(xu);
+        if (label == null) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.sm),
+          child: Text(
+            'Tổng $xu xu  $label',
+            style: context.text.bodySmall?.copyWith(
+              color: context.semantic.onSurfaceMuted,
+            ),
+          ),
         );
       },
     );

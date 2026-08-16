@@ -2,6 +2,7 @@ import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/tables/tables.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
+import 'package:beong/domain/services/money_exchange.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:drift/drift.dart';
 
@@ -111,6 +112,32 @@ class MemberDao extends DatabaseAccessor<AppDatabase> with _$MemberDaoMixin {
     await (update(families)..where((f) => f.id.equals(familyId))).write(
       FamiliesCompanion(
         dayRolloverHour: Value(hour),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  /// Tỷ giá quy đổi xu ra tiền thật — ADR-017. Tắt thì [MoneyExchange.enabled]
+  /// là `false`.
+  Stream<MoneyExchange> watchExchangeRate(String familyId) =>
+      watchFamily(familyId).map((f) => MoneyExchange(f.exchangeRateXu));
+
+  /// Đặt tỷ giá. `null` là tắt quy đổi.
+  ///
+  /// Từ chối số không dương thay vì lặng lẽ coi như tắt: 0 xu đổi được 1.000 đ
+  /// nghĩa là xu vô giá trị hoặc vô hạn giá trị, tuỳ cách đọc — không có cách
+  /// hiểu nào đúng, nên đừng đoán hộ.
+  Future<void> setExchangeRate(String familyId, int? xuPerUnit) async {
+    if (xuPerUnit != null && xuPerUnit <= 0) {
+      throw ArgumentError.value(
+        xuPerUnit,
+        'xuPerUnit',
+        'Tỷ giá phải lớn hơn 0 — dùng null để tắt quy đổi',
+      );
+    }
+    await (update(families)..where((f) => f.id.equals(familyId))).write(
+      FamiliesCompanion(
+        exchangeRateXu: Value(xuPerUnit),
         updatedAt: Value(DateTime.now()),
       ),
     );

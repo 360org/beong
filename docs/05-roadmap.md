@@ -14,7 +14,7 @@ Cập nhật bằng cách **đọc code**, không tick theo cảm giác — xem 
 | 1 — Dữ liệu local | ✅ Xong | Trừ **tầng repository** (`lib/domain/repositories/` rỗng) |
 | 2 — Luồng UI cốt lõi | 🟡 Gần xong | PIN phụ huynh ✅. Còn khối chế độ bằng chứng của Task Editor, integration test |
 | 3 — Backend & ghép cặp | 🔴 Chưa bắt đầu | Pha 0 đã xong 2/4; phần backend chờ dựng Supabase |
-| 4 — Phần thưởng & tài chính | 🟡 Đang làm | Đổi thưởng + duyệt + hoàn xu ✅, trừ xu ✅, con tự chia xu ✅, hũ tự lập ✅, huy hiệu + streak ✅, mục tiêu tiết kiệm ✅. Thiếu tỷ giá tiền thật |
+| 4 — Phần thưởng & tài chính | ✅ Xong | Đổi thưởng + duyệt + hoàn xu, trừ xu, con tự chia xu, hũ tự lập, huy hiệu + streak, mục tiêu tiết kiệm, tỷ giá tiền thật, sửa xu tay. Còn mức trừ xu riêng theo task |
 | 5 — Thông báo & hoàn thiện | 🔴 Chưa bắt đầu | |
 | 6 — Phát hành v1.0 | 🟡 Hạ tầng sẵn | CI/CD 7 job + Fastlane ✅; chưa có tài khoản store, chưa có icon/ảnh chụp |
 
@@ -171,7 +171,10 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
       logic và test từ Sprint 1 nhưng chưa từng chạy: bảng `badges_earned` không ai đọc/ghi, và
       `calculateStreak` không được gọi từ đâu nên bảng `streaks` luôn rỗng. `StreakFlame` như một
       widget riêng thì **không cần** — ngọn lửa đã nằm trong thẻ tổng quan của màn hình con.
-- [ ] Tỷ giá quy đổi ra tiền thật (mặc định tắt — ADR-017)
+- [x] **Tỷ giá quy đổi ra tiền thật** (mặc định tắt — ADR-017). Cột `exchange_rate_xu` có từ v1
+      nhưng không ai đọc/ghi. Đơn vị chốt là **nghìn đồng** ("10 xu = 1.000 đ"); lấy 1 đồng làm
+      mốc thì tỷ lệ thành số lẻ vô nghĩa. Làm tròn **xuống** — hiện nhiều hơn số con đổi được là
+      hứa hão, mà hứa hão về tiền thì bố mẹ trả bằng tiền thật.
 - [x] **Mục tiêu tiết kiệm + thanh tiến độ** — `GoalDao` + `GoalService`. Bảng `savings_goals` có
       từ v1 nhưng không ai đọc/ghi. Tiến độ đo bằng **hũ Để dành**, không phải tổng xu; tới đích
       **không trừ xu**. Bố mẹ đặt từ Thống kê, con chỉ xem.

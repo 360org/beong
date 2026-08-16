@@ -12,6 +12,7 @@ import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
+import 'package:beong/domain/services/money_exchange.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:beong/features/members/add_child_sheet.dart';
 import 'package:beong/features/settings/parent_pin_sheet.dart';
@@ -99,6 +100,7 @@ class SettingsScreen extends ConsumerWidget {
                   _JarsTile(familyId: session.familyId),
                   _PenaltyTile(familyId: session.familyId),
                   _RolloverTile(familyId: session.familyId),
+                  _ExchangeRateTile(familyId: session.familyId),
                   _SettingsTile(
                     icon: Icons.info_outline,
                     title: 'Phiên bản',
@@ -405,6 +407,92 @@ class _ThemeTile extends ConsumerWidget {
     );
     if (chosen == null) return;
     await ref.read(themeModeSettingProvider.notifier).set(chosen);
+  }
+}
+
+/// Quy đổi xu ra tiền thật — ADR-017.
+///
+/// **Mặc định tắt.** Gắn việc nhà với tiền là chủ đề gây tranh cãi trong nuôi
+/// dạy con, và mặc định của app là một lời khuyên ngầm; nhà nào muốn thì tự bật.
+/// Ô này cũng không dụ bật: không có huy hiệu, không có gợi ý, chỉ là một dòng.
+class _ExchangeRateTile extends ConsumerWidget {
+  const _ExchangeRateTile({required this.familyId});
+
+  final String familyId;
+
+  /// Các mức cho chọn, tính bằng **xu đổi được 1.000 đ**.
+  static const _choices = <int>[1, 2, 5, 10, 20, 50];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return StreamBuilder<MoneyExchange>(
+      stream: ref.watch(memberDaoProvider).watchExchangeRate(familyId),
+      builder: (context, snap) {
+        final rate = snap.data;
+        return _SettingsTile(
+          icon: Icons.payments_outlined,
+          title: 'Quy đổi tiền thật',
+          subtitle: rate == null
+              ? '…'
+              : rate.enabled
+              ? '${rate.xuPerUnit} xu = 1.000 đ'
+              : 'Đang tắt',
+          onTap: () => unawaited(_pick(context, ref, rate?.xuPerUnit)),
+        );
+      },
+    );
+  }
+
+  Future<void> _pick(
+    BuildContext context,
+    WidgetRef ref,
+    int? current,
+  ) async {
+    // `-1` là "tắt": `null` đã mang nghĩa "bố mẹ đóng sheet, không chọn gì".
+    const off = -1;
+    final chosen = await showModalBottomSheet<int>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Text(
+                  'Bật thì con thấy số xu của mình đáng bao nhiêu tiền. Xu vẫn '
+                  'là xu — app không trả tiền hộ, bố mẹ tự quy đổi ngoài đời.',
+                  style: context.text.bodySmall?.copyWith(
+                    color: context.semantic.onSurfaceMuted,
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.money_off_rounded),
+                title: const Text('Tắt quy đổi'),
+                trailing: current == null
+                    ? Icon(Icons.check_circle, color: context.colors.primary)
+                    : null,
+                onTap: () => Navigator.pop(sheetContext, off),
+              ),
+              for (final rate in _choices)
+                ListTile(
+                  leading: const Icon(Icons.payments_rounded),
+                  title: Text('$rate xu = 1.000 đ'),
+                  trailing: rate == current
+                      ? Icon(Icons.check_circle, color: context.colors.primary)
+                      : null,
+                  onTap: () => Navigator.pop(sheetContext, rate),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (chosen == null) return;
+    await ref
+        .read(memberDaoProvider)
+        .setExchangeRate(familyId, chosen == off ? null : chosen);
   }
 }
 
