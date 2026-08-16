@@ -237,7 +237,10 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 > đã viết và CI 7 job đang xanh, nhưng chưa có tài khoản Apple Developer / Google Play, chưa có
 > secret nào được nạp. Hướng dẫn từng bước ở `08-release-cicd.md`.
 - [ ] Icon app, splash, ảnh chụp store
-- [ ] Chính sách quyền riêng tư + điều khoản (bắt buộc cho app trẻ em)
+- [~] **Chính sách quyền riêng tư** — bản thảo ở `10-privacy-policy.md`, kèm phụ lục khai báo
+      cho form của cả hai store. **Chưa qua rà soát pháp lý** và còn hai chỗ trống bắt buộc
+      (email liên hệ, đơn vị phát hành). Vẫn cần đăng lên một **URL công khai** trước khi nộp.
+- [ ] Điều khoản sử dụng
 - [ ] Khai báo store: **không mua trong app, không quảng cáo** (ADR-014)
 - [ ] Khai báo App Store "Kids Category" / Play "Teacher Approved" nếu áp dụng
 - [ ] Fastlane → TestFlight + Play Internal
