@@ -31,7 +31,7 @@ env:
 jobs:
   android-release:
     name: Phát hành Android
-    if: ${{ inputs.platforms == 'both' || inputs.platforms == 'android' }}
+    if: ${{ github.event_name == 'push' || inputs.platforms == 'both' || inputs.platforms == 'android' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,10 +57,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Secret thiếu thì `base64 -d` vẫn thành công và cho ra file rỗng, rồi
-          # Gradle mới báo "keystore was tampered with, or password was
-          # incorrect" — thông báo dẫn người đọc đi tìm sai mật khẩu trong khi
-          # thật ra chưa nạp secret. Chặn ngay ở đây với lý do đúng.
           if [ -z "${ANDROID_KEYSTORE_BASE64}" ]; then
             echo "::error::Chưa nạp secret ANDROID_KEYSTORE_BASE64 (xem docs/08-release-cicd.md §A-3)"
             exit 1
@@ -96,7 +92,7 @@ jobs:
         working-directory: android
         env:
           PLAY_STORE_JSON_KEY_PATH: /tmp/play-service-account.json
-        run: fastlane ${{ inputs.android_track }}
+        run: fastlane ${{ inputs.android_track || 'production' }}
 
       - name: Xoá file bí mật
         if: always()
@@ -105,7 +101,7 @@ jobs:
 
   ios-release:
     name: Phát hành iOS
-    if: ${{ inputs.platforms == 'both' || inputs.platforms == 'ios' }}
+    if: ${{ github.event_name == 'push' || inputs.platforms == 'both' || inputs.platforms == 'ios' }}
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -224,7 +220,7 @@ jobs:
           APP_STORE_CONNECT_KEY_PATH: ${{ runner.temp }}/AuthKey.p8
         run: |
           IPA_PATH="$(find "$GITHUB_WORKSPACE/build/ios/ipa" -name '*.ipa' -print -quit)"
-          IPA_PATH="$IPA_PATH" fastlane ${{ inputs.ios_lane }}
+          IPA_PATH="$IPA_PATH" fastlane ${{ inputs.ios_lane || 'release' }}
 
       - name: Xoá file bí mật
         if: always()
