@@ -13,8 +13,9 @@ và tiếng Việt.
 **Miễn phí hoàn toàn** — không thuê bao, không mua trong app, không quảng cáo, không giới hạn
 số trẻ hay số task.
 
-> **Trạng thái:** Sprint 0 xong (nền dự án, design system, điều hướng, i18n, CI).
-> Sprint 1 (dữ liệu local) là bước tiếp theo — xem `docs/05-roadmap.md`.
+> **Trạng thái:** Phiên bản `v0.2.0` (Hoàn thành nghiệp vụ cốt lõi Local-First, Quản lý Thói quen, Mục tiêu tiết kiệm, Mã PIN phụ huynh, Báo lỗi & Diagnostics).
+> Báo cáo audit chi tiết: [`docs/audit_report_v0.2.0.md`](docs/audit_report_v0.2.0.md).
+> Nhật ký thay đổi: [`CHANGELOGS.md`](CHANGELOGS.md).
 
 ## Chạy thử
 

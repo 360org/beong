@@ -99,7 +99,7 @@ GoRouter createRouter({
                     // quay về đúng tab Nhiệm vụ.
                     path: 'routine/:routineId',
                     builder: (context, state) => RoutineEditorScreen(
-                      routineId: state.pathParameters['routineId']!,
+                      routineId: state.pathParameters['routineId'] ?? '',
                     ),
                   ),
                 ],
