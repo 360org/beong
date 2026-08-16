@@ -17,6 +17,8 @@ import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/badge_def.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
+import 'package:beong/features/goals/goal_section.dart';
+import 'package:beong/features/goals/goal_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -111,7 +113,7 @@ class _ParentStats extends StatelessWidget {
   }
 }
 
-class _ChildStatsCard extends StatelessWidget {
+class _ChildStatsCard extends ConsumerWidget {
   const _ChildStatsCard({
     required this.child,
     required this.walletDao,
@@ -122,8 +124,20 @@ class _ChildStatsCard extends StatelessWidget {
   final WalletDao walletDao;
   final MemberDao memberDao;
 
+  Future<void> _editGoal(BuildContext context, WidgetRef ref) async {
+    final current = await ref.read(goalDaoProvider).activeGoal(child.id);
+    if (!context.mounted) return;
+    await showGoalSheet(
+      context,
+      familyId: child.familyId,
+      memberId: child.id,
+      childName: child.displayName,
+      current: current,
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -146,6 +160,27 @@ class _ChildStatsCard extends StatelessWidget {
             final streak = snap.data;
             if (streak == null) return const SizedBox.shrink();
             return _StreakCard(streak: streak);
+          },
+        ),
+        const SizedBox(height: AppSpacing.md),
+        GoalSection(
+          memberId: child.id,
+          onTap: () => unawaited(_editGoal(context, ref)),
+        ),
+        // Nút riêng khi chưa có mục tiêu: [GoalSection] cố ý không hiện gì lúc
+        // đó, nên không có chỗ nào bấm vào để đặt mục tiêu đầu tiên.
+        StreamBuilder<SavingsGoal?>(
+          stream: ref.watch(goalDaoProvider).watchActiveGoal(child.id),
+          builder: (context, snap) {
+            if (snap.data != null) return const SizedBox.shrink();
+            return Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => unawaited(_editGoal(context, ref)),
+                icon: const Icon(Icons.flag_outlined),
+                label: const Text('Đặt mục tiêu để dành'),
+              ),
+            );
           },
         ),
       ],
@@ -198,6 +233,11 @@ class _ChildStats extends StatelessWidget {
               return _StreakCard(streak: streak);
             },
           ),
+          const SizedBox(height: AppSpacing.md),
+          // Không truyền `onTap`: con xem được tiến độ nhưng không tự đổi mục
+          // tiêu. Đổi mục tiêu mỗi khi thấy còn xa là đúng cái thói quen tính
+          // năng này muốn dạy ngược lại.
+          GoalSection(memberId: memberId),
           const SizedBox(height: AppSpacing.xl),
           _BadgesEntry(memberId: memberId),
           const SizedBox(height: AppSpacing.xxl),

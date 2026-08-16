@@ -9,6 +9,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/utils/ngay_viet.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/icon_picker.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/data/local/database.dart';
@@ -411,44 +412,6 @@ class _TaskTile extends StatelessWidget {
 
 /// Một hình để chọn. Vùng chạm đủ 48dp theo `AppSpacing.minTouchTarget` — ô nhỏ
 /// hơn thì ngón tay trẻ bấm trượt sang hình bên cạnh.
-class _IconChoice extends StatelessWidget {
-  const _IconChoice({
-    required this.iconKey,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String iconKey;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: AppSpacing.minTouchTarget,
-        height: AppSpacing.minTouchTarget,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selected
-              ? context.colors.primaryContainer
-              : context.colors.surfaceContainerHighest,
-          borderRadius: const BorderRadius.all(
-            Radius.circular(AppRadius.field),
-          ),
-          // Viền chứ không chỉ đổi màu nền: nền đậm nhạt một chút thì người
-          // không phân biệt màu tốt sẽ không thấy ô nào đang chọn (WCAG 1.4.1).
-          border: selected
-              ? Border.all(color: context.colors.primary, width: 2)
-              : null,
-        ),
-        child: AppIcon.task(iconKey, size: 26),
-      ),
-    );
-  }
-}
-
 class _AddTaskSheet extends StatefulWidget {
   const _AddTaskSheet({
     required this.taskDao,
@@ -620,17 +583,10 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
             const SizedBox(height: AppSpacing.lg),
             Text('Chọn hình', style: context.text.titleSmall),
             const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [
-                for (final key in kTaskIconKeys)
-                  _IconChoice(
-                    iconKey: key,
-                    selected: key == _iconKey,
-                    onTap: () => setState(() => _iconKey = key),
-                  ),
-              ],
+            IconPickerGrid(
+              iconKeys: kTaskIconKeys,
+              selected: _iconKey,
+              onSelected: (key) => setState(() => _iconKey = key),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text('Lặp lại', style: context.text.titleSmall),

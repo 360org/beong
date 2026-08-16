@@ -157,6 +157,18 @@ const List<String> kRewardIconKeys = [
 /// định thì mọi phần thưởng tự nhập trông như một việc phải làm.
 const String kDefaultRewardIconKey = 'jar_gift';
 
+/// Icon chọn được cho **mục tiêu tiết kiệm**.
+///
+/// Dùng lại bộ phần thưởng, thêm con heo đất lên đầu: mục tiêu tiết kiệm cũng
+/// là một món con muốn, chỉ khác ở chỗ con để dành nhiều ngày mới có. Một bộ
+/// icon riêng chỉ để lặp lại gần đúng danh sách kia thì thêm việc phải giữ đồng
+/// bộ mà không thêm gì.
+const List<String> kGoalIconKeys = [kDefaultGoalIconKey, ...kRewardIconKeys];
+
+/// Icon mặc định của mục tiêu: con heo đất — đúng nghĩa "để dành", và cũng là
+/// hình của hũ Để dành mà thanh tiến độ đang đo.
+const String kDefaultGoalIconKey = 'jar_save';
+
 /// Icon mặc định khi bố mẹ chưa chọn gì, và khi bù icon cho dữ liệu cũ.
 ///
 /// ✏️ đọc ra "có việc cần làm" và đúng với hầu hết nhiệm vụ. Không dùng `star`:

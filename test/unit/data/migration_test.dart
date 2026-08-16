@@ -36,6 +36,11 @@ void main() {
         .insert(FamiliesCompanion.insert(id: 'fam-1', name: 'Nhà mình'));
 
     // Bỏ dần những gì phiên bản sau đã thêm, từ mới nhất về cũ nhất.
+    if (version < 7) {
+      await db.customStatement(
+        'ALTER TABLE savings_goals DROP COLUMN icon_key',
+      );
+    }
     if (version < 6) {
       await db.customStatement(
         'ALTER TABLE point_transactions DROP COLUMN op_group_id',
@@ -139,6 +144,26 @@ void main() {
 
     final row = await db.select(db.pointTransactions).getSingle();
     expect(row.opGroupId, isNull);
+  });
+
+  test('v6 -> v7 thêm icon cho mục tiêu, mục tiêu cũ để NULL', () async {
+    await seedAtVersion(6);
+    final db = await openCurrent();
+
+    await db
+        .into(db.savingsGoals)
+        .insert(
+          SavingsGoalsCompanion.insert(
+            id: 'goal-1',
+            familyId: 'fam-1',
+            memberId: 'con-1',
+            title: 'Xe đạp',
+            targetXu: 500,
+          ),
+        );
+
+    final goal = await db.select(db.savingsGoals).getSingle();
+    expect(goal.iconKey, isNull, reason: 'mục tiêu cũ hiện icon mặc định');
   });
 
   test('v4 -> v5 tạo bảng hũ và giữ mặc định chia tự động', () async {

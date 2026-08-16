@@ -19,6 +19,7 @@ import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/services/family_clock.dart';
+import 'package:beong/features/goals/goal_section.dart';
 import 'package:beong/features/rewards/allocate_xu_sheet.dart';
 import 'package:beong/features/settings/parent_pin_sheet.dart';
 import 'package:flutter/material.dart';
@@ -144,7 +145,11 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
                       );
                     },
                   ),
-                  const SizedBox(height: AppSpacing.xxl),
+                  // Mục tiêu nằm ngay dưới ví, trên danh sách việc: nó là lý do
+                  // con làm việc hôm nay, nên phải thấy trước khi cuộn.
+                  const SizedBox(height: AppSpacing.lg),
+                  GoalSection(memberId: memberId),
+                  const SizedBox(height: AppSpacing.xl),
                   if (instSnap.connectionState == ConnectionState.waiting)
                     const Padding(
                       padding: EdgeInsets.only(top: AppSpacing.xxxl),

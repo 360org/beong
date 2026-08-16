@@ -4,7 +4,9 @@ import 'package:beong/data/local/member_dao.dart';
 import 'package:beong/data/local/reward_dao.dart';
 import 'package:beong/data/local/settings_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
+import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/services/family_clock.dart';
+import 'package:beong/domain/services/goal_service.dart';
 import 'package:beong/domain/services/penalty_service.dart';
 import 'package:beong/domain/services/streak_service.dart';
 
@@ -31,6 +33,7 @@ class DayStartService {
     required RewardDao rewardDao,
     required BadgeDao badgeDao,
     required StreakService streakService,
+    required GoalService goalService,
   }) : _tasks = taskDao,
        _members = memberDao,
        _settings = settingsDao,
@@ -38,7 +41,8 @@ class DayStartService {
        _jars = jarDao,
        _rewards = rewardDao,
        _badges = badgeDao,
-       _streaks = streakService;
+       _streaks = streakService,
+       _goals = goalService;
 
   final TaskDao _tasks;
   final MemberDao _members;
@@ -47,6 +51,7 @@ class DayStartService {
   final JarDao _jars;
   final RewardDao _rewards;
   final BadgeDao _badges;
+  final GoalService _goals;
   final StreakService _streaks;
 
   /// Khoá ghi ngày đã chạy gần nhất, theo thiết bị.
@@ -103,9 +108,16 @@ class DayStartService {
     //
     // Streak **trước** huy hiệu: ba huy hiệu streak đọc `streaks.best_len`, xét
     // ngược lại thì chúng luôn đọc số của lần chạy trước.
+    // Mục tiêu tới đích cũng xét ở đây: xu vào hũ Để dành qua nhiều đường (con
+    // tự chia, chia tự động cuối ngày, bố mẹ cộng tay), gắn kiểm tra vào từng
+    // đường thì sẽ sót đúng cái đường quên gắn.
+    final hasSaveJar = (await _jars.activeJars(familyId)).any(
+      (j) => j.key == kJarSave,
+    );
     for (final child in await _members.children(familyId)) {
       await _streaks.recalculate(memberId: child.id, today: clock.today(now));
       await _badges.awardNewBadges(familyId: familyId, memberId: child.id);
+      await _goals.checkReached(child.id, hasSaveJar: hasSaveJar);
     }
 
     if (!force) {

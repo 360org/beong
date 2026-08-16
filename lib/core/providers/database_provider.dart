@@ -1,12 +1,14 @@
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/data/local/badge_dao.dart';
 import 'package:beong/data/local/database.dart';
+import 'package:beong/data/local/goal_dao.dart';
 import 'package:beong/data/local/jar_dao.dart';
 import 'package:beong/data/local/member_dao.dart';
 import 'package:beong/data/local/reward_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/services/day_start_service.dart';
+import 'package:beong/domain/services/goal_service.dart';
 import 'package:beong/domain/services/parent_pin_service.dart';
 import 'package:beong/domain/services/penalty_service.dart';
 import 'package:beong/domain/services/redemption_service.dart';
@@ -40,6 +42,15 @@ JarDao jarDao(Ref ref) => JarDao(ref.watch(appDatabaseProvider));
 
 @riverpod
 BadgeDao badgeDao(Ref ref) => BadgeDao(ref.watch(appDatabaseProvider));
+
+@riverpod
+GoalDao goalDao(Ref ref) => GoalDao(ref.watch(appDatabaseProvider));
+
+@riverpod
+GoalService goalService(Ref ref) => GoalService(
+  goalDao: ref.watch(goalDaoProvider),
+  walletDao: ref.watch(walletDaoProvider),
+);
 
 @riverpod
 ParentPinService parentPinService(Ref ref) =>
@@ -83,4 +94,5 @@ DayStartService dayStartService(Ref ref) => DayStartService(
   rewardDao: ref.watch(rewardDaoProvider),
   badgeDao: ref.watch(badgeDaoProvider),
   streakService: ref.watch(streakServiceProvider),
+  goalService: ref.watch(goalServiceProvider),
 );

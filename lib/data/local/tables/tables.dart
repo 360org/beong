@@ -311,6 +311,14 @@ class SavingsGoals extends Table with FamilyScoped {
   TextColumn get memberId => text()();
   TextColumn get title => text().withLength(min: 1, max: 60)();
   TextColumn get imagePath => text().nullable()();
+
+  /// Khoá icon trong `assets/icons/` — xem `task_icons.dart`.
+  ///
+  /// Tách khỏi [imagePath]: `image_path` là ảnh thật của món đồ con muốn (bố mẹ
+  /// chụp), còn đây là hình minh hoạ chọn từ bộ icon. Nhét cả hai vào một cột
+  /// thì không biết chuỗi đọc lên là đường dẫn file hay khoá icon.
+  TextColumn get iconKey => text().nullable()();
+
   IntColumn get targetXu => integer()();
 
   /// `GoalStatus`.

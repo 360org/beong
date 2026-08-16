@@ -38,7 +38,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -51,6 +51,11 @@ class AppDatabase extends _$AppDatabase {
       await customStatement('PRAGMA foreign_keys = ON');
     },
     onUpgrade: (m, from, to) async {
+      // v6 -> v7: icon cho mục tiêu tiết kiệm. Cột nullable, mục tiêu cũ hiện
+      // icon mặc định.
+      if (from < 7) {
+        await m.addColumn(savingsGoals, savingsGoals.iconKey);
+      }
       // v1 -> v2: bảng cấu hình thiết bị, để session sống qua lần mở app sau.
       if (from < 2) {
         await m.createTable(deviceSettings);
