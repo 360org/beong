@@ -74,11 +74,12 @@ class PenaltyService {
     var total = 0;
 
     for (final instance in pending) {
+      // Mức riêng của việc thắng mức chung — nhưng chỉ khi nhà **đang bật**
+      // trừ xu. Để mức riêng vượt qua cả công tắc chung thì bố mẹ tắt trừ xu ở
+      // Cài đặt xong vẫn thấy con bị trừ, và không hiểu vì sao.
+      final pct = instance.missedPenaltyPct ?? policy.missedPct;
       final amount = policy.isEnabled
-          ? penaltyFor(
-              taskPoints: instance.pointsSnapshot,
-              pct: policy.missedPct,
-            )
+          ? penaltyFor(taskPoints: instance.pointsSnapshot, pct: pct)
           : 0;
 
       if (amount > 0) {

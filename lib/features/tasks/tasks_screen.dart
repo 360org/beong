@@ -18,6 +18,7 @@ import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/seed/presets.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/services/family_clock.dart';
+import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -447,6 +448,9 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
   /// icon, vì thẻ việc của con đọc bằng hình trước khi đọc chữ.
   String _iconKey = kDefaultTaskIconKey;
 
+  /// Mức trừ xu riêng cho việc này — ADR-022. `null` là theo mức chung.
+  int? _penaltyPct;
+
   /// Việc này có cần bố mẹ duyệt riêng không — ADR-023.
   ///
   /// Chỉ có tác dụng khi gia đình **bật** duyệt: nhà tắt duyệt thì
@@ -503,6 +507,7 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
         // template rồi đổi hình, và lần đổi sau cùng mới là ý của họ.
         iconKey: Value(_iconKey),
         approvalMode: Value(_approval.name),
+        missedPenaltyPct: Value(_penaltyPct),
         repeatType: Value(effectiveRepeat.name),
         repeatDays: Value(
           effectiveRepeat == RepeatType.custom
@@ -654,6 +659,12 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                 );
               }).toList(),
             ),
+            _PenaltyOverrideBlock(
+              familyId: widget.familyId,
+              memberDao: widget.memberDao,
+              value: _penaltyPct,
+              onChanged: (pct) => setState(() => _penaltyPct = pct),
+            ),
             const SizedBox(height: AppSpacing.lg),
             Text('Cần bố mẹ duyệt', style: context.text.titleSmall),
             const SizedBox(height: AppSpacing.sm),
@@ -767,6 +778,71 @@ class _TaskPresetSuggestions extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// Mức trừ xu riêng cho một việc — ADR-022.
+///
+/// Chỉ hiện khi nhà **đang bật** trừ xu. Nhà tắt thì khối này không có tác dụng
+/// gì, mà một ô cấu hình không có tác dụng còn tệ hơn không có ô nào: bố mẹ đặt
+/// xong rồi tin là nó đang chạy.
+class _PenaltyOverrideBlock extends StatelessWidget {
+  const _PenaltyOverrideBlock({
+    required this.familyId,
+    required this.memberDao,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String familyId;
+  final MemberDao memberDao;
+
+  /// `null` = theo mức chung của gia đình.
+  final int? value;
+  final ValueChanged<int?> onChanged;
+
+  static const _choices = <int>[0, 25, 50, 100];
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<PenaltyPolicy>(
+      stream: memberDao.watchPenaltyPolicy(familyId),
+      builder: (context, snap) {
+        final policy = snap.data;
+        if (policy == null || !policy.isEnabled) {
+          return const SizedBox.shrink();
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: AppSpacing.lg),
+            Text('Bỏ việc này thì trừ', style: context.text.titleSmall),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                ChoiceChip(
+                  label: Text('Như cả nhà (${policy.missedPct}%)'),
+                  selected: value == null,
+                  onSelected: (_) => onChanged(null),
+                ),
+                for (final pct in _choices)
+                  ChoiceChip(
+                    // 0% đọc ra "không trừ việc này" rõ hơn hẳn con số 0 trần,
+                    // và đó là lựa chọn bố mẹ hay cần nhất: một việc khó mà
+                    // không muốn phạt.
+                    label: Text(pct == 0 ? 'Không trừ' : '$pct%'),
+                    selected: value == pct,
+                    onSelected: (_) => onChanged(pct),
+                  ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 }

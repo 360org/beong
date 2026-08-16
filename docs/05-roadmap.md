@@ -14,7 +14,7 @@ Cập nhật bằng cách **đọc code**, không tick theo cảm giác — xem 
 | 1 — Dữ liệu local | ✅ Xong | Trừ **tầng repository** (`lib/domain/repositories/` rỗng) |
 | 2 — Luồng UI cốt lõi | 🟡 Gần xong | PIN phụ huynh ✅. Còn khối chế độ bằng chứng của Task Editor, integration test |
 | 3 — Backend & ghép cặp | 🔴 Chưa bắt đầu | Pha 0 đã xong 2/4; phần backend chờ dựng Supabase |
-| 4 — Phần thưởng & tài chính | ✅ Xong | Đổi thưởng + duyệt + hoàn xu, trừ xu, con tự chia xu, hũ tự lập, huy hiệu + streak, mục tiêu tiết kiệm, tỷ giá tiền thật, sửa xu tay. Còn mức trừ xu riêng theo task |
+| 4 — Phần thưởng & tài chính | ✅ Xong | Đổi thưởng + duyệt + hoàn xu, trừ xu (chung + riêng theo việc), con tự chia xu, hũ tự lập, huy hiệu + streak, mục tiêu tiết kiệm, tỷ giá tiền thật, sửa xu tay |
 | 5 — Thông báo & hoàn thiện | 🔴 Chưa bắt đầu | |
 | 6 — Phát hành v1.0 | 🟡 Hạ tầng sẵn | CI/CD 7 job + Fastlane ✅; chưa có tài khoản store, chưa có icon/ảnh chụp |
 
@@ -198,7 +198,9 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 - [x] **Trừ xu** (ADR-022) — làm sớm hơn kế hoạch: cấu hình hai mức ở cấp gia đình, nút "mở lại"
       trong hàng đợi duyệt, khoản trừ cuối ngày cho việc bỏ. Mặc định tắt.
 - [x] Trừ xu: cho phép tự nhập mức % bất kỳ (chip "Khác…")
-- [ ] Trừ xu: cho phép đặt mức riêng theo từng task (hiện chỉ có mức chung của gia đình)
+- [x] Trừ xu: **mức riêng theo từng việc** — schema v8, chốt vào lượt việc lúc sinh như
+      `points_snapshot` (ADR-007). Chỉ ghi đè mức *bỏ việc*, không ghi đè mức *mở lại*. Mức riêng
+      **không** vượt qua công tắc chung: nhà tắt trừ xu thì không việc nào bị trừ.
 - [ ] Trừ xu: thông báo đẩy sang máy bố mẹ khi con bấm xong (hiện chỉ hiện trong hàng đợi duyệt —
       push nằm ở Sprint 5)
 

@@ -153,6 +153,13 @@ class Tasks extends Table with FamilyScoped, Syncable {
   /// Mốc nhắc nhở dạng `HH:mm`.
   TextColumn get dueTime => text().nullable()();
 
+  /// Mức trừ xu riêng cho việc này, ghi đè mức chung của gia đình — ADR-022.
+  ///
+  /// `null` = theo mức nhà. Chỉ ghi đè mức **bỏ việc**, không ghi đè mức mở
+  /// lại: bố mẹ nghĩ theo "việc này quan trọng, bỏ là trừ nặng", còn mở lại là
+  /// chuyện giữa bố mẹ và con chứ không phải thuộc tính của việc.
+  IntColumn get missedPenaltyPct => integer().nullable()();
+
   /// `ApprovalMode`. Mặc định `manual` — ADR-009.
   TextColumn get approvalMode => text().withDefault(const Constant('manual'))();
   TextColumn get proofMode => text().withDefault(const Constant('none'))();
@@ -194,6 +201,10 @@ class TaskInstances extends Table with FamilyScoped {
   /// Số lần bố mẹ mở lại lượt này — ADR-022. Mỗi lần mở lại là một khoản trừ,
   /// nên phải đếm chứ không chỉ ghi cờ boolean.
   IntColumn get reopenCount => integer().withDefault(const Constant(0))();
+
+  /// Mức trừ xu riêng của task, chốt lúc sinh lượt — cùng lý do với
+  /// [pointsSnapshot]. `null` là dùng mức chung của gia đình.
+  IntColumn get missedPenaltyPct => integer().nullable()();
 
   /// Lúc đã áp khoản trừ "bỏ việc" cho lượt này. NULL = chưa áp.
   ///

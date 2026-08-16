@@ -61,6 +61,7 @@ class PlannedInstance {
     required this.memberId,
     required this.dueDate,
     required this.pointsSnapshot,
+    this.missedPenaltyPct,
   });
 
   final String taskId;
@@ -71,16 +72,27 @@ class PlannedInstance {
   /// sau đó không được làm thay đổi những lượt đã sinh.
   final int pointsSnapshot;
 
+  /// Mức trừ xu riêng của task, chốt cùng lúc với [pointsSnapshot]. `null` là
+  /// dùng mức chung của gia đình.
+  final int? missedPenaltyPct;
+
   @override
   bool operator ==(Object other) =>
       other is PlannedInstance &&
       other.taskId == taskId &&
       other.memberId == memberId &&
       other.dueDate == dueDate &&
-      other.pointsSnapshot == pointsSnapshot;
+      other.pointsSnapshot == pointsSnapshot &&
+      other.missedPenaltyPct == missedPenaltyPct;
 
   @override
-  int get hashCode => Object.hash(taskId, memberId, dueDate, pointsSnapshot);
+  int get hashCode => Object.hash(
+    taskId,
+    memberId,
+    dueDate,
+    pointsSnapshot,
+    missedPenaltyPct,
+  );
 
   @override
   String toString() =>
@@ -96,6 +108,7 @@ class SchedulableTask {
     required this.schedule,
     required this.assigneeIds,
     required this.points,
+    this.missedPenaltyPct,
     this.active = true,
   });
 
@@ -108,6 +121,10 @@ class SchedulableTask {
   final List<String> assigneeIds;
 
   final int points;
+
+  /// Mức trừ xu riêng cho task này, `null` là theo mức chung của gia đình.
+  final int? missedPenaltyPct;
+
   final bool active;
 }
 
@@ -137,6 +154,7 @@ List<PlannedInstance> planInstances({
             memberId: memberId,
             dueDate: date,
             pointsSnapshot: task.points,
+            missedPenaltyPct: task.missedPenaltyPct,
           ),
         );
       }

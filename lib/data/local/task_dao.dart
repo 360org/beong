@@ -160,6 +160,7 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
           schedule: schedule,
           assigneeIds: assignees,
           points: t.points,
+          missedPenaltyPct: t.missedPenaltyPct,
         ),
       );
     }
@@ -194,6 +195,7 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
           memberId: p.memberId,
           dueDate: p.dueDate.toString(),
           pointsSnapshot: p.pointsSnapshot,
+          missedPenaltyPct: Value(p.missedPenaltyPct),
         ),
         mode: InsertMode.insertOrIgnore,
       );

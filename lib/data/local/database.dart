@@ -38,7 +38,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -51,6 +51,13 @@ class AppDatabase extends _$AppDatabase {
       await customStatement('PRAGMA foreign_keys = ON');
     },
     onUpgrade: (m, from, to) async {
+      // v7 -> v8: mức trừ xu riêng theo từng việc (ADR-022). Cả hai cột đều
+      // nullable, NULL = theo mức chung của gia đình — nâng cấp không đổi hành
+      // vi của nhà nào.
+      if (from < 8) {
+        await m.addColumn(tasks, tasks.missedPenaltyPct);
+        await m.addColumn(taskInstances, taskInstances.missedPenaltyPct);
+      }
       // v6 -> v7: icon cho mục tiêu tiết kiệm. Cột nullable, mục tiêu cũ hiện
       // icon mặc định.
       if (from < 7) {

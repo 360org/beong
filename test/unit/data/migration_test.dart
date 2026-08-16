@@ -36,6 +36,14 @@ void main() {
         .insert(FamiliesCompanion.insert(id: 'fam-1', name: 'Nhà mình'));
 
     // Bỏ dần những gì phiên bản sau đã thêm, từ mới nhất về cũ nhất.
+    if (version < 8) {
+      await db.customStatement(
+        'ALTER TABLE tasks DROP COLUMN missed_penalty_pct',
+      );
+      await db.customStatement(
+        'ALTER TABLE task_instances DROP COLUMN missed_penalty_pct',
+      );
+    }
     if (version < 7) {
       await db.customStatement(
         'ALTER TABLE savings_goals DROP COLUMN icon_key',
@@ -145,6 +153,29 @@ void main() {
     final row = await db.select(db.pointTransactions).getSingle();
     expect(row.opGroupId, isNull);
   });
+
+  test(
+    'v7 -> v8 thêm mức trừ riêng, việc cũ để NULL nên không đổi hành vi',
+    () async {
+      await seedAtVersion(7);
+      final db = await openCurrent();
+
+      await db
+          .into(db.tasks)
+          .insert(
+            TasksCompanion.insert(
+              id: 'task-1',
+              familyId: 'fam-1',
+              title: 'Việc cũ',
+            ),
+          );
+
+      // NULL = theo mức chung của gia đình, tức nâng cấp không đổi số xu bị trừ
+      // của bất kỳ nhà nào.
+      final task = await db.select(db.tasks).getSingle();
+      expect(task.missedPenaltyPct, isNull);
+    },
+  );
 
   test('v6 -> v7 thêm icon cho mục tiêu, mục tiêu cũ để NULL', () async {
     await seedAtVersion(6);
