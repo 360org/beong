@@ -1,0 +1,53 @@
+# Đăng trang giới thiệu (thư mục `site/`) lên GitHub Pages.
+#
+# Vì sao publish từ `site/` chứ không phải `docs/`: GitHub Pages có chế độ phục vụ
+# thẳng thư mục `docs/`, nhưng `docs/` của repo này là tài liệu nội bộ — ADR, lộ
+# trình, 67 ảnh chụp. Trỏ Pages vào đó là vô tình xuất bản cả kho tài liệu kỹ thuật
+# ra công khai dưới dạng file thô.
+name: pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Đang deploy dở mà có push mới thì để bản đang chạy xong đã, không huỷ giữa chừng.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Kiểm tra ảnh trong trang có tồn tại thật không
+        # Ảnh vỡ trên trang giới thiệu là lỗi nhìn thấy ngay nhưng CI không bao giờ
+        # tự báo. Rẻ hơn nhiều so với việc phát hiện sau khi đã đăng.
+        run: |
+          set -euo pipefail
+          thieu=0
+          for f in $(grep -o 'src="[^"]*"' site/index.html | cut -d'"' -f2); do
+            case "$f" in http*|data:*) continue ;; esac
+            if [ ! -f "site/$f" ]; then echo "::error::thiếu ảnh site/$f"; thieu=1; fi
+          done
+          exit $thieu
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4

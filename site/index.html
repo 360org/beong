@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bé Ong — Việc nhà và phần thưởng cho con</title>
+<meta name="description" content="App ghi việc nhà cho trẻ 5–15 tuổi. Con làm xong được xu, xu đổi phần thưởng do bố mẹ đặt ra. Chạy hoàn toàn không cần mạng, không quảng cáo, không thu thập dữ liệu.">
+<link rel="canonical" href="https://beong.net/">
+
+<meta property="og:type" content="website">
+<meta property="og:locale" content="vi_VN">
+<meta property="og:site_name" content="Bé Ong">
+<meta property="og:title" content="Bé Ong — Việc nhà và phần thưởng cho con">
+<meta property="og:description" content="Con làm việc nhà được xu, xu đổi phần thưởng do bố mẹ đặt ra. Không cần mạng, không quảng cáo, không thu thập dữ liệu.">
+<meta property="og:url" content="https://beong.net/">
+<meta property="og:image" content="https://beong.net/img/28-child-home-hoan-thanh.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
+<meta name="theme-color" content="#FFC53D">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%9D%3C/text%3E%3C/svg%3E">
+
+<style>
+:root{
+  --honey:#FFC53D;
+  --honey-deep:#F0A500;
+  --blue:#0077CD;
+  --blue-deep:#005A9C;
+  --green:#00851C;
+
+  --bg:#FFFDF7;
+  --bg-alt:#FFF6E3;
+  --surface:#FFFFFF;
+  --ink:#1B1046;
+  --ink-muted:#615B87;
+  --line:#EFE7D6;
+  --shadow:0 2px 4px rgba(27,16,70,.05), 0 12px 32px rgba(27,16,70,.07);
+  --radius:18px;
+  --maxw:1080px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14102A;
+    --bg-alt:#1B1540;
+    --surface:#1E1940;
+    --ink:#F2F0FF;
+    --ink-muted:#A7A2C4;
+    --line:#332C5E;
+    --blue:#3AA0E8;
+    --blue-deep:#7CC4F5;
+    --green:#3CD75C;
+    --shadow:0 2px 4px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.35);
+  }
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Nunito","Segoe UI Variable","Segoe UI",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  font-size:17px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block}
+a{color:var(--blue);text-underline-offset:3px}
+h1,h2,h3{line-height:1.2;letter-spacing:-.02em;margin:0}
+h1{font-size:clamp(2.1rem,6vw,3.4rem);font-weight:800}
+h2{font-size:clamp(1.5rem,4vw,2.2rem);font-weight:800}
+h3{font-size:1.12rem;font-weight:800}
+p{margin:0}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+section{padding:clamp(56px,9vw,104px) 0}
+.band{background:var(--bg-alt)}
+.lede{color:var(--ink-muted);font-size:1.06rem;max-width:62ch}
+.eyebrow{
+  font-size:.76rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--blue);margin-bottom:12px;
+}
+
+/* header */
+header{
+  position:sticky;top:0;z-index:20;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:saturate(180%) blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.nav{display:flex;align-items:center;gap:14px;height:62px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.12rem;color:var(--ink);text-decoration:none}
+.brand .bee{font-size:1.35rem;line-height:1}
+.nav nav{margin-left:auto;display:flex;gap:22px}
+.nav nav a{color:var(--ink-muted);text-decoration:none;font-weight:700;font-size:.93rem}
+.nav nav a:hover{color:var(--ink)}
+@media (max-width:720px){.nav nav{display:none}}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(28px,5vw,64px);align-items:center}
+@media (max-width:860px){.hero{grid-template-columns:1fr;text-align:left}}
+.hero h1 .hl{
+  background:linear-gradient(180deg,transparent 62%,var(--honey) 62%);
+  padding:0 .1em;
+}
+.hero p.lede{margin-top:20px;font-size:1.14rem}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:13px 24px;border-radius:999px;font-weight:800;font-size:.98rem;
+  text-decoration:none;border:2px solid transparent;transition:transform .12s ease;
+}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--honey);color:#3D2B00;box-shadow:0 4px 14px rgba(240,165,0,.32)}
+.btn-primary:hover{background:var(--honey-deep)}
+.btn-ghost{border-color:var(--line);color:var(--ink);background:var(--surface)}
+.btn-ghost:hover{border-color:var(--blue)}
+.note{margin-top:16px;font-size:.88rem;color:var(--ink-muted)}
+
+.phones{display:flex;justify-content:center;gap:16px;perspective:1200px}
+.phone{
+  border-radius:26px;overflow:hidden;background:var(--surface);
+  border:1px solid var(--line);box-shadow:var(--shadow);width:min(240px,42vw);
+}
+.phone.tilt-l{transform:rotate(-4deg) translateY(10px)}
+.phone.tilt-r{transform:rotate(4deg) translateY(-10px)}
+@media (max-width:520px){.phone.tilt-l{display:none}}
+
+/* promise cards */
+.grid{display:grid;gap:18px}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+@media (max-width:860px){.g3{grid-template-columns:1fr}.g2{grid-template-columns:1fr}}
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px 24px;box-shadow:var(--shadow);
+}
+.card .ico{font-size:1.9rem;line-height:1;margin-bottom:12px}
+.card p{color:var(--ink-muted);margin-top:8px;font-size:.98rem}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3vw,34px);margin-top:44px}
+@media (max-width:860px){.steps{grid-template-columns:1fr;gap:40px}}
+.step img{border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:18px}
+.step .num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:999px;background:var(--honey);color:#3D2B00;
+  font-weight:800;font-size:.9rem;margin-bottom:10px;
+}
+.step p{color:var(--ink-muted);margin-top:7px;font-size:.97rem}
+
+/* jars */
+.jars{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
+@media (max-width:720px){.jars{grid-template-columns:1fr}}
+.jar{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px;text-align:center;box-shadow:var(--shadow);
+}
+.jar .e{font-size:2.1rem;line-height:1}
+.jar .pct{font-weight:800;font-size:1.5rem;color:var(--blue);margin-top:6px}
+.jar .nm{font-weight:800;margin-top:2px}
+.jar p{color:var(--ink-muted);font-size:.9rem;margin-top:6px}
+
+/* split */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,60px);align-items:center}
+@media (max-width:860px){.split{grid-template-columns:1fr}}
+.split img{border-radius:18px;border:1px solid var(--line);box-shadow:var(--shadow);width:min(300px,80%);margin:0 auto}
+
+/* feature list */
+.feats{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;margin-top:34px;
+  border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--line)}
+@media (max-width:720px){.feats{grid-template-columns:1fr}}
+.feat{background:var(--surface);padding:22px 24px}
+.feat h3{display:flex;align-items:center;gap:9px;font-size:1rem}
+.feat p{color:var(--ink-muted);font-size:.94rem;margin-top:6px}
+
+/* status */
+.status{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--honey);
+  border-radius:14px;padding:26px 28px;box-shadow:var(--shadow)}
+.status ul{margin:14px 0 0;padding-left:20px;color:var(--ink-muted)}
+.status li{margin:5px 0}
+.status li b{color:var(--ink)}
+
+/* privacy */
+.priv{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:28px}
+@media (max-width:720px){.priv{grid-template-columns:1fr}}
+.priv div{display:flex;gap:11px;align-items:flex-start;background:var(--surface);
+  border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.priv .tick{color:var(--green);font-weight:800;flex:none}
+.priv p{font-size:.95rem}
+
+/* gallery */
+.gal{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px}
+@media (max-width:860px){.gal{grid-template-columns:repeat(2,1fr)}}
+.gal img{border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow)}
+.gal figure{margin:0}
+.gal figcaption{font-size:.85rem;color:var(--ink-muted);margin-top:9px;text-align:center}
+
+footer{border-top:1px solid var(--line);padding:44px 0 56px;color:var(--ink-muted);font-size:.92rem}
+footer .cols{display:flex;flex-wrap:wrap;gap:34px;justify-content:space-between}
+footer a{color:var(--ink-muted);text-decoration:none;display:block;padding:3px 0}
+footer a:hover{color:var(--blue)}
+footer h3{font-size:.78rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink);margin-bottom:8px}
+.fine{margin-top:34px;padding-top:22px;border-top:1px solid var(--line);font-size:.85rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top"><span class="bee">🐝</span> Bé Ong</a>
+    <nav>
+      <a href="#cach-dung">Cách dùng</a>
+      <a href="#hu-xu">Ba hũ xu</a>
+      <a href="#tinh-nang">Tính năng</a>
+      <a href="#rieng-tu">Quyền riêng tư</a>
+      <a href="#trang-thai">Trạng thái</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<section>
+  <div class="wrap hero">
+    <div>
+      <p class="eyebrow">Việc nhà · Thói quen · Tiền bạc</p>
+      <h1>Con làm việc nhà,<br>được <span class="hl">xu</span>.</h1>
+      <p class="lede">
+        Bé Ong ghi việc nhà cho trẻ 5–15 tuổi. Con làm xong được xu, xu đổi phần
+        thưởng do chính bố mẹ đặt ra. Xu tự chia vào ba hũ Tiêu · Để dành · Cho đi,
+        nên mỗi lần con làm việc cũng là một lần học cách chia tiền.
+      </p>
+      <div class="cta">
+        <a class="btn btn-primary" href="#cach-dung">Xem cách hoạt động</a>
+        <a class="btn btn-ghost" href="https://github.com/360org/dailychildren">Mã nguồn trên GitHub</a>
+      </div>
+      <p class="note">
+        Chạy đầy đủ khi không có mạng · Không quảng cáo · Không mua trong app ·
+        Không thư viện theo dõi hành vi
+      </p>
+    </div>
+    <div class="phones">
+      <div class="phone tilt-l">
+        <img src="img/26-child-home.jpg" width="340" height="743"
+             alt="Màn hình của con: linh vật Bé Ong, vòng tiến độ và danh sách việc cần làm">
+      </div>
+      <div class="phone tilt-r">
+        <img src="img/28-child-home-hoan-thanh.jpg" width="340" height="743"
+             alt="Con làm xong 12 trên 12 việc, nhận huy hiệu Ong chăm chỉ hôm nay">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <p class="eyebrow">Ba lời hứa</p>
+    <h2>Những thứ app này cố ý <em>không</em> làm</h2>
+    <div class="grid g3" style="margin-top:36px">
+      <div class="card">
+        <div class="ico">📴</div>
+        <h3>Không cần mạng</h3>
+        <p>Dữ liệu nằm trong một file trên chính máy bạn. Không tài khoản, không
+        đăng nhập, không máy chủ nào giữ bản sao. Máy bay, vùng sóng yếu, hết 4G —
+        app vẫn chạy đủ.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🚫</div>
+        <h3>Không quảng cáo, không mua trong app</h3>
+        <p>Không có banner, không có "mở khoá bản Pro", không có SDK quảng cáo nào
+        trong mã nguồn. Không có màn hình nào dụ trẻ chi tiền, vì không có luồng
+        chi tiền.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🔍</div>
+        <h3>Không theo dõi hành vi</h3>
+        <p>Không thư viện phân tích, không định danh quảng cáo, không tự gửi nhật ký
+        sử dụng. Chỗ duy nhất đưa dữ liệu ra khỏi máy là nút Báo lỗi, và nó chỉ chạy
+        khi bạn bấm.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cach-dung">
+  <div class="wrap">
+    <p class="eyebrow">Cách hoạt động</p>
+    <h2>Ba bước, khoảng một phút để bắt đầu</h2>
+    <p class="lede" style="margin-top:14px">
+      Không có bước tạo tài khoản, không có email xác thực, không có màn hình chọn
+      gói. Mở app ra là đặt tên nhà rồi dùng.
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <img src="img/18-them-nhiem-vu.jpg" width="340" height="743"
+             alt="Màn thêm nhiệm vụ với hai mươi mẫu việc nhà chọn nhanh, mỗi việc có icon riêng">
+        <div class="num">1</div>
+        <h3>Bố mẹ đặt việc và giá xu</h3>
+        <p>Có sẵn 20 việc thường gặp và ba bộ thói quen dựng sẵn — Buổi sáng, Sau giờ
+        học, Trước khi ngủ. Mỗi việc bắt buộc có icon, vì bé chưa đọc thạo thì icon
+        chính là nội dung.</p>
+      </div>
+      <div class="step">
+        <img src="img/28-child-home-hoan-thanh.jpg" width="340" height="743"
+             alt="Con hoàn thành hết việc trong ngày và nhận huy hiệu mới">
+        <div class="num">2</div>
+        <h3>Con bấm xong, được xu</h3>
+        <p>Vòng tiến độ chạy, linh vật đổi nét mặt theo tiến độ. Làm trọn bộ một thói
+        quen thì được thưởng thêm. Đạt huy hiệu mới thì màn hình nổ hoa giấy và gọi
+        đúng tên huy hiệu.</p>
+      </div>
+      <div class="step">
+        <img src="img/55-parent-hang-doi-duyet.jpg" width="340" height="743"
+             alt="Hàng đợi duyệt của bố mẹ với nút duyệt tất cả">
+        <div class="num">3</div>
+        <h3>Bố mẹ duyệt khi cần</h3>
+        <p>Mặc định con bấm xong là xong. Nhà nào muốn kiểm thì bật chế độ duyệt — có
+        cả nút Duyệt tất cả cho lúc bận, và mở lại được việc con báo xong mà chưa
+        làm thật.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="hu-xu">
+  <div class="wrap split">
+    <div>
+      <p class="eyebrow">Giáo dục tài chính</p>
+      <h2>Mỗi lần được xu là một lần chia tiền</h2>
+      <p class="lede" style="margin-top:16px">
+        Xu không vào một túi chung. Nó chia vào ba hũ theo mô hình
+        <em>spend · save · give</em> — thứ mà các chương trình dạy tiền cho trẻ dùng
+        từ lâu, chỉ là ít khi được đưa vào app.
+      </p>
+      <div class="jars">
+        <div class="jar"><div class="e">🛍️</div><div class="pct">50%</div><div class="nm">Tiêu</div><p>Đổi phần thưởng ngay</p></div>
+        <div class="jar"><div class="e">🐷</div><div class="pct">40%</div><div class="nm">Để dành</div><p>Tích cho mục tiêu lớn</p></div>
+        <div class="jar"><div class="e">💝</div><div class="pct">10%</div><div class="nm">Cho đi</div><p>Dành để tặng, để giúp</p></div>
+      </div>
+      <p class="lede" style="margin-top:22px">
+        Tỷ lệ sửa được, tên và emoji đổi được, và bố mẹ tự lập thêm hũ mới. Khi con
+        đủ lớn thì bật <b>“Con tự chia xu”</b>: xu dồn vào hũ Chờ chia và chính con
+        quyết định bỏ bao nhiêu vào đâu.
+      </p>
+    </div>
+    <div>
+      <img src="img/59-child-man-chia-xu.jpg" width="340" height="743"
+           alt="Màn chia xu vào hũ: còn 30 xu chưa chia, mỗi hũ có nút cộng 1, cộng 5 và Hết">
+    </div>
+  </div>
+</section>
+
+<section id="tinh-nang">
+  <div class="wrap">
+    <p class="eyebrow">Có sẵn trong bản hiện tại</p>
+    <h2>Tính năng</h2>
+    <div class="feats">
+      <div class="feat">
+        <h3>🔁 Thói quen kéo thả</h3>
+        <p>Gom việc thành cụm theo buổi, kéo thả đổi thứ tự, thưởng thêm khi con làm
+        trọn bộ.</p>
+      </div>
+      <div class="feat">
+        <h3>🏅 8 huy hiệu</h3>
+        <p>Ba ngày liền, trọn một tuần, cả tháng chăm chỉ, mười / năm mươi / một trăm
+        việc… Mỗi mốc có thanh tiến độ riêng.</p>
+      </div>
+      <div class="feat">
+        <h3>🎁 Phần thưởng có duyệt</h3>
+        <p>Con xin đổi, bố mẹ duyệt rồi con mới có phiếu. Từ chối thì xu trả lại
+        nguyên vẹn.</p>
+      </div>
+      <div class="feat">
+        <h3>🎯 Mục tiêu để dành</h3>
+        <p>Đặt món con muốn và số xu cần. Thanh tiến độ hiện ngay trên màn hình
+        của con.</p>
+      </div>
+      <div class="feat">
+        <h3>🧾 Sổ chỉ ghi thêm</h3>
+        <p>Mỗi thao tác một dòng, không sửa, không xoá. Bố mẹ chỉnh xu tay thì
+        <b>bắt buộc nhập lý do</b> — không có con số nào rơi từ trên trời xuống.</p>
+      </div>
+      <div class="feat">
+        <h3>🔒 PIN phụ huynh</h3>
+        <p>Chặn con tự bấm sang vai bố mẹ. Lưu dạng băm, không lưu bốn chữ số gốc.</p>
+      </div>
+      <div class="feat">
+        <h3>👧🧒 Nhiều con</h3>
+        <p>Mỗi con một sổ xu, hũ, huy hiệu và mục tiêu riêng — không nhìn thấy
+        của nhau.</p>
+      </div>
+      <div class="feat">
+        <h3>🌗 Sáng / Tối</h3>
+        <p>Theo hệ thống hoặc chọn tay, áp cho cả vai bố mẹ lẫn vai con.</p>
+      </div>
+      <div class="feat">
+        <h3>🕓 Giờ đổi ngày</h3>
+        <p>Mặc định 4 giờ sáng chứ không phải nửa đêm — việc buổi tối hay xong trễ,
+        tính bỏ lỡ lúc 0h01 thì oan cho con.</p>
+      </div>
+      <div class="feat">
+        <h3>⚖️ Trừ xu — mặc định tắt</h3>
+        <p>Có, nhưng app không bật sẵn và nói rõ vì sao nên cân nhắc. Đặt theo phần
+        trăm giá việc, riêng từng việc được.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="rieng-tu">
+  <div class="wrap">
+    <p class="eyebrow">Quyền riêng tư</p>
+    <h2>App dành cho trẻ em thì phải nói thật về dữ liệu</h2>
+    <p class="lede" style="margin-top:14px">
+      Bé Ong chịu COPPA (Hoa Kỳ), GDPR-K (EU) và Nghị định 13/2023/NĐ-CP (Việt Nam).
+      Cách đơn giản nhất để tuân thủ là không thu thập gì.
+    </p>
+    <div class="priv">
+      <div><span class="tick">✓</span><p><b>Trẻ không cần tài khoản.</b> Hồ sơ con không có email, số điện thoại hay bất kỳ định danh liên lạc nào.</p></div>
+      <div><span class="tick">✓</span><p><b>Không hỏi thông tin nhạy cảm.</b> Không họ tên đầy đủ, không địa chỉ, không ảnh khuôn mặt, không vị trí, không danh bạ.</p></div>
+      <div><span class="tick">✓</span><p><b>Không xin quyền nào.</b> Không máy ảnh, không micro, không vị trí, không thư viện ảnh.</p></div>
+      <div><span class="tick">✓</span><p><b>Không mạng xã hội.</b> Không chat, không bình luận, không nội dung do người lạ tạo ra.</p></div>
+      <div><span class="tick">✓</span><p><b>Xoá bằng cách gỡ app.</b> File dữ liệu đi cùng ứng dụng, không cần liên hệ ai để yêu cầu xoá.</p></div>
+      <div><span class="tick">✓</span><p><b>Đổi gì cũng báo trước.</b> Khi có đồng bộ nhiều máy, chính sách sẽ cập nhật <em>trước</em> khi tính năng bật.</p></div>
+    </div>
+    <p class="lede" style="margin-top:24px">
+      Bản đầy đủ:
+      <a href="https://github.com/360org/dailychildren/blob/main/docs/10-privacy-policy.md">Chính sách quyền riêng tư</a>.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Ảnh chụp thật</p>
+    <h2>Trong app trông thế nào</h2>
+    <p class="lede" style="margin-top:14px">
+      Ảnh chụp từ bản dựng thật ở cỡ điện thoại, không phải mockup dựng lại.
+      <a href="https://github.com/360org/dailychildren/tree/main/docs/screenshot">Xem đủ 67 ảnh</a>.
+    </p>
+    <div class="gal">
+      <figure>
+        <img src="img/04-parent-home.jpg" width="340" height="743" loading="lazy" alt="Trang chính của bố mẹ">
+        <figcaption>Trang chính của bố mẹ</figcaption>
+      </figure>
+      <figure>
+        <img src="img/33-child-thong-ke.jpg" width="340" height="743" loading="lazy" alt="Sổ của con với ba hũ và lịch sử từng dòng">
+        <figcaption>Sổ của con</figcaption>
+      </figure>
+      <figure>
+        <img src="img/29-child-huy-hieu.jpg" width="340" height="743" loading="lazy" alt="Màn huy hiệu với tám mốc và thanh tiến độ">
+        <figcaption>Huy hiệu</figcaption>
+      </figure>
+      <figure>
+        <img src="img/43-toi-parent-home.jpg" width="340" height="743" loading="lazy" alt="Giao diện tối của màn hình bố mẹ">
+        <figcaption>Giao diện Tối</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="trang-thai">
+  <div class="wrap">
+    <p class="eyebrow">Nói thẳng</p>
+    <h2>App chưa lên store</h2>
+    <div class="status" style="margin-top:26px">
+      <p>
+        Bé Ong đang ở <b>v0.2.0</b>. Phần dùng hằng ngày đã chạy đủ và ổn định, nhưng
+        app <b>chưa có trên App Store hay Google Play</b>. Trang này không có nút tải
+        vì chưa có gì để tải — đặt nút giả để lấy lượt truy cập thì tệ hơn là không có.
+      </p>
+      <ul>
+        <li><b>Đã xong:</b> việc nhà, thói quen, xu và ba hũ, phần thưởng có duyệt,
+        huy hiệu, mục tiêu để dành, nhiều con, PIN phụ huynh, giao diện Sáng/Tối.</li>
+        <li><b>Đang làm:</b> đồng bộ nhiều máy — bố mẹ cấu hình xong, máy con quét mã
+        QR để nhận hồ sơ.</li>
+        <li><b>Chưa có:</b> thông báo nhắc việc, chế độ chụp ảnh làm bằng chứng,
+        và bản trên store.</li>
+      </ul>
+      <p style="margin-top:16px">
+        Lộ trình đầy đủ, đánh dấu từng mục đã xong hay chưa:
+        <a href="https://github.com/360org/dailychildren/blob/main/docs/05-roadmap.md">05-roadmap.md</a>.
+      </p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div style="max-width:30ch">
+        <div class="brand" style="margin-bottom:10px"><span class="bee">🐝</span> Bé Ong</div>
+        <p>Việc nhà, thói quen và những đồng xu đầu tiên của con. Offline-first,
+        không quảng cáo, mã nguồn mở.</p>
+      </div>
+      <div>
+        <h3>Tài liệu</h3>
+        <a href="https://github.com/360org/dailychildren/blob/main/docs/12-huong-dan-su-dung.md">Hướng dẫn sử dụng</a>
+        <a href="https://github.com/360org/dailychildren/blob/main/docs/10-privacy-policy.md">Chính sách quyền riêng tư</a>
+        <a href="https://github.com/360org/dailychildren/blob/main/docs/05-roadmap.md">Lộ trình phát triển</a>
+        <a href="https://github.com/360org/dailychildren/tree/main/docs/screenshot">Ảnh chụp màn hình</a>
+      </div>
+      <div>
+        <h3>Dự án</h3>
+        <a href="https://github.com/360org/dailychildren">Mã nguồn</a>
+        <a href="https://github.com/360org/dailychildren/issues">Báo lỗi, góp ý</a>
+        <a href="https://github.com/360org/dailychildren/blob/main/docs/06-decisions.md">Quyết định kiến trúc</a>
+      </div>
+    </div>
+    <p class="fine">
+      Bé Ong · bundle ID <code>net.beong.app</code> · Xây bằng Flutter.
+      Emoji minh hoạ dùng bộ <a href="https://github.com/microsoft/fluentui-emoji">Fluent Emoji</a> (giấy phép MIT).
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
