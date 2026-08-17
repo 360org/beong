@@ -1,0 +1,125 @@
+# Ảnh chụp màn hình — Bé Ong v0.2.0
+
+67 ảnh, chụp trên bản dựng Linux debug ở **412×900** (cỡ điện thoại thật), đi hết
+luồng chứ không chỉ mở từng màn: tạo nhà → làm việc → nhận huy hiệu → đổi thưởng →
+bố mẹ duyệt → con tự chia xu.
+
+Vì sao chụp ở 412×900 chứ không phải cỡ cửa sổ mặc định: bố cục của app đổi nhánh
+theo bề rộng. Chụp ở 1280 là đang xem nhánh desktop, không phải thứ người dùng thấy.
+Cách dựng môi trường chụp nằm ở `.claude/skills/flutter-8-buoc/SKILL.md` bước 6.
+
+## Mục lục
+
+### Tạo nhà lần đầu (01–03)
+| Ảnh | Màn |
+|---|---|
+| `01-onboarding-1.png` | Đặt tên gia đình |
+| `02-onboarding-2.png` | Thêm bé — tên, tuổi, con vật, màu |
+| `03-onboarding-3.png` | Chọn thói quen dựng sẵn |
+
+### Vai phụ huynh (04–17)
+| Ảnh | Màn |
+|---|---|
+| `04-parent-home.png` | Trang chính — hàng đợi duyệt + danh sách con |
+| `05-parent-nhiemvu.png` | Nhiệm vụ — các thói quen và việc bên trong |
+| `06-parent-phanthuong.png` | Phần thưởng — chưa có gì, kèm gợi ý chọn nhanh |
+| `07-parent-thongke.png` | Thống kê — ba hũ, streak, mục tiêu |
+| `08-parent-caidat.png` | Cài đặt (đầu trang) |
+| `09-parent-caidat-cuon.png` | Cài đặt (cuộn xuống hết) |
+| `10-caidat-giaodien.png` | Chọn giao diện Sáng / Tối / Theo hệ thống |
+| `11-caidat-pin.png` | Đặt PIN phụ huynh |
+| `12-caidat-cachu.png` | Các hũ — tên, emoji, tỷ lệ, thêm hũ mới |
+| `13-caidat-truxu.png` | Trừ xu — mặc định **tắt**, kèm phần cảnh báo |
+| `14-caidat-gio-doi-ngay.png` | Giờ đổi ngày (rollover) |
+| `15-caidat-quy-doi-tien.png` | Quy đổi ra tiền thật — mặc định **tắt** |
+| `16-caidat-bao-loi.png` | Báo lỗi — kèm ảnh xem trước và công tắc tắt ảnh |
+| `17-caidat-them-be.png` | Thêm bé thứ hai |
+
+### Trình biên tập (18–25)
+| Ảnh | Màn |
+|---|---|
+| `18-them-nhiem-vu.png` | Thêm nhiệm vụ — 20 mẫu chọn nhanh |
+| `19-them-nhiem-vu-2.png` | …giá xu và bảng icon |
+| `20-them-nhiem-vu-3.png` | …lặp lại, giao cho ai, chế độ duyệt riêng |
+| `21-them-nhiem-vu-4.png` | …toàn bộ biểu mẫu tới nút Lưu |
+| `22-sua-thoi-quen.png` | Routine editor — kéo thả đổi thứ tự |
+| `23-sua-thong-tin-thoi-quen.png` | Sửa tên / hình / thưởng trọn bộ |
+| `24-them-phan-thuong.png` | Thêm phần thưởng |
+| `25-phan-thuong-danh-sach.png` | Danh sách phần thưởng đã tạo |
+
+### Vai trẻ em (26–35)
+| Ảnh | Màn |
+|---|---|
+| `26-child-home.png` | Trang chính của con — chưa làm việc nào |
+| `27-child-home-dang-lam.png` | Làm được 3/12, vòng tiến độ chạy |
+| `28-child-home-hoan-thanh.png` | 12/12 — linh vật đổi mặt, huy hiệu mới báo bằng SnackBar |
+| `29-child-huy-hieu.png` | Huy hiệu — 8 mốc, có thanh tiến độ từng mốc |
+| `30-child-huy-hieu-2.png` | …phần còn lại |
+| `31-child-nhiem-vu.png` | Nhiệm vụ (con chỉ xem, không sửa) |
+| `32-child-phan-thuong.png` | Phần thưởng đổi được |
+| `33-child-thong-ke.png` | Sổ của con — ba hũ và lịch sử từng dòng |
+| `34-child-doi-thuong.png` | Xin đổi thưởng → chờ bố mẹ duyệt (ADR-025) |
+| `35-child-so-lich-su.png` | Lịch sử xu, mỗi thao tác một dòng |
+
+### Chuyển vai và duyệt (36–41)
+| Ảnh | Màn |
+|---|---|
+| `36-child-doi-ho-so.png` | Đổi người dùng |
+| `37-parent-home-cho-duyet.png` | Bố mẹ thấy "Con xin đổi 1 phần thưởng" |
+| `38-parent-duyet-doi-thuong.png` | Duyệt / từ chối phiếu thưởng |
+| `39-parent-sua-xu.png` | Điều chỉnh xu thủ công — **bắt buộc nhập lý do** |
+| `40-parent-muc-tieu-tiet-kiem.png` | Đặt mục tiêu để dành |
+| `41-parent-thong-ke-co-muc-tieu.png` | Mục tiêu hiện kèm thanh tiến độ |
+
+### Giao diện Tối (42–49)
+Cả hai vai, đủ các tab chính. `42`–`46` là vai bố mẹ, `47`–`49` là vai con.
+
+### Duyệt từng việc (50–56)
+| Ảnh | Màn |
+|---|---|
+| `50-parent-da-xong-hom-nay.png` | Danh sách đã xong hôm nay, mỗi dòng có nút mở lại |
+| `51-parent-mo-lai-viec.png` | Sau khi mở lại 3 việc |
+| `52-child-can-lam-lai.png` | Con thấy việc quay về "Cần làm" |
+| `53-child-cho-duyet.png` | Con bấm xong, xu **chưa** cộng vì nhà bật duyệt |
+| `54-child-danh-sach-da-xong.png` | Danh sách đã xong phía con |
+| `55-parent-hang-doi-duyet.png` | Hàng đợi duyệt + nút Duyệt tất cả |
+| `56-parent-sau-khi-duyet.png` | Duyệt xong, xu cộng vào |
+
+### Con tự chia xu (57–62)
+| Ảnh | Màn |
+|---|---|
+| `57-child-so-cho-chia.png` | Hũ **Chờ chia** viền vàng, khác hẳn ba hũ kia |
+| `58-child-home-cho-chia.png` | Header hiện "30 chưa chia ›" |
+| `59-child-man-chia-xu.png` | Màn chia xu vào hũ |
+| `60-child-chia-xu-da-chia.png` | Đã chia đủ 30 xu |
+| `61-child-home-sau-khi-chia.png` | Chia hết rồi thì dòng "chưa chia" **ẩn đi** |
+| `62-child-so-cuoi.png` | Hũ Chờ chia cũng ẩn khi bằng 0 |
+
+### Còn lại (63–67)
+| Ảnh | Màn |
+|---|---|
+| `63-so-lich-su-day-du.png` | Sổ đầy đủ: xong, phải làm lại, thưởng trọn bộ, dùng thưởng |
+| `64-tru-xu-da-bat.png` | Trừ xu sau khi bật 10% |
+| `65-tru-xu-rieng-tung-viec.png` | Khối "Bỏ việc này thì trừ" trong Task Editor |
+| `66-nhap-pin-de-vao-vai-bo-me.png` | PIN chặn con tự đổi sang vai bố mẹ |
+| `67-pin-sai.png` | Nhập sai thì báo rõ, không im lặng |
+
+## Lỗi bộ ảnh này bắt được
+
+Chụp xong rồi *nhìn* mới thấy, trong khi `flutter analyze --fatal-infos` sạch và
+470 test đều xanh:
+
+1. **Ảnh 63** — `Làm bài tập` giá 25 xu mà sổ ghi `+50`, liệt kê cả một lần chia
+   tự động lẫn một lần vào hũ Chờ chia. Nguyên nhân: hai đường cộng xu trong
+   `wallet_dao.dart` dùng hai vùng khoá `client_op_id` khác nhau
+   (`task-approved:<id>:<hũ>` với `task-approved:<id>`), nên chốt chống trùng không
+   bắt được nhau. Bố mẹ đổi chế độ chia xu giữa hai lần cộng là con được trả hai lần.
+2. **Ảnh 53–54** — bật "Cần bố mẹ duyệt" thì việc con vừa bấm hiện **y hệt** việc
+   đã duyệt: cùng gạch ngang, cùng dấu tích xanh, cùng nằm trong nhóm "Đã xong".
+   Con thấy tích xanh mà xu không lên.
+
+## Chụp lại bộ này
+
+Ảnh phải chụp lại khi bố cục đổi, không phải mỗi lần commit. Quy trình ở
+`.claude/skills/flutter-8-buoc/SKILL.md` bước 6; nhớ chạy `matchbox-window-manager`
+trước, thiếu nó thì cửa sổ vẫn là 1280×720 và ảnh ra là bố cục desktop bị cắt.
