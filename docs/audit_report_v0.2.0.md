@@ -48,10 +48,12 @@ Dự án **Bé Ong** (DailyChildren) là ứng dụng quản lý việc nhà, x�
 * **ADR-014 (Miễn phí hoàn toàn)**: Không chứa bất kỳ mã nguồn, SDK thanh toán, IAP hay SDK quảng cáo bên thứ 3 nào.
 * **ADR-017 (Quy đổi tiền thật)**: Tách biệt logic làm tròn xuống an toàn tại `MoneyExchange`, mặc định tắt.
 * **ADR-025 (Bắt buộc duyệt đổi thưởng)**: Mọi giao dịch đổi quà đều chuyển vào trạng thái `pending` và yêu cầu xác nhận từ bố mẹ.
-* **Clean Architecture — chưa đạt**: `lib/domain/repositories/` **rỗng**; UI và service gọi
-  thẳng DAO. Chấp nhận được ở giai đoạn local-only, nhưng phải có trước khi thêm sync, vì lúc đó
-  "đọc ở đâu" mới thành câu hỏi thật. Không nên tuyên bố tuân thủ Clean Architecture khi còn
-  thiếu đúng tầng ở giữa.
+* **Clean Architecture — đã có tầng giữa** (17/08): 7 interface + bản `Local...` ở
+  `lib/domain/repositories/`, mặt cắt bằng đúng 73 phương thức `lib/features` gọi thật, và
+  `test/unit/kien_truc_test.dart` chặn mọi đường đi vòng. **Vẫn còn một nửa chưa làm**:
+  repository trả về kiểu hàng của Drift chứ chưa có entity riêng của domain — cố ý hoãn tới lúc
+  có nguồn dữ liệu thứ hai, ghi rõ trong README cùng thư mục. Service vẫn gọi thẳng DAO, cũng cố
+  ý, vì chúng cần cùng transaction.
 
 ### B. Chất Lượng Mã Nguồn (Code Quality & Flutter Best Practices)
 * **Null Safety**: unwrap cưỡng chế trong router đã xử lý bằng `redirect` — `routineId` rỗng
@@ -68,7 +70,7 @@ Dự án **Bé Ong** (DailyChildren) là ứng dụng quản lý việc nhà, x�
 * Vùng chạm tối thiểu đạt chuẩn >= 48dp (`AppSpacing.minTouchTarget`).
 
 ### D. Hệ Thống Kiểm Thử (Testing Coverage)
-* **46 file test, 483 test** đều xanh; `flutter analyze --fatal-infos` sạch.
+* **47 file test, 487 test** đều xanh; `flutter analyze --fatal-infos` sạch.
 * Kiểm thử tích hợp toàn trình tại `integration_test/luong_day_du_test.dart` (3 luồng), có job
   CI riêng chạy trên Linux desktop dưới Xvfb.
 * Ràng buộc khả dụng đã thành test tự động (`test/unit/kha_dung_test.dart`) thay vì chỉ là lời
@@ -124,7 +126,7 @@ Xếp theo mức chặn thật, không theo độ khó.
 | 2 | **Điền + đăng chính sách quyền riêng tư** ở URL công khai | Thiếu là không nộp được store, không phải việc để tới lúc review mới lo |
 | 3 | **Icon app, splash, ảnh chụp store** | Cùng lý do, và cần thiết kế chứ không phải code |
 | 4 | **Đưa chuỗi màn hình vào ARB** | 15 chỗ dùng ARB / ~600 chuỗi cứng phải chuyển. Việc thật đứng sau ô chọn ngôn ngữ, và **không** phải việc một buổi |
-| 5 | **Tầng repository** | Phải có trước sync, và Sprint 3 là việc kế tiếp |
+| 5 | ~~Tầng repository~~ ✅ | Xong 17/08, trước khi bắt đầu sync đúng như hạn chót |
 | 6 | ~~Widget test cho màn báo lỗi~~ ✅ | `test/widget/bao_loi_screen_test.dart`, 7 test |
 | 7 | ~~Router: `routineId` rỗng~~ ✅ | Nay `redirect` về danh sách Nhiệm vụ |
 | 8 | Task Editor: khối **chế độ bằng chứng** | Khối thứ 8 còn thiếu; docs xếp ở v1.1. **Cột `tasks.proof_mode` đã có trong schema nhưng chưa ai đọc hay ghi** — một cột chết nữa |

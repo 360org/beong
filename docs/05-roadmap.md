@@ -45,9 +45,10 @@ nếu không nó chỉ là ước muốn.
 ## Sprint 1 — Dữ liệu local ✅ XONG
 - [x] Drift schema đầy đủ theo `03-data-model.md` (gồm `routines`, `streaks`, `badges_earned`)
 - [x] DAO local-only: `TaskDao`, `WalletDao`, `MemberDao`, `RewardDao`, `SettingsDao`
-- [ ] Tầng repository — **chưa làm.** `lib/domain/repositories/` vẫn rỗng; UI và service gọi
-      thẳng DAO. Chấp nhận được ở giai đoạn local-only, nhưng phải có trước khi thêm sync,
-      vì lúc đó "đọc ở đâu" mới thành câu hỏi thật.
+- [x] Tầng repository ✅ — 7 interface + bản `Local...` ở `lib/domain/repositories/`, mặt cắt lấy
+      đúng bằng 73 phương thức `lib/features` thật sự gọi (không bọc lại cả 244 phương thức DAO —
+      lý do ở README cùng thư mục). Ràng buộc "features không chạm `lib/data`" có
+      `test/unit/kien_truc_test.dart` canh.
 - [x] Bộ sinh `task_instances` + ngày theo timezone/rollover + kế thừa lịch từ routine
 - [x] Ledger theo hũ + tính số dư từng hũ (ADR-016, mở rộng ở ADR-024)
 - [x] Thưởng trọn bộ routine, idempotent
@@ -119,8 +120,7 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
 - [ ] Tách điều hướng theo vai; onboarding tách hai nhánh
 
 **Việc còn nợ từ Sprint 1–2, không cần backend:**
-- [ ] Tầng repository — cùng mục ở Sprint 1 (dòng trên), nhắc lại vì đây là hạn chót thật:
-      phải có **trước** khi thêm sync
+- [x] Tầng repository ✅ (xem Sprint 1) — xong trước khi bắt đầu sync, đúng như hạn chót đặt ra
 - [ ] Task Editor đủ 8 khối (còn thiếu **chế độ bằng chứng** — cột `proof_mode` có sẵn nhưng chưa
       ai đọc; chế độ duyệt riêng đã xong)
 - [x] Routine Editor + kéo thả thứ tự
