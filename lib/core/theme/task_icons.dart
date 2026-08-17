@@ -7,7 +7,7 @@
 /// `AppIcon`**.
 ///
 /// Khoá khớp với `iconKey` trong `TaskPreset`/`RoutinePreset`
-/// (`lib/data/seed/presets.dart`) và với **tên file** trong `assets/icons/`.
+/// (`lib/domain/entities/presets.dart`) và với **tên file** trong `assets/icons/`.
 library;
 
 /// Thư mục chứa asset icon.
@@ -106,7 +106,7 @@ const Map<String, String> taskIcons = {
   'clock': '⏰',
   'star': '⭐',
 
-  // Phần thưởng — `lib/data/seed/reward_presets.dart`.
+  // Phần thưởng — `lib/domain/entities/reward_presets.dart`.
   'phone': '📱',
   'money': '💰',
   'ice_cream': '🍦',

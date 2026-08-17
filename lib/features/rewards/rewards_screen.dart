@@ -10,11 +10,10 @@ import 'package:beong/core/widgets/icon_picker.dart';
 import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
-import 'package:beong/data/local/database.dart';
-import 'package:beong/data/local/reward_dao.dart';
-import 'package:beong/data/local/wallet_dao.dart';
-import 'package:beong/data/seed/reward_presets.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/entities/reward_presets.dart';
+import 'package:beong/domain/repositories/reward_repository.dart';
+import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/domain/services/redemption_service.dart';
 import 'package:beong/features/rewards/redemption_queue.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -29,8 +28,8 @@ class RewardsScreen extends ConsumerWidget {
     final session = ref.watch(sessionProvider);
     if (session == null) return const SizedBox.shrink();
 
-    final rewardDao = ref.watch(rewardDaoProvider);
-    final walletDao = ref.watch(walletDaoProvider);
+    final rewardDao = ref.watch(rewardRepositoryProvider);
+    final walletDao = ref.watch(walletRepositoryProvider);
     final redemptionService = ref.watch(redemptionServiceProvider);
 
     return Scaffold(
@@ -118,7 +117,7 @@ class RewardsScreen extends ConsumerWidget {
   /// Bố mẹ sửa lại tên/giá sau được — mục đích là để trang không còn trống sau
   /// **một** cú chạm.
   Future<void> _createFromPreset(
-    RewardDao rewardDao,
+    RewardRepository rewardDao,
     String familyId,
     RewardPreset preset,
   ) async {
@@ -136,7 +135,7 @@ class RewardsScreen extends ConsumerWidget {
 
   void _showAddReward(
     BuildContext context,
-    RewardDao rewardDao,
+    RewardRepository rewardDao,
     String familyId,
   ) {
     unawaited(
@@ -163,8 +162,8 @@ class _RewardCard extends StatelessWidget {
 
   final Reward reward;
   final AppSession session;
-  final RewardDao rewardDao;
-  final WalletDao walletDao;
+  final RewardRepository rewardDao;
+  final WalletRepository walletDao;
   final RedemptionService redemptionService;
 
   @override
@@ -271,8 +270,8 @@ class _RedeemButton extends StatefulWidget {
 
   final Reward reward;
   final AppSession session;
-  final RewardDao rewardDao;
-  final WalletDao walletDao;
+  final RewardRepository rewardDao;
+  final WalletRepository walletDao;
   final RedemptionService redemptionService;
 
   @override
@@ -474,7 +473,7 @@ class _AddRewardSheet extends StatefulWidget {
     required this.familyId,
   });
 
-  final RewardDao rewardDao;
+  final RewardRepository rewardDao;
   final String familyId;
 
   @override

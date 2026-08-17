@@ -9,9 +9,9 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
-import 'package:beong/data/local/database.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
+import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/services/money_exchange.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:beong/features/members/add_child_sheet.dart';
@@ -29,7 +29,7 @@ class SettingsScreen extends ConsumerWidget {
     final session = ref.watch(sessionProvider);
     if (session == null) return const SizedBox.shrink();
 
-    final memberDao = ref.watch(memberDaoProvider);
+    final memberDao = ref.watch(memberRepositoryProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -436,7 +436,7 @@ class _ExchangeRateTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StreamBuilder<MoneyExchange>(
-      stream: ref.watch(memberDaoProvider).watchExchangeRate(familyId),
+      stream: ref.watch(memberRepositoryProvider).watchExchangeRate(familyId),
       builder: (context, snap) {
         final rate = snap.data;
         return _SettingsTile(
@@ -501,7 +501,7 @@ class _ExchangeRateTile extends ConsumerWidget {
     );
     if (chosen == null) return;
     await ref
-        .read(memberDaoProvider)
+        .read(memberRepositoryProvider)
         .setExchangeRate(familyId, chosen == off ? null : chosen);
   }
 }
@@ -529,7 +529,9 @@ class _RolloverTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StreamBuilder<int>(
-      stream: ref.watch(memberDaoProvider).watchDayRolloverHour(familyId),
+      stream: ref
+          .watch(memberRepositoryProvider)
+          .watchDayRolloverHour(familyId),
       builder: (context, snap) {
         final hour = snap.data;
         return _SettingsTile(
@@ -571,7 +573,9 @@ class _RolloverTile extends ConsumerWidget {
       ),
     );
     if (chosen == null) return;
-    await ref.read(memberDaoProvider).setDayRolloverHour(familyId, chosen);
+    await ref
+        .read(memberRepositoryProvider)
+        .setDayRolloverHour(familyId, chosen);
   }
 }
 
@@ -688,7 +692,7 @@ class _JarsTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final jarDao = ref.watch(jarDaoProvider);
+    final jarDao = ref.watch(jarRepositoryProvider);
 
     return StreamBuilder<List<JarDef>>(
       stream: jarDao.watchActiveJars(familyId),
@@ -721,7 +725,7 @@ class _PenaltyTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final memberDao = ref.watch(memberDaoProvider);
+    final memberDao = ref.watch(memberRepositoryProvider);
 
     return StreamBuilder<PenaltyPolicy>(
       stream: memberDao.watchPenaltyPolicy(familyId),
@@ -751,7 +755,7 @@ class _ApprovalTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final memberDao = ref.watch(memberDaoProvider);
+    final memberDao = ref.watch(memberRepositoryProvider);
 
     return StreamBuilder<bool>(
       stream: memberDao.watchRequireApproval(familyId),
@@ -795,7 +799,7 @@ class _AllocationTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final memberDao = ref.watch(memberDaoProvider);
+    final memberDao = ref.watch(memberRepositoryProvider);
 
     return StreamBuilder<AllocationMode>(
       stream: memberDao.watchAllocationMode(familyId),

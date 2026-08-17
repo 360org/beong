@@ -16,12 +16,12 @@ import 'package:beong/core/widgets/celebration.dart';
 import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/progress_ring.dart';
 import 'package:beong/core/widgets/task_card.dart';
-import 'package:beong/data/local/database.dart';
-import 'package:beong/data/local/jar_dao.dart';
-import 'package:beong/data/local/task_dao.dart';
-import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/badge_def.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/repositories/jar_repository.dart';
+import 'package:beong/domain/repositories/member_repository.dart';
+import 'package:beong/domain/repositories/task_repository.dart';
+import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/features/goals/goal_section.dart';
 import 'package:beong/features/rewards/allocate_xu_sheet.dart';
 import 'package:beong/features/settings/parent_pin_sheet.dart';
@@ -89,9 +89,9 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
     if (session == null) return const SizedBox.shrink();
 
     final memberId = session.activeMemberId;
-    final memberDao = ref.watch(memberDaoProvider);
-    final walletDao = ref.watch(walletDaoProvider);
-    final taskDao = ref.watch(taskDaoProvider);
+    final memberDao = ref.watch(memberRepositoryProvider);
+    final walletDao = ref.watch(walletRepositoryProvider);
+    final taskDao = ref.watch(taskRepositoryProvider);
     final penaltyService = ref.watch(penaltyServiceProvider);
 
     final today =
@@ -168,7 +168,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
                                                 inbox: balance.inbox,
                                                 walletDao: walletDao,
                                                 jarDao: ref.read(
-                                                  jarDaoProvider,
+                                                  jarRepositoryProvider,
                                                 ),
                                               ),
                                             )
@@ -224,7 +224,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
 
   List<Widget> _buildTaskSections(
     List<TaskInstance> instances,
-    TaskDao taskDao,
+    TaskRepository taskDao,
   ) {
     final scheduled = instances
         .where((i) => i.status == InstanceStatus.scheduled.name)
@@ -367,7 +367,7 @@ class _ChildHeader extends ConsumerWidget {
     final session = ref.read(sessionProvider);
     if (session == null) return;
     final members = await ref
-        .read(memberDaoProvider)
+        .read(memberRepositoryProvider)
         .watchMembers(session.familyId)
         .first;
     if (!context.mounted) return;
@@ -799,7 +799,7 @@ class _InstanceCard extends ConsumerStatefulWidget {
   });
 
   final TaskInstance instance;
-  final TaskDao taskDao;
+  final TaskRepository taskDao;
 
   /// Gọi khi con vừa bấm xong việc, để màn hình nổ hoa giấy. Thẻ không tự nổ:
   /// nó bị tháo ngay sau khi bấm vì danh sách xếp lại theo trạng thái.
@@ -916,8 +916,8 @@ Future<void> _openAllocateSheet({
   required String familyId,
   required String memberId,
   required int inbox,
-  required WalletDao walletDao,
-  required JarDao jarDao,
+  required WalletRepository walletDao,
+  required JarRepository jarDao,
 }) async {
   // Đọc hũ **trước khi** mở sheet: mở rồi mới đọc thì con thấy một khung trống
   // nháy lên, và trên máy chậm thì đủ lâu để bấm vào chỗ chưa có gì.

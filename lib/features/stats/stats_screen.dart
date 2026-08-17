@@ -10,14 +10,14 @@ import 'package:beong/core/utils/ngay_viet.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
-import 'package:beong/data/local/database.dart';
-import 'package:beong/data/local/member_dao.dart';
-import 'package:beong/data/local/reward_dao.dart';
-import 'package:beong/data/local/task_dao.dart';
-import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/badge_def.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
+import 'package:beong/domain/repositories/goal_repository.dart';
+import 'package:beong/domain/repositories/member_repository.dart';
+import 'package:beong/domain/repositories/reward_repository.dart';
+import 'package:beong/domain/repositories/task_repository.dart';
+import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/domain/services/money_exchange.dart';
 import 'package:beong/features/goals/goal_section.dart';
 import 'package:beong/features/goals/goal_sheet.dart';
@@ -34,10 +34,10 @@ class StatsScreen extends ConsumerWidget {
     final session = ref.watch(sessionProvider);
     if (session == null) return const SizedBox.shrink();
 
-    final memberDao = ref.watch(memberDaoProvider);
-    final walletDao = ref.watch(walletDaoProvider);
-    final taskDao = ref.watch(taskDaoProvider);
-    final rewardDao = ref.watch(rewardDaoProvider);
+    final memberDao = ref.watch(memberRepositoryProvider);
+    final walletDao = ref.watch(walletRepositoryProvider);
+    final taskDao = ref.watch(taskRepositoryProvider);
+    final rewardDao = ref.watch(rewardRepositoryProvider);
 
     if (session.isParent) {
       return _ParentStats(
@@ -66,8 +66,8 @@ class _ParentStats extends StatelessWidget {
   });
 
   final AppSession session;
-  final MemberDao memberDao;
-  final WalletDao walletDao;
+  final MemberRepository memberDao;
+  final WalletRepository walletDao;
 
   @override
   Widget build(BuildContext context) {
@@ -124,11 +124,11 @@ class _ChildStatsCard extends ConsumerWidget {
   });
 
   final Member child;
-  final WalletDao walletDao;
-  final MemberDao memberDao;
+  final WalletRepository walletDao;
+  final MemberRepository memberDao;
 
   Future<void> _editGoal(BuildContext context, WidgetRef ref) async {
-    final current = await ref.read(goalDaoProvider).activeGoal(child.id);
+    final current = await ref.read(goalRepositoryProvider).activeGoal(child.id);
     if (!context.mounted) return;
     await showGoalSheet(
       context,
@@ -195,7 +195,7 @@ class _ChildStatsCard extends ConsumerWidget {
         // Nút riêng khi chưa có mục tiêu: [GoalSection] cố ý không hiện gì lúc
         // đó, nên không có chỗ nào bấm vào để đặt mục tiêu đầu tiên.
         StreamBuilder<SavingsGoal?>(
-          stream: ref.watch(goalDaoProvider).watchActiveGoal(child.id),
+          stream: ref.watch(goalRepositoryProvider).watchActiveGoal(child.id),
           builder: (context, snap) {
             if (snap.data != null) return const SizedBox.shrink();
             return Align(
@@ -225,10 +225,10 @@ class _ChildStats extends StatelessWidget {
 
   final String memberId;
   final String familyId;
-  final WalletDao walletDao;
-  final MemberDao memberDao;
-  final TaskDao taskDao;
-  final RewardDao rewardDao;
+  final WalletRepository walletDao;
+  final MemberRepository memberDao;
+  final TaskRepository taskDao;
+  final RewardRepository rewardDao;
 
   @override
   Widget build(BuildContext context) {
@@ -325,7 +325,7 @@ class _BadgesEntry extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StreamBuilder<Set<String>>(
-      stream: ref.watch(badgeDaoProvider).watchEarnedKeys(memberId),
+      stream: ref.watch(badgeRepositoryProvider).watchEarnedKeys(memberId),
       builder: (context, snap) {
         final earned = snap.data?.length ?? 0;
         return Card(
@@ -370,7 +370,7 @@ class _JarTitles extends ConsumerWidget {
       // Lấy **cả hũ đã xếp lại**: sổ cái vẫn còn dòng của chúng, và một hũ xếp
       // lại rồi vẫn phải đọc được tên trong lịch sử.
       stream: ref
-          .watch(jarDaoProvider)
+          .watch(jarRepositoryProvider)
           .watchAllJars(familyId)
           .map((rows) => [for (final r in rows) r.jar]),
       builder: (context, snap) => builder(context, {
@@ -395,7 +395,7 @@ class _JarOverview extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StreamBuilder<List<JarDef>>(
-      stream: ref.watch(jarDaoProvider).watchActiveJars(familyId),
+      stream: ref.watch(jarRepositoryProvider).watchActiveJars(familyId),
       builder: (context, snap) {
         final jars = snap.data ?? kDefaultJars;
 
@@ -462,7 +462,7 @@ class _MoneyValue extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StreamBuilder<MoneyExchange>(
-      stream: ref.watch(memberDaoProvider).watchExchangeRate(familyId),
+      stream: ref.watch(memberRepositoryProvider).watchExchangeRate(familyId),
       builder: (context, snap) {
         final label = snap.data?.labelFor(xu);
         if (label == null) return const SizedBox.shrink();
@@ -596,8 +596,8 @@ class _TransactionTile extends StatefulWidget {
   });
 
   final LedgerEntry tx;
-  final TaskDao taskDao;
-  final RewardDao rewardDao;
+  final TaskRepository taskDao;
+  final RewardRepository rewardDao;
 
   /// `jar_key` -> tên hũ do bố mẹ đặt.
   final Map<String, String> jarTitles;

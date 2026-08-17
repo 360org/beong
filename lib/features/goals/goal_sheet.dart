@@ -4,7 +4,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/icon_picker.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
-import 'package:beong/data/local/database.dart';
+import 'package:beong/domain/repositories/goal_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -86,7 +86,7 @@ class _GoalSheetState extends ConsumerState<_GoalSheet> {
   Future<void> _save() async {
     setState(() => _busy = true);
     await ref
-        .read(goalDaoProvider)
+        .read(goalRepositoryProvider)
         .setGoal(
           familyId: widget.familyId,
           memberId: widget.memberId,
@@ -99,7 +99,7 @@ class _GoalSheetState extends ConsumerState<_GoalSheet> {
 
   Future<void> _remove() async {
     setState(() => _busy = true);
-    await ref.read(goalDaoProvider).abandonActive(widget.memberId);
+    await ref.read(goalRepositoryProvider).abandonActive(widget.memberId);
     if (mounted) Navigator.of(context).pop(true);
   }
 

@@ -11,10 +11,11 @@ import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
-import 'package:beong/data/local/database.dart';
-import 'package:beong/data/local/task_dao.dart';
-import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/repositories/member_repository.dart';
+import 'package:beong/domain/repositories/reward_repository.dart';
+import 'package:beong/domain/repositories/task_repository.dart';
+import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/task_review_service.dart';
 import 'package:flutter/material.dart';
@@ -29,9 +30,9 @@ class ParentHomeScreen extends ConsumerWidget {
     final session = ref.watch(sessionProvider);
     if (session == null) return const SizedBox.shrink();
 
-    final memberDao = ref.watch(memberDaoProvider);
-    final taskDao = ref.watch(taskDaoProvider);
-    final walletDao = ref.watch(walletDaoProvider);
+    final memberDao = ref.watch(memberRepositoryProvider);
+    final taskDao = ref.watch(taskRepositoryProvider);
+    final walletDao = ref.watch(walletRepositoryProvider);
     final reviewService = ref.watch(taskReviewServiceProvider);
 
     return Scaffold(
@@ -114,7 +115,9 @@ class _PendingRedemptionBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StreamBuilder<List<Redemption>>(
-      stream: ref.watch(rewardDaoProvider).watchPendingRedemptions(familyId),
+      stream: ref
+          .watch(rewardRepositoryProvider)
+          .watchPendingRedemptions(familyId),
       builder: (context, snap) {
         final count = snap.data?.length ?? 0;
         if (count == 0) return const SizedBox.shrink();
@@ -164,8 +167,8 @@ class _PendingReviewSection extends StatefulWidget {
   });
 
   final String familyId;
-  final TaskDao taskDao;
-  final WalletDao walletDao;
+  final TaskRepository taskDao;
+  final WalletRepository walletDao;
   final TaskReviewService reviewService;
   final String reviewerId;
 
@@ -319,8 +322,8 @@ class _PendingCard extends StatefulWidget {
   });
 
   final TaskInstance instance;
-  final TaskDao taskDao;
-  final WalletDao walletDao;
+  final TaskRepository taskDao;
+  final WalletRepository walletDao;
   final TaskReviewService reviewService;
   final String reviewerId;
   final VoidCallback onActioned;
@@ -460,8 +463,8 @@ class _ChildSummaryCard extends ConsumerWidget {
   });
 
   final Member child;
-  final TaskDao taskDao;
-  final WalletDao walletDao;
+  final TaskRepository taskDao;
+  final WalletRepository walletDao;
   final TaskReviewService reviewService;
   final String reviewerId;
 
@@ -566,7 +569,7 @@ class _DoneTodayList extends StatelessWidget {
 
   final String memberId;
   final CalendarDate date;
-  final TaskDao taskDao;
+  final TaskRepository taskDao;
   final TaskReviewService reviewService;
   final String reviewerId;
 
@@ -620,7 +623,7 @@ class _DoneRow extends StatefulWidget {
   });
 
   final TaskInstance instance;
-  final TaskDao taskDao;
+  final TaskRepository taskDao;
   final TaskReviewService reviewService;
   final String reviewerId;
 

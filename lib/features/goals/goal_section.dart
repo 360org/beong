@@ -1,7 +1,7 @@
 import 'package:beong/core/providers/database_provider.dart';
-import 'package:beong/data/local/database.dart';
-import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/jar_def.dart';
+import 'package:beong/domain/repositories/goal_repository.dart';
+import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/domain/services/goal_service.dart';
 import 'package:beong/features/goals/goal_card.dart';
 import 'package:flutter/material.dart';
@@ -23,17 +23,19 @@ class GoalSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StreamBuilder<SavingsGoal?>(
-      stream: ref.watch(goalDaoProvider).watchActiveGoal(memberId),
+      stream: ref.watch(goalRepositoryProvider).watchActiveGoal(memberId),
       builder: (context, goalSnap) {
         final goal = goalSnap.data;
         if (goal == null) return const SizedBox.shrink();
 
         return StreamBuilder<WalletBalance>(
-          stream: ref.watch(walletDaoProvider).watchBalance(memberId),
+          stream: ref.watch(walletRepositoryProvider).watchBalance(memberId),
           builder: (context, balanceSnap) {
             final balance = balanceSnap.data ?? WalletBalance.zero;
             return StreamBuilder<List<JarDef>>(
-              stream: ref.watch(jarDaoProvider).watchActiveJars(goal.familyId),
+              stream: ref
+                  .watch(jarRepositoryProvider)
+                  .watchActiveJars(goal.familyId),
               builder: (context, jarSnap) {
                 // Chưa biết danh sách hũ thì coi như còn hũ Để dành: đoán
                 // ngược lại sẽ hiện tổng xu trong một nhịp rồi tụt xuống, thanh

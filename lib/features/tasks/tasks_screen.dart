@@ -13,11 +13,10 @@ import 'package:beong/core/widgets/icon_picker.dart';
 import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
-import 'package:beong/data/local/database.dart';
-import 'package:beong/data/local/member_dao.dart';
-import 'package:beong/data/local/task_dao.dart';
-import 'package:beong/data/seed/presets.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/entities/presets.dart';
+import 'package:beong/domain/repositories/member_repository.dart';
+import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -33,8 +32,8 @@ class TasksScreen extends ConsumerWidget {
     final session = ref.watch(sessionProvider);
     if (session == null) return const SizedBox.shrink();
 
-    final taskDao = ref.watch(taskDaoProvider);
-    final memberDao = ref.watch(memberDaoProvider);
+    final taskDao = ref.watch(taskRepositoryProvider);
+    final memberDao = ref.watch(memberRepositoryProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -46,7 +45,7 @@ class TasksScreen extends ConsumerWidget {
       body: _TaskList(
         familyId: session.familyId,
         taskDao: taskDao,
-        memberDao: ref.watch(memberDaoProvider),
+        memberDao: ref.watch(memberRepositoryProvider),
         isParent: session.isParent,
       ),
       floatingActionButton: session.isParent
@@ -81,8 +80,8 @@ class _TaskList extends StatefulWidget {
   });
 
   final String familyId;
-  final TaskDao taskDao;
-  final MemberDao memberDao;
+  final TaskRepository taskDao;
+  final MemberRepository memberDao;
   final bool isParent;
 
   @override
@@ -423,8 +422,8 @@ class _AddTaskSheet extends StatefulWidget {
     required this.children,
   });
 
-  final TaskDao taskDao;
-  final MemberDao memberDao;
+  final TaskRepository taskDao;
+  final MemberRepository memberDao;
   final String familyId;
   final List<Member> children;
 
@@ -798,7 +797,7 @@ class _PenaltyOverrideBlock extends StatelessWidget {
   });
 
   final String familyId;
-  final MemberDao memberDao;
+  final MemberRepository memberDao;
 
   /// `null` = theo mức chung của gia đình.
   final int? value;

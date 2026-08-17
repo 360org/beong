@@ -20,7 +20,7 @@ class BadgesScreen extends ConsumerWidget {
     final session = ref.watch(sessionProvider);
     if (session == null) return const SizedBox.shrink();
 
-    final badgeDao = ref.watch(badgeDaoProvider);
+    final badgeDao = ref.watch(badgeRepositoryProvider);
     final memberId = session.activeMemberId;
 
     return Scaffold(

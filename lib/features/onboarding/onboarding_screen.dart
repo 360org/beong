@@ -9,9 +9,10 @@ import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/bee_mascot.dart';
 import 'package:beong/core/widgets/responsive_scaffold.dart';
-import 'package:beong/data/local/database.dart';
-import 'package:beong/data/seed/presets.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/entities/presets.dart';
+import 'package:beong/domain/repositories/member_repository.dart';
+import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:beong/domain/services/age_band.dart';
 import 'package:beong/features/members/child_profile_form.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -66,8 +67,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final childName = _childNameController.text.trim();
     if (familyName.isEmpty || childName.isEmpty) return;
 
-    final memberDao = ref.read(memberDaoProvider);
-    final taskDao = ref.read(taskDaoProvider);
+    final memberDao = ref.read(memberRepositoryProvider);
+    final taskDao = ref.read(taskRepositoryProvider);
 
     // UUID sinh ở client, không dùng ID cứng — mỗi lần onboarding phải tạo
     // được family mới (ADR-002). Onboarding lặp lại vẫn xảy ra sau khi đăng
@@ -84,7 +85,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     // Ba hũ mặc định vào **bảng** `jars` ngay từ đầu (ADR-024), để màn quản lý hũ
     // có thứ thật mà sửa. Không gieo thì gia đình mới chạy bằng đường rơi về
     // `kDefaultJars`, và bố mẹ sửa tỷ lệ xong thấy không có gì thay đổi.
-    await ref.read(jarDaoProvider).seedDefaults(familyId);
+    await ref.read(jarRepositoryProvider).seedDefaults(familyId);
 
     await memberDao.addMember(
       MembersCompanion.insert(

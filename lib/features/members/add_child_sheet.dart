@@ -2,8 +2,8 @@ import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/task_icons.dart';
-import 'package:beong/data/local/database.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/features/members/child_profile_form.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
@@ -72,7 +72,7 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
   Future<void> _save() async {
     setState(() => _busy = true);
     await ref
-        .read(memberDaoProvider)
+        .read(memberRepositoryProvider)
         .addMember(
           MembersCompanion.insert(
             id: const Uuid().v4(),

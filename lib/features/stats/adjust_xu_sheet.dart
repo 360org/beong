@@ -4,15 +4,15 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
-import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/jar_def.dart';
+import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 /// Bố mẹ cộng hoặc trừ xu tay cho một trẻ.
 ///
-/// `WalletDao.manualAdjust` viết từ Sprint 1 và schema có sẵn ràng buộc "bắt
+/// `WalletRepository.manualAdjust` viết từ Sprint 1 và schema có sẵn ràng buộc "bắt
 /// buộc ghi lý do", nhưng **không có chỗ nào gọi nó** — bố mẹ không có cách nào
 /// sửa xu. Thưởng thêm cho một việc tốt ngoài danh sách, hay sửa một lần cộng
 /// nhầm, đều phải bó tay.
@@ -93,7 +93,7 @@ class _AdjustSheetState extends ConsumerState<_AdjustSheet> {
     });
     try {
       await ref
-          .read(walletDaoProvider)
+          .read(walletRepositoryProvider)
           .manualAdjustToJarKey(
             familyId: widget.familyId,
             memberId: widget.memberId,
@@ -245,7 +245,7 @@ class _JarPicker extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StreamBuilder<List<JarDef>>(
-      stream: ref.watch(jarDaoProvider).watchActiveJars(familyId),
+      stream: ref.watch(jarRepositoryProvider).watchActiveJars(familyId),
       builder: (context, snap) {
         final jars = snap.data ?? kDefaultJars;
         return Wrap(

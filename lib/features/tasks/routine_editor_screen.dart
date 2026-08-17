@@ -8,9 +8,8 @@ import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/utils/ngay_viet.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
-import 'package:beong/data/local/database.dart';
-import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -51,7 +50,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
   }
 
   Future<void> _load() async {
-    final taskDao = ref.read(taskDaoProvider);
+    final taskDao = ref.read(taskRepositoryProvider);
     final session = ref.read(sessionProvider);
     if (session == null) return;
 
@@ -70,7 +69,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
 
   Future<void> _saveOrder() async {
     await ref
-        .read(taskDaoProvider)
+        .read(taskRepositoryProvider)
         .reorderRoutineTasks(
           routineId: widget.routineId,
           taskIds: [for (final t in _draftOrder) t.id],
@@ -211,7 +210,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
   }
 
   Future<void> _detach(Task task) async {
-    await ref.read(taskDaoProvider).detachTaskFromRoutine(task.id);
+    await ref.read(taskRepositoryProvider).detachTaskFromRoutine(task.id);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -229,7 +228,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
 
   Future<void> _attach(Task task) async {
     await ref
-        .read(taskDaoProvider)
+        .read(taskRepositoryProvider)
         .attachTaskToRoutine(taskId: task.id, routineId: widget.routineId);
     await _load();
   }
@@ -259,7 +258,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
     );
     if (ok != true || !mounted) return;
 
-    await ref.read(taskDaoProvider).archiveRoutine(widget.routineId);
+    await ref.read(taskRepositoryProvider).archiveRoutine(widget.routineId);
     if (mounted) Navigator.of(context).pop();
   }
 
@@ -273,7 +272,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
         ),
         child: _RoutineInfoSheet(
           routine: routine,
-          taskDao: ref.read(taskDaoProvider),
+          taskDao: ref.read(taskRepositoryProvider),
         ),
       ),
     );
@@ -407,7 +406,7 @@ class _RoutineInfoSheet extends StatefulWidget {
   const _RoutineInfoSheet({required this.routine, required this.taskDao});
 
   final Routine routine;
-  final TaskDao taskDao;
+  final TaskRepository taskDao;
 
   @override
   State<_RoutineInfoSheet> createState() => _RoutineInfoSheetState();

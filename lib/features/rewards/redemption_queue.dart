@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/widgets/app_icon.dart';
-import 'package:beong/data/local/database.dart';
-import 'package:beong/data/local/reward_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/repositories/reward_repository.dart';
 import 'package:beong/domain/services/redemption_service.dart';
 import 'package:flutter/material.dart';
 
@@ -25,7 +24,7 @@ class RedemptionQueue extends StatelessWidget {
 
   final String familyId;
   final String reviewerId;
-  final RewardDao rewardDao;
+  final RewardRepository rewardDao;
   final RedemptionService redemptionService;
 
   @override
@@ -93,7 +92,7 @@ class _RedemptionCard extends StatefulWidget {
   });
 
   final Redemption redemption;
-  final RewardDao rewardDao;
+  final RewardRepository rewardDao;
   final RedemptionService redemptionService;
   final String reviewerId;
 
@@ -210,7 +209,7 @@ class MyVouchers extends StatelessWidget {
   });
 
   final String memberId;
-  final RewardDao rewardDao;
+  final RewardRepository rewardDao;
   final RedemptionService redemptionService;
 
   @override
@@ -263,7 +262,7 @@ class _VoucherCard extends StatefulWidget {
   });
 
   final Redemption redemption;
-  final RewardDao rewardDao;
+  final RewardRepository rewardDao;
   final RedemptionService redemptionService;
 
   @override

@@ -1,4 +1,4 @@
-import 'package:beong/data/seed/presets.dart';
+import 'package:beong/domain/entities/presets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

@@ -1,8 +1,8 @@
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/tables/tables.dart';
-import 'package:beong/data/seed/presets.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/entities/presets.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/schedule.dart';
 import 'package:drift/drift.dart';

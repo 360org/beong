@@ -6,15 +6,15 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
-import 'package:beong/data/local/jar_dao.dart';
 import 'package:beong/domain/entities/jar_def.dart';
+import 'package:beong/domain/repositories/jar_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Quản lý hũ của gia đình — ADR-024.
 ///
 /// Ràng buộc duy nhất mà màn này phải bảo vệ: **tổng tỷ lệ bằng 100%**. Không
-/// bằng 100 thì `splitByPlan` từ chối kế hoạch và `WalletDao.planFor` rơi về ba
+/// bằng 100 thì `splitByPlan` từ chối kế hoạch và `WalletRepository.planFor` rơi về ba
 /// hũ mặc định — nghĩa là bố mẹ sửa tỷ lệ xong mà xu vẫn chia theo tỷ lệ cũ, im
 /// lặng. Vì vậy tổng luôn hiện ra, và lệch thì nói rõ lệch bao nhiêu.
 class JarSettingsScreen extends ConsumerWidget {
@@ -27,7 +27,7 @@ class JarSettingsScreen extends ConsumerWidget {
       return const Scaffold(body: SizedBox.shrink());
     }
 
-    final jarDao = ref.watch(jarDaoProvider);
+    final jarDao = ref.watch(jarRepositoryProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Các hũ')),
@@ -112,7 +112,7 @@ class JarSettingsScreen extends ConsumerWidget {
 Future<void> _openEditor(
   BuildContext context, {
   required String familyId,
-  required JarDao jarDao,
+  required JarRepository jarDao,
   JarDef? existing,
 }) async {
   await showModalBottomSheet<void>(
@@ -185,7 +185,7 @@ class _JarTile extends StatelessWidget {
 
   final JarDef jar;
   final String familyId;
-  final JarDao jarDao;
+  final JarRepository jarDao;
   final bool canArchive;
 
   @override
@@ -241,7 +241,7 @@ class _JarEditor extends StatefulWidget {
   });
 
   final String familyId;
-  final JarDao jarDao;
+  final JarRepository jarDao;
   final JarDef? existing;
 
   @override

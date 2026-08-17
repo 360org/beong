@@ -4,8 +4,8 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
-import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/jar_def.dart';
+import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:flutter/material.dart';
 
 /// Con tự chia xu từ hũ chờ vào các hũ — ADR-024, chế độ `manual`.
@@ -32,7 +32,7 @@ class AllocateXuSheet extends StatefulWidget {
   /// Số xu đang chờ chia.
   final int inbox;
 
-  final WalletDao walletDao;
+  final WalletRepository walletDao;
 
   /// Hũ đang dùng của gia đình, đọc từ bảng `jars` (ADR-024).
   ///

@@ -1,6 +1,6 @@
 import 'package:beong/core/theme/task_icons.dart';
-import 'package:beong/data/seed/presets.dart';
-import 'package:beong/data/seed/reward_presets.dart';
+import 'package:beong/domain/entities/presets.dart';
+import 'package:beong/domain/entities/reward_presets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Mọi nhiệm vụ đều phải có icon.

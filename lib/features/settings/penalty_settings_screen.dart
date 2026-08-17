@@ -26,7 +26,7 @@ class PenaltySettingsScreen extends ConsumerWidget {
     final session = ref.watch(sessionProvider);
     if (session == null) return const SizedBox.shrink();
 
-    final memberDao = ref.watch(memberDaoProvider);
+    final memberDao = ref.watch(memberRepositoryProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text('Trừ xu', style: context.text.titleLarge)),
