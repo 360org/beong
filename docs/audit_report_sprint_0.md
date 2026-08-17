@@ -1,6 +1,10 @@
 # Báo Cáo Audit Dự Án DailyChildren (Sprint 0)
 
 *Ngày báo cáo: 2026-08-04*
+
+> **Đã cũ — giữ lại làm hồ sơ, đừng đọc như hiện trạng.** Bản audit đang dùng là
+> [`audit_report_v0.2.0.md`](audit_report_v0.2.0.md). Nhiều khẳng định dưới đây không còn
+> đúng với mã nguồn.
 *Người thực hiện: Claude (beong-dev)*
 *Trạng thái dự án: Sprint 0 Hoàn thành (Nền tảng đa thiết bị)*
 

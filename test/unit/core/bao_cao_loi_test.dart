@@ -211,46 +211,6 @@ void main() {
     });
   });
 
-  group('URL dự phòng', () {
-    test('trỏ đúng repo và mang theo tiêu đề, thân, nhãn', () {
-      final url = urlTaoIssue(baoCao());
-
-      expect(url.host, 'github.com');
-      expect(url.path, '/$kGitHubOwner/$kGitHubRepo/issues/new');
-      expect(url.queryParameters['title'], 'Bấm xong việc mà xu không cộng');
-      expect(url.queryParameters['body'], contains('### Thiết bị'));
-      expect(url.queryParameters['labels'], 'bug,from-app');
-    });
-
-    test('URL không vượt trần dù nhật ký dài', () {
-      // Đo trên chuỗi **đã mã hoá**: ký tự tiếng Việt nở ra 9 ký tự, đo trên
-      // chuỗi gốc là ra URL dài gấp ba trần mà test vẫn xanh.
-      final log = NhatKyLoi();
-      for (var i = 0; i < 50; i++) {
-        log.ghi('Lỗi rất dài với chữ tiếng Việt có dấu ${'đ' * 300}');
-      }
-
-      final url = urlTaoIssue(baoCao(nhatKy: log.muc));
-      final body = url.queryParameters['body']!;
-
-      expect(Uri.encodeComponent(body).length, lessThanOrEqualTo(6000));
-      expect(body, contains('đã bị cắt bớt'));
-    });
-
-    test('cắt nhật ký nhưng **giữ nguyên** lời kể của người dùng', () {
-      // Log thì tái tạo được, còn câu người ta kể thì không. Cắt nhầm đầu này
-      // là mất phần giá trị nhất của cả báo cáo.
-      const keChuyen = 'Con bấm xong việc Gấp chăn màn mà xu không cộng lên';
-      final log = NhatKyLoi();
-      for (var i = 0; i < 50; i++) {
-        log.ghi('x' * 400);
-      }
-
-      final url = urlTaoIssue(baoCao(moTa: keChuyen, nhatKy: log.muc));
-      expect(url.queryParameters['body'], contains(keChuyen));
-    });
-  });
-
   group('móc bắt lỗi toàn cục', () {
     late FlutterExceptionHandler? handlerCu;
 

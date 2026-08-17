@@ -90,14 +90,28 @@ void main() {
       );
     });
 
-    testWidgets('mới mở trang thì nói thẳng là **chưa** gửi', (tester) async {
-      await tester.pumpWidget(
-        wrap(const ManKetThucBaoLoi(tuGui: false)),
-      );
+    testWidgets('chưa cấu hình thì nói thẳng là **chưa** gửi', (tester) async {
+      await tester.pumpWidget(wrap(const ManKetThucBaoLoi(tuGui: false)));
 
       // Đây là cái bẫy chính của màn này. Gộp hai ca vào một là nói dối.
-      expect(find.textContaining('chưa được gửi đi'), findsOneWidget);
+      expect(find.text('Chưa gửi được'), findsOneWidget);
+      expect(find.textContaining('chưa đi đâu cả'), findsOneWidget);
       expect(find.textContaining('Đã gửi rồi'), findsNothing);
+    });
+
+    testWidgets('không bảo người dùng đi mở trang nào cả', (tester) async {
+      // Ca này từng mở form tạo issue GitHub. Đẩy quy trình nội bộ của đội phát
+      // triển sang cho một phụ huynh đang bực vì app hỏng là bắt họ làm việc
+      // của mình.
+      await tester.pumpWidget(wrap(const ManKetThucBaoLoi(tuGui: false)));
+
+      for (final tu in ['trang', 'GitHub', 'issue', 'trình duyệt']) {
+        expect(
+          find.textContaining(tu, findRichText: true),
+          findsNothing,
+          reason: 'màn này không nên bảo người dùng làm gì với "$tu"',
+        );
+      }
     });
   });
 }

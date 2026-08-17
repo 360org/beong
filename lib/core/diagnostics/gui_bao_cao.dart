@@ -13,22 +13,8 @@ import 'package:http/http.dart' as http;
 /// giữ token phía máy chủ và tạo issue hộ. Xem `docs/11-bao-loi-endpoint.md`
 /// để dựng, mất khoảng năm phút.
 ///
-/// Rỗng nghĩa là bản dựng này chưa cấu hình endpoint — lúc đó [guiBaoCao] rơi
-/// về đường dự phòng, xem [KetQuaGui].
+/// Rỗng nghĩa là bản dựng này chưa cấu hình endpoint — xem [KetQuaGui].
 const kEndpointBaoCao = String.fromEnvironment('BEONG_REPORT_ENDPOINT');
-
-/// Repo nhận báo cáo, dùng cho đường dự phòng khi chưa có endpoint.
-///
-/// Để ở đây chứ không trong `--dart-define`: đây là địa chỉ công khai của dự
-/// án, không phải bí mật.
-const kGitHubOwner = '360org';
-const kGitHubRepo = 'beong';
-
-/// Trần độ dài URL cho đường dự phòng.
-///
-/// GitHub trả 414 với URL quá dài, và trình duyệt cũng có trần riêng. 6.000 ký
-/// tự là ngưỡng an toàn ở mọi nền tảng.
-const kToiDaDoDaiUrl = 6000;
 
 /// Thời gian chờ máy chủ. Ngắn có chủ ý: người dùng vừa gặp lỗi, bắt họ nhìn
 /// vòng xoay thêm nửa phút nữa là hỏng nốt phần còn lại của trải nghiệm.
@@ -44,9 +30,15 @@ enum KetQuaGui {
 
   /// Bản dựng này chưa cấu hình endpoint.
   ///
-  /// Không phải lỗi của người dùng và cũng không im lặng bỏ qua: chỗ gọi sẽ mở
-  /// đường dự phòng. Tách riêng khỏi [that] vì hai ca cần hai cách xử lý khác
-  /// hẳn nhau.
+  /// Tách riêng khỏi [that] vì nguyên nhân khác hẳn: không phải mạng hỏng mà là
+  /// bản dựng thiếu cấu hình, và người dùng không tự sửa được. Bản phát hành
+  /// luôn có endpoint (`docs/08-release-cicd.md`), nên ca này chỉ gặp ở bản
+  /// dựng nội bộ.
+  ///
+  /// Trước đây chỗ gọi phản ứng bằng cách **mở trang tạo issue GitHub**. Đã bỏ:
+  /// đẩy quy trình nội bộ của đội phát triển sang cho một phụ huynh đang bực vì
+  /// app hỏng là bắt họ làm việc của mình, và nó kéo theo `url_launcher` cùng
+  /// `androidx.browser` — thứ từng làm đỏ CI Android vì đòi AGP >= 8.9.
   chuaCauHinh,
 }
 
@@ -113,46 +105,4 @@ Future<Map<String, Object?>> taoGoiGui(BaoCaoLoi baoCao) async {
     'he_dieu_hanh': baoCao.thietBi.heDieuHanh,
     'anh_png_base64': ?anhBase64,
   };
-}
-
-/// Đường **dự phòng**: mở form tạo issue GitHub với nội dung điền sẵn.
-///
-/// Chỉ dùng khi bản dựng chưa cấu hình endpoint. Người dùng thường không bao
-/// giờ thấy đường này — bản phát hành luôn có endpoint.
-Uri urlTaoIssue(BaoCaoLoi baoCao) {
-  return Uri.https(
-    'github.com',
-    '/$kGitHubOwner/$kGitHubRepo/issues/new',
-    <String, String>{
-      'title': baoCao.tieuDe,
-      'body': _catVuaUrl(baoCao),
-      // Nhãn ASCII, không dấu: nhãn có dấu phải tạo sẵn đúng từng ký tự trong
-      // repo mới khớp, sai một dấu là GitHub bỏ qua lặng lẽ.
-      'labels': 'bug,from-app',
-    },
-  );
-}
-
-/// Cắt thân báo cáo cho vừa trần URL.
-///
-/// Cắt từ **cuối** nhật ký trở lên: lỗi mới nhất thường là lỗi người dùng vừa
-/// gặp, nhưng chuỗi dẫn tới nó nằm ở trên — nên giữ đầu, bỏ đuôi, và nói rõ là
-/// đã bỏ. Phần người dùng tự kể nằm ở đầu nên không bao giờ bị cắt: log tái
-/// tạo được, câu người ta kể thì không.
-String _catVuaUrl(BaoCaoLoi baoCao) {
-  final than = baoCao.than;
-  // Ký tự tiếng Việt thành 9 ký tự sau khi mã hoá URL, nên đo trên chuỗi đã mã
-  // hoá chứ không đo trên chuỗi gốc — đo sai chỗ này là ra URL dài gấp ba.
-  if (Uri.encodeComponent(than).length <= kToiDaDoDaiUrl) return than;
-
-  final dong = than.split('\n');
-  final giu = <String>[];
-  var doDai = 0;
-  for (final d in dong) {
-    final them = Uri.encodeComponent('$d\n').length;
-    if (doDai + them > kToiDaDoDaiUrl - 200) break;
-    giu.add(d);
-    doDai += them;
-  }
-  return '${giu.join('\n')}\n```\n\n_(nhật ký đã bị cắt bớt cho vừa đường dẫn)_';
 }

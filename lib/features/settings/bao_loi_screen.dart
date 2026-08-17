@@ -8,7 +8,6 @@ import 'package:beong/core/diagnostics/nhat_ky_loi.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Phiên bản app hiện lên báo cáo.
 ///
@@ -40,13 +39,12 @@ enum _TrangThai {
   /// App đã gửi xong, người dùng không phải làm gì nữa.
   daGui,
 
-  /// Bản dựng thiếu endpoint nên chỉ **mở được trang gửi**, người dùng còn
-  /// phải bấm nút gửi ở đó.
+  /// Bản dựng thiếu endpoint nên **không gửi được**.
   ///
-  /// Tách khỏi [daGui] vì gộp lại là nói dối: hiện "đã gửi rồi, cảm ơn" trong
-  /// khi báo cáo vẫn nằm im trong một tab trình duyệt là cách chắc chắn nhất để
-  /// không bao giờ nhận được nó.
-  daMoTrang,
+  /// Tách khỏi [daGui] vì gộp lại là nói dối, và tách khỏi [guiHong] vì bấm
+  /// "thử lại" cũng không đổi được gì — đây là thiếu cấu hình của bản dựng,
+  /// không phải mạng chập chờn.
+  chuaCauHinh,
 
   guiHong,
 }
@@ -99,16 +97,9 @@ class _BaoLoiScreenState extends State<BaoLoiScreen> {
       case KetQuaGui.that:
         setState(() => _trangThai = _TrangThai.guiHong);
       case KetQuaGui.chuaCauHinh:
-        // Bản dựng chưa có endpoint — người dùng thật gần như không gặp ca này.
-        // Mở trang tạo báo lỗi để nội dung không bị mất trắng.
-        final moDuoc = await launchUrl(
-          urlTaoIssue(baoCao),
-          mode: LaunchMode.externalApplication,
-        );
-        if (!mounted) return;
-        setState(
-          () => _trangThai = moDuoc ? _TrangThai.daMoTrang : _TrangThai.guiHong,
-        );
+        // Bản dựng nội bộ chưa cấu hình endpoint. Nói thẳng là chưa gửi được
+        // thay vì mở trang GitHub — xem ghi chú ở `KetQuaGui.chuaCauHinh`.
+        setState(() => _trangThai = _TrangThai.chuaCauHinh);
     }
   }
 
@@ -117,7 +108,7 @@ class _BaoLoiScreenState extends State<BaoLoiScreen> {
     if (_trangThai == _TrangThai.daGui) {
       return const ManKetThucBaoLoi(tuGui: true);
     }
-    if (_trangThai == _TrangThai.daMoTrang) {
+    if (_trangThai == _TrangThai.chuaCauHinh) {
       return const ManKetThucBaoLoi(tuGui: false);
     }
 
@@ -220,13 +211,15 @@ class ManKetThucBaoLoi extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              tuGui ? Icons.check_circle_rounded : Icons.open_in_new_rounded,
+              tuGui ? Icons.check_circle_rounded : Icons.error_outline_rounded,
               size: 64,
-              color: tuGui ? context.semantic.success : context.colors.primary,
+              color: tuGui
+                  ? context.semantic.success
+                  : context.semantic.warning,
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              tuGui ? 'Đã gửi rồi, cảm ơn anh chị!' : 'Đã mở trang gửi báo cáo',
+              tuGui ? 'Đã gửi rồi, cảm ơn anh chị!' : 'Chưa gửi được',
               style: context.text.titleLarge,
               textAlign: TextAlign.center,
             ),
@@ -235,8 +228,9 @@ class ManKetThucBaoLoi extends StatelessWidget {
               tuGui
                   ? 'Chúng tôi sẽ xem và sửa. Nếu cần hỏi thêm thì chưa có '
                         'cách liên hệ lại — app không lưu email của anh chị.'
-                  : 'Nội dung đã điền sẵn ở đó. Anh chị bấm nút gửi trên trang '
-                        'vừa mở giúp nhé — báo cáo chưa được gửi đi.',
+                  : 'Bản app này chưa được cấu hình để gửi báo cáo, nên báo '
+                        'cáo chưa đi đâu cả. Bấm lại cũng chưa gửi được — '
+                        'anh chị báo giúp cho người đưa bản app này nhé.',
               style: context.text.bodyMedium?.copyWith(
                 color: context.semantic.onSurfaceMuted,
               ),
