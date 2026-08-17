@@ -70,6 +70,13 @@ toàn bộ offline. ✅ đạt.
 - [~] **Task Editor** — có 7 khối: tên, điểm, preset, icon, **chọn con nào**, **lịch lặp**
       (hằng ngày / chọn thứ / một lần), **chế độ duyệt riêng**, và mức **trừ xu riêng** cho
       từng việc. Thiếu đúng 1 khối: **chế độ bằng chứng** (docs xếp ở v1.1).
+
+      Lưu ý cho người làm khối này: cột `tasks.proof_mode` **đã có trong schema** với mặc định
+      `'none'`, nhưng soát ngày 17/08 thì không một dòng nào ngoài file schema đọc hay ghi nó —
+      một cột chết. Đây là dạng lỗi dự án đã dọn năm lần (`jars`, `badges_earned`,
+      `day_rollover_hour`, `KidScale.celebrateOnTap`, `TaskCard.isPending`). Làm khối này thì nối
+      cột đó vào, đừng thêm cột mới; còn nếu quyết định hoãn tiếp thì nên gỡ cột ra chứ đừng để
+      nằm đó trông như đã xong.
 - [x] **Routine Editor** + kéo thả đổi thứ tự task — xong: sửa tên/hình/xu thưởng trọn bộ, kéo thả
       thứ tự việc, bỏ việc ra và đưa việc lẻ vào, ngừng dùng thói quen (việc bên trong không mất).
 - [~] Child Home — vòng tiến độ ✅, linh vật đổi tâm trạng theo tiến độ ✅, hoa giấy ăn mừng ✅
@@ -114,7 +121,8 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
 **Việc còn nợ từ Sprint 1–2, không cần backend:**
 - [ ] Tầng repository — cùng mục ở Sprint 1 (dòng trên), nhắc lại vì đây là hạn chót thật:
       phải có **trước** khi thêm sync
-- [ ] Task Editor đủ 8 khối (còn thiếu **chế độ bằng chứng**; chế độ duyệt riêng đã xong)
+- [ ] Task Editor đủ 8 khối (còn thiếu **chế độ bằng chứng** — cột `proof_mode` có sẵn nhưng chưa
+      ai đọc; chế độ duyệt riêng đã xong)
 - [x] Routine Editor + kéo thả thứ tự
 - [x] Animation ăn mừng — `ConfettiBurst`, nổ ở cấp màn hình vì thẻ việc bị tháo ngay sau khi bấm
 - [x] **PIN phụ huynh** — `ParentPinService` + sheet nhập PIN, hỏi ở cả hai cửa đổi vai (màn con
@@ -221,10 +229,20 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 - [x] Cài đặt: **chủ đề sáng/tối** (lưu theo thiết bị) và **giờ đổi ngày** (0/3/4/5/6 giờ). Sửa
       kèm một lỗi chờ sẵn: các màn hình tự dựng `FamilyClock` với mặc định 4 và bỏ qua cột
       `day_rollover_hour` mà `DayStartService` vẫn đọc — hai bên sẽ lệch ngày ngay khi có ai đổi.
-- [~] Cài đặt: **ngôn ngữ** — đã làm rồi **gỡ ra**. Ô chọn chạy đúng về mặt kỹ thuật, nhưng chỉ
-      3 chỗ trong `lib/features` dùng ARB còn hơn 89 chuỗi là tiếng Việt viết cứng, nên chọn
-      "English" ra một app nửa Việt nửa Anh. Đó đúng là loại lời hứa suông vừa gỡ ở ô "Thông báo".
-      Việc thật cần làm trước là **đưa toàn bộ chuỗi màn hình vào ARB**; ô chọn chỉ là phần ngọn.
+- [~] Cài đặt: **ngôn ngữ** — đã làm rồi **gỡ ra**. Ô chọn chạy đúng về mặt kỹ thuật, nhưng app
+      chưa dịch được, nên chọn "English" ra một app nửa Việt nửa Anh. Đó đúng là loại lời hứa
+      suông vừa gỡ ở ô "Thông báo".
+
+      Số đo lại ngày 17/08 (con số cũ ở đây — "3 chỗ dùng ARB / 89 chuỗi cứng" — sai cả hai đầu):
+      **15** lần gọi `L10n.of` ở 6 file, phần lớn là tiêu đề và nhãn thanh điều hướng trong
+      `router.dart`. Chữ viết cứng thì **98** chuỗi nằm trực tiếp trong `Text('...')` — đây là
+      con số mà lần đo trước bắt được — nhưng tổng số chuỗi có dấu tiếng Việt trong `lib/` là
+      **~644**, vì rất nhiều chữ hiển thị đi qua tham số (`label:`, `title:`, `hintText:`,
+      `content:` của SnackBar) chứ không nằm trong `Text()`. Trừ ~23 chuỗi là thông điệp lỗi nội
+      bộ thì việc thật vẫn cỡ **600 chuỗi**, không phải 89.
+
+      Nói cách khác đây **không** phải việc một buổi. Việc thật cần làm trước là đưa chuỗi vào
+      ARB theo từng màn; ô chọn ngôn ngữ chỉ là phần ngọn.
 - [ ] Cài đặt: âm thanh — hoãn có chủ ý. App chưa phát âm thanh nào; một công tắc không điều
       khiển gì là cờ chết, đúng thứ dự án này đã phải đi dọn năm lần.
 - [x] Trang trống ✅ (đã có sẵn ở mọi màn chính) và **trạng thái lỗi** — `LoiManHinh` +

@@ -13,10 +13,13 @@ Dự án **Bé Ong** (DailyChildren) là ứng dụng quản lý việc nhà, x�
 
 ### Các mốc tiến độ chính:
 * **Sprint 0 (Nền móng)**: Hoàn thành (Responsive layout, Design System, CI build 5 nền tảng).
-  **Ngoại lệ — đa ngôn ngữ**: hạ tầng ARB (`app_vi.arb`, `app_en.arb`) có sẵn nhưng `lib/features`
-  chỉ gọi `L10n.of(context)` ở **3** chỗ trong khi có **95** chuỗi tiếng Việt viết cứng. Thực chất
-  app đang là **tiếng Việt một ngôn ngữ**; đây là lý do ô chọn ngôn ngữ đã bị gỡ ra (xem
-  `05-roadmap.md` Sprint 5).
+  **Ngoại lệ — đa ngôn ngữ**: hạ tầng ARB (`app_vi.arb`, `app_en.arb`) có sẵn nhưng chỉ được gọi
+  **15** lần ở 6 file, gần hết là tiêu đề và nhãn nav trong `router.dart`. Chữ viết cứng: **98**
+  chuỗi trong `Text('...')` và **~644** chuỗi có dấu tiếng Việt trên toàn `lib/` (nhiều chữ hiển
+  thị đi qua `label:`, `title:`, `hintText:`, `content:` chứ không qua `Text()`); trừ ~23 thông
+  điệp lỗi nội bộ thì còn cỡ **600 chuỗi** phải chuyển. Con số "3 chỗ / 95 chuỗi" ở bản audit
+  trước chỉ đếm `Text()`, nên **ước lượng thiếu khoảng 6 lần**. Thực chất app đang là **tiếng
+  Việt một ngôn ngữ**; đây là lý do ô chọn ngôn ngữ đã bị gỡ ra.
 * **Sprint 1 (Dữ liệu Local & Ledger)**: Hoàn thành 100% (Drift SQLite schema, DAO phân lập, bộ sinh task tự động theo chu kỳ, tính streak, thưởng trọn bộ).
 * **Sprint 2 & 4 (Giao diện & Nghiệp vụ cốt lõi)**: Hoàn thành 95% (Parent/Child Home, Onboarding, Quản lý thói quen kéo thả, Mục tiêu tiết kiệm, Duyệt thưởng an toàn, Phạt xu, Mã PIN phụ huynh, 8 huy hiệu MVP).
 * **Sprint 5 (Thông báo)**: **Chưa bắt đầu.** FCM push, 7 loại thông báo và bộ điều tiết
@@ -120,11 +123,11 @@ Xếp theo mức chặn thật, không theo độ khó.
 | 1 | **Dựng endpoint báo lỗi** + tạo nhãn `bug`, `from-app` | Tính năng báo lỗi đã viết xong nhưng **chưa gửi được**; cần tài khoản của chủ dự án |
 | 2 | **Điền + đăng chính sách quyền riêng tư** ở URL công khai | Thiếu là không nộp được store, không phải việc để tới lúc review mới lo |
 | 3 | **Icon app, splash, ảnh chụp store** | Cùng lý do, và cần thiết kế chứ không phải code |
-| 4 | **Đưa chuỗi màn hình vào ARB** | Đang có 3 chỗ dùng ARB / 95 chuỗi cứng; đây là việc thật đứng sau ô chọn ngôn ngữ |
+| 4 | **Đưa chuỗi màn hình vào ARB** | 15 chỗ dùng ARB / ~600 chuỗi cứng phải chuyển. Việc thật đứng sau ô chọn ngôn ngữ, và **không** phải việc một buổi |
 | 5 | **Tầng repository** | Phải có trước sync, và Sprint 3 là việc kế tiếp |
 | 6 | ~~Widget test cho màn báo lỗi~~ ✅ | `test/widget/bao_loi_screen_test.dart`, 7 test |
 | 7 | ~~Router: `routineId` rỗng~~ ✅ | Nay `redirect` về danh sách Nhiệm vụ |
-| 8 | Task Editor: khối **chế độ bằng chứng** | Khối thứ 8 còn thiếu; docs xếp ở v1.1 |
+| 8 | Task Editor: khối **chế độ bằng chứng** | Khối thứ 8 còn thiếu; docs xếp ở v1.1. **Cột `tasks.proof_mode` đã có trong schema nhưng chưa ai đọc hay ghi** — một cột chết nữa |
 | 9 | ~~Nhận huy hiệu mà không có phản hồi gì~~ ✅ | `complete()` nay trả huy hiệu vừa mở khoá; màn con nổ hoa giấy + hiện tên |
 | 10 | ~~Cộng xu hai lần khi đổi chế độ chia~~ ✅ | Chốt chống trùng nay hỏi theo `op_group_id`, không theo khoá từng dòng |
 | 11 | ~~Con không biết việc đang chờ duyệt~~ ✅ | Mục riêng + đồng hồ cát + nhãn chữ, thay vì dấu tích y như đã duyệt |
