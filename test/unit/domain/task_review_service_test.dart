@@ -4,6 +4,7 @@ import 'package:beong/data/local/member_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/data/local/wallet_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/services/approval_rule.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
@@ -357,6 +358,80 @@ void main() {
 
       expect(ketQua.xuCongNgay, isFalse);
       expect(ketQua.huyHieuMoi, isEmpty);
+    });
+  });
+
+  /// Một lượt việc chỉ được trả xu **một lần**, kể cả khi bố mẹ đổi cách chia xu
+  /// giữa hai lần cộng.
+  ///
+  /// Lỗi thật đã gặp: chốt chống trùng đặt theo `client_op_id`, nhưng hai đường
+  /// cộng xu đặt khoá ở hai vùng không đụng nhau — chia theo tỷ lệ ghi
+  /// `<op>:<hũ>` cho từng hũ, còn hũ Chờ chia ghi đúng `<op>`. Bố mẹ mở lại việc
+  /// rồi bật "Con tự chia xu" là con được trả tiền hai lần cho một việc.
+  group('không trả xu hai lần cho một lượt', () {
+    Future<int> tongXu() async {
+      final b = await walletDao.balanceOf(childId);
+      return b.total;
+    }
+
+    test('mở lại rồi làm lại: vẫn đúng một lần, cùng chế độ chia', () async {
+      await makeInstance(id: 'v1', points: 20);
+      await service.complete('v1');
+      expect(await tongXu(), 20);
+
+      await service.reopen(instanceId: 'v1', reviewerId: parentId);
+      await service.complete('v1');
+
+      expect(
+        await tongXu(),
+        20,
+        reason: 'làm lại không phải kiếm thêm lần nữa',
+      );
+    });
+
+    test(
+      'đổi sang "con tự chia" giữa hai lần thì vẫn không cộng thêm',
+      () async {
+        await makeInstance(id: 'v1', points: 20);
+        await service.complete('v1');
+        expect(await tongXu(), 20);
+
+        // Đúng ba thao tác của bố mẹ trong đời thật, và là ca lỗi đã lọt.
+        await service.reopen(instanceId: 'v1', reviewerId: parentId);
+        await memberDao.setAllocationMode(familyId, AllocationMode.manual);
+        await service.complete('v1');
+
+        expect(
+          await tongXu(),
+          20,
+          reason: 'đổi chế độ chia không được mở ra một đường cộng xu thứ hai',
+        );
+      },
+    );
+
+    test('đổi từ "con tự chia" về chia tự động cũng vậy', () async {
+      // Canh cả chiều ngược lại: sửa một chiều mà bỏ chiều kia là chuyện thường.
+      await memberDao.setAllocationMode(familyId, AllocationMode.manual);
+      await makeInstance(id: 'v1', points: 20);
+      await service.complete('v1');
+      expect(await tongXu(), 20);
+
+      await service.reopen(instanceId: 'v1', reviewerId: parentId);
+      await memberDao.setAllocationMode(familyId, AllocationMode.auto);
+      await service.complete('v1');
+
+      expect(await tongXu(), 20);
+    });
+
+    test('duyệt hai lần cũng chỉ cộng một lần', () async {
+      await memberDao.setRequireApproval(familyId, value: true);
+      await makeInstance(id: 'v1', points: 20);
+      await service.complete('v1');
+
+      await service.approve(instanceId: 'v1', reviewerId: parentId);
+      await service.approve(instanceId: 'v1', reviewerId: parentId);
+
+      expect(await tongXu(), 20);
     });
   });
 }

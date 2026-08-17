@@ -60,25 +60,46 @@ class TaskCard extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
-                  child: Text(
-                    title,
-                    style: context.text.bodyLarge?.copyWith(
-                      fontSize:
-                          (context.text.bodyLarge?.fontSize ?? 16) *
-                          scale.textScale,
-                      fontWeight: FontWeight.w700,
-                      decoration: isDone ? TextDecoration.lineThrough : null,
-                      color: isDone
-                          ? context.semantic.onSurfaceMuted
-                          : context.colors.onSurface,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        title,
+                        style: context.text.bodyLarge?.copyWith(
+                          fontSize:
+                              (context.text.bodyLarge?.fontSize ?? 16) *
+                              scale.textScale,
+                          fontWeight: FontWeight.w700,
+                          // Gạch ngang là "xong rồi". Việc đang chờ duyệt thì
+                          // **chưa** xong: gạch nó đi là nói với con rằng phần
+                          // của con đã trọn vẹn, trong khi xu chưa cộng và bố mẹ
+                          // vẫn có thể mở lại.
+                          decoration: isCompleted
+                              ? TextDecoration.lineThrough
+                              : null,
+                          color: isDone
+                              ? context.semantic.onSurfaceMuted
+                              : context.colors.onSurface,
+                        ),
+                      ),
+                      if (isPending)
+                        Text(
+                          'Chờ bố mẹ duyệt',
+                          style: context.text.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: context.semantic.warning,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 XuBadge(amount: points, pill: true),
                 const SizedBox(width: AppSpacing.sm),
                 _Checkbox(
-                  checked: isDone,
+                  checked: isCompleted,
+                  pending: isPending,
                   missed: isMissed,
                   color: profileColor,
                 ),
@@ -130,16 +151,39 @@ class _IconAvatar extends StatelessWidget {
 class _Checkbox extends StatelessWidget {
   const _Checkbox({
     required this.checked,
+    required this.pending,
     required this.missed,
     required this.color,
   });
 
   final bool checked;
+
+  /// Con bấm xong nhưng bố mẹ chưa duyệt — xu **chưa** cộng.
+  final bool pending;
   final bool missed;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
+    if (pending) {
+      // Đồng hồ chứ không phải dấu tích, và khác **hình** chứ không chỉ khác
+      // màu (WCAG 1.4.1): dấu tích xanh y như việc đã duyệt là nói với con
+      // rằng xong rồi, trong khi xu chưa vào ví.
+      return Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: context.semantic.warning, width: 2),
+        ),
+        child: Icon(
+          Icons.hourglass_top_rounded,
+          size: 18,
+          color: context.semantic.warning,
+        ),
+      );
+    }
+
     if (missed) {
       return Container(
         width: 32,

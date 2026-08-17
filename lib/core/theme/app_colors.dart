@@ -81,8 +81,16 @@ abstract final class AppColors {
 
   // ---- Ngữ nghĩa ----
 
-  /// Lá 360 hạ độ sáng để gánh được chữ trắng trên nền sáng (4.80:1).
-  static const successLight = Color(0xFF00851C);
+  /// Lá 360 hạ độ sáng để gánh được chữ trắng, và để **đọc được trên nền thẻ**.
+  ///
+  /// Hạ tiếp từ `#00851C` xuống `#007D1A`: mã cũ đạt 4.80:1 trên nền trắng — đủ
+  /// theo test cũ — nhưng chỉ **4.43:1** trên nền thẻ ([surfaceVariantLight]), mà
+  /// nhãn "Đã xong" trong Sổ của con nằm đúng ở đó. Mã mới đạt 4.91:1 trên thẻ và
+  /// 5.32:1 trên trắng.
+  ///
+  /// Màu này vừa làm chữ vừa làm **nền nút duyệt với icon trắng**, nên đậm hơn
+  /// thì cả hai vai đều tăng tương phản.
+  static const successLight = Color(0xFF007D1A);
   static const Color successDark = brand360Green;
 
   /// Lá 360 nguyên bản, chỉ dùng làm **nền trang trí với nội dung đậm** —
@@ -90,9 +98,24 @@ abstract final class AppColors {
   static const Color successBright = brand360Green;
 
   /// Cam, tách rõ khỏi vàng mật để "chờ duyệt" không lẫn với xu.
-  static const warningLight = Color(0xFFB55800);
+  ///
+  /// Hạ độ sáng từ `#B55800` xuống `#A85200`: mã cũ đạt 4.82:1 trên nền trắng
+  /// nhưng chỉ **4.45:1** trên nền thẻ ([surfaceVariantLight]) — mà thẻ chính là
+  /// chỗ nhãn "Chờ bố mẹ duyệt" nằm. Mã mới đạt 5.01:1 trên thẻ.
+  ///
+  /// Đổi được an toàn vì màu này chỉ dùng làm chữ, icon, viền, hoặc nền có
+  /// `alpha` 0.15–0.2 — không có chỗ nào đặt chữ sáng lên nền đặc màu này, nên
+  /// đậm hơn thì mọi chỗ đều tăng tương phản, không có chỗ nào giảm.
+  static const warningLight = Color(0xFFA85200);
   static const warningDark = Color(0xFFFF922B);
-  static const dangerLight = Color(0xFFE31313);
+
+  /// Hạ từ `#E31313` xuống `#D50C0C` — cùng lý do như [successLight] và
+  /// [warningLight]: 4.81:1 trên nền trắng nhưng chỉ **4.44:1** trên nền thẻ, mà
+  /// dấu ✗ "bỏ lỡ" và nút từ chối đều nằm trong thẻ. Mã mới đạt 4.99:1 trên thẻ.
+  ///
+  /// Cả ba màu ngữ nghĩa cùng vướng đúng một chỗ, vì test cũ chỉ canh nền trắng
+  /// thuần trong khi hầu như không có chữ nào của app nằm trên nền trắng thuần.
+  static const dangerLight = Color(0xFFD50C0C);
   static const dangerDark = Color(0xFFF87171);
 
   /// Màu đồng xu — cũng là màu mật ong. Đơn vị điểm gọi là "xu" (ADR-015).

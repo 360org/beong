@@ -584,6 +584,30 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     return query.watch();
   }
 
+  /// Nhóm thao tác [opGroupId] đã có dòng nào trong sổ cái chưa.
+  ///
+  /// Chốt chống trùng theo `client_op_id` **không đủ** cho việc cộng xu, vì hai
+  /// đường cộng đặt khoá ở hai vùng khác nhau: [credit] ghi
+  /// `<op>:<khoá hũ>` cho từng hũ, còn [creditToJar] ghi đúng `<op>`. Hai vùng
+  /// đó không bao giờ đụng nhau, nên cùng một lượt việc mà cộng qua hai đường
+  /// khác nhau thì cả hai đều lọt.
+  ///
+  /// Chuyện đó xảy ra thật, bằng đúng một thao tác của bố mẹ: mở lại việc → bật
+  /// "Con tự chia xu" → con làm lại. Lần đầu đi đường chia theo tỷ lệ, lần sau đi
+  /// đường hũ Chờ chia, và con được trả tiền **hai lần** cho một việc.
+  ///
+  /// `op_group_id` thì cả hai đường đều đặt giống nhau, nên nó là chỗ duy nhất
+  /// hỏi được câu "lượt này đã trả xu chưa" mà không phụ thuộc đường đi.
+  Future<bool> daGhiNhom(String opGroupId) async {
+    final existing =
+        await (selectOnly(pointTransactions)
+              ..addColumns([pointTransactions.id])
+              ..where(pointTransactions.opGroupId.equals(opGroupId))
+              ..limit(1))
+            .getSingleOrNull();
+    return existing != null;
+  }
+
   /// Ghi một dòng sổ cái nếu `clientOpId` chưa tồn tại. Trả về 1 nếu đã ghi.
   Future<int> _insertIfNew({
     required String familyId,

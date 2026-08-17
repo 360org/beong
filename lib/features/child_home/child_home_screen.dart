@@ -229,12 +229,15 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
     final scheduled = instances
         .where((i) => i.status == InstanceStatus.scheduled.name)
         .toList();
+    // Chờ duyệt là mục **riêng**, không gộp vào "Đã xong". Gộp lại thì việc con
+    // vừa bấm trông y hệt việc đã được duyệt — cùng gạch ngang, cùng dấu tích
+    // xanh — trong khi xu chưa cộng và bố mẹ vẫn có thể mở lại. Con thấy tích
+    // xanh mà số xu không nhích là lúc con thôi tin vào cái tích đó.
+    final choDuyet = instances
+        .where((i) => i.status == InstanceStatus.pendingReview.name)
+        .toList();
     final done = instances
-        .where(
-          (i) =>
-              i.status == InstanceStatus.approved.name ||
-              i.status == InstanceStatus.pendingReview.name,
-        )
+        .where((i) => i.status == InstanceStatus.approved.name)
         .toList();
     final missed = instances
         .where((i) => i.status == InstanceStatus.missed.name)
@@ -245,6 +248,25 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
         _SectionHeader(title: 'Cần làm', count: scheduled.length),
         const SizedBox(height: AppSpacing.sm),
         ...scheduled.map(
+          (instance) => Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: _InstanceCard(
+              // Key theo id: không có key, Flutter tái dùng State theo
+              // vị trí khi việc chuyển mục và thẻ hiện tên của việc cũ.
+              key: ValueKey(instance.id),
+              instance: instance,
+              taskDao: taskDao,
+              onCompleted: _celebrateOnce,
+              onComplete: _hoanThanhViec,
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+      ],
+      if (choDuyet.isNotEmpty) ...[
+        _SectionHeader(title: 'Chờ bố mẹ duyệt', count: choDuyet.length),
+        const SizedBox(height: AppSpacing.sm),
+        ...choDuyet.map(
           (instance) => Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: _InstanceCard(

@@ -80,8 +80,8 @@ Cả hai vai, đủ các tab chính. `42`–`46` là vai bố mẹ, `47`–`49` 
 | `50-parent-da-xong-hom-nay.png` | Danh sách đã xong hôm nay, mỗi dòng có nút mở lại |
 | `51-parent-mo-lai-viec.png` | Sau khi mở lại 3 việc |
 | `52-child-can-lam-lai.png` | Con thấy việc quay về "Cần làm" |
-| `53-child-cho-duyet.png` | Con bấm xong, xu **chưa** cộng vì nhà bật duyệt |
-| `54-child-danh-sach-da-xong.png` | Danh sách đã xong phía con |
+| `53-child-cho-duyet.png` | Con bấm xong, xu **vẫn 0** vì nhà bật duyệt |
+| `54-child-danh-sach-da-xong.png` | Mục **"Chờ bố mẹ duyệt"** tách riêng, không gộp vào "Đã xong" |
 | `55-parent-hang-doi-duyet.png` | Hàng đợi duyệt + nút Duyệt tất cả |
 | `56-parent-sau-khi-duyet.png` | Duyệt xong, xu cộng vào |
 
@@ -98,25 +98,41 @@ Cả hai vai, đủ các tab chính. `42`–`46` là vai bố mẹ, `47`–`49` 
 ### Còn lại (63–67)
 | Ảnh | Màn |
 |---|---|
-| `63-so-lich-su-day-du.png` | Sổ đầy đủ: xong, phải làm lại, thưởng trọn bộ, dùng thưởng |
+| `63-so-lich-su-day-du.png` | Sổ của con — mỗi lượt việc đúng **một** dòng, số xu khớp giá việc |
 | `64-tru-xu-da-bat.png` | Trừ xu sau khi bật 10% |
 | `65-tru-xu-rieng-tung-viec.png` | Khối "Bỏ việc này thì trừ" trong Task Editor |
 | `66-nhap-pin-de-vao-vai-bo-me.png` | PIN chặn con tự đổi sang vai bố mẹ |
 | `67-pin-sai.png` | Nhập sai thì báo rõ, không im lặng |
+| `68-zoom-the-cho-duyet.png` | Phóng 210% thẻ chờ duyệt: đồng hồ cát, nhãn chữ, không gạch ngang |
 
-## Lỗi bộ ảnh này bắt được
+## Lỗi bộ ảnh này bắt được — **đã sửa**
 
-Chụp xong rồi *nhìn* mới thấy, trong khi `flutter analyze --fatal-infos` sạch và
-470 test đều xanh:
+Cả hai chỉ hiện ra khi chụp xong rồi *nhìn*, trong khi `flutter analyze
+--fatal-infos` sạch và 470 test đều xanh. Ghi lại ở đây vì bài học đáng giá hơn
+bản sửa: cả hai đều là **thứ có sẵn trong code nhưng không điều khiển gì cả**.
 
-1. **Ảnh 63** — `Làm bài tập` giá 25 xu mà sổ ghi `+50`, liệt kê cả một lần chia
-   tự động lẫn một lần vào hũ Chờ chia. Nguyên nhân: hai đường cộng xu trong
-   `wallet_dao.dart` dùng hai vùng khoá `client_op_id` khác nhau
-   (`task-approved:<id>:<hũ>` với `task-approved:<id>`), nên chốt chống trùng không
-   bắt được nhau. Bố mẹ đổi chế độ chia xu giữa hai lần cộng là con được trả hai lần.
-2. **Ảnh 53–54** — bật "Cần bố mẹ duyệt" thì việc con vừa bấm hiện **y hệt** việc
-   đã duyệt: cùng gạch ngang, cùng dấu tích xanh, cùng nằm trong nhóm "Đã xong".
-   Con thấy tích xanh mà xu không lên.
+1. **Cộng xu hai lần.** `Làm bài tập` giá 25 xu mà sổ ghi `+50`, liệt kê cả một
+   lần chia tự động lẫn một lần vào hũ Chờ chia. Nguyên nhân: hai đường cộng xu
+   trong `wallet_dao.dart` đặt `client_op_id` ở hai vùng không đụng nhau
+   (`task-approved:<id>:<hũ>` với `task-approved:<id>`), nên chốt chống trùng
+   không bắt được nhau. Bố mẹ mở lại việc rồi bật "Con tự chia xu" là con được
+   trả tiền hai lần.
+   → Sửa: hỏi theo `op_group_id` (`WalletDao.daGhiNhom`), khoá duy nhất mà cả hai
+   đường đều đặt giống nhau. 4 test mới, trong đó 2 test đỏ đúng khi bỏ bản sửa.
+
+2. **Con không biết việc đang chờ duyệt.** Bật "Cần bố mẹ duyệt" thì việc con vừa
+   bấm hiện y hệt việc đã duyệt: cùng gạch ngang, cùng dấu tích xanh, cùng nhóm
+   "Đã xong". Cờ `isPending` có sẵn trong `TaskCard` nhưng chỉ được gộp vào
+   `isDone` — không điều khiển gì.
+   → Sửa: mục riêng "Chờ bố mẹ duyệt", **đồng hồ cát** thay dấu tích (khác hình
+   chứ không chỉ khác màu — WCAG 1.4.1), nhãn chữ "Chờ bố mẹ duyệt", và bỏ gạch
+   ngang vì việc chưa xong hẳn. Xem ảnh `53`, `54`, `68`.
+
+Lỗi thứ ba lộ ra khi viết test cho lỗi thứ hai: cả **ba** màu ngữ nghĩa
+(`success` 4.43:1, `warning` 4.45:1, `danger` 4.44:1) đều dưới ngưỡng 4.5:1 trên
+nền thẻ, dù đều qua test cũ — vì test cũ chỉ canh **nền trắng thuần**, trong khi
+hầu như không có chữ nào của app nằm trên nền trắng thuần. Đã hạ độ sáng cả ba và
+thêm test canh đúng nền thẻ.
 
 ## Chụp lại bộ này
 

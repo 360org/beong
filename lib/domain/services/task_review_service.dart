@@ -121,7 +121,13 @@ class TaskReviewService {
   Future<List<BadgeDef>> _creditFor(TaskInstance instance) async {
     // `pointsSnapshot` chứ không phải `tasks.points`: bố mẹ đổi giá task không
     // được làm thay đổi lượt đã sinh (ADR-007).
-    if (instance.pointsSnapshot > 0) {
+    //
+    // Hỏi theo **nhóm** thao tác, không theo khoá từng dòng: hai đường cộng xu
+    // dưới đây đặt `clientOpId` ở hai vùng khác nhau nên không tự chặn được nhau.
+    // Bố mẹ mở lại việc rồi bật "Con tự chia xu" là con được trả xu hai lần —
+    // xem `WalletDao.daGhiNhom`.
+    final nhomXu = 'task-approved:${instance.id}';
+    if (instance.pointsSnapshot > 0 && !await _wallet.daGhiNhom(nhomXu)) {
       final family = await _members.getFamily(instance.familyId);
       final mode = allocationModeFromDb(family.allocationMode);
 
@@ -135,8 +141,8 @@ class TaskReviewService {
           jar: Jar.inbox,
           amount: instance.pointsSnapshot,
           reason: TxReason.taskApproved,
-          clientOpId: 'task-approved:${instance.id}',
-          opGroupId: 'task-approved:${instance.id}',
+          clientOpId: nhomXu,
+          opGroupId: nhomXu,
           refType: 'task_instance',
           refId: instance.id,
         );
@@ -146,7 +152,7 @@ class TaskReviewService {
           memberId: instance.memberId,
           amount: instance.pointsSnapshot,
           reason: TxReason.taskApproved,
-          clientOpId: 'task-approved:${instance.id}',
+          clientOpId: nhomXu,
           refType: 'task_instance',
           refId: instance.id,
         );

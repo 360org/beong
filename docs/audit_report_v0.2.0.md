@@ -65,13 +65,16 @@ Dự án **Bé Ong** (DailyChildren) là ứng dụng quản lý việc nhà, x�
 * Vùng chạm tối thiểu đạt chuẩn >= 48dp (`AppSpacing.minTouchTarget`).
 
 ### D. Hệ Thống Kiểm Thử (Testing Coverage)
-* **44 file test, 460 test** đều xanh; `flutter analyze --fatal-infos` sạch.
+* **46 file test, 483 test** đều xanh; `flutter analyze --fatal-infos` sạch.
 * Kiểm thử tích hợp toàn trình tại `integration_test/luong_day_du_test.dart` (3 luồng), có job
   CI riêng chạy trên Linux desktop dưới Xvfb.
 * Ràng buộc khả dụng đã thành test tự động (`test/unit/kha_dung_test.dart`) thay vì chỉ là lời
   hứa trong tài liệu.
-* **Khoảng trống**: chưa có widget test cho `bao_loi_screen` — bốn trạng thái của màn (đang
-  soạn / đang gửi / đã gửi / gửi hỏng) hiện chỉ được kiểm bằng tay.
+* Ràng buộc tương phản nay canh **cả nền thẻ**, không chỉ nền trắng thuần — chỗ hở này từng
+  để lọt ba màu ngữ nghĩa cùng dưới ngưỡng 4.5:1.
+* **Khoảng trống**: `flutter analyze` sạch và toàn bộ test xanh vẫn **không** thay được việc
+  chạy app thật và soi ảnh chụp. Ba lỗi nghiêm trọng nhất của bản này đều được tìm ra bằng
+  cách đó, không phải bằng test — xem `screenshot/README.md`.
 
 ---
 
@@ -123,6 +126,9 @@ Xếp theo mức chặn thật, không theo độ khó.
 | 7 | ~~Router: `routineId` rỗng~~ ✅ | Nay `redirect` về danh sách Nhiệm vụ |
 | 8 | Task Editor: khối **chế độ bằng chứng** | Khối thứ 8 còn thiếu; docs xếp ở v1.1 |
 | 9 | ~~Nhận huy hiệu mà không có phản hồi gì~~ ✅ | `complete()` nay trả huy hiệu vừa mở khoá; màn con nổ hoa giấy + hiện tên |
+| 10 | ~~Cộng xu hai lần khi đổi chế độ chia~~ ✅ | Chốt chống trùng nay hỏi theo `op_group_id`, không theo khoá từng dòng |
+| 11 | ~~Con không biết việc đang chờ duyệt~~ ✅ | Mục riêng + đồng hồ cát + nhãn chữ, thay vì dấu tích y như đã duyệt |
+| 12 | ~~Ba màu ngữ nghĩa dưới ngưỡng trên nền thẻ~~ ✅ | Hạ độ sáng cả ba; test cũ chỉ canh nền trắng thuần nên để lọt |
 
 **Cố ý chưa làm** (ghi ra để lần audit sau không đề xuất lại): ô cài đặt âm thanh — app chưa
 phát âm thanh nào, thêm một công tắc không điều khiển gì là cờ chết, đúng loại lỗi dự án này đã

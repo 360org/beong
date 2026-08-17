@@ -177,6 +177,25 @@ void main() {
       }
     });
 
+    test('màu ngữ nghĩa còn phải đọc được trên **nền thẻ**, không chỉ nền trắng', () {
+      // Khoảng trống đã để lọt một lỗi thật: test trên chỉ canh nền trắng thuần,
+      // nhưng chữ ngữ nghĩa hầu như luôn nằm trong `Card`, mà `cardTheme.color`
+      // là `surfaceContainerHighest` = surfaceVariantLight, đậm hơn trắng.
+      // Nhãn "Chờ bố mẹ duyệt" từng đạt 4.45:1 ở đó trong khi vẫn qua test trắng.
+      const light = AppSemanticColors.light;
+      for (final (name, color) in [
+        ('success', light.success),
+        ('warning', light.warning),
+        ('danger', light.danger),
+      ]) {
+        expect(
+          _contrast(color, AppColors.surfaceVariantLight),
+          greaterThanOrEqualTo(4.5),
+          reason: '$name trên nền thẻ',
+        );
+      }
+    });
+
     test('mọi màu ngữ nghĩa nền tối nổi trên nền tối', () {
       const dark = AppSemanticColors.dark;
       for (final (name, color) in [
