@@ -1,6 +1,6 @@
 # Ảnh chụp màn hình — Bé Ong v0.2.0
 
-67 ảnh, chụp trên bản dựng Linux debug ở **412×900** (cỡ điện thoại thật), đi hết
+68 ảnh, chụp trên bản dựng Linux debug ở **412×900** (cỡ điện thoại thật), đi hết
 luồng chứ không chỉ mở từng màn: tạo nhà → làm việc → nhận huy hiệu → đổi thưởng →
 bố mẹ duyệt → con tự chia xu.
 
@@ -95,7 +95,7 @@ Cả hai vai, đủ các tab chính. `42`–`46` là vai bố mẹ, `47`–`49` 
 | `61-child-home-sau-khi-chia.png` | Chia hết rồi thì dòng "chưa chia" **ẩn đi** |
 | `62-child-so-cuoi.png` | Hũ Chờ chia cũng ẩn khi bằng 0 |
 
-### Còn lại (63–67)
+### Còn lại (63–68)
 | Ảnh | Màn |
 |---|---|
 | `63-so-lich-su-day-du.png` | Sổ của con — mỗi lượt việc đúng **một** dòng, số xu khớp giá việc |
