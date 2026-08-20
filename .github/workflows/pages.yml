@@ -31,7 +31,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Kiểm tra ảnh trong trang có tồn tại thật không
         # Ảnh vỡ trên trang giới thiệu là lỗi nhìn thấy ngay nhưng CI không bao giờ

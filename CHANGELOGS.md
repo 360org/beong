@@ -7,6 +7,7 @@ Toàn bộ các thay đổi và cột mốc phát triển của dự án **Bé O
 ## [0.2.1] - 2026-08-20
 
 ### 🛠️ Cải Tiến & Sửa Lỗi (Refactor & Fixes)
+- [FIX] **CI/CD & iOS Code Signing**: Chuẩn hoá cấu hình ký `Apple Distribution`, thiết lập default-keychain trên GitHub runner và nâng cấp actions runner lên `actions/checkout@v5`.
 - [FIX] **Landing Page & Docs**: Sửa tỷ lệ khung hình ảnh (`img { height: auto }`) chống méo hình trên các breakpoint (`site/index.html`).
 - [FIX] **Log Xu & Duyệt Việc**: Không trả xu hai lần cho một lượt việc, làm rõ trạng thái việc đang chờ duyệt.
 - [FIX] **Huy Hiệu & Điều Hướng**: Nhận huy hiệu có hiệu ứng pháo hoa ăn mừng, router không mở màn hình trống.
