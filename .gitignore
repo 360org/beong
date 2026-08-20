@@ -50,3 +50,4 @@ lib/core/l10n/gen/
 # Sinh bởi build_runner
 *.g.dart
 *.freezed.dart
+certs/

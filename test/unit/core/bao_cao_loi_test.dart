@@ -16,7 +16,7 @@ import 'package:yaml/yaml.dart';
 /// Báo cáo lỗi người dùng gửi cho nhà phát triển.
 void main() {
   ThongTinThietBi thietBi() => ThongTinThietBi.thuThap(
-    phienBanApp: '0.2.0',
+    phienBanApp: '0.2.1',
     kichThuocManHinh: const Size(412, 900),
     tyLePhongChu: 1,
   );
@@ -66,7 +66,7 @@ void main() {
 
       expect(than, contains('Bấm xong việc mà xu không cộng'));
       expect(than, contains('412×900 dp'));
-      expect(than, contains('0.2.0'));
+      expect(than, contains('0.2.1'));
       expect(than, contains(Platform.operatingSystem));
     });
 
@@ -113,7 +113,7 @@ void main() {
 
       expect(goi['tieu_de'], 'Bấm xong việc mà xu không cộng');
       expect(goi['than'], contains('### Thiết bị'));
-      expect(goi['phien_ban_app'], '0.2.0');
+      expect(goi['phien_ban_app'], '0.2.1');
       expect(goi['he_dieu_hanh'], Platform.operatingSystem);
     });
 

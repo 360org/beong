@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "note": "Feature map dẫn xuất từ symbol/domain signal. Agent cập nhật thủ công sau thay đổi có ý nghĩa.",
+  "hotspots": [
+    {
+      "file": "lib/features/stats/stats_screen.dart",
+      "signals": 28
+    },
+    {
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "signals": 27
+    },
+    {
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "signals": 26
+    },
+    {
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "signals": 25
+    },
+    {
+      "file": "lib/data/local/wallet_dao.dart",
+      "signals": 22
+    },
+    {
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "signals": 21
+    },
+    {
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "signals": 19
+    },
+    {
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "signals": 18
+    },
+    {
+      "file": "lib/features/settings/settings_screen.dart",
+      "signals": 18
+    },
+    {
+      "file": "lib/data/local/tables/tables.dart",
+      "signals": 16
+    },
+    {
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "signals": 16
+    },
+    {
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "signals": 16
+    }
+  ]
+}

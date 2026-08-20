@@ -4,6 +4,18 @@ Toàn bộ các thay đổi và cột mốc phát triển của dự án **Bé O
 
 ---
 
+## [0.2.1] - 2026-08-20
+
+### 🛠️ Cải Tiến & Sửa Lỗi (Refactor & Fixes)
+- [FIX] **Landing Page & Docs**: Sửa tỷ lệ khung hình ảnh (`img { height: auto }`) chống méo hình trên các breakpoint (`site/index.html`).
+- [FIX] **Log Xu & Duyệt Việc**: Không trả xu hai lần cho một lượt việc, làm rõ trạng thái việc đang chờ duyệt.
+- [FIX] **Huy Hiệu & Điều Hướng**: Nhận huy hiệu có hiệu ứng pháo hoa ăn mừng, router không mở màn hình trống.
+- [IMPROVE] **Dọn Dẹp Phụ Thuộc**: Loại bỏ 6 dependencies thừa trước khi đóng gói release.
+- [IMPROVE] **Kiến Trúc Repository**: Hoàn thiện mặt cắt tầng repository đáp ứng chính xác nhu cầu `lib/features`.
+- [DOCS] Cập nhật hướng dẫn sử dụng cho phụ huynh (`docs/12-huong-dan-su-dung.md`) và bộ 68 ảnh chụp màn hình hoàn chỉnh (`docs/screenshot/README.md`).
+
+---
+
 ## [0.2.0] - 2026-08-16
 
 ### ✨ Tính Năng Mới (Features)

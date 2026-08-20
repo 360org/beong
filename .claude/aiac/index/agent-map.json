@@ -1,0 +1,3431 @@
+{
+  "schemaVersion": 1,
+  "root": "/Volumes/DATA/DEV/MOBILES/beong",
+  "files": 81,
+  "symbols": [
+    {
+      "kind": "class",
+      "name": "BeOngApp",
+      "file": "lib/app/app.dart",
+      "line": 32,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_BeOngAppState",
+      "file": "lib/app/app.dart",
+      "line": 39,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "initState",
+      "file": "lib/app/app.dart",
+      "line": 48,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "dispose",
+      "file": "lib/app/app.dart",
+      "line": 54,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "didChangeAppLifecycleState",
+      "file": "lib/app/app.dart",
+      "line": 61,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/app/app.dart",
+      "line": 76,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_SessionChangeNotifier",
+      "file": "lib/app/app.dart",
+      "line": 106,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "notify",
+      "file": "lib/app/app.dart",
+      "line": 107,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "Routes",
+      "file": "lib/app/router.dart",
+      "line": 17,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "Function",
+      "file": "lib/app/router.dart",
+      "line": 135,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_Branch",
+      "file": "lib/app/router.dart",
+      "line": 137,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_AppShell",
+      "file": "lib/app/router.dart",
+      "line": 200,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/app/router.dart",
+      "line": 206,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "AppSession",
+      "file": "lib/core/providers/session_provider.dart",
+      "line": 12,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "Session",
+      "file": "lib/core/providers/session_provider.dart",
+      "line": 42,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "restore",
+      "file": "lib/core/providers/session_provider.dart",
+      "line": 55,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "login",
+      "file": "lib/core/providers/session_provider.dart",
+      "line": 57,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "switchMember",
+      "file": "lib/core/providers/session_provider.dart",
+      "line": 62,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "logout",
+      "file": "lib/core/providers/session_provider.dart",
+      "line": 77,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "AppColors",
+      "file": "lib/core/theme/app_colors.dart",
+      "line": 25,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "AppSemanticColors",
+      "file": "lib/core/theme/app_colors.dart",
+      "line": 154,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "AppSpacing",
+      "file": "lib/core/theme/app_spacing.dart",
+      "line": 4,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "AppNavMetrics",
+      "file": "lib/core/theme/app_spacing.dart",
+      "line": 28,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "AppRadius",
+      "file": "lib/core/theme/app_spacing.dart",
+      "line": 42,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "AppBreakpoints",
+      "file": "lib/core/theme/app_spacing.dart",
+      "line": 51,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "isCompact",
+      "file": "lib/core/theme/app_spacing.dart",
+      "line": 55,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "isMedium",
+      "file": "lib/core/theme/app_spacing.dart",
+      "line": 56,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "isExpanded",
+      "file": "lib/core/theme/app_spacing.dart",
+      "line": 57,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "AppTheme",
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 10,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "AppTypography",
+      "file": "lib/core/theme/app_typography.dart",
+      "line": 10,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "KidScale",
+      "file": "lib/core/theme/kid_scale.dart",
+      "line": 11,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "KidScaleScope",
+      "file": "lib/core/theme/kid_scale.dart",
+      "line": 124,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "updateShouldNotify",
+      "file": "lib/core/theme/kid_scale.dart",
+      "line": 140,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "assetPathForIcon",
+      "file": "lib/core/theme/task_icons.dart",
+      "line": 20,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "iconKeyForEmoji",
+      "file": "lib/core/theme/task_icons.dart",
+      "line": 68,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "iconForKey",
+      "file": "lib/core/theme/task_icons.dart",
+      "line": 129,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "avatarForKey",
+      "file": "lib/core/theme/task_icons.dart",
+      "line": 190,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "AppIcon",
+      "file": "lib/core/widgets/app_icon.dart",
+      "line": 12,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/core/widgets/app_icon.dart",
+      "line": 26,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "BeeMascot",
+      "file": "lib/core/widgets/bee_mascot.dart",
+      "line": 37,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_BeeMascotState",
+      "file": "lib/core/widgets/bee_mascot.dart",
+      "line": 60,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "initState",
+      "file": "lib/core/widgets/bee_mascot.dart",
+      "line": 68,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "didUpdateWidget",
+      "file": "lib/core/widgets/bee_mascot.dart",
+      "line": 74,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_syncAnimation",
+      "file": "lib/core/widgets/bee_mascot.dart",
+      "line": 79,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "dispose",
+      "file": "lib/core/widgets/bee_mascot.dart",
+      "line": 92,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/core/widgets/bee_mascot.dart",
+      "line": 98,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_BeePainter",
+      "file": "lib/core/widgets/bee_mascot.dart",
+      "line": 116,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "paint",
+      "file": "lib/core/widgets/bee_mascot.dart",
+      "line": 142,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_paintWings",
+      "file": "lib/core/widgets/bee_mascot.dart",
+      "line": 160,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_paintBody",
+      "file": "lib/core/widgets/bee_mascot.dart",
+      "line": 186,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_paintStripes",
+      "file": "lib/core/widgets/bee_mascot.dart",
+      "line": 209,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_paintAntennae",
+      "file": "lib/core/widgets/bee_mascot.dart",
+      "line": 229,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_paintFace",
+      "file": "lib/core/widgets/bee_mascot.dart",
+      "line": 260,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "shouldRepaint",
+      "file": "lib/core/widgets/bee_mascot.dart",
+      "line": 345,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "PlaceholderScreen",
+      "file": "lib/core/widgets/placeholder_screen.dart",
+      "line": 11,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/core/widgets/placeholder_screen.dart",
+      "line": 18,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "PresetChip",
+      "file": "lib/core/widgets/preset_chip.dart",
+      "line": 7,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/core/widgets/preset_chip.dart",
+      "line": 22,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "ProgressRing",
+      "file": "lib/core/widgets/progress_ring.dart",
+      "line": 12,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/core/widgets/progress_ring.dart",
+      "line": 34,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_RingPainter",
+      "file": "lib/core/widgets/progress_ring.dart",
+      "line": 57,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "paint",
+      "file": "lib/core/widgets/progress_ring.dart",
+      "line": 71,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "shouldRepaint",
+      "file": "lib/core/widgets/progress_ring.dart",
+      "line": 106,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "AppDestination",
+      "file": "lib/core/widgets/responsive_scaffold.dart",
+      "line": 5,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "ResponsiveScaffold",
+      "file": "lib/core/widgets/responsive_scaffold.dart",
+      "line": 25,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/core/widgets/responsive_scaffold.dart",
+      "line": 42,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "ScreenPadding",
+      "file": "lib/core/widgets/responsive_scaffold.dart",
+      "line": 111,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/core/widgets/responsive_scaffold.dart",
+      "line": 117,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "TaskCard",
+      "file": "lib/core/widgets/task_card.dart",
+      "line": 9,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/core/widgets/task_card.dart",
+      "line": 34,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_IconAvatar",
+      "file": "lib/core/widgets/task_card.dart",
+      "line": 94,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/core/widgets/task_card.dart",
+      "line": 113,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_Checkbox",
+      "file": "lib/core/widgets/task_card.dart",
+      "line": 130,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/core/widgets/task_card.dart",
+      "line": 142,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "XuBadge",
+      "file": "lib/core/widgets/xu_badge.dart",
+      "line": 10,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/core/widgets/xu_badge.dart",
+      "line": 31,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "AppDatabase",
+      "file": "lib/data/local/database.dart",
+      "line": 34,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_createIndexes",
+      "file": "lib/data/local/database.dart",
+      "line": 90,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "JarException",
+      "file": "lib/data/local/jar_dao.dart",
+      "line": 9,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "toString",
+      "file": "lib/data/local/jar_dao.dart",
+      "line": 14,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "JarDao",
+      "file": "lib/data/local/jar_dao.dart",
+      "line": 28,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "seedDefaults",
+      "file": "lib/data/local/jar_dao.dart",
+      "line": 32,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "addJar",
+      "file": "lib/data/local/jar_dao.dart",
+      "line": 97,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "updateJar",
+      "file": "lib/data/local/jar_dao.dart",
+      "line": 139,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "setArchived",
+      "file": "lib/data/local/jar_dao.dart",
+      "line": 170,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "reorder",
+      "file": "lib/data/local/jar_dao.dart",
+      "line": 194,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "MemberDao",
+      "file": "lib/data/local/member_dao.dart",
+      "line": 11,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "createFamily",
+      "file": "lib/data/local/member_dao.dart",
+      "line": 15,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "getFamily",
+      "file": "lib/data/local/member_dao.dart",
+      "line": 19,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "addMember",
+      "file": "lib/data/local/member_dao.dart",
+      "line": 30,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "getMember",
+      "file": "lib/data/local/member_dao.dart",
+      "line": 58,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "setRequireApproval",
+      "file": "lib/data/local/member_dao.dart",
+      "line": 72,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "setAllocationMode",
+      "file": "lib/data/local/member_dao.dart",
+      "line": 89,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "penaltyPolicyOf",
+      "file": "lib/data/local/member_dao.dart",
+      "line": 99,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "setPenaltyPolicy",
+      "file": "lib/data/local/member_dao.dart",
+      "line": 118,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "updateMember",
+      "file": "lib/data/local/member_dao.dart",
+      "line": 135,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "upsertStreak",
+      "file": "lib/data/local/member_dao.dart",
+      "line": 140,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "getStreak",
+      "file": "lib/data/local/member_dao.dart",
+      "line": 160,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "RewardDao",
+      "file": "lib/data/local/reward_dao.dart",
+      "line": 9,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "createReward",
+      "file": "lib/data/local/reward_dao.dart",
+      "line": 25,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "updateReward",
+      "file": "lib/data/local/reward_dao.dart",
+      "line": 29,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "deleteReward",
+      "file": "lib/data/local/reward_dao.dart",
+      "line": 34,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "redeem",
+      "file": "lib/data/local/reward_dao.dart",
+      "line": 41,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "fulfillRedemption",
+      "file": "lib/data/local/reward_dao.dart",
+      "line": 64,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "rejectRedemption",
+      "file": "lib/data/local/reward_dao.dart",
+      "line": 78,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "getRedemption",
+      "file": "lib/data/local/reward_dao.dart",
+      "line": 108,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "getReward",
+      "file": "lib/data/local/reward_dao.dart",
+      "line": 134,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "markUsed",
+      "file": "lib/data/local/reward_dao.dart",
+      "line": 139,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "SessionStore",
+      "file": "lib/data/local/session_store.dart",
+      "line": 12,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "load",
+      "file": "lib/data/local/session_store.dart",
+      "line": 32,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "save",
+      "file": "lib/data/local/session_store.dart",
+      "line": 49,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "clear",
+      "file": "lib/data/local/session_store.dart",
+      "line": 57,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "SettingsDao",
+      "file": "lib/data/local/settings_dao.dart",
+      "line": 9,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "read",
+      "file": "lib/data/local/settings_dao.dart",
+      "line": 14,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "write",
+      "file": "lib/data/local/settings_dao.dart",
+      "line": 33,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "writeAll",
+      "file": "lib/data/local/settings_dao.dart",
+      "line": 39,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "remove",
+      "file": "lib/data/local/settings_dao.dart",
+      "line": 58,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "Families",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 30,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "Members",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 78,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "Routines",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 103,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "RoutineAssignees",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 127,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "Tasks",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 135,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "TaskAssignees",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 166,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "TaskInstances",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 175,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "PointTransactions",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 218,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "Rewards",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 263,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "Redemptions",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 290,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "SavingsGoals",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 310,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "Streaks",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 326,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "BadgesEarned",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 338,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "Outbox",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 352,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "DeviceSettings",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 373,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "Jars",
+      "file": "lib/data/local/tables/tables.dart",
+      "line": 390,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "TaskDao",
+      "file": "lib/data/local/task_dao.dart",
+      "line": 22,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "getTaskById",
+      "file": "lib/data/local/task_dao.dart",
+      "line": 25,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "backfillMissingIcons",
+      "file": "lib/data/local/task_dao.dart",
+      "line": 63,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "generateInstances",
+      "file": "lib/data/local/task_dao.dart",
+      "line": 171,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "getInstanceById",
+      "file": "lib/data/local/task_dao.dart",
+      "line": 235,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "markPendingReview",
+      "file": "lib/data/local/task_dao.dart",
+      "line": 254,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "markApproved",
+      "file": "lib/data/local/task_dao.dart",
+      "line": 265,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "approve",
+      "file": "lib/data/local/task_dao.dart",
+      "line": 285,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "reject",
+      "file": "lib/data/local/task_dao.dart",
+      "line": 299,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "checkAndAwardRoutineBonus",
+      "file": "lib/data/local/task_dao.dart",
+      "line": 315,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "createTask",
+      "file": "lib/data/local/task_dao.dart",
+      "line": 391,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "createRoutine",
+      "file": "lib/data/local/task_dao.dart",
+      "line": 406,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "reopen",
+      "file": "lib/data/local/task_dao.dart",
+      "line": 452,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "markMissedPenaltyApplied",
+      "file": "lib/data/local/task_dao.dart",
+      "line": 499,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_markMissed",
+      "file": "lib/data/local/task_dao.dart",
+      "line": 526,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "WalletBalance",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 22,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "ofKey",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 32,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "of",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 33,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "toString",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 58,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "WalletException",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 65,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "toString",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 70,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "WalletDao",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 79,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "balanceOf",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 83,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "splitFor",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 115,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "credit",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 144,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "planFor",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 209,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "creditToJar",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 267,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "creditToJarKey",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 297,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "moveFromInbox",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 333,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "moveFromInboxToKey",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 349,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "debit",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 396,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "penalize",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 453,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "manualAdjust",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 508,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_insertIfNew",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 566,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_insertIfNewKey",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 594,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "LedgerEntry",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 640,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "toString",
+      "file": "lib/data/local/wallet_dao.dart",
+      "line": 670,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "TaskPreset",
+      "file": "lib/data/seed/presets.dart",
+      "line": 7,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "RoutinePreset",
+      "file": "lib/data/seed/presets.dart",
+      "line": 220,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "RewardPreset",
+      "file": "lib/data/seed/reward_presets.dart",
+      "line": 5,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "JarDef",
+      "file": "lib/domain/entities/jar_def.dart",
+      "line": 30,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "toString",
+      "file": "lib/domain/entities/jar_def.dart",
+      "line": 70,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "JarPlan",
+      "file": "lib/domain/entities/jar_def.dart",
+      "line": 106,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "needsApproval",
+      "file": "lib/domain/services/approval_rule.dart",
+      "line": 16,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "DayStartService",
+      "file": "lib/domain/services/day_start_service.dart",
+      "line": 21,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "runIfNeeded",
+      "file": "lib/domain/services/day_start_service.dart",
+      "line": 53,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "reset",
+      "file": "lib/domain/services/day_start_service.dart",
+      "line": 101,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "CalendarDate",
+      "file": "lib/domain/services/family_clock.dart",
+      "line": 16,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "differenceInDays",
+      "file": "lib/domain/services/family_clock.dart",
+      "line": 45,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "compareTo",
+      "file": "lib/domain/services/family_clock.dart",
+      "line": 56,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "toString",
+      "file": "lib/domain/services/family_clock.dart",
+      "line": 78,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "FamilyClock",
+      "file": "lib/domain/services/family_clock.dart",
+      "line": 85,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "JarSplit",
+      "file": "lib/domain/services/jar_splitter.dart",
+      "line": 10,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "percentOf",
+      "file": "lib/domain/services/jar_splitter.dart",
+      "line": 37,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "toString",
+      "file": "lib/domain/services/jar_splitter.dart",
+      "line": 59,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "PenaltyPolicy",
+      "file": "lib/domain/services/penalty_policy.dart",
+      "line": 10,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "toString",
+      "file": "lib/domain/services/penalty_policy.dart",
+      "line": 43,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "penaltyFor",
+      "file": "lib/domain/services/penalty_policy.dart",
+      "line": 55,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "DayTaskOutcome",
+      "file": "lib/domain/services/penalty_policy.dart",
+      "line": 63,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "DayPenaltySummary",
+      "file": "lib/domain/services/penalty_policy.dart",
+      "line": 82,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "toString",
+      "file": "lib/domain/services/penalty_policy.dart",
+      "line": 114,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "PenaltyOutcome",
+      "file": "lib/domain/services/penalty_service.dart",
+      "line": 10,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "toString",
+      "file": "lib/domain/services/penalty_service.dart",
+      "line": 33,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "PenaltyService",
+      "file": "lib/domain/services/penalty_service.dart",
+      "line": 42,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "applyMissedPenalties",
+      "file": "lib/domain/services/penalty_service.dart",
+      "line": 64,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "reopenInstance",
+      "file": "lib/domain/services/penalty_service.dart",
+      "line": 110,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "RedemptionException",
+      "file": "lib/domain/services/redemption_service.dart",
+      "line": 10,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "toString",
+      "file": "lib/domain/services/redemption_service.dart",
+      "line": 15,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "RedemptionService",
+      "file": "lib/domain/services/redemption_service.dart",
+      "line": 35,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "redeem",
+      "file": "lib/domain/services/redemption_service.dart",
+      "line": 51,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "approve",
+      "file": "lib/domain/services/redemption_service.dart",
+      "line": 103,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "reject",
+      "file": "lib/domain/services/redemption_service.dart",
+      "line": 117,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "markUsed",
+      "file": "lib/domain/services/redemption_service.dart",
+      "line": 153,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "Schedule",
+      "file": "lib/domain/services/schedule.dart",
+      "line": 10,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "occursOn",
+      "file": "lib/domain/services/schedule.dart",
+      "line": 31,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "isExhaustedAfter",
+      "file": "lib/domain/services/schedule.dart",
+      "line": 39,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "PlannedInstance",
+      "file": "lib/domain/services/schedule.dart",
+      "line": 58,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "toString",
+      "file": "lib/domain/services/schedule.dart",
+      "line": 86,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "SchedulableTask",
+      "file": "lib/domain/services/schedule.dart",
+      "line": 93,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "DayTally",
+      "file": "lib/domain/services/streak_calculator.dart",
+      "line": 4,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "StreakResult",
+      "file": "lib/domain/services/streak_calculator.dart",
+      "line": 26,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "toString",
+      "file": "lib/domain/services/streak_calculator.dart",
+      "line": 46,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "TaskReviewService",
+      "file": "lib/domain/services/task_review_service.dart",
+      "line": 19,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "complete",
+      "file": "lib/domain/services/task_review_service.dart",
+      "line": 39,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "approve",
+      "file": "lib/domain/services/task_review_service.dart",
+      "line": 63,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "approveAll",
+      "file": "lib/domain/services/task_review_service.dart",
+      "line": 80,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "reopen",
+      "file": "lib/domain/services/task_review_service.dart",
+      "line": 93,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "reject",
+      "file": "lib/domain/services/task_review_service.dart",
+      "line": 102,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_creditFor",
+      "file": "lib/domain/services/task_review_service.dart",
+      "line": 107,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "ChildHomeScreen",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 25,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 29,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_ChildHeader",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 232,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_switchProfile",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 237,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 289,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_DashboardCard",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 331,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 357,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_BusyBeeBadge",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 486,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 492,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_StatTile",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 521,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 539,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_tile",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 556,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "XuBadgeStat",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 592,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 598,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_SectionHeader",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 617,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 624,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_InstanceCard",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 656,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_InstanceCardState",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 670,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "initState",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 674,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "didUpdateWidget",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 680,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_loadTask",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 690,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 696,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_EmptyState",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 716,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 722,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_openAllocateSheet",
+      "file": "lib/features/child_home/child_home_screen.dart",
+      "line": 760,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "OnboardingScreen",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 24,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_OnboardingScreenState",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 31,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "dispose",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 46,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_nextPage",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 53,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_finish",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 65,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 166,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_StepIndicator",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 226,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 232,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_FamilyStep",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 251,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 256,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_ChildStep",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 311,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 331,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_AgePicker",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 467,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 479,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_RoutineStep",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 537,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/onboarding/onboarding_screen.dart",
+      "line": 543,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "ParentHomeScreen",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 20,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 24,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_PendingReviewSection",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 93,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_PendingReviewSectionState",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 112,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "initState",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 117,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_approveAll",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 124,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_load",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 156,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 167,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_PendingCard",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 246,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_PendingCardState",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 268,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "initState",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 272,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "didUpdateWidget",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 278,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_loadTask",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 286,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_reopen",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 292,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 314,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_ChildSummaryCard",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 389,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 405,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_DoneTodayList",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 493,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 509,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_DoneRow",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 548,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_DoneRowState",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 566,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "initState",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 570,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "didUpdateWidget",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 576,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_loadTask",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 583,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_reopen",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 588,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/parent_home/parent_home_screen.dart",
+      "line": 606,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "AllocateXuSheet",
+      "file": "lib/features/rewards/allocate_xu_sheet.dart",
+      "line": 19,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_AllocateXuSheetState",
+      "file": "lib/features/rewards/allocate_xu_sheet.dart",
+      "line": 48,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_add",
+      "file": "lib/features/rewards/allocate_xu_sheet.dart",
+      "line": 55,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_clear",
+      "file": "lib/features/rewards/allocate_xu_sheet.dart",
+      "line": 60,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_save",
+      "file": "lib/features/rewards/allocate_xu_sheet.dart",
+      "line": 62,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/rewards/allocate_xu_sheet.dart",
+      "line": 83,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_JarRow",
+      "file": "lib/features/rewards/allocate_xu_sheet.dart",
+      "line": 154,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/rewards/allocate_xu_sheet.dart",
+      "line": 172,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_StepButton",
+      "file": "lib/features/rewards/allocate_xu_sheet.dart",
+      "line": 216,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/rewards/allocate_xu_sheet.dart",
+      "line": 223,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "RedemptionQueue",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 17,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 32,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_RedemptionCard",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 86,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_RedemptionCardState",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 104,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "initState",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 108,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "didUpdateWidget",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 114,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_load",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 121,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_approve",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 126,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_reject",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 137,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 151,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "MyVouchers",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 204,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 217,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_VoucherCard",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 257,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_VoucherCardState",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 273,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "initState",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 277,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "didUpdateWidget",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 283,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_load",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 290,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/rewards/redemption_queue.dart",
+      "line": 296,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "RewardsScreen",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 21,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 25,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_createFromPreset",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 116,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_showAddReward",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 133,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_RewardCard",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 151,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 167,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_RedeemButton",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 259,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_RedeemButtonState",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 278,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_redeem",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 281,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 322,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_EmptyState",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 338,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 350,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_PresetSuggestions",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 395,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 401,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_AddRewardSheet",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 465,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_AddRewardSheetState",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 478,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "dispose",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 485,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_save",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 490,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/rewards/rewards_screen.dart",
+      "line": 513,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "JarSettingsScreen",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 20,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 24,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_openEditor",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 112,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_TotalBanner",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 135,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 141,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_JarTile",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 178,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 192,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_JarEditor",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 236,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_JarEditorState",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 251,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "initState",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 260,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_onTitleChanged",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 268,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "dispose",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 271,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_save",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 278,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 306,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_EmojiChoice",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 382,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/jar_settings_screen.dart",
+      "line": 394,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "PenaltySettingsScreen",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 21,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 25,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "save",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 39,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_WhyThisIsOffByDefault",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 78,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 82,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_LevelPicker",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 119,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 133,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_LevelChip",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 169,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 185,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_CustomChip",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 227,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_ask",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 235,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 244,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_PercentDialog",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 256,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_PercentDialogState",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 265,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "dispose",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 272,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_submit",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 277,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 292,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_Example",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 321,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 327,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_Line",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 388,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/penalty_settings_screen.dart",
+      "line": 396,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "SettingsScreen",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 19,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 23,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_FamilyInfoCard",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 132,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 138,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_MemberTile",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 177,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 189,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_SettingsSection",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 245,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 251,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_SettingsTile",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 265,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 279,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_JarsTile",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 321,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 327,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_PenaltyTile",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 350,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 356,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_ApprovalTile",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 380,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 386,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_AllocationTile",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 424,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/settings/settings_screen.dart",
+      "line": 430,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "StatsScreen",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 20,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 24,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_ParentStats",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 52,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 64,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_ChildStatsCard",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 110,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 122,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_ChildStats",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 152,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 170,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_JarTitles",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 247,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "Function",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 251,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 254,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_JarOverview",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 275,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 282,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_JarCard",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 326,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 341,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_StreakCard",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 364,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 370,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_TransactionTile",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 412,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_EntryStatus",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 434,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_TransactionTileState",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 444,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "initState",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 455,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "didUpdateWidget",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 461,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_loadSubject",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 566,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 600,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_buildRow",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 607,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_jarBreakdown",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 713,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_jarLabel",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 737,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_reasonLabel",
+      "file": "lib/features/stats/stats_screen.dart",
+      "line": 763,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "TasksScreen",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 21,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 25,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_TaskList",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 67,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_TaskListState",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 84,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_createFromPreset",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 98,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 115,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_buildList",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 136,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_RoutineGroupCard",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 232,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 242,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_TaskTile",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 314,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 320,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_repeatLabel",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 367,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_weekdaysLabel",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 380,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_shortWeekday",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 394,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_IconChoice",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 407,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 419,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_AddTaskSheet",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 445,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_AddTaskSheetState",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 460,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "initState",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 467,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "dispose",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 487,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_repeatTypeLabel",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 493,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_weekdayLabel",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 500,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_save",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 510,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 551,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "_TaskPresetSuggestions",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 706,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "Function",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 709,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "build",
+      "file": "lib/features/tasks/tasks_screen.dart",
+      "line": 712,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "lib/main.dart",
+      "line": 7,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/app/locale_resolution_test.dart",
+      "line": 6,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/app/nav_labels_test.dart",
+      "line": 8,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/app/nav_visibility_test.dart",
+      "line": 20,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "_contrast",
+      "file": "test/unit/app_theme_test.dart",
+      "line": 9,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "luminance",
+      "file": "test/unit/app_theme_test.dart",
+      "line": 10,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/app_theme_test.dart",
+      "line": 18,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/app_typography_test.dart",
+      "line": 12,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/bundle_id_test.dart",
+      "line": 14,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/data/jar_dao_test.dart",
+      "line": 16,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/data/ledger_grouping_test.dart",
+      "line": 11,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/data/migration_test.dart",
+      "line": 18,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "seedAtVersion",
+      "file": "test/unit/data/migration_test.dart",
+      "line": 32,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "openCurrent",
+      "file": "test/unit/data/migration_test.dart",
+      "line": 77,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/data/penalty_service_test.dart",
+      "line": 15,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "giveXu",
+      "file": "test/unit/data/penalty_service_test.dart",
+      "line": 27,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "missedInstance",
+      "file": "test/unit/data/penalty_service_test.dart",
+      "line": 39,
+      "domain": "flutter"
+    },
+    {
+      "kind": "class",
+      "name": "JarSplitAllSpend",
+      "file": "test/unit/data/penalty_service_test.dart",
+      "line": 361,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/data/preset_test.dart",
+      "line": 4,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/data/session_store_test.dart",
+      "line": 10,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/data/task_dao_test.dart",
+      "line": 8,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/data/task_repeat_test.dart",
+      "line": 17,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "createTask",
+      "file": "test/unit/data/task_repeat_test.dart",
+      "line": 47,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "hasInstanceOn",
+      "file": "test/unit/data/task_repeat_test.dart",
+      "line": 66,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/data/wallet_dao_test.dart",
+      "line": 10,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/domain/age_band_test.dart",
+      "line": 5,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/domain/allocation_test.dart",
+      "line": 17,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "makeInstance",
+      "file": "test/unit/domain/allocation_test.dart",
+      "line": 27,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/domain/family_clock_test.dart",
+      "line": 6,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/domain/jar_def_test.dart",
+      "line": 4,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/domain/jar_splitter_test.dart",
+      "line": 7,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/domain/penalty_policy_test.dart",
+      "line": 4,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/domain/redemption_service_test.dart",
+      "line": 13,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "giveXu",
+      "file": "test/unit/domain/redemption_service_test.dart",
+      "line": 24,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "makeReward",
+      "file": "test/unit/domain/redemption_service_test.dart",
+      "line": 33,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/domain/schedule_test.dart",
+      "line": 6,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/domain/streak_calculator_test.dart",
+      "line": 7,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/domain/task_review_service_test.dart",
+      "line": 19,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "makeInstance",
+      "file": "test/unit/domain/task_review_service_test.dart",
+      "line": 30,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "reload",
+      "file": "test/unit/domain/task_review_service_test.dart",
+      "line": 63,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/unit/task_icons_test.dart",
+      "line": 12,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "main",
+      "file": "test/widget/responsive_scaffold_test.dart",
+      "line": 7,
+      "domain": "flutter"
+    },
+    {
+      "kind": "function",
+      "name": "wrap",
+      "file": "test/widget/responsive_scaffold_test.dart",
+      "line": 21,
+      "domain": "flutter"
+    }
+  ],
+  "domainSignals": []
+}
