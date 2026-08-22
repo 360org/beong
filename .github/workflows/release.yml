@@ -1,8 +1,17 @@
 name: Release
 
-# Chạy tay từ tab Actions — chọn track/lane rồi bấm Run workflow.
-# Trước khi chạy: tăng `version:` trong pubspec.yaml (build number phải tăng
-# mỗi lần nộp lên store).
+# Hai đường chạy, và chúng **không** làm cùng một việc:
+#
+# - **Push tag `v*`** -> bản thử: TestFlight (iOS) + track internal (Android).
+#   Tag là thứ tạo thường xuyên, nên nó phải trỏ tới đích an toàn. Trước đây tag
+#   rơi vào nhánh mặc định `release`/`production`, tức là một lệnh `git push
+#   --tags` sẽ nộp duyệt App Store **và tự phát hành ra công khai**. Đó là loại
+#   bẫy chỉ lộ ra sau khi đã lỡ tay.
+# - **Chạy tay từ tab Actions** -> chọn lane/track, kể cả ra store công khai.
+#   Ra công khai là quyết định của con người, phải có người bấm.
+#
+# Trước khi chạy: tăng `version:` trong pubspec.yaml. Apple từ chối build có
+# `+build` trùng bản đã nộp, kể cả bản chỉ nằm trên TestFlight.
 on:
   push:
     tags:
@@ -92,7 +101,7 @@ jobs:
         working-directory: android
         env:
           PLAY_STORE_JSON_KEY_PATH: /tmp/play-service-account.json
-        run: fastlane ${{ inputs.android_track || 'production' }}
+        run: fastlane ${{ inputs.android_track || 'internal' }}
 
       - name: Xoá file bí mật
         if: always()
@@ -221,7 +230,7 @@ jobs:
           APP_STORE_CONNECT_KEY_PATH: ${{ runner.temp }}/AuthKey.p8
         run: |
           IPA_PATH="$(find "$GITHUB_WORKSPACE/build/ios/ipa" -name '*.ipa' -print -quit)"
-          IPA_PATH="$IPA_PATH" fastlane ${{ inputs.ios_lane || 'release' }}
+          IPA_PATH="$IPA_PATH" fastlane ${{ inputs.ios_lane || 'beta' }}
 
       - name: Xoá file bí mật
         if: always()

@@ -4,6 +4,34 @@ Toàn bộ các thay đổi và cột mốc phát triển của dự án **Bé O
 
 ---
 
+## [0.2.2] - 2026-08-22
+
+Bản này **dành cho TestFlight / Play internal**, không phát hành công khai.
+Hai lỗi nghiêm trọng dưới đây **chưa được sửa** — người thử cần biết trước.
+
+### ⚠️ Lỗi đã biết, chưa sửa (Known Issues)
+- 🔴 **Đăng xuất là mất đường vào dữ liệu cũ.** Bấm ĐĂNG XUẤT xong app quay về màn tạo nhà,
+  không có chỗ vào lại. Làm lại onboarding sẽ sinh **gia đình thứ hai**; dữ liệu của bé cũ
+  vẫn nằm trong máy nhưng không màn hình nào mở tới được. **Khi thử, đừng bấm ĐĂNG XUẤT.**
+- 🔴 **Quên PIN là mất quyền bố mẹ vĩnh viễn.** Đường bỏ PIN nằm trong Cài đặt, mà Cài đặt lại
+  nằm sau chính cái PIN đó. Chỉ gỡ app mới thoát, tức mất sạch dữ liệu. **Khi thử, nhớ kỹ PIN
+  hoặc đừng đặt PIN.**
+- ⚠️ **Chưa rõ**: có báo cáo "tắt app rồi mở lại phải cấu hình từ đầu". Chưa tái tạo được trên
+  bản dựng thử nghiệm. Nếu gặp trên máy thật, xin báo lại kèm cách cài bản app.
+
+Chi tiết, nguyên nhân gốc và phương án: `docs/13-audit-luong-vao-app.md`.
+
+### 🛠️ Thay Đổi (Changes)
+- [FIX] **Tag không còn phát hành ra store công khai.** Trước đây `git push --tags` chạy lane
+  `release` + track `production`, tức nộp duyệt App Store **và tự phát hành**. Nay tag trỏ tới
+  TestFlight + Play internal; muốn ra công khai phải bấm tay trong tab Actions.
+- [DOCS] **Audit luồng vào app** (`docs/13-audit-luong-vao-app.md`): ba hiện tượng được dựng
+  lại trên app thật và đọc thẳng file dữ liệu, kèm phương án đánh số và test phải có.
+- [FEAT] **Website 3 trang** với header/footer đầy đủ, có menu điện thoại, và trang chính sách
+  quyền riêng tư cho người dùng — gỡ một nút chặn nộp store.
+
+---
+
 ## [0.2.1] - 2026-08-20
 
 ### 🛠️ Cải Tiến & Sửa Lỗi (Refactor & Fixes)

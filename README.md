@@ -17,7 +17,7 @@ số trẻ hay số task.
 
 ## Trạng thái
 
-**`v0.2.1` — chạy đủ trên một máy, chưa lên store.**
+**`v0.2.2` — chạy đủ trên một máy, chưa lên store.**
 
 | | |
 |---|---|
