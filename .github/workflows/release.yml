@@ -89,8 +89,27 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: flutter build appbundle --release
 
+      # `printf %s` với giá trị đi qua env, không phải `echo '...'` nội suy
+      # thẳng: JSON có dấu nháy đơn là câu lệnh vỡ, và giá trị lọt vào chỗ shell
+      # phân tích cú pháp là thứ không nên có.
+      #
+      # Kiểm luôn tại chỗ. Không kiểm thì secret rỗng hay dán nhầm bản base64
+      # chỉ lộ ra sau khi build xong AAB — bốn phút sau — bằng đúng một dòng
+      # "Invalid Google Credentials file provided", không nói secret nào.
       - name: Giải mã service account Play Console
-        run: echo '${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}' > /tmp/play-service-account.json
+        env:
+          PLAY_JSON: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$PLAY_JSON" > /tmp/play-service-account.json
+          if [ ! -s /tmp/play-service-account.json ]; then
+            echo "::error::Secret PLAY_STORE_SERVICE_ACCOUNT_JSON rỗng hoặc chưa đặt."
+            exit 1
+          fi
+          if ! python3 -c "import json,sys; d=json.load(open('/tmp/play-service-account.json')); sys.exit(0 if d.get('type')=='service_account' else 1)"; then
+            echo "::error::PLAY_STORE_SERVICE_ACCOUNT_JSON không phải file service account JSON hợp lệ (thiếu \"type\": \"service_account\"). Dán **nguyên văn** file JSON tải từ Google Cloud, không mã hoá base64."
+            exit 1
+          fi
 
       - uses: ruby/setup-ruby@v1
         with:

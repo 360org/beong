@@ -41,7 +41,16 @@ platform :ios do
       skip_metadata: true,
       submit_for_review: true,
       automatic_release: true,
-      reject_build_waiting_for_review: true,
+      # `reject_if_possible`, không phải `reject_build_waiting_for_review` —
+      # tên sau không tồn tại trong fastlane và làm lane này hỏng ngay ở dòng
+      # đầu. Lỗi sống sót tới tận v0.2.3 vì lane `release` chưa từng chạy thật:
+      # mọi lần phát hành trước đều đi đường `beta`.
+      reject_if_possible: true,
+      # Không có metadata để kiểm (đã `skip_metadata`), mà precheck vẫn đòi đọc
+      # — để bật thì nó chặn đúng bước cuối.
+      run_precheck_before_submit: false,
+      # CI không có ai bấm xác nhận bản tóm tắt trước khi nộp duyệt.
+      force: true,
     )
   end
 end
