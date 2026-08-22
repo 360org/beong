@@ -257,6 +257,20 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
       không màu hard-code trong `lib/features`. Bắt được một màu lọt lưới, nay là token `onXu`.
       Vẫn cần một lượt bật TalkBack thật trước khi phát hành.
 
+## Chặn phát hành — sửa trước khi cho người ngoài dùng
+
+Tìm ra ngày 22/08 khi chạy app thật; chi tiết và phương án ở
+[`13-audit-luong-vao-app.md`](13-audit-luong-vao-app.md).
+
+- [ ] 🔴 **Đăng xuất xong không có đường vào lại.** Về màn tạo nhà, làm lại là sinh gia đình
+      thứ hai — dữ liệu cũ còn nguyên trong máy nhưng không màn hình nào mở tới được. Cần màn
+      **chọn người dùng** cho ca "máy có dữ liệu, chưa có session".
+- [ ] 🔴 **Quên PIN là mất quyền bố mẹ vĩnh viễn.** Đường bỏ PIN nằm trong Cài đặt, mà Cài đặt
+      lại nằm sau chính cái PIN đó. Chỉ gỡ app mới thoát, tức mất sạch dữ liệu. Cần "Quên PIN?"
+      ngay ở màn nhập.
+- [ ] Thêm dấu vết chẩn đoán lúc khởi động (đọc session thành công/thất bại, đường dẫn dữ liệu)
+      để lần sau chẩn được ca "mở lại app phải cấu hình từ đầu" thay vì đoán.
+
 ## Sprint 6 — Phát hành v1.0 (1 tuần)
 
 > **Hạ tầng đã sẵn, tài khoản thì chưa.** `.github/workflows/release.yml` + Fastlane cho cả hai store

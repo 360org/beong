@@ -1,6 +1,6 @@
 # Ảnh chụp màn hình — Bé Ong v0.2.0
 
-68 ảnh, chụp trên bản dựng Linux debug ở **412×900** (cỡ điện thoại thật), đi hết
+69 ảnh, chụp trên bản dựng Linux debug ở **412×900** (cỡ điện thoại thật), đi hết
 luồng chứ không chỉ mở từng màn: tạo nhà → làm việc → nhận huy hiệu → đổi thưởng →
 bố mẹ duyệt → con tự chia xu.
 
@@ -95,7 +95,7 @@ Cả hai vai, đủ các tab chính. `42`–`46` là vai bố mẹ, `47`–`49` 
 | `61-child-home-sau-khi-chia.png` | Chia hết rồi thì dòng "chưa chia" **ẩn đi** |
 | `62-child-so-cuoi.png` | Hũ Chờ chia cũng ẩn khi bằng 0 |
 
-### Còn lại (63–68)
+### Còn lại (63–69)
 | Ảnh | Màn |
 |---|---|
 | `63-so-lich-su-day-du.png` | Sổ của con — mỗi lượt việc đúng **một** dòng, số xu khớp giá việc |
@@ -104,6 +104,7 @@ Cả hai vai, đủ các tab chính. `42`–`46` là vai bố mẹ, `47`–`49` 
 | `66-nhap-pin-de-vao-vai-bo-me.png` | PIN chặn con tự đổi sang vai bố mẹ |
 | `67-pin-sai.png` | Nhập sai thì báo rõ, không im lặng |
 | `68-zoom-the-cho-duyet.png` | Phóng 210% thẻ chờ duyệt: đồng hồ cát, nhãn chữ, không gạch ngang |
+| `69-dang-xuat-ve-welcome.png` | **Lỗi chưa sửa** — đăng xuất xong về màn tạo nhà, không có đường vào lại ([audit](../13-audit-luong-vao-app.md)) |
 
 ## Lỗi bộ ảnh này bắt được — **đã sửa**
 

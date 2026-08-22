@@ -60,7 +60,8 @@ dựng môi trường chụp màn hình: `.claude/skills/flutter-8-buoc/SKILL.md
 | [`docs/10-privacy-policy.md`](docs/10-privacy-policy.md) | Chính sách quyền riêng tư + phụ lục khai báo cho hai store |
 | [`docs/11-bao-loi-endpoint.md`](docs/11-bao-loi-endpoint.md) | Dựng endpoint nhận báo lỗi (Cloudflare Worker) |
 | [`docs/12-huong-dan-su-dung.md`](docs/12-huong-dan-su-dung.md) | **Hướng dẫn cho bố mẹ** — 16 mục, kèm ảnh |
-| [`docs/screenshot/`](docs/screenshot/) | 68 ảnh chụp toàn bộ app, có mục lục |
+| [`docs/13-audit-luong-vao-app.md`](docs/13-audit-luong-vao-app.md) | **Audit luồng vào app** — 2 lỗi nghiêm trọng kèm phương án, đọc trước khi phát hành |
+| [`docs/screenshot/`](docs/screenshot/) | 69 ảnh chụp toàn bộ app, có mục lục |
 
 ## Ý tưởng cốt lõi
 
