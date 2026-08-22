@@ -32,6 +32,13 @@ và nếu đã lỡ bấm ĐĂNG XUẤT thì bản này lấy lại được d�
 - **Chưa rõ**: báo cáo "tắt app rồi mở lại phải cấu hình từ đầu" vẫn chưa tái tạo được. Nếu
   gặp trên máy thật, xin báo lại kèm cách cài bản app.
 
+### 📦 Trạng thái phát hành
+- **iOS:** `0.2.3 (5)` **đã lên App Store Connect và xử lý xong** — dùng được cho
+  TestFlight ngay. Chưa nộp duyệt được vì hồ sơ App Store còn thiếu ảnh chụp, mô tả,
+  phân loại độ tuổi, giá và chính sách quyền riêng tư — không phải lỗi mã, xem
+  `docs/08-release-cicd.md`.
+- **Android:** chưa lên được, secret `PLAY_STORE_SERVICE_ACCOUNT_JSON` không hợp lệ.
+
 Chi tiết, nguyên nhân gốc và cách kiểm: `docs/13-audit-luong-vao-app.md`.
 Ảnh: `docs/screenshot/70`–`74`.
 

@@ -8,6 +8,12 @@ name: Release
 # - **Chạy tay từ tab Actions** -> chọn lane/track, dùng cho bản thử
 #   (`beta` / `internal`) hoặc khi chỉ muốn chạy một nền tảng.
 #
+# Điều kiện tiên quyết của lane công khai (kiểm thật ở run #15/#16 ngày
+# 22/08/2026): **hồ sơ app trên store phải điền xong**. Thiếu ảnh chụp, mô tả,
+# phân loại độ tuổi, giá, chính sách quyền riêng tư... thì binary vẫn lên được
+# App Store Connect nhưng `submit_for_review` hỏng, và chạy lại chỉ tốn thêm
+# build number. Danh sách đầy đủ ở `docs/08-release-cicd.md` §B-5/B-6.
+#
 # Hai điều phải làm trước khi tag:
 #
 # 1. Tăng `version:` trong pubspec.yaml. Apple từ chối build có `+build` trùng

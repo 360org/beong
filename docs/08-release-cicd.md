@@ -1,5 +1,31 @@
 # 08 — Phát hành lên App Store / Play Store qua CI/CD
 
+> ## Đã kiểm thật ngày 22/08/2026 — hai chốt chặn còn nguyên
+>
+> Chạy `Release` với lane công khai (run #15, #16) và đọc log tới cùng. Kết quả:
+>
+> **iOS — binary lên được, nộp duyệt thì không.** `0.2.3 (5)` đã
+> `Successfully uploaded` và `Successfully finished processing` trên App Store
+> Connect — tức **bản này đã dùng được cho TestFlight ngay**. Chỉ bước
+> `submit_for_review` hỏng, và Apple liệt kê đúng thứ thiếu: ảnh chụp màn hình
+> (iphone65, ipadPro129), `description`, `keywords`, `supportUrl`,
+> `privacyPolicyUrl`, toàn bộ **bảng câu hỏi phân loại độ tuổi**, khai báo thu
+> thập dữ liệu, `primaryCategory`, **giá**, và `contentRightsDeclaration`.
+>
+> Không cái nào là mã nguồn. Toàn bộ nằm trong App Store Connect và **chỉ chủ
+> tài khoản điền được** — đúng phần `B-5`/`B-6` dưới đây chưa làm xong. Trước
+> khi điền hết, lane `release` **không thể** chạy xanh, chạy lại bao nhiêu lần
+> cũng vậy: mỗi lần chỉ tốn thêm một build number.
+>
+> **Android — secret sai.** `PLAY_STORE_SERVICE_ACCOUNT_JSON` không phải khoá
+> service account (thiếu `"type": "service_account"`, hay gặp nhất là dán bản
+> base64 thay vì nguyên văn). Workflow nay kiểm ngay sau checkout và báo rõ,
+> thay vì để lộ ra sau bốn phút build.
+>
+> **Muốn có bản chạy được ngay hôm nay:** chạy tay `Release` với
+> `ios_lane = beta` — đường đó đã xanh và đưa bản lên TestFlight.
+
+
 Workflow: `.github/workflows/release.yml`, chạy tay từ tab **Actions → Release → Run workflow**.
 Repo public nên GitHub-hosted runner (kể cả macOS) miễn phí không giới hạn phút.
 
