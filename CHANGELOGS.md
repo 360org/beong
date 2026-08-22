@@ -6,8 +6,10 @@ Toàn bộ các thay đổi và cột mốc phát triển của dự án **Bé O
 
 ## [0.2.2] - 2026-08-22
 
-Bản này **dành cho TestFlight / Play internal**, không phát hành công khai.
-Hai lỗi nghiêm trọng dưới đây **chưa được sửa** — người thử cần biết trước.
+Hai lỗi nghiêm trọng dưới đây **chưa được sửa**. Người dùng cần biết trước.
+
+Build `+3` đã lên TestFlight ngày 22/08. Build `+4` là cùng mã nguồn đó, tăng số
+build vì Apple không nhận hai lần nộp trùng `+build`.
 
 ### ⚠️ Lỗi đã biết, chưa sửa (Known Issues)
 - 🔴 **Đăng xuất là mất đường vào dữ liệu cũ.** Bấm ĐĂNG XUẤT xong app quay về màn tạo nhà,
