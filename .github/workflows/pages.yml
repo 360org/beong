@@ -33,17 +33,45 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Kiểm tra ảnh trong trang có tồn tại thật không
-        # Ảnh vỡ trên trang giới thiệu là lỗi nhìn thấy ngay nhưng CI không bao giờ
-        # tự báo. Rẻ hơn nhiều so với việc phát hiện sau khi đã đăng.
+      - name: Kiểm mọi liên kết và ảnh nội bộ đều trỏ tới file có thật
+        # Ảnh vỡ hoặc link 404 là lỗi nhìn thấy ngay nhưng CI không bao giờ tự báo.
+        # Rẻ hơn nhiều so với việc phát hiện sau khi đã đăng.
         run: |
           set -euo pipefail
           thieu=0
-          for f in $(grep -o 'src="[^"]*"' site/index.html | cut -d'"' -f2); do
-            case "$f" in http*|data:*) continue ;; esac
-            if [ ! -f "site/$f" ]; then echo "::error::thiếu ảnh site/$f"; thieu=1; fi
+          for page in site/*.html; do
+            for f in $(grep -ohE '(src|href)="[^"]*"' "$page" | cut -d'"' -f2); do
+              case "$f" in http*|data:*|\#*) continue ;; esac
+              base="${f%%#*}"
+              [ -z "$base" ] && continue
+              if [ ! -f "site/$base" ]; then
+                echo "::error file=$page::liên kết hỏng -> $base"; thieu=1
+              fi
+            done
           done
           exit $thieu
+
+      - name: Trang giới thiệu không được lộ chi tiết kỹ thuật
+        # Yêu cầu của chủ dự án: website nói với phụ huynh, không nói với lập trình
+        # viên. Không có bước này thì một lần sửa vội là chữ "Flutter" quay lại.
+        run: |
+          set -euo pipefail
+          loi=0
+          for page in site/*.html; do
+            # bỏ <head>, <style>, <script> rồi bỏ thẻ -> chỉ còn chữ người đọc thấy
+            text=$(python3 - "$page" <<'EOF'
+          import re,sys,html
+          s=open(sys.argv[1]).read()
+          s=re.sub(r'<(script|style|head)[^>]*>.*?</\1>','',s,flags=re.S|re.I)
+          print(html.unescape(re.sub(r'<[^>]+>',' ',s)))
+          EOF
+          )
+            hit=$(printf '%s' "$text" | grep -oiE 'flutter|github|drift|sqlite|riverpod|ADR-[0-9]+|bundle id|mã nguồn|SDK|endpoint' | sort -u || true)
+            if [ -n "$hit" ]; then
+              echo "::error file=$page::lộ chi tiết kỹ thuật -> $(echo $hit)"; loi=1
+            fi
+          done
+          exit $loi
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
