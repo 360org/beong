@@ -48,6 +48,24 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # Kiểm **trước khi build**, và không ghi ra đĩa. Để bước này nằm sau
+      # `flutter build appbundle` thì secret sai chỉ lộ ra sau bốn phút build
+      # — bốn phút để biết một điều đã biết được ngay từ giây thứ mười.
+      - name: Kiểm secret Play Console
+        env:
+          PLAY_JSON: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PLAY_JSON:-}" ]; then
+            echo "::error::Secret PLAY_STORE_SERVICE_ACCOUNT_JSON rỗng hoặc chưa đặt."
+            exit 1
+          fi
+          hop_le=$(printf '%s' "$PLAY_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('type',''))" 2>/dev/null || true)
+          if [ "$hop_le" != "service_account" ]; then
+            echo "::error::PLAY_STORE_SERVICE_ACCOUNT_JSON không phải khoá service account. Dán nguyên văn file JSON tải từ Google Cloud (có dòng \"type\": \"service_account\"), không mã hoá base64."
+            exit 1
+          fi
+
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
@@ -106,10 +124,7 @@ jobs:
             echo "::error::Secret PLAY_STORE_SERVICE_ACCOUNT_JSON rỗng hoặc chưa đặt."
             exit 1
           fi
-          if ! python3 -c "import json,sys; d=json.load(open('/tmp/play-service-account.json')); sys.exit(0 if d.get('type')=='service_account' else 1)"; then
-            echo "::error::PLAY_STORE_SERVICE_ACCOUNT_JSON không phải file service account JSON hợp lệ (thiếu \"type\": \"service_account\"). Dán **nguyên văn** file JSON tải từ Google Cloud, không mã hoá base64."
-            exit 1
-          fi
+
 
       - uses: ruby/setup-ruby@v1
         with:
