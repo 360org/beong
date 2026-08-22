@@ -3,6 +3,10 @@
 **Ngày:** 22/08/2026 · **Bản kiểm:** v0.2.1 · **Cách kiểm:** chạy app thật ở
 412×900, đi hết luồng, và đọc thẳng file dữ liệu sau mỗi bước.
 
+> **Trạng thái: §2 và §3 đã sửa xong ở `v0.2.3`.** Xem phần
+> [Đã sửa gì ở v0.2.3](#đã-sửa-gì-ở-v023) ở cuối tài liệu, và ảnh `70`–`74`
+> trong [`screenshot/`](screenshot/). §1 vẫn để mở — chưa dựng lại được.
+
 Tài liệu này dành cho người sẽ sửa. Mỗi lỗi ghi: **hiện tượng đã dựng lại được**,
 **nguyên nhân gốc trong mã**, **phương án**, và **test phải có** để lỗi không quay lại.
 
@@ -13,8 +17,8 @@ Tài liệu này dành cho người sẽ sửa. Mỗi lỗi ghi: **hiện tượ
 | # | Vấn đề | Kết luận | Mức |
 |---|---|---|---|
 | 1 | Tắt app rồi mở lại phải cấu hình từ đầu | **Không tái tạo được** trên bản Linux — session giữ đúng. Có nguyên nhân khác, xem §1 | Cần thêm dữ kiện |
-| 2 | Đăng xuất xong quay về welcome, không có chỗ đăng nhập | **Đúng, và nặng hơn mô tả** — làm lại onboarding sinh gia đình thứ hai, dữ liệu cũ thành mồ côi | 🔴 Nghiêm trọng |
-| 3 | Đặt PIN không có chỗ đặt lại | **Đúng** — quên PIN là mất quyền bố mẹ vĩnh viễn, chỉ gỡ app mới thoát | 🔴 Nghiêm trọng |
+| 2 | Đăng xuất xong quay về welcome, không có chỗ đăng nhập | **Đúng, và nặng hơn mô tả** — làm lại onboarding sinh gia đình thứ hai, dữ liệu cũ thành mồ côi | 🔴 → ✅ sửa ở v0.2.3 |
+| 3 | Đặt PIN không có chỗ đặt lại | **Đúng** — quên PIN là mất quyền bố mẹ vĩnh viễn, chỉ gỡ app mới thoát | 🔴 → ✅ sửa ở v0.2.3 |
 
 Hai lỗi 🔴 có **cùng một gốc**: app coi "đã đăng nhập" là trạng thái duy nhất
 đáng quan tâm, và không có khái niệm *"máy này đã có dữ liệu, cho tôi vào lại"*.
@@ -214,3 +218,53 @@ tới mất dữ liệu thật, và cả hai đều không có đường tự c�
   sử dự án; cái mới nhất (`TaskCard.isPending`) vừa phải sửa hôm 17/08.
 - Sau khi sửa, chạy app thật và soi ảnh chụp. Cả ba lỗi trong tài liệu này đều
   không có test nào bắt được, và §2 chỉ lộ ra khi đọc thẳng file dữ liệu.
+
+---
+
+## Đã sửa gì ở v0.2.3
+
+Bản sửa bám đúng phương án ở trên. Ghi lại chỗ **khác** với phương án, và những
+gì chỉ lộ ra khi chạy thật.
+
+### §2 — đường vào lại
+
+| Phương án | Đã làm |
+|---|---|
+| P1 tách hai trạng thái ở router | `diemDenDauTien` — tách hẳn khỏi `createRouter` để canh bằng bảng, không phải dựng cả cây widget |
+| P2 màn chọn người dùng | `ChonNguoiDungScreen`. **Khác phương án:** liệt kê **mọi** nhà trong máy, không chỉ nhà mới nhất — máy nào đã lỡ dính lỗi thì đây là đường duy nhất mở lại nhà mồ côi |
+| P3 đổi chữ ĐĂNG XUẤT | → **KHOÁ LẠI**, bỏ luôn màu đỏ (nút không còn phá gì), thêm một dòng nói dữ liệu vẫn còn |
+| P4 chặn tạo trùng | Onboarding hỏi lại ngay trước khi ghi, không chỉ dựa vào cờ của router |
+
+**Thêm ngoài phương án — đường tạo nhà mới có chủ đích.** Chặn sạch lối vào
+onboarding là đổi cái bẫy này lấy cái bẫy khác: nhà muốn làm lại từ đầu sẽ kẹt
+vĩnh viễn với dữ liệu cũ. Nên để lại đúng một đường (`/onboarding?tao-moi=1`),
+phải nói rõ ý định mới đi được, và P4 vẫn hỏi thêm một lần nữa. Việc này cũng
+làm P4 hết là code chết.
+
+**Kiểm trên máy thật đã dính lỗi.** Chính file dữ liệu trong §2 — hai nhà, bốn
+thành viên, 24 việc. Sau bản sửa: bấm KHOÁ LẠI → hiện cả hai nhà → chọn Minh →
+vào đúng nhà cũ với đủ 12 việc. Ảnh `71`.
+
+### §3 — lối thoát khi quên PIN
+
+P1 và P3 làm đúng như đề xuất. **Không** làm P2 (bắt gõ một câu để xác nhận):
+hộp thoại đã nói rõ hệ quả, thêm ma sát nữa chỉ phạt người vốn đã quên. Cũng
+không làm câu hỏi bí mật hay email khôi phục, vì lý do đã ghi ở §3.
+
+### Hai lỗi chỉ ảnh chụp mới bắt được
+
+Cả hai đều là **thứ hiện ra mà không ai giữ cho đúng** — đúng loại lặp lại của
+dự án — và cả hai sống sót qua 506 test xanh:
+
+1. **Dòng "PIN của bố mẹ" nói dối.** Gỡ PIN qua "Quên PIN?" xong, DB đã sạch
+   nhưng Cài đặt vẫn ghi *Đang bật*: dòng đó đọc trạng thái một lần lúc dựng.
+   → đọc bằng `watchMembers`, không giữ bản sao trạng thái.
+2. **Ổ khoá trên thẻ "Bố mẹ" vẽ cứng**, hứa một bước hỏi PIN không xảy ra ở nhà
+   chưa đặt PIN. → suy ra từ chính `pin_hash`.
+
+### §1 vẫn để mở
+
+Chưa dựng lại được, nên chưa sửa gì. P1 (thêm dấu vết chẩn đoán) và P2 (không
+nuốt lỗi khởi động) vẫn còn nguyên giá trị và nên làm ở bản sau. Lưới an toàn
+của §2 P4 có che một phần ca xấu nhất: cờ router sai vì đọc DB hỏng thì
+onboarding vẫn hỏi lại trước khi ghi đè.

@@ -36,6 +36,15 @@ abstract final class Routes {
   /// Máy đã có dữ liệu nhưng chưa chọn ai đang dùng.
   static const chonNguoiDung = '/chon-nguoi-dung';
 
+  /// Cố ý tạo thêm một nhà nữa trên máy đã có dữ liệu.
+  ///
+  /// Phải nói rõ ý định bằng tham số này, vì mặc định máy có dữ liệu là
+  /// **không** được vào onboarding — đó chính là bản sửa của §2. Không có
+  /// đường này thì người muốn làm lại từ đầu bị kẹt vĩnh viễn với dữ liệu cũ,
+  /// tức là đổi một cái bẫy lấy một cái bẫy khác.
+  static const taoNhaMoi = '$onboarding?$thamSoTaoNhaMoi=1';
+  static const thamSoTaoNhaMoi = 'tao-moi';
+
   static const List<String> shellBranches = [
     home,
     tasks,
@@ -63,12 +72,17 @@ String? diemDenDauTien({
   required AppSession? session,
   required bool mayDaCoDuLieu,
   required String viTri,
+  bool xinTaoNhaMoi = false,
 }) {
   final laOnboarding = viTri == Routes.onboarding;
   final laChonNguoiDung = viTri == Routes.chonNguoiDung;
 
   if (session == null) {
-    if (mayDaCoDuLieu) return laChonNguoiDung ? null : Routes.chonNguoiDung;
+    if (mayDaCoDuLieu) {
+      // Vào onboarding phải là **cố ý**, không phải hệ quả của việc khoá máy.
+      if (laOnboarding && xinTaoNhaMoi) return null;
+      return laChonNguoiDung ? null : Routes.chonNguoiDung;
+    }
     return laOnboarding ? null : Routes.onboarding;
   }
 
@@ -96,6 +110,7 @@ GoRouter createRouter({
       session: getSession(),
       mayDaCoDuLieu: getMayDaCoDuLieu(),
       viTri: state.matchedLocation,
+      xinTaoNhaMoi: state.uri.queryParameters[Routes.thamSoTaoNhaMoi] == '1',
     ),
     routes: [
       GoRoute(

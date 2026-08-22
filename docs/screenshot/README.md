@@ -1,6 +1,6 @@
-# Ảnh chụp màn hình — Bé Ong v0.2.0
+# Ảnh chụp màn hình — Bé Ong v0.2.3
 
-69 ảnh, chụp trên bản dựng Linux debug ở **412×900** (cỡ điện thoại thật), đi hết
+74 ảnh, chụp trên bản dựng Linux debug ở **412×900** (cỡ điện thoại thật), đi hết
 luồng chứ không chỉ mở từng màn: tạo nhà → làm việc → nhận huy hiệu → đổi thưởng →
 bố mẹ duyệt → con tự chia xu.
 
@@ -104,7 +104,16 @@ Cả hai vai, đủ các tab chính. `42`–`46` là vai bố mẹ, `47`–`49` 
 | `66-nhap-pin-de-vao-vai-bo-me.png` | PIN chặn con tự đổi sang vai bố mẹ |
 | `67-pin-sai.png` | Nhập sai thì báo rõ, không im lặng |
 | `68-zoom-the-cho-duyet.png` | Phóng 210% thẻ chờ duyệt: đồng hồ cát, nhãn chữ, không gạch ngang |
-| `69-dang-xuat-ve-welcome.png` | **Lỗi chưa sửa** — đăng xuất xong về màn tạo nhà, không có đường vào lại ([audit](../13-audit-luong-vao-app.md)) |
+| `69-dang-xuat-ve-welcome.png` | Lỗi cũ, **đã sửa ở v0.2.3** — đăng xuất xong về màn tạo nhà, không có đường vào lại ([audit](../13-audit-luong-vao-app.md)) |
+
+### Hai lỗi của audit, sau khi sửa (70–74)
+| Ảnh | Màn |
+|---|---|
+| `70-caidat-khoa-lai.png` | Cài đặt — **KHOÁ LẠI** thay cho ĐĂNG XUẤT, kèm dòng nói dữ liệu vẫn còn |
+| `71-chon-nguoi-dung.png` | **"Ai đang dùng máy?"** — màn thiếu suốt từ đầu. Máy trong ảnh đã dính lỗi §2 nên có **hai** nhà; dòng "Con: Minh" / "Con: Lan" để phân biệt hai nhà trùng tên, và nhà cũ mở lại được |
+| `72-dat-pin-noi-truoc-cach-go.png` | Đặt PIN — nói trước cách gỡ khi quên |
+| `73-nhap-pin-co-quen-pin.png` | Nhập PIN — có đường **"Quên PIN?"**, mở được cả từ màn chọn người dùng |
+| `74-go-pin-xac-nhan.png` | Hộp thoại gỡ PIN: nói rõ hệ quả rồi mới gỡ |
 
 ## Lỗi bộ ảnh này bắt được — **đã sửa**
 
@@ -134,6 +143,24 @@ Lỗi thứ ba lộ ra khi viết test cho lỗi thứ hai: cả **ba** màu ng�
 nền thẻ, dù đều qua test cũ — vì test cũ chỉ canh **nền trắng thuần**, trong khi
 hầu như không có chữ nào của app nằm trên nền trắng thuần. Đã hạ độ sáng cả ba và
 thêm test canh đúng nền thẻ.
+
+## Lỗi bộ ảnh này bắt được ở lượt chụp v0.2.3 — **đã sửa**
+
+Lại đúng loại cũ: **thứ hiện ra mà không ai giữ cho đúng**.
+
+3. **Dòng "PIN của bố mẹ" nói dối sau khi gỡ PIN.** Gỡ xong qua "Quên PIN?",
+   DB đã sạch (`pin_hash` = 0 dòng) nhưng Cài đặt vẫn ghi *Đang bật* — vì dòng
+   đó đọc trạng thái **một lần** lúc dựng rồi chỉ tự nạp lại khi chính nó mở
+   sheet. Bố mẹ đọc được là "gỡ không ăn thua".
+   → Sửa: đọc bằng `watchMembers`, không giữ bản sao trạng thái. Test canh
+   luồng phát lại đúng thứ tự `true → false` khi `pin_hash` đổi.
+
+4. **Ổ khoá trên thẻ "Bố mẹ" vẽ cứng.** Nhà chưa đặt PIN vẫn hiện ổ khoá, tức
+   là hứa một bước hỏi PIN không bao giờ xảy ra.
+   → Sửa: suy ra từ chính `pin_hash` của nhà đó. Ảnh `71` cho thấy đúng một
+   trong hai nhà có ổ khoá.
+
+Cả hai chỉ lộ ra khi *bấm thật* rồi *nhìn*, trong khi 506 test đều xanh.
 
 ## Chụp lại bộ này
 

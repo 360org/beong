@@ -68,6 +68,29 @@ void main() {
       );
     });
 
+    test('cố ý tạo nhà mới thì vào được onboarding', () {
+      // Chặn sạch đường vào onboarding là đổi cái bẫy này lấy cái bẫy khác:
+      // nhà muốn làm lại từ đầu sẽ kẹt vĩnh viễn với dữ liệu cũ. Đường ra có,
+      // nhưng phải nói rõ ý định — và onboarding còn hỏi lại trước khi ghi.
+      expect(
+        diemDenDauTien(
+          session: null,
+          mayDaCoDuLieu: true,
+          viTri: Routes.onboarding,
+          xinTaoNhaMoi: true,
+        ),
+        isNull,
+      );
+    });
+
+    test('đường tạo nhà mới mang đúng tham số router đọc', () {
+      // Hằng số và chỗ đọc phải khớp nhau; lệch một chữ thì nút im lặng không
+      // làm gì, và không test nào bắt được.
+      final uri = Uri.parse(Routes.taoNhaMoi);
+      expect(uri.path, Routes.onboarding);
+      expect(uri.queryParameters[Routes.thamSoTaoNhaMoi], '1');
+    });
+
     test('đang ở màn chọn người dùng thì để yên', () {
       expect(
         diemDenDauTien(

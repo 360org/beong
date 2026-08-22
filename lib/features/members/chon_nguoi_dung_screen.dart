@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:beong/app/router.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
@@ -13,6 +14,7 @@ import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/features/settings/parent_pin_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 /// Một nhà và những người trong nhà đó — thứ màn này cần để vẽ một khối.
 @immutable
@@ -21,6 +23,14 @@ class NhaVaThanhVien {
 
   final Family nha;
   final List<Member> thanhVien;
+
+  /// Nhà này có đặt PIN không — quyết định thẻ "Bố mẹ" có hiện ổ khoá.
+  ///
+  /// Suy ra từ chính dữ liệu chứ không vẽ cứng: ổ khoá vẽ cứng vẫn nằm đó sau
+  /// khi bố mẹ gỡ PIN, tức là hứa một bước hỏi PIN không bao giờ xảy ra.
+  bool get coPin => thanhVien
+      .where((m) => m.kind == MemberKind.parent.name)
+      .any((m) => (m.pinHash ?? '').isNotEmpty);
 }
 
 /// Máy đã có dữ liệu nhưng chưa chọn ai đang dùng.
@@ -129,9 +139,21 @@ class _ChonNguoiDungScreenState extends ConsumerState<ChonNguoiDungScreen> {
                         bottom: AppSpacing.md,
                         top: AppSpacing.sm,
                       ),
-                      child: Text(
-                        muc.nha.name,
-                        style: context.text.titleMedium,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(muc.nha.name, style: context.text.titleMedium),
+                          // Máy dính lỗi §2 thường có hai nhà **trùng tên**, vì
+                          // onboarding điền sẵn "Nhà mình" cho cả hai lần. Chỉ
+                          // in tên nhà thì hai khối giống hệt nhau và không ai
+                          // biết nhà nào là nhà cũ của con mình.
+                          Text(
+                            _tomTatNha(muc),
+                            style: context.text.bodySmall?.copyWith(
+                              color: context.semantic.onSurfaceMuted,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -140,11 +162,25 @@ class _ChonNguoiDungScreenState extends ConsumerState<ChonNguoiDungScreen> {
                       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                       child: _TheNguoiDung(
                         thanhVien: thanhVien,
+                        coPin: muc.coPin,
                         onTap: () => unawaited(_chon(thanhVien, muc.nha.id)),
                       ),
                     ),
                   const SizedBox(height: AppSpacing.lg),
                 ],
+                const SizedBox(height: AppSpacing.lg),
+                // Máy đã có dữ liệu thì không còn đường nào vào onboarding nữa
+                // — đó là bản sửa của §2. Nhưng chặn sạch cũng là một cái bẫy
+                // khác: nhà muốn làm lại từ đầu sẽ kẹt vĩnh viễn với dữ liệu
+                // cũ. Để lại đúng một đường, đi qua tham số nói rõ ý định, và
+                // onboarding còn hỏi lại một lần nữa trước khi ghi.
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () => context.go(Routes.taoNhaMoi),
+                    icon: const Icon(Icons.add_home_outlined),
+                    label: const Text('Tạo nhà mới'),
+                  ),
+                ),
               ],
             );
           },
@@ -154,10 +190,25 @@ class _ChonNguoiDungScreenState extends ConsumerState<ChonNguoiDungScreen> {
   }
 }
 
+/// Một dòng đủ để nhận ra đây là nhà nào — tên các con, hoặc số thành viên.
+String _tomTatNha(NhaVaThanhVien muc) {
+  final con = muc.thanhVien
+      .where((m) => m.kind == MemberKind.child.name)
+      .map((m) => m.displayName)
+      .toList();
+  if (con.isEmpty) return '${muc.thanhVien.length} thành viên';
+  return 'Con: ${con.join(', ')}';
+}
+
 class _TheNguoiDung extends StatelessWidget {
-  const _TheNguoiDung({required this.thanhVien, required this.onTap});
+  const _TheNguoiDung({
+    required this.thanhVien,
+    required this.coPin,
+    required this.onTap,
+  });
 
   final Member thanhVien;
+  final bool coPin;
   final VoidCallback onTap;
 
   @override
@@ -209,8 +260,9 @@ class _TheNguoiDung extends StatelessWidget {
                 ),
               ),
               // Ổ khoá nói trước rằng vào vai này sẽ bị hỏi PIN, thay vì để
-              // người ta bấm rồi mới bất ngờ.
-              if (laBoMe)
+              // người ta bấm rồi mới bất ngờ. Nhà chưa đặt PIN thì không vẽ —
+              // một ổ khoá không khoá gì chỉ là chữ thừa gây hiểu nhầm.
+              if (laBoMe && coPin)
                 Icon(
                   Icons.lock_outline_rounded,
                   color: context.semantic.onSurfaceMuted,

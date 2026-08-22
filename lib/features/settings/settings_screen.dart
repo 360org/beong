@@ -592,58 +592,54 @@ class _RolloverTile extends ConsumerWidget {
 }
 
 /// Bật/tắt PIN phụ huynh.
-class _PinTile extends ConsumerStatefulWidget {
+/// Dòng "PIN của bố mẹ" trong Cài đặt.
+///
+/// Đọc trạng thái bằng **stream**, không phải một lần lúc dựng. Bản trước đọc
+/// một lần rồi chỉ tự nạp lại khi chính dòng này mở sheet — nên gỡ PIN qua
+/// đường "Quên PIN?" (mở từ chỗ đổi người dùng) xong, dòng này vẫn ghi "Đang
+/// bật" trong khi DB đã sạch. Bố mẹ đọc được là "gỡ không ăn thua".
+///
+/// Đây đúng loại lỗi lặp đi lặp lại của dự án: thứ hiện ra mà không ai cập
+/// nhật. Chữa tận gốc là đừng giữ bản sao trạng thái.
+class _PinTile extends ConsumerWidget {
   const _PinTile({required this.familyId});
 
   final String familyId;
 
   @override
-  ConsumerState<_PinTile> createState() => _PinTileState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    return StreamBuilder<List<Member>>(
+      stream: ref.watch(memberRepositoryProvider).watchMembers(familyId),
+      builder: (context, snap) {
+        final isSet = snap.data
+            ?.where((m) => m.kind == MemberKind.parent.name)
+            .any((m) => (m.pinHash ?? '').isNotEmpty);
 
-class _PinTileState extends ConsumerState<_PinTile> {
-  bool? _isSet;
-
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_load());
-  }
-
-  Future<void> _load() async {
-    final isSet = await ref
-        .read(parentPinServiceProvider)
-        .isSet(widget.familyId);
-    if (mounted) setState(() => _isSet = isSet);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isSet = _isSet;
-    return _SettingsTile(
-      icon: Icons.lock_outline_rounded,
-      title: 'PIN của bố mẹ',
-      // Chữ ngắn như các dòng khác; lời giải thích dài nằm trong sheet, không
-      // nhét vào một hàng cao 48px.
-      subtitle: isSet == null
-          ? '…'
-          : isSet
-          ? 'Đang bật'
-          : 'Chưa đặt',
-      onTap: () => unawaited(_open(isSet ?? false)),
+        return _SettingsTile(
+          icon: Icons.lock_outline_rounded,
+          title: 'PIN của bố mẹ',
+          // Chữ ngắn như các dòng khác; lời giải thích dài nằm trong sheet,
+          // không nhét vào một hàng cao 48px.
+          subtitle: isSet == null
+              ? '…'
+              : isSet
+              ? 'Đang bật'
+              : 'Chưa đặt',
+          onTap: () => unawaited(_open(context, ref, isSet: isSet ?? false)),
+        );
+      },
     );
   }
 
-  Future<void> _open(bool isSet) async {
+  Future<void> _open(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool isSet,
+  }) async {
     final service = ref.read(parentPinServiceProvider);
 
     if (!isSet) {
-      await askNewParentPin(
-        context,
-        familyId: widget.familyId,
-        service: service,
-      );
-      await _load();
+      await askNewParentPin(context, familyId: familyId, service: service);
       return;
     }
 
@@ -651,12 +647,16 @@ class _PinTileState extends ConsumerState<_PinTile> {
     // đang cầm máy chỉ việc bấm "Bỏ PIN" là xong.
     if (!await askParentPin(
       context,
-      familyId: widget.familyId,
+      familyId: familyId,
       service: service,
     )) {
       return;
     }
-    if (!mounted) return;
+    if (!context.mounted) return;
+
+    // Vừa gỡ PIN qua "Quên PIN?" thì không còn gì để đổi hay bỏ nữa.
+    if (!await service.isSet(familyId)) return;
+    if (!context.mounted) return;
 
     final action = await showModalBottomSheet<String>(
       context: context,
@@ -678,18 +678,13 @@ class _PinTileState extends ConsumerState<_PinTile> {
         ),
       ),
     );
-    if (!mounted) return;
+    if (!context.mounted) return;
 
     if (action == 'change') {
-      await askNewParentPin(
-        context,
-        familyId: widget.familyId,
-        service: service,
-      );
+      await askNewParentPin(context, familyId: familyId, service: service);
     } else if (action == 'clear') {
-      await service.clearPin(widget.familyId);
+      await service.clearPin(familyId);
     }
-    await _load();
   }
 }
 

@@ -4,6 +4,39 @@ Toàn bộ các thay đổi và cột mốc phát triển của dự án **Bé O
 
 ---
 
+## [0.2.3] - 2026-08-22
+
+**Hai lỗi nghiêm trọng của 0.2.2 đã sửa xong.** Ai đang dùng 0.2.2 nên cập nhật —
+và nếu đã lỡ bấm ĐĂNG XUẤT thì bản này lấy lại được dữ liệu cũ.
+
+### 🐛 Sửa Lỗi (Fixes)
+- 🔴 **Khoá máy không còn làm mất đường vào dữ liệu cũ.** Có màn hình mới
+  **"Ai đang dùng máy?"**: khoá xong là chọn lại người dùng, không rơi vào màn tạo nhà nữa.
+  Máy nào đã lỡ dính lỗi ở 0.2.2 thì màn này liệt kê **cả hai nhà** — chọn nhà cũ là dữ liệu
+  của con hiện lại đầy đủ, không mất gì.
+- 🔴 **Quên PIN đã có lối thoát.** Màn nhập PIN có thêm **"Quên PIN?"**: xác nhận một lần rồi
+  gỡ PIN và vào luôn. Không còn phải gỡ app, tức không còn mất dữ liệu vì quên bốn chữ số.
+  Màn đặt PIN cũng nói trước điều này ngay từ đầu.
+- **Dòng "PIN của bố mẹ" trong Cài đặt không còn nói sai.** Gỡ PIN xong nó vẫn ghi "Đang bật"
+  dù PIN đã mất thật.
+- **Ổ khoá trên thẻ "Bố mẹ"** chỉ hiện ở nhà thật sự có đặt PIN.
+
+### 🛠️ Thay Đổi (Changes)
+- **ĐĂNG XUẤT → KHOÁ LẠI.** Chữ cũ sai với việc nút làm: app không có tài khoản nào để xuất
+  ra, nó chỉ hỏi lại ai đang dùng máy. Nút cũng bỏ màu đỏ và có thêm một dòng nói rõ dữ liệu
+  vẫn còn nguyên.
+- **Muốn làm lại từ đầu vẫn được**, qua "Tạo nhà mới" ở màn chọn người dùng — nhưng app sẽ
+  hỏi lại một lần trước khi tạo, kèm tên nhà đang có.
+
+### ⚠️ Còn lại
+- **Chưa rõ**: báo cáo "tắt app rồi mở lại phải cấu hình từ đầu" vẫn chưa tái tạo được. Nếu
+  gặp trên máy thật, xin báo lại kèm cách cài bản app.
+
+Chi tiết, nguyên nhân gốc và cách kiểm: `docs/13-audit-luong-vao-app.md`.
+Ảnh: `docs/screenshot/70`–`74`.
+
+---
+
 ## [0.2.2] - 2026-08-22
 
 Hai lỗi nghiêm trọng dưới đây **chưa được sửa**. Người dùng cần biết trước.
