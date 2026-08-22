@@ -28,10 +28,62 @@ Future<bool> askParentPin(
         title: 'Nhập PIN của bố mẹ',
         subtitle: 'Để vào phần dành cho bố mẹ.',
         onSubmit: (pin) => service.verify(familyId: familyId, pin: pin),
+        onQuen: () => _quenPin(
+          sheetContext,
+          familyId: familyId,
+          service: service,
+        ),
       ),
     ),
   );
   return ok ?? false;
+}
+
+/// Gỡ PIN cho người đã quên nó.
+///
+/// Trước bản này, đường duy nhất bỏ PIN nằm **bên trong** Cài đặt, mà Cài đặt
+/// thì chỉ vai bố mẹ vào được, mà vào vai bố mẹ thì phải qua đúng cái PIN vừa
+/// quên. Lối ra duy nhất là gỡ app — tức là **mất sạch dữ liệu**
+/// (`docs/13-audit-luong-vao-app.md` §3).
+///
+/// Vì sao cho gỡ mà không hỏi gì thêm: PIN bốn số này chưa bao giờ là bảo mật
+/// thật (xem [ParentPinService]) — nó chặn một đứa trẻ tò mò. Người đang cầm
+/// máy vốn đã đọc được thẳng file dữ liệu, nên "gỡ PIN cần có máy trong tay"
+/// không hạ mức bảo vệ đi chút nào. Nó chỉ bỏ đi cái bẫy mất dữ liệu.
+Future<void> _quenPin(
+  BuildContext context, {
+  required String familyId,
+  required ParentPinService service,
+}) async {
+  final dongY = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Gỡ PIN?'),
+      content: const Text(
+        'Nhà mình sẽ không còn PIN nữa: từ giờ ai cầm máy cũng vào được phần '
+        'của bố mẹ. Dữ liệu vẫn còn nguyên, và bố mẹ đặt PIN mới bất cứ lúc '
+        'nào trong Cài đặt.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(false),
+          child: const Text('THÔI'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(dialogContext).pop(true),
+          child: const Text('GỠ PIN'),
+        ),
+      ],
+    ),
+  );
+  if (dongY != true) return;
+
+  await service.clearPin(familyId);
+  if (!context.mounted) return;
+
+  // Đóng luôn sheet với kết quả thành công: gỡ xong mà vẫn bắt nhập PIN vừa
+  // xoá thì chẳng gỡ được gì.
+  Navigator.of(context).pop(true);
 }
 
 /// Đặt PIN mới. Trả về `true` nếu đã đặt xong.
@@ -49,8 +101,11 @@ Future<bool> askNewParentPin(
       ),
       child: _PinSheet(
         title: 'Đặt PIN cho bố mẹ',
+        // Nói trước cách thoát, ngay lúc đặt: người biết mình gỡ được thì không
+        // hoảng khi quên, và cũng không tự dựng ra một cái bẫy cho chính mình.
         subtitle:
-            'Bốn chữ số. Con sẽ phải nhập PIN này mới vào được phần của bố mẹ.',
+            'Bốn chữ số. Con sẽ phải nhập PIN này mới vào được phần của bố mẹ.\n'
+            'Quên PIN thì gỡ được ngay trên máy này, không cần cài lại app.',
         onSubmit: (pin) async {
           await service.setPin(familyId: familyId, pin: pin);
           return true;
@@ -66,10 +121,15 @@ class _PinSheet extends StatefulWidget {
     required this.title,
     required this.subtitle,
     required this.onSubmit,
+    this.onQuen,
   });
 
   final String title;
   final String subtitle;
+
+  /// Có thì hiện đường "Quên PIN?". Chỉ sheet *nhập* PIN mới cần — sheet *đặt*
+  /// PIN thì chưa có gì để quên.
+  final VoidCallback? onQuen;
 
   /// Trả `true` là đóng sheet với kết quả thành công.
   final Future<bool> Function(String pin) onSubmit;
@@ -172,6 +232,13 @@ class _PinSheetState extends State<_PinSheet> {
               child: const Text('HUỶ'),
             ),
           ),
+          if (widget.onQuen != null)
+            Align(
+              child: TextButton(
+                onPressed: widget.onQuen,
+                child: const Text('Quên PIN?'),
+              ),
+            ),
         ],
       ),
     );

@@ -20,6 +20,7 @@ export 'package:beong/data/local/database.dart'
 /// chỗ đầu tiên phải trả lời "local hay máy chủ".
 abstract interface class MemberRepository {
   Future<void> addMember(MembersCompanion member);
+  Future<List<Family>> allFamilies();
   Future<List<Member>> children(String familyId);
   Future<void> createFamily(FamiliesCompanion family);
   Future<void> setAllocationMode(String familyId, AllocationMode mode);
@@ -49,6 +50,9 @@ final class LocalMemberRepository implements MemberRepository {
 
   @override
   Future<void> addMember(MembersCompanion member) => _dao.addMember(member);
+
+  @override
+  Future<List<Family>> allFamilies() => _dao.allFamilies();
 
   @override
   Future<List<Member>> children(String familyId) => _dao.children(familyId);

@@ -1,6 +1,7 @@
 import 'package:beong/app/app.dart';
 import 'package:beong/core/diagnostics/nhat_ky_loi.dart';
 import 'package:beong/core/providers/database_provider.dart';
+import 'package:beong/core/providers/du_lieu_may_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/providers/theme_mode_provider.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,10 @@ Future<void> main() async {
   // Màu trước khung hình đầu: nạp sau `runApp` thì máy đang để chế độ tối sẽ
   // thấy một nhịp màn hình trắng.
   await container.read(themeModeSettingProvider.notifier).restore();
+
+  // Máy này đã có gia đình nào chưa — router cần biết **trước** khung hình đầu
+  // để phân biệt "máy trống" với "máy có dữ liệu, chưa chọn ai đang dùng".
+  await container.read(mayDaCoDuLieuProvider.notifier).nap();
 
   // Nạp trước khung hình đầu: nếu để router chạy trước rồi mới nạp, người dùng
   // thấy màn hình onboarding nháy lên rồi mới về đúng chỗ.

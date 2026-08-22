@@ -17,6 +17,18 @@ class MemberDao extends DatabaseAccessor<AppDatabase> with _$MemberDaoMixin {
     return into(families).insert(family);
   }
 
+  /// Mọi gia đình đang có **trên máy này**.
+  ///
+  /// Câu hỏi mà router cần trả lời trước khi quyết định đưa người dùng đi đâu:
+  /// "máy này trống, hay đã có dữ liệu mà chưa chọn ai đang dùng?". Trước khi
+  /// có hàm này, hai trạng thái đó dùng chung một nhánh và đăng xuất là mất
+  /// đường về (`docs/13-audit-luong-vao-app.md` §2).
+  Future<List<Family>> allFamilies() {
+    return (select(
+      families,
+    )..orderBy([(f) => OrderingTerm(expression: f.createdAt)])).get();
+  }
+
   Future<Family> getFamily(String familyId) {
     return (select(families)..where((f) => f.id.equals(familyId))).getSingle();
   }

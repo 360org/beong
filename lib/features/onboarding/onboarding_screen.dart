@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:beong/app/router.dart';
 import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/database_provider.dart';
+import 'package:beong/core/providers/du_lieu_may_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
@@ -69,6 +71,21 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     final memberDao = ref.read(memberRepositoryProvider);
     final taskDao = ref.read(taskRepositoryProvider);
+
+    // Lưới an toàn cuối (`docs/13-audit-luong-vao-app.md` §2 P4). Router đã lo
+    // không cho vào đây khi máy có dữ liệu, nhưng hỏi lại ngay trước lúc ghi
+    // vẫn đáng: chỗ hỏng duy nhất còn lại — đọc DB lúc khởi động thất bại — làm
+    // đúng cái cờ của router sai, và cái giá của việc lọt qua là một gia đình
+    // trùng cùng toàn bộ dữ liệu cũ thành mồ côi.
+    final daCo = await memberDao.allFamilies();
+    if (daCo.isNotEmpty) {
+      if (!mounted) return;
+      final tiepTuc = await _hoiTruocKhiTaoTrung(daCo.first.name);
+      if (tiepTuc != true) {
+        if (mounted) context.go(Routes.chonNguoiDung);
+        return;
+      }
+    }
 
     // UUID sinh ở client, không dùng ID cứng — mỗi lần onboarding phải tạo
     // được family mới (ADR-002). Onboarding lặp lại vẫn xảy ra sau khi đăng
@@ -159,7 +176,37 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         .read(dayStartServiceProvider)
         .runIfNeeded(familyId: familyId, force: true);
 
+    // Máy vừa có gia đình đầu tiên — router phải biết, nếu không lần khoá máy
+    // sau lại rơi về onboarding.
+    ref.read(mayDaCoDuLieuProvider.notifier).danhDauDaCo();
+
     if (mounted) context.go('/');
+  }
+
+  /// Hỏi trước khi tạo nhà thứ hai trên cùng một máy.
+  ///
+  /// `true` = vẫn tạo nhà mới. Bất cứ gì khác = về màn chọn người dùng.
+  Future<bool?> _hoiTruocKhiTaoTrung(String tenNhaCu) {
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Máy này đã có nhà rồi'),
+        content: Text(
+          'Trong máy đang có nhà «$tenNhaCu» cùng toàn bộ việc, xu và huy hiệu '
+          'của con. Tạo nhà mới thì nhà cũ vẫn còn nhưng bắt đầu lại từ số 0.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('TẠO NHÀ MỚI'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('VÀO NHÀ CŨ'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

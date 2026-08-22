@@ -4,6 +4,7 @@ import 'package:beong/app/router.dart';
 import 'package:beong/core/diagnostics/chup_man_hinh.dart';
 import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/database_provider.dart';
+import 'package:beong/core/providers/du_lieu_may_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/providers/theme_mode_provider.dart';
 import 'package:beong/core/theme/app_theme.dart';
@@ -43,6 +44,7 @@ class _BeOngAppState extends ConsumerState<BeOngApp>
   final _sessionNotifier = _SessionChangeNotifier();
   late final GoRouter _router = createRouter(
     getSession: () => ref.read(sessionProvider),
+    getMayDaCoDuLieu: () => ref.read(mayDaCoDuLieuProvider),
     refreshListenable: _sessionNotifier,
   );
 
@@ -76,9 +78,15 @@ class _BeOngAppState extends ConsumerState<BeOngApp>
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(sessionProvider, (prev, next) {
-      _sessionNotifier.notify();
-    });
+    // Router đọc cả hai thứ này trong `redirect`, mà `redirect` chỉ chạy lại
+    // khi `refreshListenable` kêu. Thiếu một trong hai thì màn hình đứng
+    // nguyên: nhà vừa tạo xong vẫn hiện onboarding.
+    ref
+      ..listen(sessionProvider, (prev, next) => _sessionNotifier.notify())
+      ..listen(
+        mayDaCoDuLieuProvider,
+        (prev, next) => _sessionNotifier.notify(),
+      );
 
     return MaterialApp.router(
       onGenerateTitle: (context) => L10n.of(context).appTitle,

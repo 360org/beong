@@ -120,15 +120,18 @@ class SettingsScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.xxl),
+              // Trước đây nút này ghi "ĐĂNG XUẤT" — chữ sai với việc nó làm:
+              // app không có tài khoản nào để xuất ra. Nó chỉ bỏ lựa chọn "ai
+              // đang dùng máy" rồi hỏi lại. Chữ cũ khiến bố mẹ tưởng bấm vào là
+              // mất dữ liệu, mà thật ra dữ liệu vẫn còn nguyên.
               SizedBox(
                 width: double.infinity,
-                child: OutlinedButton(
+                child: OutlinedButton.icon(
                   onPressed: () {
                     unawaited(ref.read(sessionProvider.notifier).logout());
                   },
+                  icon: const Icon(Icons.lock_outline_rounded),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: context.semantic.danger,
-                    side: BorderSide(color: context.semantic.danger),
                     minimumSize: const Size.fromHeight(AppSpacing.giant),
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(
@@ -136,7 +139,16 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  child: const Text('ĐĂNG XUẤT'),
+                  label: const Text('KHOÁ LẠI'),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Máy sẽ hỏi lại ai đang dùng. Dữ liệu của cả nhà vẫn còn nguyên '
+                'trên máy này.',
+                textAlign: TextAlign.center,
+                style: context.text.bodySmall?.copyWith(
+                  color: context.semantic.onSurfaceMuted,
                 ),
               ),
               const SizedBox(height: AppSpacing.xxxl),

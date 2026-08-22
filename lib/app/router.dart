@@ -2,6 +2,7 @@ import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/widgets/responsive_scaffold.dart';
 import 'package:beong/features/child_home/child_home_screen.dart';
+import 'package:beong/features/members/chon_nguoi_dung_screen.dart';
 import 'package:beong/features/onboarding/onboarding_screen.dart';
 import 'package:beong/features/parent_home/parent_home_screen.dart';
 import 'package:beong/features/rewards/rewards_screen.dart';
@@ -32,6 +33,9 @@ abstract final class Routes {
   static String routineEditor(String routineId) => '/tasks/routine/$routineId';
   static const onboarding = '/onboarding';
 
+  /// Máy đã có dữ liệu nhưng chưa chọn ai đang dùng.
+  static const chonNguoiDung = '/chon-nguoi-dung';
+
   static const List<String> shellBranches = [
     home,
     tasks,
@@ -41,33 +45,66 @@ abstract final class Routes {
   ];
 }
 
+/// Người mở app lúc này phải đi đâu — `null` là "cứ ở nguyên chỗ đang tới".
+///
+/// Tách khỏi [createRouter] để test được bằng bảng, không cần dựng cả cây
+/// widget. Ba trạng thái, không phải hai — đó chính là chỗ trước đây sai:
+///
+/// | Máy có dữ liệu | Có session | Đi đâu |
+/// |---|---|---|
+/// | không | không | onboarding |
+/// | **có** | **không** | **màn chọn người dùng** |
+/// | có | có | trang chính |
+///
+/// Gộp hai dòng đầu làm một (`session == null` → onboarding) là lỗi §2 trong
+/// `docs/13-audit-luong-vao-app.md`: bấm KHOÁ LẠI xong onboarding tạo thêm một
+/// gia đình nữa, còn gia đình cũ nằm lại trong DB không đường vào.
+String? diemDenDauTien({
+  required AppSession? session,
+  required bool mayDaCoDuLieu,
+  required String viTri,
+}) {
+  final laOnboarding = viTri == Routes.onboarding;
+  final laChonNguoiDung = viTri == Routes.chonNguoiDung;
+
+  if (session == null) {
+    if (mayDaCoDuLieu) return laChonNguoiDung ? null : Routes.chonNguoiDung;
+    return laOnboarding ? null : Routes.onboarding;
+  }
+
+  // Đã chọn người dùng rồi thì hai màn "chưa vào được" kia không còn nghĩa.
+  if (laOnboarding || laChonNguoiDung) return Routes.home;
+
+  // Vai con không có Cài đặt. Chặn cả ở router chứ không chỉ ẩn tab: link sâu
+  // hay `goBranch` gọi sai vẫn phải rơi về chỗ an toàn.
+  if (!session.isParent && viTri.startsWith(Routes.settings)) {
+    return Routes.home;
+  }
+
+  return null;
+}
+
 GoRouter createRouter({
   required AppSession? Function() getSession,
+  required bool Function() getMayDaCoDuLieu,
   required Listenable refreshListenable,
 }) {
   return GoRouter(
     initialLocation: Routes.home,
     refreshListenable: refreshListenable,
-    redirect: (context, state) {
-      final session = getSession();
-      final isOnboarding = state.matchedLocation == Routes.onboarding;
-
-      if (session == null && !isOnboarding) return Routes.onboarding;
-      if (session != null && isOnboarding) return Routes.home;
-
-      // Vai con không có Cài đặt. Chặn cả ở router chứ không chỉ ẩn tab: link
-      // sâu hay `goBranch` gọi sai vẫn phải rơi về chỗ an toàn.
-      final settingsPath = state.matchedLocation.startsWith(Routes.settings);
-      if (session != null && !session.isParent && settingsPath) {
-        return Routes.home;
-      }
-
-      return null;
-    },
+    redirect: (context, state) => diemDenDauTien(
+      session: getSession(),
+      mayDaCoDuLieu: getMayDaCoDuLieu(),
+      viTri: state.matchedLocation,
+    ),
     routes: [
       GoRoute(
         path: Routes.onboarding,
         builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: Routes.chonNguoiDung,
+        builder: (context, state) => const ChonNguoiDungScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
