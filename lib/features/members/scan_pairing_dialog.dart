@@ -71,11 +71,11 @@ class _ScanPairingDialogState extends ConsumerState<_ScanPairingDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.cardRadiusLg),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       title: Row(
         children: [
-          const Icon(Icons.qr_code_scanner_rounded, color: AppColors.amberDark),
+          const Icon(Icons.qr_code_scanner_rounded, color: AppColors.brand360Blue),
           const SizedBox(width: AppSpacing.sm),
           Text('Ghép cặp máy con', style: context.text.titleMedium),
         ],
@@ -87,14 +87,16 @@ class _ScanPairingDialogState extends ConsumerState<_ScanPairingDialog> {
           children: [
             Text(
               'Hướng camera về phía mã QR trên máy bố mẹ (trong mục Cài đặt -> Thành viên -> Ghép cặp) hoặc nhập mã liên kết bên dưới.',
-              style: context.text.bodyMedium?.copyWith(color: AppColors.textSecondary),
+              style: context.text.bodyMedium?.copyWith(
+                color: context.semantic.onSurfaceMuted,
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
             Container(
               height: 160,
               decoration: BoxDecoration(
                 color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(AppSpacing.cardRadiusMd),
+                borderRadius: BorderRadius.circular(AppRadius.card),
                 border: Border.all(color: Colors.grey.shade300),
               ),
               child: Center(

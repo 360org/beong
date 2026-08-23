@@ -22,7 +22,7 @@ Future<void> showPairingCodeSheet(
     context: context,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.cardRadiusLg)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.card)),
     ),
     builder: (ctx) => _PairingCodeSheet(
       childName: childName,
@@ -120,7 +120,9 @@ class _PairingCodeSheetState extends State<_PairingCodeSheet> {
             const SizedBox(height: AppSpacing.sm),
             Text(
               'Mở ứng dụng Bé Ong trên máy của bé, chọn vai "Con" rồi quét mã này để hoàn tất kết nối.',
-              style: context.text.bodyMedium?.copyWith(color: AppColors.textSecondary),
+              style: context.text.bodyMedium?.copyWith(
+                color: context.semantic.onSurfaceMuted,
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
             Center(
@@ -128,9 +130,9 @@ class _PairingCodeSheetState extends State<_PairingCodeSheet> {
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppSpacing.cardRadiusMd),
+                  borderRadius: BorderRadius.circular(AppRadius.card),
                   border: Border.all(
-                    color: isExpired ? AppColors.error : AppColors.amberBg,
+                    color: isExpired ? AppColors.dangerLight : AppColors.brand360Blue,
                     width: 2,
                   ),
                 ),
@@ -138,9 +140,9 @@ class _PairingCodeSheetState extends State<_PairingCodeSheet> {
                     ? Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.timer_off_outlined, size: 64, color: AppColors.error),
+                          const Icon(Icons.timer_off_outlined, size: 64, color: AppColors.dangerLight),
                           const SizedBox(height: AppSpacing.sm),
-                          Text('Mã đã hết hạn', style: context.text.titleSmall?.copyWith(color: AppColors.error)),
+                          Text('Mã đã hết hạn', style: context.text.titleSmall?.copyWith(color: AppColors.dangerLight)),
                         ],
                       )
                     : Column(
@@ -163,7 +165,7 @@ class _PairingCodeSheetState extends State<_PairingCodeSheet> {
                             style: context.text.titleLarge?.copyWith(
                               letterSpacing: 4,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.amberDark,
+                              color: AppColors.brand360Blue,
                             ),
                           ),
                         ],
@@ -177,13 +179,13 @@ class _PairingCodeSheetState extends State<_PairingCodeSheet> {
                 Icon(
                   Icons.timer_outlined,
                   size: 18,
-                  color: isExpired ? AppColors.error : AppColors.textSecondary,
+                  color: isExpired ? AppColors.dangerLight : context.semantic.onSurfaceMuted,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   isExpired ? 'Đã hết hạn' : 'Hiệu lực còn: ${_formatTime(_secondsLeft)}',
                   style: context.text.bodyMedium?.copyWith(
-                    color: isExpired ? AppColors.error : AppColors.textSecondary,
+                    color: isExpired ? AppColors.dangerLight : context.semantic.onSurfaceMuted,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
