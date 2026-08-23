@@ -377,10 +377,13 @@ section { padding: clamp(56px, 8vw, 96px) 0; position: relative; }
   background: #030712;
 }
 .btn-store svg {
-  width: 32px;
-  height: 32px;
-  flex: none;
-  fill: currentColor;
+  width: 32px !important;
+  height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  flex: 0 0 32px !important;
+  fill: currentColor !important;
+  display: block !important;
 }
 .store-text {
   display: flex;
