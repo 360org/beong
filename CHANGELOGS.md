@@ -33,8 +33,9 @@ và nếu đã lỡ bấm ĐĂNG XUẤT thì bản này lấy lại được d�
   gặp trên máy thật, xin báo lại kèm cách cài bản app.
 
 ### 📦 Trạng thái phát hành
-- **iOS:** `0.2.3 (5)` **đã lên App Store Connect và xử lý xong** — dùng được cho
-  TestFlight ngay. Chưa nộp duyệt được vì hồ sơ App Store còn thiếu ảnh chụp, mô tả,
+- **iOS:** `0.2.3 (6)` trên **TestFlight**. Build `(5)` trước đó đã lên App Store
+  Connect và xử lý xong nhưng bị App Store Connect giữ cho bản nộp duyệt, nên bản
+  TestFlight phải mang số build mới — Apple không nhận hai lần nộp trùng `+build`. Chưa nộp duyệt được vì hồ sơ App Store còn thiếu ảnh chụp, mô tả,
   phân loại độ tuổi, giá và chính sách quyền riêng tư — không phải lỗi mã, xem
   `docs/08-release-cicd.md`.
 - **Android:** chưa lên được, secret `PLAY_STORE_SERVICE_ACCOUNT_JSON` không hợp lệ.
