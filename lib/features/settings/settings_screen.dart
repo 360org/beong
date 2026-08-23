@@ -95,6 +95,7 @@ class SettingsScreen extends ConsumerWidget {
                   _AllocationTile(familyId: session.familyId),
                   _JarsTile(familyId: session.familyId),
                   _PenaltyTile(familyId: session.familyId),
+                  _TimezoneTile(familyId: session.familyId),
                   _RolloverTile(familyId: session.familyId),
                   _ExchangeRateTile(familyId: session.familyId),
                   _SettingsTile(
@@ -526,6 +527,86 @@ class _ExchangeRateTile extends ConsumerWidget {
     await ref
         .read(memberRepositoryProvider)
         .setExchangeRate(familyId, chosen == off ? null : chosen);
+  }
+}
+
+/// Cấu hình Múi giờ của gia đình.
+class _TimezoneTile extends ConsumerWidget {
+  const _TimezoneTile({required this.familyId});
+
+  final String familyId;
+
+  static const _commonTimezones = <String, String>{
+    'Asia/Ho_Chi_Minh': 'Việt Nam (GMT+7)',
+    'Asia/Bangkok': 'Bangkok (GMT+7)',
+    'Asia/Tokyo': 'Tokyo (GMT+9)',
+    'Asia/Seoul': 'Seoul (GMT+9)',
+    'Asia/Singapore': 'Singapore (GMT+8)',
+    'Australia/Sydney': 'Sydney (GMT+10)',
+    'Europe/London': 'London (GMT+0)',
+    'Europe/Paris': 'Paris (GMT+1)',
+    'America/New_York': 'New York (GMT-5)',
+    'America/Los_Angeles': 'Los Angeles (GMT-8)',
+    'UTC': 'UTC',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return StreamBuilder<Family>(
+      stream: ref.watch(memberRepositoryProvider).watchFamily(familyId),
+      builder: (context, snap) {
+        final family = snap.data;
+        final tz = family?.timezone ?? 'Asia/Ho_Chi_Minh';
+        return _SettingsTile(
+          icon: Icons.public_rounded,
+          title: 'Múi giờ',
+          subtitle: _commonTimezones[tz] ?? tz,
+          onTap: () => unawaited(_pick(context, ref, tz)),
+        );
+      },
+    );
+  }
+
+  Future<void> _pick(BuildContext context, WidgetRef ref, String current) async {
+    final chosen = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        child: SizedBox(
+          height: 400,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Text(
+                  'Chọn múi giờ để tính ngày và thời hạn nhiệm vụ chính xác.',
+                  style: context.text.bodySmall?.copyWith(
+                    color: context.semantic.onSurfaceMuted,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  children: [
+                    for (final entry in _commonTimezones.entries)
+                      ListTile(
+                        title: Text(entry.value),
+                        subtitle: Text(entry.key),
+                        trailing: entry.key == current
+                            ? Icon(Icons.check_circle, color: context.colors.primary)
+                            : null,
+                        onTap: () => Navigator.pop(sheetContext, entry.key),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (chosen == null || chosen.isEmpty) return;
+    await ref.read(memberRepositoryProvider).setTimezone(familyId, chosen);
   }
 }
 

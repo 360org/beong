@@ -108,6 +108,20 @@ class MemberDao extends DatabaseAccessor<AppDatabase> with _$MemberDaoMixin {
     );
   }
 
+  /// Đặt múi giờ cho gia đình.
+  Future<void> setTimezone(String familyId, String timezone) async {
+    final tz = timezone.trim();
+    if (tz.isEmpty) {
+      throw ArgumentError.value(timezone, 'timezone', 'Múi giờ không được để trống');
+    }
+    await (update(families)..where((f) => f.id.equals(familyId))).write(
+      FamiliesCompanion(
+        timezone: Value(tz),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   /// Giờ bắt đầu ngày mới của gia đình. 4 nghĩa là 03:59 vẫn thuộc hôm qua.
   Stream<int> watchDayRolloverHour(String familyId) =>
       watchFamily(familyId).map((f) => f.dayRolloverHour);

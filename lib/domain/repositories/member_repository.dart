@@ -27,6 +27,7 @@ abstract interface class MemberRepository {
   Future<void> setDayRolloverHour(String familyId, int hour);
   Future<void> setPenaltyPolicy(String familyId, PenaltyPolicy policy);
   Future<void> setRequireApproval(String familyId, {required bool value});
+  Future<void> setTimezone(String familyId, String timezone);
   Stream<AllocationMode> watchAllocationMode(String familyId);
   Stream<int> watchDayRolloverHour(String familyId);
   Stream<MoneyExchange> watchExchangeRate(String familyId);
@@ -76,6 +77,10 @@ final class LocalMemberRepository implements MemberRepository {
   @override
   Future<void> setRequireApproval(String familyId, {required bool value}) =>
       _dao.setRequireApproval(familyId, value: value);
+
+  @override
+  Future<void> setTimezone(String familyId, String timezone) =>
+      _dao.setTimezone(familyId, timezone);
 
   @override
   Stream<AllocationMode> watchAllocationMode(String familyId) =>
