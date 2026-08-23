@@ -43,6 +43,7 @@ jobs:
             for f in $(grep -ohE '(src|href)="[^"]*"' "$page" | cut -d'"' -f2); do
               case "$f" in http*|https*|mailto:*|tel:*|data:*|\#*) continue ;; esac
               base="${f%%#*}"
+              base="${base%%\?*}"
               [ -z "$base" ] && continue
               if [ ! -f "site/$base" ]; then
                 echo "::error file=$page::liên kết hỏng -> $base"; thieu=1
