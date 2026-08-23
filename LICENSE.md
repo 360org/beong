@@ -1,7 +1,7 @@
 BẢN QUYỀN VÀ ĐIỀU KHOẢN SỬ DỤNG PHẦN MỀM (END USER LICENSE AGREEMENT - EULA)
 ỨNG DỤNG BÉ ONG (BÉ ONG CHĂM CHỈ)
 Phiên bản hiệu lực: 2026-08-23
-Chủ sở hữu bản quyền: 360 CORP (info@vuaai.net · Hotline: 0836 360 360)
+Chủ sở hữu bản quyền: 360 CORP (info@beong.net)
 
 1. QUYỀN SỬ DỤNG CỦA NGƯỜI DÙNG CUỐI (FREEWARE LICENSE)
 - Ứng dụng Bé Ong được cung cấp HOÀN TOÀN MIỄN PHÍ cho người dùng cuối (phụ huynh và trẻ em) tải về, cài đặt và sử dụng cho mục đích giáo dục, quản lý việc nhà và rèn luyện thói quen cá nhân hoặc trong phạm vi gia đình.
@@ -28,6 +28,5 @@ d. Xoá bỏ, sửa đổi, che khuất bất kỳ thông báo bản quyền, nh
 6. LIÊN HỆ & CẤP PHÉP DOANH NGHIỆP
 Mọi yêu cầu hợp tác, cấp phép thương mại hoặc phản ánh vi phạm bản quyền xin vui lòng gửi về:
 - Đơn vị chủ quản: 360 CORP
-- Email: info@vuaai.net
-- Hotline: 0836 360 360
+- Email: info@beong.net
 - Website chính thức: https://beong.net
