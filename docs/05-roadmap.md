@@ -5,18 +5,24 @@ một người UI).
 
 ## Trạng thái hiện tại
 
+*Soát lần cuối: 23/08/2026, bản `v0.2.5+8`.*
+
 Cập nhật bằng cách **đọc code**, không tick theo cảm giác — xem quy trình ở
 `.claude/skills/flutter-8-buoc`.
 
 | Sprint | Trạng thái | Ghi chú |
 |---|---|---|
 | 0 — Nền móng | ✅ Xong | Còn pre-commit hook, cố ý hoãn |
-| 1 — Dữ liệu local | ✅ Xong | Trừ **tầng repository** (`lib/domain/repositories/` rỗng) |
-| 2 — Luồng UI cốt lõi | 🟡 Gần xong | PIN phụ huynh ✅, integration test ✅. Còn khối chế độ bằng chứng của Task Editor |
-| 3 — Backend & ghép cặp | 🔴 Chưa bắt đầu | Pha 0 đã xong 2/4; phần backend chờ dựng Supabase |
+| 1 — Dữ liệu local | ✅ Xong | Gồm cả **tầng repository** — 7 interface + bản `Local...`, có test kiến trúc canh |
+| 2 — Luồng UI cốt lõi | 🟡 Gần xong | Mật khẩu **từng hồ sơ** ✅ (ADR-027), chọn vai lần mở đầu ✅, integration test ✅. Còn khối chế độ bằng chứng của Task Editor |
+| 3 — Backend & ghép cặp | 🔴 Chưa bắt đầu | **Pha 0 xong 4/4** (không cần backend); phần backend chờ dựng Supabase |
 | 4 — Phần thưởng & tài chính | ✅ Xong | Đổi thưởng + duyệt + hoàn xu, trừ xu (chung + riêng theo việc), con tự chia xu, hũ tự lập, huy hiệu + streak, mục tiêu tiết kiệm, tỷ giá tiền thật, sửa xu tay |
 | 5 — Thông báo & hoàn thiện | 🔴 Chưa bắt đầu | |
-| 6 — Phát hành v1.0 | 🟡 Hạ tầng sẵn | CI/CD 7 job + Fastlane ✅; chưa có tài khoản store, chưa có icon/ảnh chụp |
+| 6 — Phát hành v1.0 | 🟡 Đang chạy | **Đã lên TestFlight thật** (`0.2.5+8`, run #19). Chặn còn lại **không phải mã**: hồ sơ App Store chưa điền, secret Play Console chưa hợp lệ |
+
+**Hai lỗi 🔴 chặn phát hành tìm ra ngày 22/08 đã sửa xong**, cộng hai lỗi nữa lộ ra sau đó khi
+chạy app thật — xem mục *Chặn phát hành* bên dưới. Còn đúng một mục để mở, và cố ý: dấu vết chẩn
+đoán lúc khởi động, vì hiện tượng của nó chưa dựng lại được lần nào.
 
 **Chặn lớn nhất:** chưa có backend nên chưa ghép cặp được máy con — mà "mỗi bé một máy" là điểm bán
 chính (ADR-021). Mọi thứ khác đang chạy được trên **một** thiết bị.
@@ -84,9 +90,14 @@ toàn bộ offline. ✅ đạt.
       (kèm báo tên huy hiệu khi vừa mở khoá), mục tiêu tiết kiệm ✅. Khác tài liệu một chỗ:
       nhóm theo **trạng thái** (Cần làm / Đã xong / Bỏ lỡ), **không** nhóm theo routine.
 - [x] Parent Home + hàng đợi duyệt (+ nút Duyệt tất cả, + danh sách "Đã xong hôm nay" để mở lại)
-- [x] Chuyển hồ sơ + **PIN phụ huynh** — `09` §6 ca "máy bố mẹ cũng là máy con dùng". Trước đó
-      đổi vai không cần gì cả, tức là cả vòng duyệt của ADR-023/ADR-025 dựa trên một giả định
+- [x] Chuyển hồ sơ + **mật khẩu từng hồ sơ** — `09` §6 ca "máy bố mẹ cũng là máy con dùng". Trước
+      đó đổi vai không cần gì cả, tức là cả vòng duyệt của ADR-023/ADR-025 dựa trên một giả định
       chưa từng được bảo vệ: con bấm avatar, chọn "Bố mẹ", rồi tự duyệt việc của mình.
+
+      **Đổi lần hai ngày 23/08 (ADR-027):** từ *một PIN chung cả nhà, tuỳ chọn* thành *mỗi hồ sơ
+      một mật khẩu riêng, bắt buộc từ onboarding*. Mật khẩu đổi vai trò — không còn là cái chốt
+      cửa Cài đặt mà là cách **định danh ai đang dùng máy**. Mật khẩu của bé này không mở được hồ
+      sơ bé kia.
 - [x] **Integration test luồng đầy đủ** — `integration_test/luong_day_du_test.dart`, dựng nguyên
       `BeOngApp` với router thật trên Linux desktop dưới Xvfb, có job CI riêng. Ba luồng:
       onboarding → con bấm xong việc, xu vào ví ngay → đổi thưởng vào hàng chờ duyệt.
@@ -94,8 +105,9 @@ toàn bộ offline. ✅ đạt.
 **Xong khi:** dùng được thật trên 1 thiết bị, không cần mạng. ✅ đạt — đã chạy thật và chụp 27 ảnh
 qua toàn bộ luồng.
 
-**Còn thiếu so với luồng ở `09-onboarding-pairing.md`:** chọn vai bố mẹ/con lần mở đầu, tạo **nhiều**
-con. Đã chuyển sang Sprint 3 vì là điều kiện của ghép cặp.
+**~~Còn thiếu so với luồng ở `09-onboarding-pairing.md`~~ — đã xong 23/08:** chọn vai bố mẹ/con và
+tạo **nhiều** con. `VaoAppScreen` đi bốn bước (chọn nhà → chọn vai → chọn hồ sơ → mật khẩu), tự bỏ
+qua bước nào chỉ có một lựa chọn; thêm bé làm qua sheet "Thêm bé" trong Cài đặt.
 
 Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó tới giờ:
 - **Lưu session bền vững** — xong, `device_settings` + `SessionStore`, nạp trước `runApp`.
@@ -116,8 +128,9 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
 - [x] Sinh `task_instances` lúc **mở app**, khi quay lại app, và sau onboarding —
       `DayStartService`, có khoá một-lần-mỗi-ngày
 - [x] **Lưu session bền vững** — `device_settings` + `SessionStore` (làm trước, ngoài kế hoạch)
-- [ ] Màn chọn vai Bố mẹ / Con ở lần mở đầu, ghi nhớ vĩnh viễn (ADR-018)
-- [ ] Tách điều hướng theo vai; onboarding tách hai nhánh
+- [x] **Màn chọn vai Bố mẹ / Con**, ghi nhớ vĩnh viễn (ADR-018) — `VaoAppScreen`, 23/08
+- [x] **Tách điều hướng theo vai** — `diemDenDauTien` tách ba trạng thái (máy trống / có dữ liệu
+      chưa chọn ai / đã chọn), canh bằng bảng test. Onboarding chỉ dành cho máy **thật sự trống**
 
 **Việc còn nợ từ Sprint 1–2, không cần backend:**
 - [x] Tầng repository ✅ (xem Sprint 1) — xong trước khi bắt đầu sync, đúng như hạn chót đặt ra
@@ -125,9 +138,12 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
       ai đọc; chế độ duyệt riêng đã xong)
 - [x] Routine Editor + kéo thả thứ tự
 - [x] Animation ăn mừng — `ConfettiBurst`, nổ ở cấp màn hình vì thẻ việc bị tháo ngay sau khi bấm
-- [x] **PIN phụ huynh** — `ParentPinService` + sheet nhập PIN, hỏi ở cả hai cửa đổi vai (màn con
-      và màn Cài đặt) và hỏi lại PIN cũ trước khi đổi/bỏ. Nhà chưa đặt PIN thì không chặn gì.
-      Không phải bảo mật thật: 4 số băm SHA-256 chặn được trẻ con, không chặn được ai cầm file DB.
+- [x] **Mật khẩu từng hồ sơ** (ADR-027) — `MatKhauHoSo` khoá theo `member_id`, hỏi ở cả hai cửa
+      đổi vai và ở màn vào app. Bắt buộc đặt từ onboarding và khi thêm bé; bố mẹ đặt lại được cho
+      con mà không cần mật khẩu cũ. "Quên mật khẩu?" **đổi** chứ không **gỡ** — gỡ sẽ để lại hồ sơ
+      trống, tức vi phạm chính ADR-027.
+      Không phải bảo mật thật: 4 số băm SHA-256 chặn được người trong nhà mở nhầm hồ sơ của nhau,
+      không chặn được ai cầm file DB.
 - [x] Gộp các dòng sổ cái của cùng một giao dịch trong "Sổ của con" (`op_group_id`), hiện **tên
       việc / tên phần thưởng**, **trạng thái** (chữ + màu, theo dõi sống), và chi tiết từng hũ
 
@@ -259,31 +275,63 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 
 ## Chặn phát hành — sửa trước khi cho người ngoài dùng
 
-Tìm ra ngày 22/08 khi chạy app thật; chi tiết và phương án ở
+Tìm ra ngày 22/08 khi chạy app thật; chi tiết, nguyên nhân gốc và cách kiểm ở
 [`13-audit-luong-vao-app.md`](13-audit-luong-vao-app.md).
 
-- [ ] 🔴 **Đăng xuất xong không có đường vào lại.** Về màn tạo nhà, làm lại là sinh gia đình
-      thứ hai — dữ liệu cũ còn nguyên trong máy nhưng không màn hình nào mở tới được. Cần màn
-      **chọn người dùng** cho ca "máy có dữ liệu, chưa có session".
-- [ ] 🔴 **Quên PIN là mất quyền bố mẹ vĩnh viễn.** Đường bỏ PIN nằm trong Cài đặt, mà Cài đặt
-      lại nằm sau chính cái PIN đó. Chỉ gỡ app mới thoát, tức mất sạch dữ liệu. Cần "Quên PIN?"
-      ngay ở màn nhập.
+- [x] 🔴 **Đăng xuất xong không có đường vào lại** — sửa ở `v0.2.3`. Router tách ba trạng thái
+      thay vì hai; thêm màn **"Ai đang dùng máy?"** liệt kê **mọi** nhà trong máy, nên máy nào đã
+      lỡ dính lỗi vẫn mở lại được nhà mồ côi. Nút ĐĂNG XUẤT đổi thành **KHOÁ LẠI** — chữ cũ sai
+      với việc nó làm, app không có tài khoản nào để xuất ra.
+      Kiểm trên đúng máy đã dính lỗi (2 nhà, 4 thành viên, 24 việc): chọn nhà cũ → vào lại đủ 12
+      việc, không mất gì.
+- [x] 🔴 **Quên PIN là mất quyền bố mẹ vĩnh viễn** — sửa ở `v0.2.3`, mở rộng ở `v0.2.4`. Có
+      "Quên mật khẩu?" ngay ở màn nhập; từ ADR-027 thì nó **đổi** mật khẩu chứ không **gỡ**, vì
+      gỡ sẽ để lại hồ sơ trống. Bố mẹ cũng đặt lại được mật khẩu cho con từ Cài đặt.
 - [ ] Thêm dấu vết chẩn đoán lúc khởi động (đọc session thành công/thất bại, đường dẫn dữ liệu)
       để lần sau chẩn được ca "mở lại app phải cấu hình từ đầu" thay vì đoán.
 
+      **Vẫn để mở, và cố ý.** §1 của audit chưa dựng lại được lần nào trên bản Linux, nên chưa có
+      gì để sửa. Nhưng lưới an toàn của §2 che một phần ca xấu nhất: nếu cờ "máy đã có dữ liệu"
+      sai vì đọc DB lúc khởi động hỏng, onboarding vẫn hỏi lại trước khi ghi đè.
+
+### Sửa thêm sau khi chạy thật, không nằm trong audit
+
+- [x] **Bấm xong việc bị giật cục** (`v0.2.5`) — chủ dự án báo 23/08. Đo trước khi đoán: ghi DB
+      mất 3ms, nên nghẽn ở giao diện chứ không ở dữ liệu. Ba lớp chồng nhau:
+      bốn luồng được tạo mới trong mỗi `build()` nên `StreamBuilder` đăng ký lại và cả danh sách
+      nháy thành vòng xoay — hai lần mỗi cú chạm, vì hoa giấy `setState` hai lượt; mỗi thẻ tự đi
+      hỏi dữ liệu riêng và cao 0 trong lúc chờ; và thẻ không phản hồi gì cho tới khi ghi xong.
+- [x] **Bước đặt mật khẩu của onboarding không bao giờ chạy** (`v0.2.4`) — `login()` gọi trước
+      nên router đá khỏi màn, `if (!mounted) return` nuốt gọn cả vòng. Onboarding chạy xong với
+      hai hồ sơ `pin_hash = NULL` mà không báo gì. Sống sót qua 507 test xanh; chỉ lộ ra khi chạy
+      app thật và nhìn.
+
+Cả hai lỗi trên đều thuộc **loại lặp đi lặp lại của dự án**: thứ có trong code mà không ai đọc,
+hoặc không bao giờ chạy. Danh sách các lần trước ở Sprint 2, khối `proof_mode`.
+
 ## Sprint 6 — Phát hành v1.0 (1 tuần)
 
-> **Hạ tầng đã sẵn, tài khoản thì chưa.** `.github/workflows/release.yml` + Fastlane cho cả hai store
-> đã viết và CI 7 job đang xanh, nhưng chưa có tài khoản Apple Developer / Google Play, chưa có
-> secret nào được nạp. Hướng dẫn từng bước ở `08-release-cicd.md`.
+> **iOS đã đi được tới TestFlight thật.** `0.2.5+8`, run #19 ngày 23/08. Trước đó lane `release`
+> chưa từng chạy lần nào nên mang một lỗi không ai biết (`reject_build_waiting_for_review` — tên
+> tuỳ chọn không tồn tại); đã sửa. Chốt chặn còn lại **không phải mã** — xem đầu
+> [`08-release-cicd.md`](08-release-cicd.md).
 - [ ] Icon app, splash, ảnh chụp store
-- [~] **Chính sách quyền riêng tư** — bản thảo ở `10-privacy-policy.md`, kèm phụ lục khai báo
-      cho form của cả hai store. **Chưa qua rà soát pháp lý** và còn hai chỗ trống bắt buộc
-      (email liên hệ, đơn vị phát hành). Vẫn cần đăng lên một **URL công khai** trước khi nộp.
-- [ ] Điều khoản sử dụng
+- [ ] 🔴 **Hồ sơ App Store chưa điền** — chặn cứng đường ra công khai. Binary lên được App Store
+      Connect nhưng `submit_for_review` hỏng vì thiếu: ảnh chụp (`iphone65`, `ipadPro129`), mô tả,
+      từ khoá, URL hỗ trợ, URL chính sách, **toàn bộ bảng phân loại độ tuổi**, khai báo thu thập
+      dữ liệu, danh mục chính, **giá**, và khai báo bản quyền nội dung. Chỉ chủ tài khoản điền
+      được; chạy lại CI bao nhiêu lần cũng vậy, mỗi lần chỉ tốn thêm một build number.
+- [ ] 🔴 **Secret `PLAY_STORE_SERVICE_ACCOUNT_JSON` không hợp lệ** — thiếu `"type":
+      "service_account"`, hay gặp nhất là dán bản base64 thay vì nguyên văn. CI nay kiểm ngay sau
+      checkout và báo rõ, thay vì để lộ ra sau bốn phút build.
+- [x] **Chính sách quyền riêng tư** — đăng công khai ở `site/quyen-rieng-tu.html`, đã điền đơn vị
+      phát hành (360 CORP) và email liên hệ (info@beong.net). Bản thảo kèm phụ lục khai báo cho
+      form hai store vẫn ở `10-privacy-policy.md`. **Chưa qua rà soát pháp lý** — vẫn nên làm
+      trước khi nộp.
+- [x] **Điều khoản sử dụng** — `site/dieu-khoan.html`
 - [ ] Khai báo store: **không mua trong app, không quảng cáo** (ADR-014)
 - [ ] Khai báo App Store "Kids Category" / Play "Teacher Approved" nếu áp dụng
-- [ ] Fastlane → TestFlight + Play Internal
+- [x] **Fastlane → TestFlight** ✅ (run #14, #18, #19). Play Internal ❌ — chờ secret ở trên
 - [ ] Beta 10 gia đình, thu phản hồi 2 tuần
 
 **Tổng MVP: ~9.5 tuần** (thêm 0.5 tuần cho trụ giáo dục tài chính). Tổng thời lượng không đổi khi
