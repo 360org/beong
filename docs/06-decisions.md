@@ -284,7 +284,9 @@ thiết bị bố mẹ có session auth user, thiết bị con có credential ph
 `member_id`.
 
 **Hệ quả:** (+) đổi vai là thao tác vô hại, không cần khoá bằng PIN, không tạo đường leo thang
-quyền. (+) mất/mượn máy con cũng không thành máy bố mẹ. (−) phải cẩn thận không bao giờ để logic
+quyền. *(**ADR-027 sửa vế "không cần khoá bằng PIN"**: nay vào hồ sơ nào cũng qua pass của hồ sơ
+đó — nhưng để **định danh ai đang dùng**, không phải để cấp quyền. Phần cốt lõi của ADR này —
+vai local không cấp quyền — giữ nguyên.)* (+) mất/mượn máy con cũng không thành máy bố mẹ. (−) phải cẩn thận không bao giờ để logic
 nghiệp vụ đọc cờ vai local thay vì đọc credential — dễ sai khi code nhanh.
 
 ---
@@ -511,6 +513,57 @@ Nghĩa là chốt ID **không** khoá luôn thương hiệu: câu hỏi mở #4 
 không ảnh hưởng gì tới ID.
 
 ---
+
+---
+
+## ADR-027: Mỗi hồ sơ một mật khẩu riêng, đặt bắt buộc ngay từ onboarding
+
+**Bối cảnh:** luồng vào app do chủ dự án chốt ngày 23/08/2026:
+
+```
+Cài app → khai báo gia đình → khai báo con cái → đặt pass cho từng hồ sơ → dùng
+Khoá lại → chọn nhà → chọn vai (phụ huynh / con) → chọn hồ sơ → điền pass → vào đúng hồ sơ
+```
+
+**Quyết định:** mỗi `member` — cả bố mẹ lẫn từng bé — có `pin_hash` của riêng mình.
+Onboarding **bắt buộc** đặt pass cho mọi hồ sơ vừa tạo; thêm bé về sau cũng phải đặt
+pass cho bé đó. Không có hồ sơ nào không có pass.
+
+**Đây là quyết định ngược lại hai điều đã ghi trước đó**, ghi ra để không ai
+tưởng mình đọc nhầm tài liệu:
+
+| Trước | Nay |
+|---|---|
+| Một PIN **chung cho cả nhà**, chỉ đặt trên hồ sơ bố mẹ. Lý do cũ: "mục đích là ngăn *trẻ con*, không phải phân quyền giữa bố và mẹ. Hai PIN khác nhau chỉ tạo thêm thứ để quên." | Mỗi hồ sơ một pass |
+| PIN **tuỳ chọn** — "bật PIN là lựa chọn của bố mẹ, không phải thứ áp lên mọi nhà" | Bắt buộc, từ onboarding |
+| ADR-018: "đổi vai là thao tác vô hại, **không cần khoá bằng PIN**" | Vào bất kỳ hồ sơ nào cũng qua pass |
+
+**Lý do:** pass ở đây không còn chỉ để ngăn trẻ vào Cài đặt. Nó trở thành cách
+**định danh ai đang dùng máy** — bước "điền pass → load đúng hồ sơ" của luồng
+trên. Trên một máy dùng chung, đó cũng là thứ giữ sổ xu của bé này khỏi tay bé
+kia.
+
+**Điều ADR-018 vẫn giữ nguyên:** vai lưu ở local **không cấp quyền**. Pass chọn
+xem mở hồ sơ nào, không phải thứ chứng minh quyền với máy chủ. Khi có backend,
+quyền vẫn suy ra từ credential. Đừng để logic nghiệp vụ đọc "đã qua pass" thay
+cho credential.
+
+**Hệ quả phải bù, nếu không là tự dựng lại đúng cái bẫy vừa gỡ:**
+
+- **Bé cũng phải nhớ mật khẩu.** Với bé 5 tuổi thì đây là rào thật, không phải
+  giả thiết. Bù bằng: **bố mẹ đặt lại pass cho con** được từ Cài đặt, không cần
+  biết pass cũ.
+- **"Quên pass?" giờ phải *đổi* pass, không phải *gỡ*.** Gỡ sẽ để lại hồ sơ
+  không pass, tức vi phạm chính ADR này. Luồng thoát: xác nhận → đặt pass mới
+  ngay → vào.
+- **Không thêm câu hỏi bí mật hay email khôi phục** (giữ nguyên lập luận cũ):
+  app không có tài khoản, và thêm hai thứ đó là thêm dữ liệu cá nhân vào một app
+  trẻ em.
+
+**Mức bảo đảm không đổi:** vẫn là 4 chữ số băm SHA-256 không muối, vẫn **không
+phải bảo mật thật** — ai cầm được file dữ liệu thì dò ra trong tích tắc. Nó chặn
+người trong nhà bấm nhầm hồ sơ của nhau, không chặn kẻ tấn công.
+
 
 ## Câu hỏi còn mở
 
