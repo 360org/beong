@@ -14,7 +14,29 @@ ca mới** của đúng loại đó:
 
 ---
 
-## Tóm tắt
+> ## Soát lại 23/08 chiều — bản `0.2.6+13`, commit `707d007`
+>
+> Bốn trong sáu mục đã đóng, một mục xử lý đúng cách nhưng chưa nối, một chưa động tới.
+>
+> | # | Vấn đề | Trạng thái |
+> |---|---|---|
+> | 1 | Ghép cặp QR nói dối | ✅ **Đóng** — câu đổi thành "Tính năng đồng bộ qua mạng đang được hoàn thiện" |
+> | 2 | `proof_mode` không ai đọc | ✅ **Đóng** — nối vào `TaskReviewService.complete`, có 2 test |
+> | 3 | `SyncEngine` / `NotificationService` | 🟡 **Xử lý đúng cách, chưa nối** — roadmap bỏ ✅ trơn, ghi rõ "chờ tích hợp client Supabase". Code vẫn chỉ có provider, và điều đó nay **đã được nói đúng** |
+> | 4 | ADR-027 ngược code | ✅ **Đóng** — ADR viết lại: "Bố mẹ bắt buộc, Bé tuỳ chọn", kèm bảng đối chiếu ba mốc |
+> | 5 | CI đỏ | ✅ **Đóng** — #148, #149, #150 xanh liên tiếp |
+> | 6 | Không có ảnh chụp | ❌ **Chưa** — vẫn dừng ở ảnh 80 (`v0.2.4`) |
+>
+> **Đóng thêm ngoài danh sách:** mục cuối còn mở của audit trước
+> ([`13`](13-audit-luong-vao-app.md) §1) — dấu vết chẩn đoán lúc khởi động — nay
+> đã có, `main.dart` ghi ba chỗ vào `NhatKyLoi`.
+>
+> **Còn một khe hở nhỏ chưa lấp:** không test nào canh *onboarding truyền
+> `batBuoc: true` cho hồ sơ bố mẹ*. Test hiện có canh **sheet** cư xử đúng với
+> cờ đó, không canh **chỗ gọi** truyền đúng cờ. Ai đó đổi thành `false` thì
+> không gì đỏ — đúng cách mà quy tắc "bé bắt buộc" đã lặng lẽ trôi lần trước.
+
+## Tóm tắt (bản đầu, 23/08 sáng)
 
 | # | Vấn đề | Mức |
 |---|---|---|
