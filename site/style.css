@@ -142,8 +142,17 @@ section { padding: clamp(56px, 8vw, 96px) 0; position: relative; }
 }
 .head-in { display: flex; align-items: center; gap: 16px; min-height: 68px; }
 .brand {
-  display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 1.25rem;
+  display: flex; align-items: center; gap: 10px;
   color: var(--ink); text-decoration: none; flex: none;
+}
+.brand-text {
+  display: flex; flex-direction: column; line-height: 1.15;
+}
+.brand-name {
+  font-weight: 900; font-size: 1.2rem; color: var(--ink);
+}
+.brand-slogan {
+  font-size: 0.72rem; font-weight: 700; color: var(--amber); letter-spacing: 0.02em;
 }
 .brand .logo {
   width: 36px; height: 36px; border-radius: 10px; flex: none;
