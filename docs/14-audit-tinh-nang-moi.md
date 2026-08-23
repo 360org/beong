@@ -36,7 +36,9 @@ ca mới** của đúng loại đó:
 > cờ đó, không canh **chỗ gọi** truyền đúng cờ. Ai đó đổi thành `false` thì
 > không gì đỏ — đúng cách mà quy tắc "bé bắt buộc" đã lặng lẽ trôi lần trước.
 
-## Tóm tắt (bản đầu, 23/08 sáng)
+# Phần I — Đúng/sai (23/08 sáng)
+
+## Tóm tắt
 
 | # | Vấn đề | Mức |
 |---|---|---|
@@ -241,3 +243,140 @@ Tạo một việc lặp hằng ngày thì app sinh sẵn lượt cho **8 ngày*
 vì hai lý do: số dòng lớn dần theo thời gian, và luồng trừ xu khi bỏ lỡ
 (`ADR-022`) nay phải đúng với cả lượt **tương lai** chứ không chỉ hôm nay. Nếu
 đó là chủ ý thì nên có một dòng trong `03-data-model.md` nói rõ.
+
+---
+
+# Phần II — Cải tiến giao diện (chủ dự án nêu, 23/08 tối)
+
+Sáu điểm dưới đây **không phải lỗi** — code chạy đúng như thiết kế hiện tại.
+Đây là yêu cầu nâng chất lượng trải nghiệm, ghi tách khỏi Phần I để không lẫn
+"sai" với "chưa đủ tốt".
+
+Chủ dự án gửi kèm 5 ảnh của **ChoreReward** (`support@chorereward.net`) làm mẫu
+tham chiếu — app đối chiếu đã phân tích ở
+[`07-competitive-analysis.md`](07-competitive-analysis.md). Ảnh của họ, không
+phải của Bé Ong; dùng để so cách bố trí, không phải để chép.
+
+## Tóm tắt
+
+| # | Yêu cầu | Hiện trạng đo được | Mức |
+|---|---|---|---|
+| 7 | Thêm icon cho việc nhà | **30 icon** (`kTaskIconKeys`) | 🟡 |
+| 8 | Bảng chọn icon phải thu gọn, có nút "Xem thêm" | Đổ hết 30 icon cùng lúc, chiếm ~5 hàng | 🟡 |
+| 9 | Giao diện cho bé thân thiện, ngộ nghĩnh hơn | Đang dùng chung ngôn ngữ thị giác với vai bố mẹ | 🟠 |
+| 10 | Cài đặt chia nhóm cho khoa học | **11 dòng trong một khối phẳng**, không tiêu đề nhóm | 🟠 |
+| 11 | Thống kê xếp theo ngày, bấm mới sổ ra | Lịch sử là một danh sách phẳng, không nhóm theo ngày | 🟠 |
+| 12 | Xu chưa chia làm **banner trên cùng**, hũ nằm dưới | "Chờ chia" đang là **ô thứ tư nằm cùng hàng** với ba hũ thật | 🟠 |
+
+## 7 · 🟡 Icon việc nhà còn ít
+
+Đang có **30 icon** cho việc nhà và 12 avatar con vật. Bảng preset có 20 việc
+mẫu, tức phần lớn icon đã bị các preset dùng hết — nhà nào tự đặt việc riêng
+("Tưới cây ban công", "Tập đàn", "Cho mèo ăn") sẽ nhanh hết thứ để chọn và phải
+dùng lại icon của việc khác.
+
+**Đề xuất:** nâng lên 60–80 icon, chia nhóm theo ngữ cảnh (nhà cửa · học tập ·
+vệ sinh · thể chất · thú cưng · giúp đỡ). Ràng buộc phải giữ: mọi icon **nằm
+trong bundle**, không tải mạng (ADR-002 offline-first), và mỗi icon phải nhận
+ra được ở cỡ 28px — bé chưa đọc chữ thì icon là nội dung duy nhất.
+
+## 8 · 🟡 Bảng chọn icon đổ hết ra một lúc
+
+Hiện đổ cả 30 icon thành lưới 6 cột × 5 hàng ngay trong biểu mẫu (ảnh `88`).
+Thêm icon theo mục 7 thì lưới này thành 12–14 hàng, đẩy mọi thứ phía dưới —
+lịch lặp, giao cho ai, chế độ duyệt, yêu cầu bằng chứng — ra khỏi màn hình.
+
+**Đề xuất:** mặc định hiện **một hàng** (6–8 icon hay dùng nhất, hoặc icon của
+preset vừa chọn), kèm nút **"Xem thêm ▾"** mở ra phần còn lại. ChoreReward làm
+đúng kiểu này ở khối preset. Nút phải nói rõ còn bao nhiêu ("Xem thêm 52 hình")
+— nút "More" trơn không cho biết bấm vào được gì.
+
+## 9 · 🟠 Giao diện vai con chưa đủ ngộ nghĩnh
+
+Đây là điểm **đáng giá nhất trong sáu điểm**, vì nó chạm thẳng vào kim chỉ nam
+của sản phẩm: app phải khiến đứa trẻ *muốn* quay lại.
+
+Hiện vai con và vai bố mẹ dùng **chung một ngôn ngữ thị giác**: cùng kiểu thẻ,
+cùng bo góc, cùng kiểu chữ, cùng cách xếp danh sách. Khác biệt duy nhất là
+`KidScale` (cỡ chữ, cỡ icon, vùng chạm) và linh vật Bé Ong ở đầu màn.
+
+Nói cách khác: **màn của con hiện là màn của người lớn, phóng to.**
+
+**Đề xuất, xếp theo tỷ lệ hiệu quả trên công sức:**
+
+1. **Phản hồi khi chạm** — hiện chỉ có ô tròn tích và hoa giấy. Thêm nảy nhẹ,
+   rung, và một âm thanh ngắn (tắt được). Đây là thứ trẻ nhỏ phản ứng mạnh nhất
+   và rẻ nhất để làm.
+2. **Linh vật tham gia vào việc**, không chỉ ngồi trên đầu màn — reo khi con
+   xong việc, buồn ngủ khi chưa có gì, nhảy khi đủ mốc huy hiệu.
+3. **Tiến độ dạng vật thể** thay vì vòng tròn phần trăm: tổ ong đầy dần, cây
+   lớn lên. Trẻ 5 tuổi đọc "7/12" chậm hơn nhiều so với nhìn một cái tổ gần đầy.
+4. **Nền và thẻ mềm hơn ở vai con** — bo góc lớn hơn, màu ấm hơn, tách hẳn khỏi
+   bảng màu nghiêm túc của vai bố mẹ.
+
+**Ràng buộc không được phá:** tương phản 4.5:1 và WCAG 1.4.1 (không dùng riêng
+màu để truyền nghĩa) vẫn phải giữ — xem `test/unit/kha_dung_test.dart`. Ngộ
+nghĩnh không phải lý do để hạ ngưỡng khả dụng.
+
+## 10 · 🟠 Cài đặt là một khối phẳng 11 dòng
+
+Đo được: một `_SettingsSection` duy nhất chứa Giao diện · Mật khẩu hồ sơ · Cần
+bố mẹ duyệt · Con tự chia xu · Các hũ · Trừ xu · Múi giờ · Giờ đổi ngày · Quy
+đổi tiền thật · Báo lỗi · Phiên bản. Không tiêu đề nhóm nào (ảnh `85`).
+
+Sprint 3 xong sẽ thêm tài khoản, đồng bộ, thiết bị đã ghép — danh sách này sẽ
+qua 15 dòng.
+
+**Đề xuất chia bốn nhóm**, mỗi nhóm một tiêu đề chữ nhỏ như ChoreReward:
+
+| Nhóm | Gồm |
+|---|---|
+| **Gia đình** | Thành viên, Thêm bé, Ghép cặp máy con, Múi giờ, Giờ đổi ngày |
+| **Quy tắc xu** | Cần bố mẹ duyệt, Con tự chia xu, Các hũ, Trừ xu, Quy đổi tiền thật |
+| **Ứng dụng** | Giao diện, Mật khẩu hồ sơ |
+| **Thông tin** | Báo lỗi, Phiên bản, Quyền riêng tư, Điều khoản |
+
+Đặt **Khoá lại** tách hẳn dưới cùng, giữ nguyên như hiện tại.
+
+## 11 · 🟠 Thống kê chưa xếp theo ngày
+
+"Sổ của con" hiện đổ **một danh sách phẳng** mọi giao dịch, mới nhất trước
+(`watchGroupedHistory`). Đã gộp theo giao dịch — một việc là một dòng, không
+phải ba dòng theo hũ — nhưng chưa nhóm theo ngày.
+
+Hệ quả: sau một tuần là vài chục dòng liền mạch, không có mốc để bám. Câu hỏi
+tự nhiên nhất của bố mẹ — *"hôm qua con làm được gì?"* — phải cuộn tay mà đếm.
+
+**Đề xuất:** nhóm theo ngày, mỗi ngày **một dòng tóm tắt gập lại** (thứ + ngày,
+số việc xong, tổng xu), bấm mới sổ ra chi tiết. Ngày hôm nay mở sẵn. Ngày không
+có gì vẫn hiện nhưng ghi "Chưa có hoạt động" — khoảng trống trong chuỗi cũng là
+thông tin, và đó chính là cách ChoreReward làm ở màn Statistics.
+
+## 12 · 🟠 Xu chưa chia đang nằm lẫn với các hũ
+
+Trong "Sổ của con", **"Chờ chia" là ô thứ tư nằm cùng hàng** với Tiêu · Để dành
+· Cho đi. Code có ghi rõ nó khác (`pending: true`, viền vàng, và có chú thích
+giải thích đúng nguy cơ này), nhưng **vị trí vẫn nói ngược lại**: cùng hàng,
+cùng cỡ, cùng hình dạng thì mắt đọc nó là hũ thứ tư.
+
+Đây không phải hũ. Đó là số xu **chưa vào hũ nào**, và là một **việc cần làm**.
+
+**Đề xuất:** đưa lên thành **banner riêng phía trên**, chiếm hết chiều ngang,
+kèm nút hành động ("Chia ngay") — hàng hũ nằm dưới, chỉ còn đúng những hũ thật.
+Hết xu chưa chia thì banner biến mất, hàng hũ trở về ba ô.
+
+Cách này cũng làm màn chia xu (`89`, `90`) nhất quán với sổ: cả hai đều đặt
+"còn bao nhiêu chưa chia" ở trên cùng.
+
+## Thứ tự đề nghị cho Phần II
+
+1. **§12** — nhỏ nhất, sửa một chỗ bố trí, và gỡ một hiểu nhầm về tiền của con.
+2. **§10** — chia nhóm Cài đặt, làm trước khi Sprint 3 đổ thêm dòng vào.
+3. **§11** — nhóm thống kê theo ngày.
+4. **§8** rồi **§7** — thu gọn bảng chọn trước, rồi mới thêm icon. Làm ngược
+   thứ tự thì biểu mẫu vỡ ngay khi thêm icon.
+5. **§9** — làm theo bốn bước nhỏ ở trên, đo lại bằng ảnh chụp sau mỗi bước.
+
+**Ghi cho người làm §9:** đây là mục duy nhất trong sáu mục **không kiểm được
+bằng test**. Cách duy nhất biết nó có tác dụng là đưa cho một đứa trẻ thật dùng
+và ngồi nhìn. Ràng buộc khả dụng thì test canh được, còn "ngộ nghĩnh" thì không.
