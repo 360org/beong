@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:beong/core/providers/database_provider.dart';
-import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
+import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/features/members/child_profile_form.dart';
@@ -99,7 +99,7 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.dangerLight,
+              backgroundColor: ctx.semantic.danger,
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('XOÁ HỒ SƠ'),
@@ -168,8 +168,8 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
             width: double.infinity,
             child: OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.dangerLight,
-                side: const BorderSide(color: AppColors.dangerLight),
+                foregroundColor: context.semantic.danger,
+                side: BorderSide(color: context.semantic.danger),
               ),
               onPressed: _busy ? null : _deleteProfile,
               icon: const Icon(Icons.delete_outline_rounded),

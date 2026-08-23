@@ -60,7 +60,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.dangerLight,
+                backgroundColor: ctx.semantic.danger,
               ),
               onPressed: () => Navigator.of(ctx).pop(true),
               child: const Text('XOÁ TOÀN BỘ'),
@@ -260,7 +260,7 @@ class _FamilyInfoCard extends StatelessWidget {
             IconButton(
               onPressed: onDelete,
               icon: const Icon(Icons.delete_outline_rounded),
-              color: AppColors.dangerLight,
+              color: context.semantic.danger,
               tooltip: 'Xoá gia đình này',
             ),
           ],
