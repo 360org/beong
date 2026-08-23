@@ -191,6 +191,58 @@ void main() {
     );
   });
 
+  testWidgets('bấm xong việc thì danh sách không bị xé đi dựng lại', (
+    tester,
+  ) async {
+    // "Bấm hoàn thành nhiệm vụ bị giật cục" — chủ dự án báo 23/08.
+    //
+    // Nguyên nhân: cả bốn luồng của màn hình con được tạo mới ngay trong
+    // `build()`, mà Drift trả `Stream` mới mỗi lần gọi. `StreamBuilder` so sánh
+    // theo danh tính đối tượng nên huỷ đăng ký rồi đăng ký lại, và quay về
+    // `ConnectionState.waiting` với `data == null` — danh sách việc bị thay
+    // bằng vòng xoay. Mỗi cú chạm lại `setState` hai lần để nổ hoa giấy, nên
+    // mỗi lần bấm là hai lần xé cả danh sách đi dựng lại.
+    //
+    // Test canh đúng triệu chứng người dùng thấy, không canh cách sửa: **ngay
+    // khung hình sau cú chạm**, danh sách phải còn nguyên và không có vòng
+    // xoay nào.
+    await pumpApp(tester);
+    await xongOnboarding(tester);
+
+    final child = (await db.select(db.members).get()).firstWhere(
+      (m) => m.kind == MemberKind.child.name,
+    );
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(BeOngApp)),
+    );
+    await container
+        .read(sessionProvider.notifier)
+        .switchMember(child.id, isParent: false);
+    await settle(tester);
+
+    final soThe = tester.widgetList(find.byType(TaskCard)).length;
+    expect(soThe, greaterThan(1), reason: 'cần vài việc mới thấy được cú giật');
+
+    await tester.tap(find.byType(TaskCard).first);
+    // **Một** khung hình, không `settle`: `settle` chạy tới lúc mọi thứ yên
+    // nên nó nuốt mất đúng cái nháy cần bắt.
+    await tester.pump();
+
+    expect(
+      find.byType(CircularProgressIndicator),
+      findsNothing,
+      reason: 'danh sách không được nháy thành vòng xoay sau mỗi cú chạm',
+    );
+    expect(
+      tester.widgetList(find.byType(TaskCard)).length,
+      soThe,
+      reason: 'các thẻ khác phải đứng yên, không bị tháo rồi dựng lại',
+    );
+
+    await settle(tester);
+    await khongHoSoNaoTrongMatKhau();
+  });
+
   testWidgets('đổi phần thưởng phải qua bố mẹ duyệt (ADR-025)', (tester) async {
     await pumpApp(tester);
 

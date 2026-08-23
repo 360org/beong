@@ -6,7 +6,14 @@ import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:flutter/material.dart';
 
-class TaskCard extends StatelessWidget {
+/// Thẻ một việc trong danh sách của con.
+///
+/// **Có state cục bộ, và đó là chủ ý.** Trạng thái thật đi một vòng dài: ghi
+/// DB → cộng xu → xét thưởng trọn bộ → xét huy hiệu → luồng phát lại → dựng
+/// lại. Nếu thẻ chỉ vẽ theo trạng thái thật thì trong suốt vòng đó con chạm
+/// vào mà **không có gì xảy ra**, rồi đột nhiên mọi thứ nhảy một lượt. Cờ
+/// `_vuaBam` lấp đúng khoảng lặng ấy: ô tròn tích ngay trong khung hình chạm.
+class TaskCard extends StatefulWidget {
   const TaskCard({
     required this.title,
     required this.points,
@@ -31,15 +38,47 @@ class TaskCard extends StatelessWidget {
   final VoidCallback onToggle;
 
   @override
+  State<TaskCard> createState() => _TaskCardState();
+}
+
+class _TaskCardState extends State<TaskCard> {
+  /// Con vừa chạm, trạng thái thật chưa về.
+  ///
+  /// Nhả ra ngay khi trạng thái thật tới, để thẻ không giữ một lời hứa sai nếu
+  /// việc ghi hỏng — sai mà im lặng còn khó lần ra hơn một cú chậm.
+  bool _vuaBam = false;
+
+  @override
+  void didUpdateWidget(TaskCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isCompleted || widget.isPending || widget.isMissed) {
+      _vuaBam = false;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final title = widget.title;
+    final points = widget.points;
+    final iconKey = widget.iconKey;
+    final isCompleted = widget.isCompleted;
+    final isPending = widget.isPending;
+    final isMissed = widget.isMissed;
+
     final scale = KidScaleScope.of(context);
-    final profileColor = AppColors.profileColor(colorIndex);
-    final isDone = isCompleted || isPending;
+    final profileColor = AppColors.profileColor(widget.colorIndex);
+    final isDone = isCompleted || isPending || _vuaBam;
     final avatarSize = scale.tapTarget - AppSpacing.lg;
 
     return Card(
       child: InkWell(
-        onTap: isDone || isMissed ? null : onToggle,
+        onTap: isDone || isMissed
+            ? null
+            : () {
+                // Tích ngay trong khung hình chạm, không chờ DB.
+                setState(() => _vuaBam = true);
+                widget.onToggle();
+              },
         borderRadius: BorderRadius.circular(scale.cardRadius),
         child: ConstrainedBox(
           // Vùng chạm rộng theo tuổi — ngón tay trẻ nhỏ kém chính xác.
@@ -98,7 +137,9 @@ class TaskCard extends StatelessWidget {
                 XuBadge(amount: points, pill: true),
                 const SizedBox(width: AppSpacing.sm),
                 _Checkbox(
-                  checked: isCompleted,
+                  // `_vuaBam` cũng tính là đã tích: đó chính là chỗ lấp khoảng
+                  // lặng giữa cú chạm và lúc trạng thái thật về.
+                  checked: isCompleted || _vuaBam,
                   pending: isPending,
                   missed: isMissed,
                   color: profileColor,

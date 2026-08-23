@@ -21,6 +21,7 @@ import 'package:beong/domain/repositories/jar_repository.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:beong/domain/repositories/wallet_repository.dart';
+import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/features/goals/goal_section.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
 import 'package:beong/features/rewards/allocate_xu_sheet.dart';
@@ -43,6 +44,55 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
   /// Ở cấp màn hình thì hiệu ứng sống qua lần xếp lại danh sách, và nổ giữa màn
   /// còn dễ thấy hơn nổ trong một hàng cao 70px.
   bool _celebrate = false;
+
+  // ---------------------------------------------------------------------------
+  // Luồng dữ liệu giữ lại giữa các lần dựng.
+  //
+  // Đây là nguyên nhân của "bấm xong việc thì giật cục". Trước bản này cả bốn
+  // luồng dưới đây được **tạo mới ngay trong `build()`**:
+  //
+  //     stream: taskDao.watchInstancesForMember(memberId: ..., date: today)
+  //
+  // Drift trả một `Stream` **mới** mỗi lần gọi. `StreamBuilder` so sánh theo
+  // *danh tính* đối tượng, thấy khác là huỷ đăng ký rồi đăng ký lại — và lúc đó
+  // nó quay về `ConnectionState.waiting` với `data == null`. Danh sách việc bị
+  // thay bằng vòng xoay rồi mới dựng lại.
+  //
+  // Mà mỗi lần con bấm xong một việc thì màn hình `setState` để nổ hoa giấy —
+  // hai lần, bật rồi tắt. Nên **mỗi cú chạm là hai lần xé cả danh sách đi dựng
+  // lại**. Đúng thứ người dùng mô tả.
+  //
+  // Giữ lại ở đây, chỉ dựng lại khi thứ *thật sự* quyết định nội dung đổi: đổi
+  // bé, đổi nhà, hoặc sang ngày mới.
+  String? _khoaLuong;
+  late Stream<List<TaskInstance>> _luongLuotViec;
+  late Stream<List<Task>> _luongViec;
+  late Stream<Member> _luongThanhVien;
+  late Stream<WalletBalance> _luongVi;
+  late Stream<Streak?> _luongChuoi;
+
+  void _dungLuongNeuCan({
+    required String memberId,
+    required String familyId,
+    required CalendarDate today,
+  }) {
+    final khoa = '$memberId|$familyId|$today';
+    if (khoa == _khoaLuong) return;
+    _khoaLuong = khoa;
+
+    final tasks = ref.read(taskRepositoryProvider);
+    final members = ref.read(memberRepositoryProvider);
+    final wallet = ref.read(walletRepositoryProvider);
+
+    _luongLuotViec = tasks.watchInstancesForMember(
+      memberId: memberId,
+      date: today,
+    );
+    _luongViec = tasks.watchActiveTasks(familyId);
+    _luongThanhVien = members.watchMember(memberId);
+    _luongChuoi = members.watchStreak(memberId);
+    _luongVi = wallet.watchBalance(memberId);
+  }
 
   /// Con bấm xong một lượt việc.
   ///
@@ -88,8 +138,6 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
     if (session == null) return const SizedBox.shrink();
 
     final memberId = session.activeMemberId;
-    final memberDao = ref.watch(memberRepositoryProvider);
-    final walletDao = ref.watch(walletRepositoryProvider);
     final taskDao = ref.watch(taskRepositoryProvider);
     final penaltyService = ref.watch(penaltyServiceProvider);
 
@@ -98,15 +146,18 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
                 fallbackFamilyClock())
             .today();
 
+    _dungLuongNeuCan(
+      memberId: memberId,
+      familyId: session.familyId,
+      today: today,
+    );
+
     return Scaffold(
       body: ConfettiBurst(
         play: _celebrate,
         child: SafeArea(
           child: StreamBuilder<List<TaskInstance>>(
-            stream: taskDao.watchInstancesForMember(
-              memberId: memberId,
-              date: today,
-            ),
+            stream: _luongLuotViec,
             builder: (context, instSnap) {
               // Danh sách việc là chỗ hiện sai tệ nhất: luồng hỏng mà rơi về
               // rỗng thì con thấy "chưa có việc nào hôm nay" và tin là thật.
@@ -130,7 +181,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
                 ),
                 children: [
                   StreamBuilder<Member>(
-                    stream: memberDao.watchMember(memberId),
+                    stream: _luongThanhVien,
                     builder: (context, memberSnap) {
                       final member = memberSnap.data;
                       // Giao diện điều chỉnh theo tuổi của chính bé đang xem —
@@ -147,12 +198,12 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
                             _ChildHeader(member: member),
                             const SizedBox(height: AppSpacing.lg),
                             StreamBuilder<WalletBalance>(
-                              stream: walletDao.watchBalance(memberId),
+                              stream: _luongVi,
                               builder: (context, balSnap) {
                                 final balance =
                                     balSnap.data ?? WalletBalance.zero;
                                 return StreamBuilder<Streak?>(
-                                  stream: memberDao.watchStreak(memberId),
+                                  stream: _luongChuoi,
                                   builder: (context, streakSnap) {
                                     return _DashboardCard(
                                       scale: scale,
@@ -165,7 +216,9 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
                                                 familyId: session.familyId,
                                                 memberId: memberId,
                                                 inbox: balance.inbox,
-                                                walletDao: walletDao,
+                                                walletDao: ref.read(
+                                                  walletRepositoryProvider,
+                                                ),
                                                 jarDao: ref.read(
                                                   jarRepositoryProvider,
                                                 ),
@@ -211,7 +264,25 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
                       },
                     )
                   else
-                    ..._buildTaskSections(instances, taskDao),
+                    // Nạp **một** lần cho cả danh sách, thay vì để mỗi thẻ tự
+                    // hỏi `getTaskById` trong `initState`. Cách cũ vừa là 12
+                    // truy vấn rời rạc, vừa làm thẻ trả `SizedBox.shrink()`
+                    // trong lúc chờ — tức **cao 0** — nên danh sách co lại rồi
+                    // bung ra mỗi khi một thẻ phải nạp lại. Cú giật thứ hai,
+                    // ngay sau cú giật do stream bị đăng ký lại.
+                    StreamBuilder<List<Task>>(
+                      stream: _luongViec,
+                      builder: (context, taskSnap) {
+                        final byId = {
+                          for (final t in taskSnap.data ?? const <Task>[])
+                            t.id: t,
+                        };
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: _buildTaskSections(instances, byId),
+                        );
+                      },
+                    ),
                 ],
               );
             },
@@ -223,7 +294,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
 
   List<Widget> _buildTaskSections(
     List<TaskInstance> instances,
-    TaskRepository taskDao,
+    Map<String, Task> byId,
   ) {
     final scheduled = instances
         .where((i) => i.status == InstanceStatus.scheduled.name)
@@ -254,7 +325,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
               // vị trí khi việc chuyển mục và thẻ hiện tên của việc cũ.
               key: ValueKey(instance.id),
               instance: instance,
-              taskDao: taskDao,
+              task: byId[instance.taskId],
               onCompleted: _celebrateOnce,
               onComplete: _hoanThanhViec,
             ),
@@ -273,7 +344,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
               // vị trí khi việc chuyển mục và thẻ hiện tên của việc cũ.
               key: ValueKey(instance.id),
               instance: instance,
-              taskDao: taskDao,
+              task: byId[instance.taskId],
               onCompleted: _celebrateOnce,
               onComplete: _hoanThanhViec,
             ),
@@ -292,7 +363,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
               // vị trí khi việc chuyển mục và thẻ hiện tên của việc cũ.
               key: ValueKey(instance.id),
               instance: instance,
-              taskDao: taskDao,
+              task: byId[instance.taskId],
               onCompleted: _celebrateOnce,
               onComplete: _hoanThanhViec,
             ),
@@ -311,7 +382,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
               // vị trí khi việc chuyển mục và thẻ hiện tên của việc cũ.
               key: ValueKey(instance.id),
               instance: instance,
-              taskDao: taskDao,
+              task: byId[instance.taskId],
               onCompleted: _celebrateOnce,
               onComplete: _hoanThanhViec,
             ),
@@ -789,17 +860,21 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _InstanceCard extends ConsumerStatefulWidget {
+class _InstanceCard extends StatelessWidget {
   const _InstanceCard({
     required this.instance,
-    required this.taskDao,
+    required this.task,
     required this.onCompleted,
     required this.onComplete,
     super.key,
   });
 
   final TaskInstance instance;
-  final TaskRepository taskDao;
+
+  /// Việc tương ứng, do màn hình nạp sẵn cho cả danh sách.
+  ///
+  /// `null` chỉ ở khung hình đầu, trước khi luồng việc kịp phát.
+  final Task? task;
 
   /// Gọi khi con vừa bấm xong việc, để màn hình nổ hoa giấy. Thẻ không tự nổ:
   /// nó bị tháo ngay sau khi bấm vì danh sách xếp lại theo trạng thái.
@@ -810,58 +885,33 @@ class _InstanceCard extends ConsumerStatefulWidget {
   final Future<void> Function(String instanceId) onComplete;
 
   @override
-  ConsumerState<_InstanceCard> createState() => _InstanceCardState();
-}
-
-class _InstanceCardState extends ConsumerState<_InstanceCard> {
-  Task? _task;
-
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_loadTask());
-  }
-
-  @override
-  void didUpdateWidget(_InstanceCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Phòng vệ tầng hai bên cạnh key ở chỗ dựng widget: nếu State bị tái dùng
-    // cho instance khác thì `initState` không chạy lại, phải tự nạp lại task —
-    // nếu không thẻ sẽ hiện tên của việc cũ.
-    if (oldWidget.instance.taskId != widget.instance.taskId) {
-      unawaited(_loadTask());
-    }
-  }
-
-  Future<void> _loadTask() async {
-    final task = await widget.taskDao.getTaskById(widget.instance.taskId);
-    if (mounted) setState(() => _task = task);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final task = _task;
-    if (task == null) return const SizedBox.shrink();
-
-    // `celebrateOnTap` tắt với tuổi teen: hoa giấy với bé 14 tuổi là rườm rà.
+    final task = this.task;
     final scale = KidScaleScope.of(context);
+
+    // Chỗ trống **có chiều cao**, không co về 0: chỗ trống có kích thước thì
+    // danh sách đứng yên, chỗ trống cao 0 thì nó nhảy.
+    if (task == null) {
+      return SizedBox(height: scale.tapTarget + AppSpacing.lg);
+    }
 
     return TaskCard(
       title: task.title,
       points: task.points,
       iconKey: task.iconKey,
-      isCompleted: widget.instance.status == InstanceStatus.approved.name,
-      isPending: widget.instance.status == InstanceStatus.pendingReview.name,
-      isMissed: widget.instance.status == InstanceStatus.missed.name,
+      isCompleted: instance.status == InstanceStatus.approved.name,
+      isPending: instance.status == InstanceStatus.pendingReview.name,
+      isMissed: instance.status == InstanceStatus.missed.name,
       // Đi qua TaskReviewService chứ không gọi thẳng DAO: nó là chỗ duy nhất
       // biết nhà này có bật duyệt hay không, và là chỗ cộng xu (ADR-023).
       onToggle: () {
-        if (scale.celebrateOnTap) widget.onCompleted();
-        // Gọi lên **màn hình**, không tự `await` ở đây: bấm xong là việc rời
-        // mục "Cần làm" xuống "Đã xong" ngay, thẻ này bị tháo, và mọi
+        // `celebrateOnTap` tắt với tuổi teen: hoa giấy với bé 14 tuổi là rườm rà.
+        if (scale.celebrateOnTap) onCompleted();
+        // Gọi lên **màn hình**, không tự `await` ở đây: bấm xong là việc rời mục
+        // "Cần làm" xuống "Đã xong" ngay, thẻ này bị tháo, và mọi
         // `if (!mounted) return` sau `await` sẽ nuốt mất kết quả — đúng cái bẫy
         // đã làm hoa giấy không bao giờ hiện.
-        unawaited(widget.onComplete(widget.instance.id));
+        unawaited(onComplete(instance.id));
       },
     );
   }
