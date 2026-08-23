@@ -38,13 +38,12 @@ class _ScanPairingDialogState extends ConsumerState<_ScanPairingDialog> {
     super.initState();
     _scannerController = MobileScannerController(
       detectionSpeed: DetectionSpeed.noDuplicates,
-      facing: CameraFacing.back,
     );
   }
 
   @override
   void dispose() {
-    _scannerController?.dispose();
+    unawaited(_scannerController?.dispose());
     _inputController.dispose();
     super.dispose();
   }
@@ -121,7 +120,7 @@ class _ScanPairingDialogState extends ConsumerState<_ScanPairingDialog> {
                           for (final barcode in barcodes) {
                             final rawVal = barcode.rawValue;
                             if (rawVal != null && rawVal.isNotEmpty) {
-                              _handlePairing(rawVal);
+                              unawaited(_handlePairing(rawVal));
                               break;
                             }
                           }

@@ -160,7 +160,6 @@ class _PairingCodeSheetState extends State<_PairingCodeSheet> {
                             child: Center(
                               child: QrImageView(
                                 data: _uri,
-                                version: QrVersions.auto,
                                 size: 170,
                                 eyeStyle: const QrEyeStyle(
                                   eyeShape: QrEyeShape.square,
