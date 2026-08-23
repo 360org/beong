@@ -15,6 +15,7 @@ import 'package:beong/domain/services/money_exchange.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:beong/features/members/add_child_sheet.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
+import 'package:beong/features/members/pairing_sheet.dart';
 import 'package:beong/features/settings/bao_loi_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -257,6 +258,20 @@ class _MemberTile extends StatelessWidget {
                   ],
                 ),
               ),
+              if (!isParent) ...[
+                IconButton(
+                  icon: const Icon(Icons.qr_code_rounded),
+                  tooltip: 'Ghép cặp máy',
+                  onPressed: () => unawaited(
+                    showPairingCodeSheet(
+                      context,
+                      childName: member.displayName,
+                      childMemberId: member.id,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+              ],
               if (isActive)
                 Icon(Icons.check_circle, color: context.colors.primary),
             ],

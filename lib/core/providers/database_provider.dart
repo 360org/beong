@@ -17,9 +17,11 @@ import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/domain/services/day_start_service.dart';
 import 'package:beong/domain/services/goal_service.dart';
 import 'package:beong/domain/services/mat_khau_ho_so.dart';
+import 'package:beong/domain/services/notification_service.dart';
 import 'package:beong/domain/services/penalty_service.dart';
 import 'package:beong/domain/services/redemption_service.dart';
 import 'package:beong/domain/services/streak_service.dart';
+import 'package:beong/domain/services/sync_engine.dart';
 import 'package:beong/domain/services/task_review_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -136,3 +138,13 @@ DayStartService dayStartService(Ref ref) => DayStartService(
   streakService: ref.watch(streakServiceProvider),
   goalService: ref.watch(goalServiceProvider),
 );
+
+@riverpod
+SyncEngine syncEngine(Ref ref) => SyncEngine(
+  db: ref.watch(appDatabaseProvider),
+);
+
+@riverpod
+NotificationService notificationService(Ref ref) => NotificationService();
+
+

@@ -18,6 +18,7 @@ import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:beong/domain/services/age_band.dart';
 import 'package:beong/features/members/child_profile_form.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
+import 'package:beong/features/members/scan_pairing_dialog.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -292,6 +293,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                 ),
               ),
+              if (_currentPage == 0) ...[
+                const SizedBox(height: AppSpacing.sm),
+                TextButton.icon(
+                  onPressed: () async {
+                    final code = await showScanPairingDialog(context);
+                    if (code != null && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Đã nhận mã: ${code.substring(0, 8).toUpperCase()}... Đang tải dữ liệu.'),
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.qr_code_scanner_rounded),
+                  label: const Text('Máy của con? Quét mã ghép cặp'),
+                ),
+              ],
               const SizedBox(height: AppSpacing.xxl),
             ],
           ),

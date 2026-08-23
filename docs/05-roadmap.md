@@ -149,14 +149,14 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
       Phần "chọn con khi thêm task" thì **đã có sẵn** — hàng chip "Giao cho" trong ô thêm việc.
 
 **Ghép cặp máy con:**
-- [ ] Bảng `pairing_codes` (lưu hash, TTL, cờ đã dùng) + bảng `devices`
-- [ ] **Ghép cặp bằng QR** — chi tiết ở `09-onboarding-pairing.md` §4
+- [x] Bảng `pairing_codes` (lưu hash, TTL, cờ đã dùng) + bảng `devices` (schema Supabase)
+- [x] **Ghép cặp bằng QR** — chi tiết ở `09-onboarding-pairing.md` §4 (`PairingService` sinh URI chuẩn `beong://pair?v=1&c=<code>`, sheet cấp mã QR trên máy bố mẹ kèm đếm ngược 10 phút, dialog quét/nhập mã trên máy con)
 - [ ] Credential phạm vi hẹp + **RLS theo hàng** cho máy con
 - [ ] Nhiều hồ sơ con trên cùng một máy + nút chuyển; danh sách thiết bị + thu hồi
 - [ ] Mời phụ huynh thứ hai vào gia đình (dùng lại hạ tầng QR, cấp vai `parent`)
 
 **Sync:**
-- [ ] Outbox + SyncEngine + retry/backoff + idempotency
+- [x] Outbox + SyncEngine + retry/backoff + idempotency (`SyncEngine` quản lý hàng đợi biến đổi local, đẩy tuần tự và xử lý lỗi retry)
 - [ ] Realtime subscribe theo `family_id`
 - [ ] Test xung đột: 2 thiết bị offline cùng sửa → kết quả hội tụ
 - [ ] Job đối soát `balance_cache`
