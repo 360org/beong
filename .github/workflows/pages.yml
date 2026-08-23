@@ -41,7 +41,7 @@ jobs:
           thieu=0
           for page in site/*.html; do
             for f in $(grep -ohE '(src|href)="[^"]*"' "$page" | cut -d'"' -f2); do
-              case "$f" in http*|data:*|\#*) continue ;; esac
+              case "$f" in http*|https*|mailto:*|tel:*|data:*|\#*) continue ;; esac
               base="${f%%#*}"
               [ -z "$base" ] && continue
               if [ ! -f "site/$base" ]; then
