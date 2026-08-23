@@ -3,12 +3,12 @@
 
   "appTitle": "Bé Ong",
   "@appTitle": {
-    "description": "Tên ứng dụng, hiển thị ở trình chuyển ứng dụng"
+    "description": "Tên ứng dụng"
   },
 
-  "appSlogan": "Ong chăm chỉ mỗi ngày",
+  "appSlogan": "Bé Ong chăm chỉ",
   "@appSlogan": {
-    "description": "Slogan dưới tên app ở màn hình chào"
+    "description": "Slogan ứng dụng"
   },
 
   "badgeBusyBee": "Ong chăm chỉ hôm nay!",
@@ -30,38 +30,56 @@
   "settingsTitle": "Cài đặt",
 
   "comingSoon": "Sắp có",
-  "@comingSoon": {
-    "description": "Nhãn tạm cho màn hình chưa dựng xong"
-  },
 
-  "sectionQuickPresets": "Việc có sẵn",
-  "sectionPoints": "Điểm",
+  "sectionQuickPresets": "Chọn nhanh",
+  "sectionPoints": "Điểm (xu)",
   "sectionTaskName": "Tên việc",
   "sectionRepeat": "Lặp lại",
-  "sectionTimeOfDay": "Buổi trong ngày (không bắt buộc)",
+  "sectionTimeOfDay": "Buổi trong ngày",
   "sectionAssignTo": "Giao cho",
-  "sectionApproval": "Duyệt",
+  "sectionApproval": "Cần bố mẹ duyệt",
+  "sectionProofMode": "Yêu cầu bằng chứng",
 
   "repeatOnce": "Một lần",
   "repeatDaily": "Hằng ngày",
-  "repeatCustom": "Tuỳ chọn",
+  "repeatCustom": "Chọn thứ",
 
   "timeMorning": "Sáng",
   "timeAfternoon": "Chiều",
   "timeEvening": "Tối",
 
-  "approvalAuto": "Tự động",
+  "approvalAuto": "Xong là xong",
   "approvalManual": "Bố mẹ duyệt",
+
+  "proofNone": "Không cần",
+  "proofPhoto": "Chụp ảnh 📸",
+  "proofNote": "Ghi chú ✍️",
 
   "actionSave": "Lưu",
   "actionCancel": "Huỷ",
   "actionDelete": "Xoá",
+  "actionEdit": "Sửa",
   "actionApprove": "Duyệt",
   "actionReject": "Từ chối",
+  "actionRedeem": "Đổi",
+  "actionMarkUsed": "Đã dùng",
 
-  "pointsUnit": "{count, plural, other{{count} điểm}}",
+  "jarSpend": "Hũ Tiêu Dùng",
+  "jarSave": "Hũ Để Dành",
+  "jarGive": "Hũ Cho Đi",
+  "jarInbox": "Hũ Chờ Chia",
+
+  "emptyTasksTitle": "Chưa có nhiệm vụ nào",
+  "emptyTasksSubtitle": "Thêm nhiệm vụ đầu tiên để bé bắt đầu rèn luyện!",
+  "emptyRewardsTitle": "Chưa có phần thưởng nào",
+  "emptyRewardsSubtitle": "Tạo phần thưởng để bé có thêm động lực!",
+
+  "dialogDeleteTitle": "Xác nhận xoá",
+  "dialogDeleteContent": "Bạn có chắc chắn muốn xoá mục này không?",
+
+  "pointsUnit": "{count, plural, other{{count} xu}}",
   "@pointsUnit": {
-    "description": "Số điểm thưởng",
+    "description": "Số lượng xu",
     "placeholders": {
       "count": {
         "type": "int"
