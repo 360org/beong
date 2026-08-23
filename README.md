@@ -62,7 +62,7 @@ dựng môi trường chụp màn hình: `.claude/skills/flutter-8-buoc/SKILL.md
 | [`docs/12-huong-dan-su-dung.md`](docs/12-huong-dan-su-dung.md) | **Hướng dẫn cho bố mẹ** — 16 mục, kèm ảnh |
 | [`docs/13-audit-luong-vao-app.md`](docs/13-audit-luong-vao-app.md) | **Audit luồng vào app** — 2 lỗi nghiêm trọng, phương án, và bản sửa ở v0.2.3 |
 | [`docs/14-audit-tinh-nang-moi.md`](docs/14-audit-tinh-nang-moi.md) | **Audit Sprint 3 & 5** — 3 tính năng tick ✅ nhưng chưa nằm trên đường chạy nào |
-| [`docs/screenshot/`](docs/screenshot/) | 80 ảnh chụp toàn bộ app, có mục lục |
+| [`docs/screenshot/`](docs/screenshot/) | 90 ảnh chụp toàn bộ app, có mục lục |
 
 ## Ý tưởng cốt lõi
 

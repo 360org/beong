@@ -1,6 +1,6 @@
-# Ảnh chụp màn hình — Bé Ong v0.2.4
+# Ảnh chụp màn hình — Bé Ong v0.2.6
 
-80 ảnh, chụp trên bản dựng Linux debug ở **412×900** (cỡ điện thoại thật), đi hết
+90 ảnh, chụp trên bản dựng Linux debug ở **412×900** (cỡ điện thoại thật), đi hết
 luồng chứ không chỉ mở từng màn: tạo nhà → làm việc → nhận huy hiệu → đổi thưởng →
 bố mẹ duyệt → con tự chia xu.
 
@@ -126,6 +126,22 @@ Mỗi hồ sơ một mật khẩu riêng, đặt bắt buộc ngay từ onboardi
 | `78-vao-app-chon-ho-so.png` | Nhà hai bé → thêm bước **chọn hồ sơ**, có nút Quay lại |
 | `79-mat-khau-cheo-bi-tu-choi.png` | Mật khẩu của Bố mẹ **không** mở được hồ sơ của con — điều ADR-027 đổi so với PIN chung cũ |
 | `80-them-be-bat-dat-mat-khau.png` | Thêm bé cũng bắt đặt mật khẩu, nếu không là thủng ngay quy tắc vừa đặt |
+
+### Tính năng Sprint 3 & 5 (81–90)
+Chụp ở bản `0.2.6+13`, sau khi audit `14` đóng bốn mục.
+
+| Ảnh | Màn |
+|---|---|
+| `81-quet-ma-ghep-cap.png` | Máy con quét mã — camera + ô dán mã thủ công. Khung camera đen vì máy dựng ảnh không có camera |
+| `82-them-be-tu-3-tuoi.png` | Dải tuổi nay bắt đầu từ **3 tuổi** (trước là 5) |
+| `83-mat-khau-be-tuy-chon.png` | ADR-027 bản mới: mật khẩu **bé có nút HUỶ**, bố mẹ thì không |
+| `84-home-bo-me-viec-chua-xong.png` | Home bố mẹ — mục "Chưa hoàn thành (9)" bung ra xem từng việc |
+| `85-caidat-xoa-nha-qr-mui-gio.png` | Cài đặt — nút xoá nhà, nút QR cạnh mỗi bé, mục Múi giờ |
+| `86-ma-qr-ghep-cap.png` | Máy bố mẹ hiện mã QR + mã chữ dự phòng + đếm ngược hiệu lực |
+| `87-sua-ho-so-be.png` | Sửa hồ sơ bé, đổi mật khẩu bé, xoá hồ sơ |
+| `88-task-editor-yeu-cau-bang-chung.png` | Khối thứ 8 của Task Editor: **Yêu cầu bằng chứng** |
+| `89-chia-xu-truoc-khi-chia.png` | Màn chia xu, chưa chia gì |
+| `90-chia-xu-do-dang-luu-duoc.png` | **Lưu được khi còn 4 xu chưa chia** — trước phải chia đủ 100% |
 
 ## Lỗi bộ ảnh này bắt được — **đã sửa**
 

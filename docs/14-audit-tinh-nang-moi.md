@@ -203,3 +203,41 @@ câu hỏi này, hỏi trước khi tick ✅:
   chạy.
 - **Người dùng bật nó lên thì cái gì đổi?** Nếu không trả lời được bằng một câu
   cụ thể thì nó chưa xong.
+
+---
+
+## Phụ lục — soi bằng ảnh chụp, 23/08 tối (bản `0.2.6+13`)
+
+§6 đã đóng: chụp thêm **10 ảnh** cho các màn mới, `docs/screenshot/81`–`90`.
+Chín tính năng của Sprint 3 & 5 nay đã có người nhìn.
+
+### Kiểm chứng §2 trên app thật, không chỉ bằng test
+
+Tạo việc "Làm bài tập" 25 xu, đặt **Yêu cầu bằng chứng = Chụp ảnh**, đổi sang
+vai con, bấm xong. Đọc thẳng file dữ liệu ngay sau đó:
+
+```
+trạng thái : pendingReview     ← không phải approved
+xu         : 0                 ← không cộng
+```
+
+Nhà đang **tắt** duyệt. Trước bản sửa, việc này sẽ approved và cộng 25 xu ngay.
+Đây là bằng chứng chạy thật, bổ sung cho hai unit test.
+
+### Những thứ nhìn ra được mà đọc code không thấy
+
+- **Mật khẩu bé tuỳ chọn nhìn rất rõ ràng** (`83`): sheet của bố mẹ không có nút
+  HUỶ, sheet của bé có. Người dùng phân biệt được ngay, không cần đọc tài liệu.
+- **Cài đặt đang dày lên nhanh** (`85`): 12 dòng, và sẽ còn thêm khi Sprint 3
+  xong. Chưa tới mức phải chia nhóm, nhưng đáng để mắt.
+- **Khung camera đen** (`81`) là do máy dựng ảnh không có camera, không phải
+  lỗi. Trên máy thật cần kiểm lại — đây là màn duy nhất trong bộ 90 ảnh **chưa
+  ai xác nhận trên thiết bị thật**.
+
+### Một quan sát, chưa xếp là lỗi
+
+Tạo một việc lặp hằng ngày thì app sinh sẵn lượt cho **8 ngày** (23/08 → 30/08),
+đều đặn 10 lượt/ngày. Nhất quán nên trông là cố ý, không phải trùng lặp. Ghi lại
+vì hai lý do: số dòng lớn dần theo thời gian, và luồng trừ xu khi bỏ lỡ
+(`ADR-022`) nay phải đúng với cả lượt **tương lai** chứ không chỉ hôm nay. Nếu
+đó là chủ ý thì nên có một dòng trong `03-data-model.md` nói rõ.

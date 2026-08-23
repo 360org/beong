@@ -306,7 +306,7 @@ hoặc không bao giờ chạy. Danh sách các lần trước ở Sprint 2, kh�
 > chưa từng chạy lần nào nên mang một lỗi không ai biết (`reject_build_waiting_for_review` — tên
 > tuỳ chọn không tồn tại); đã sửa. Chốt chặn còn lại **không phải mã** — xem đầu
 > [`08-release-cicd.md`](08-release-cicd.md).
-- [ ] Icon app, splash, ảnh chụp store
+- [ ] Icon app, splash, ảnh chụp store (bộ ảnh nội bộ đã có 90 tấm ở `screenshot/`, chưa cắt theo cỡ store)
 - [ ] 🔴 **Hồ sơ App Store chưa điền** — chặn cứng đường ra công khai. Binary lên được App Store
       Connect nhưng `submit_for_review` hỏng vì thiếu: ảnh chụp (`iphone65`, `ipadPro129`), mô tả,
       từ khoá, URL hỗ trợ, URL chính sách, **toàn bộ bảng phân loại độ tuổi**, khai báo thu thập
