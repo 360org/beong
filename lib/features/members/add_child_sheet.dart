@@ -5,6 +5,7 @@ import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/features/members/child_profile_form.dart';
+import 'package:beong/features/members/mat_khau_sheet.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -71,19 +72,40 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
 
   Future<void> _save() async {
     setState(() => _busy = true);
+    final childId = const Uuid().v4();
+    final ten = _name.text.trim();
+
     await ref
         .read(memberRepositoryProvider)
         .addMember(
           MembersCompanion.insert(
-            id: const Uuid().v4(),
+            id: childId,
             familyId: widget.familyId,
             kind: MemberKind.child.name,
-            displayName: _name.text.trim(),
+            displayName: ten,
             colorIndex: Value(_colorIndex),
             avatarKey: Value(_avatar),
             birthYear: Value(_birthYear),
           ),
         );
+    if (!mounted) return;
+
+    // ADR-027: không hồ sơ nào được để trống mật khẩu. Bỏ qua ở đây là thủng
+    // ngay quy tắc vừa đặt — bé mới sẽ là hồ sơ duy nhất ai cũng mở được.
+    //
+    // Đặt **sau** khi ghi bé: hỏng ở giữa thì bé vẫn còn và màn chọn hồ sơ bắt
+    // đặt nốt; đặt trước rồi hỏng thì mất cả bé.
+    await datMatKhauMoi(
+      context,
+      memberId: childId,
+      tenHienThi: ten,
+      service: ref.read(matKhauHoSoProvider),
+      batBuoc: true,
+      moTa:
+          'Bốn chữ số cho hồ sơ của $ten. Bé nhập nó để mở hồ sơ của mình; '
+          'bố mẹ đặt lại được bất cứ lúc nào trong Cài đặt.',
+    );
+
     if (mounted) Navigator.of(context).pop(true);
   }
 

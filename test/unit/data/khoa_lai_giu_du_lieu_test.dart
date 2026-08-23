@@ -5,7 +5,7 @@ import 'package:beong/data/local/member_dao.dart';
 import 'package:beong/data/local/session_store.dart';
 import 'package:beong/data/local/settings_dao.dart';
 import 'package:beong/domain/entities/enums.dart';
-import 'package:beong/domain/services/parent_pin_service.dart';
+import 'package:beong/domain/services/mat_khau_ho_so.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -79,26 +79,25 @@ void main() {
     );
   });
 
-  test('gỡ PIN thì luồng thành viên phát lại ngay', () async {
-    // Dòng "PIN của bố mẹ" trong Cài đặt đọc trạng thái từ chính luồng này.
-    // Bản trước đọc một lần lúc dựng, nên gỡ PIN qua "Quên PIN?" xong dòng đó
-    // vẫn ghi "Đang bật" trong khi DB đã sạch — bố mẹ đọc được là gỡ hỏng.
-    // Nếu `watchMembers` không phát lại khi `pin_hash` đổi thì bản sửa im lặng
-    // không chạy, và không màn hình nào lộ ra.
-    final pin = ParentPinService(memberDao: members);
-    await pin.setPin(familyId: familyId, pin: '1357');
+  test('đổi mật khẩu thì luồng thành viên phát lại ngay', () async {
+    // Dòng "Mật khẩu hồ sơ" trong Cài đặt đọc trạng thái từ chính luồng này.
+    // Bản trước đọc một lần lúc dựng, nên đổi mật khẩu ở chỗ khác xong dòng đó
+    // vẫn ghi số cũ trong khi DB đã đổi. Nếu `watchMembers` không phát lại khi
+    // `pin_hash` đổi thì bản sửa im lặng không chạy, và không màn hình nào lộ
+    // ra.
+    final matKhau = MatKhauHoSo(memberDao: members);
 
-    final luot = members.watchMembers(familyId);
-    expect(
-      luot.map(
-        (ds) => ds
-            .where((m) => m.kind == MemberKind.parent.name)
-            .any((m) => (m.pinHash ?? '').isNotEmpty),
-      ),
-      emitsInOrder(<bool>[true, false]),
-    );
+    final luot = members
+        .watchMembers(familyId)
+        .map((ds) => ds.where((m) => (m.pinHash ?? '').isEmpty).length);
 
-    await pin.clearPin(familyId);
+    // `emitsThrough` chứ không phải `emitsInOrder([2, 1, 0])`: Drift gộp hai
+    // lần ghi sát nhau thành một lần phát, nên nhịp trung gian không chắc có.
+    // Ràng buộc thật là **có phát lại**, không phải phát bao nhiêu lần.
+    expect(luot, emitsThrough(0));
+
+    await matKhau.dat(memberId: parentId, matKhau: '1357');
+    await matKhau.dat(memberId: 'con-1', matKhau: '2468');
   });
 
   test('máy đã lỡ dính lỗi vẫn mở lại được nhà cũ', () async {

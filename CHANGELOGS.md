@@ -4,6 +4,40 @@ Toàn bộ các thay đổi và cột mốc phát triển của dự án **Bé O
 
 ---
 
+## [0.2.4] - 2026-08-23
+
+**Luồng vào app làm lại đúng như chủ dự án chốt.** Mỗi hồ sơ giờ có mật khẩu riêng.
+
+### ✨ Mới
+- **Mỗi hồ sơ một mật khẩu riêng.** Bố mẹ có mật khẩu của bố mẹ, mỗi bé có mật khẩu của
+  bé đó. Mật khẩu của người này **không** mở được hồ sơ người kia — trên máy dùng chung,
+  đó là thứ giữ sổ xu của bé này khỏi tay bé kia.
+- **Đặt mật khẩu là một bước của lúc cài app**, không còn giấu trong Cài đặt. Thêm bé về
+  sau cũng phải đặt mật khẩu cho bé đó.
+- **Vào lại theo bốn bước**: chọn nhà → chọn vai (bố mẹ / con) → chọn hồ sơ → điền mật
+  khẩu. Nhà chỉ có một hộ thì bỏ qua bước chọn nhà; vai chỉ có một người thì bỏ qua bước
+  chọn hồ sơ — một màn hình chỉ có đúng một thứ để bấm không phải là lựa chọn.
+- **Bố mẹ đặt lại mật khẩu cho con** trong Cài đặt → Mật khẩu hồ sơ, không cần biết mật
+  khẩu cũ. Thiếu đường này là bé quên mật khẩu thì mất luôn hồ sơ của mình.
+
+### 🐛 Sửa Lỗi (Fixes)
+- **Bước đặt mật khẩu của onboarding không bao giờ chạy.** Bấm BẮT ĐẦU xong app vào thẳng
+  Trang chính với hai hồ sơ không mật khẩu, không báo gì. Chỉ lộ ra khi chạy app thật và
+  nhìn — `analyze` sạch và 507 test đều xanh.
+
+### ⚠️ Anh/chị đang dùng bản cũ cần biết
+- **Mật khẩu bố mẹ cũ vẫn dùng được**, không phải đặt lại. Cách băm không đổi.
+- Hồ sơ **các con** thì chưa có mật khẩu. Lần đầu mở hồ sơ nào, app cho vào rồi bắt đặt
+  ngay tại đó — không khoá ai ra khỏi dữ liệu của chính mình.
+
+### 📌 Quyết định
+- `ADR-027` ghi rõ ba điều bản này làm ngược lại tài liệu cũ (PIN chung → riêng, tuỳ chọn
+  → bắt buộc, đổi vai không khoá → có khoá), kèm lý do và những thứ phải bù.
+
+Ảnh: `docs/screenshot/75`–`80`.
+
+---
+
 ## [0.2.3] - 2026-08-22
 
 **Hai lỗi nghiêm trọng của 0.2.2 đã sửa xong.** Ai đang dùng 0.2.2 nên cập nhật —

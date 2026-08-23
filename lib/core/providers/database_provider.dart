@@ -16,7 +16,7 @@ import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/domain/services/day_start_service.dart';
 import 'package:beong/domain/services/goal_service.dart';
-import 'package:beong/domain/services/parent_pin_service.dart';
+import 'package:beong/domain/services/mat_khau_ho_so.dart';
 import 'package:beong/domain/services/penalty_service.dart';
 import 'package:beong/domain/services/redemption_service.dart';
 import 'package:beong/domain/services/streak_service.dart';
@@ -93,8 +93,8 @@ GoalService goalService(Ref ref) => GoalService(
 );
 
 @riverpod
-ParentPinService parentPinService(Ref ref) =>
-    ParentPinService(memberDao: ref.watch(memberDaoProvider));
+MatKhauHoSo matKhauHoSo(Ref ref) =>
+    MatKhauHoSo(memberDao: ref.watch(memberDaoProvider));
 
 @riverpod
 PenaltyService penaltyService(Ref ref) => PenaltyService(

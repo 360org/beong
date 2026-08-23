@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:beong/app/router.dart';
 import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/database_provider.dart';
@@ -23,8 +22,8 @@ import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/features/goals/goal_section.dart';
+import 'package:beong/features/members/mat_khau_sheet.dart';
 import 'package:beong/features/rewards/allocate_xu_sheet.dart';
-import 'package:beong/features/settings/parent_pin_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -335,11 +334,14 @@ class _ChildHeader extends ConsumerWidget {
 
   final Member? member;
 
-  /// Đổi sang hồ sơ [member], hỏi PIN nếu đó là vai bố mẹ.
+  /// Đổi sang hồ sơ [member], hỏi mật khẩu của **chính hồ sơ đó** (ADR-027).
   ///
   /// Đây là **cửa duy nhất** con có thể tự đi vào vai bố mẹ. Không chặn ở đây
   /// thì cả vòng "bố mẹ duyệt" (ADR-023, ADR-025) chỉ là hình thức: con đổi vai
   /// rồi tự duyệt việc của mình.
+  ///
+  /// Từ ADR-027 thì cửa này còn chặn thêm một chiều nữa: bé không mở được hồ sơ
+  /// của anh chị em mình, vì mỗi hồ sơ một mật khẩu.
   static Future<void> _switchTo(
     BuildContext context,
     WidgetRef ref, {
@@ -347,15 +349,13 @@ class _ChildHeader extends ConsumerWidget {
     required String familyId,
   }) async {
     final isParent = member.kind == MemberKind.parent.name;
-    if (isParent) {
-      final ok = await askParentPin(
-        context,
-        familyId: familyId,
-        service: ref.read(parentPinServiceProvider),
-      );
-      if (!ok) return;
-    }
-    if (!context.mounted) return;
+    final ok = await hoiMatKhau(
+      context,
+      memberId: member.id,
+      tenHienThi: member.displayName,
+      service: ref.read(matKhauHoSoProvider),
+    );
+    if (!ok || !context.mounted) return;
 
     Navigator.of(context).pop();
     await ref

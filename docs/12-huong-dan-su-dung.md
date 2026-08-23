@@ -337,4 +337,4 @@ phải làm bao nhiêu ngày để đổi được, rồi tính ngược ra.
 | `10-privacy-policy.md` | Dữ liệu app lưu gì, gửi đi đâu |
 | `06-decisions.md` | Vì sao app làm thế này chứ không thế khác (ADR) |
 | `05-roadmap.md` | Tính năng nào đã xong, đang làm, chưa làm |
-| `screenshot/README.md` | Toàn bộ 74 ảnh, có mục lục |
+| `screenshot/README.md` | Toàn bộ 80 ảnh, có mục lục |

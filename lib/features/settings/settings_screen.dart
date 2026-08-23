@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:beong/app/router.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
@@ -15,8 +14,8 @@ import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/services/money_exchange.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:beong/features/members/add_child_sheet.dart';
+import 'package:beong/features/members/mat_khau_sheet.dart';
 import 'package:beong/features/settings/bao_loi_screen.dart';
-import 'package:beong/features/settings/parent_pin_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -64,12 +63,7 @@ class SettingsScreen extends ConsumerWidget {
                     member: member,
                     isActive: member.id == session.activeMemberId,
                     onTap: () => unawaited(
-                      _switchMember(
-                        context,
-                        ref,
-                        member: member,
-                        familyId: session.familyId,
-                      ),
+                      _switchMember(context, ref, member: member),
                     ),
                   ),
                 ),
@@ -95,7 +89,7 @@ class SettingsScreen extends ConsumerWidget {
                   // (Sprint 5). Một dòng ghi "Bật" mà không có gì bật là lời
                   // hứa suông — bố mẹ sẽ ngồi đợi nhắc nhở không bao giờ tới.
                   const _ThemeTile(),
-                  _PinTile(familyId: session.familyId),
+                  _MatKhauTile(familyId: session.familyId),
                   _ApprovalTile(familyId: session.familyId),
                   _AllocationTile(familyId: session.familyId),
                   _JarsTile(familyId: session.familyId),
@@ -355,29 +349,31 @@ class _SettingsTile extends StatelessWidget {
   }
 }
 
-/// Đổi hồ sơ, hỏi PIN nếu đích đến là vai bố mẹ.
+/// Đổi hồ sơ — hỏi mật khẩu của **chính hồ sơ đích** (ADR-027).
 ///
-/// Màn Cài đặt chỉ vai bố mẹ mới vào được, nhưng chỗ này vẫn phải hỏi: bố mẹ đưa
-/// máy cho con rồi quên đổi lại vai là chuyện thường, và lúc đó con vẫn đang
-/// đứng trong Cài đặt.
+/// Trước ADR-027 chỗ này chỉ hỏi khi đích đến là vai bố mẹ, vì PIN là của cả
+/// nhà và chỉ để chặn trẻ vào Cài đặt. Nay mật khẩu là thứ định danh từng
+/// người, nên mở hồ sơ nào cũng phải qua mật khẩu của hồ sơ đó — kể cả từ trong
+/// Cài đặt, nơi bố mẹ đưa máy cho con rồi quên đổi vai lại là chuyện thường.
 Future<void> _switchMember(
   BuildContext context,
   WidgetRef ref, {
   required Member member,
-  required String familyId,
 }) async {
-  final isParent = member.kind == MemberKind.parent.name;
-  if (isParent) {
-    final ok = await askParentPin(
-      context,
-      familyId: familyId,
-      service: ref.read(parentPinServiceProvider),
-    );
-    if (!ok) return;
-  }
+  final ok = await hoiMatKhau(
+    context,
+    memberId: member.id,
+    tenHienThi: member.displayName,
+    service: ref.read(matKhauHoSoProvider),
+  );
+  if (!ok) return;
+
   await ref
       .read(sessionProvider.notifier)
-      .switchMember(member.id, isParent: isParent);
+      .switchMember(
+        member.id,
+        isParent: member.kind == MemberKind.parent.name,
+      );
 }
 
 /// Chọn giao diện sáng / tối / theo hệ thống.
@@ -592,17 +588,14 @@ class _RolloverTile extends ConsumerWidget {
 }
 
 /// Bật/tắt PIN phụ huynh.
-/// Dòng "PIN của bố mẹ" trong Cài đặt.
+/// Dòng "Mật khẩu hồ sơ" trong Cài đặt.
 ///
-/// Đọc trạng thái bằng **stream**, không phải một lần lúc dựng. Bản trước đọc
-/// một lần rồi chỉ tự nạp lại khi chính dòng này mở sheet — nên gỡ PIN qua
-/// đường "Quên PIN?" (mở từ chỗ đổi người dùng) xong, dòng này vẫn ghi "Đang
-/// bật" trong khi DB đã sạch. Bố mẹ đọc được là "gỡ không ăn thua".
-///
-/// Đây đúng loại lỗi lặp đi lặp lại của dự án: thứ hiện ra mà không ai cập
-/// nhật. Chữa tận gốc là đừng giữ bản sao trạng thái.
-class _PinTile extends ConsumerWidget {
-  const _PinTile({required this.familyId});
+/// Đọc trạng thái bằng **stream**, không giữ bản sao. Bản trước đọc một lần lúc
+/// dựng rồi chỉ tự nạp lại khi chính nó mở sheet — nên gỡ mật khẩu ở chỗ khác
+/// xong, dòng này vẫn ghi "Đang bật" trong khi DB đã sạch. Đây là loại lỗi lặp
+/// đi lặp lại của dự án: thứ hiện ra mà không ai cập nhật.
+class _MatKhauTile extends ConsumerWidget {
+  const _MatKhauTile({required this.familyId});
 
   final String familyId;
 
@@ -611,80 +604,75 @@ class _PinTile extends ConsumerWidget {
     return StreamBuilder<List<Member>>(
       stream: ref.watch(memberRepositoryProvider).watchMembers(familyId),
       builder: (context, snap) {
-        final isSet = snap.data
-            ?.where((m) => m.kind == MemberKind.parent.name)
-            .any((m) => (m.pinHash ?? '').isNotEmpty);
+        final members = snap.data;
+        final thieu = members?.where((m) => (m.pinHash ?? '').isEmpty).length;
 
         return _SettingsTile(
           icon: Icons.lock_outline_rounded,
-          title: 'PIN của bố mẹ',
-          // Chữ ngắn như các dòng khác; lời giải thích dài nằm trong sheet,
-          // không nhét vào một hàng cao 48px.
-          subtitle: isSet == null
-              ? '…'
-              : isSet
-              ? 'Đang bật'
-              : 'Chưa đặt',
-          onTap: () => unawaited(_open(context, ref, isSet: isSet ?? false)),
+          title: 'Mật khẩu hồ sơ',
+          // ADR-027 nói không hồ sơ nào được để trống. Nếu còn thiếu thì nói
+          // thẳng ra đây chứ không im lặng — máy cài từ bản cũ đang có đúng
+          // loại đó, và im lặng thì không ai biết mà đặt.
+          // Ngắn cho vừa cột: "2 hồ sơ, đều đã đặt" bị cắt thành "2 hồ sơ,
+          // đều đã …" — dòng bị cắt thì nói ít hơn cả dòng ngắn.
+          subtitle: switch (thieu) {
+            null => '…',
+            0 => 'Đã đặt đủ',
+            final n => '$n chưa đặt',
+          },
+          onTap: members == null
+              ? () {}
+              : () => unawaited(_chonHoSo(context, ref, members)),
         );
       },
     );
   }
 
-  Future<void> _open(
+  /// Đổi mật khẩu cho một hồ sơ bất kỳ trong nhà.
+  ///
+  /// Không hỏi mật khẩu cũ: người đang đứng đây đã qua mật khẩu của một hồ sơ
+  /// bố mẹ để vào được Cài đặt. Đây cũng chính là đường bố mẹ đặt lại mật khẩu
+  /// cho con khi bé quên — thiếu nó là con quên mật khẩu thì mất luôn đường
+  /// vào, đúng cái bẫy §3 vừa gỡ, chỉ đổi chiều.
+  Future<void> _chonHoSo(
     BuildContext context,
-    WidgetRef ref, {
-    required bool isSet,
-  }) async {
-    final service = ref.read(parentPinServiceProvider);
-
-    if (!isSet) {
-      await askNewParentPin(context, familyId: familyId, service: service);
-      return;
-    }
-
-    // Đã có PIN: phải nhập PIN cũ trước khi đổi hay bỏ. Không hỏi thì đứa trẻ
-    // đang cầm máy chỉ việc bấm "Bỏ PIN" là xong.
-    if (!await askParentPin(
-      context,
-      familyId: familyId,
-      service: service,
-    )) {
-      return;
-    }
-    if (!context.mounted) return;
-
-    // Vừa gỡ PIN qua "Quên PIN?" thì không còn gì để đổi hay bỏ nữa.
-    if (!await service.isSet(familyId)) return;
-    if (!context.mounted) return;
-
-    final action = await showModalBottomSheet<String>(
+    WidgetRef ref,
+    List<Member> members,
+  ) async {
+    final chon = await showModalBottomSheet<Member>(
       context: context,
       builder: (sheetContext) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(
-              leading: const Icon(Icons.password_rounded),
-              title: const Text('Đổi PIN'),
-              onTap: () => Navigator.pop(sheetContext, 'change'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.lock_open_rounded),
-              title: const Text('Bỏ PIN'),
-              onTap: () => Navigator.pop(sheetContext, 'clear'),
-            ),
+            for (final member in members)
+              ListTile(
+                leading: Icon(
+                  (member.pinHash ?? '').isEmpty
+                      ? Icons.lock_open_rounded
+                      : Icons.lock_outline_rounded,
+                ),
+                title: Text(member.displayName),
+                subtitle: Text(
+                  (member.pinHash ?? '').isEmpty
+                      ? 'Chưa đặt mật khẩu'
+                      : 'Đổi mật khẩu',
+                ),
+                onTap: () => Navigator.pop(sheetContext, member),
+              ),
           ],
         ),
       ),
     );
-    if (!context.mounted) return;
+    if (chon == null || !context.mounted) return;
 
-    if (action == 'change') {
-      await askNewParentPin(context, familyId: familyId, service: service);
-    } else if (action == 'clear') {
-      await service.clearPin(familyId);
-    }
+    await datMatKhauMoi(
+      context,
+      memberId: chon.id,
+      tenHienThi: chon.displayName,
+      service: ref.read(matKhauHoSoProvider),
+      batBuoc: (chon.pinHash ?? '').isEmpty,
+    );
   }
 }
 

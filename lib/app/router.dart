@@ -2,7 +2,7 @@ import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/widgets/responsive_scaffold.dart';
 import 'package:beong/features/child_home/child_home_screen.dart';
-import 'package:beong/features/members/chon_nguoi_dung_screen.dart';
+import 'package:beong/features/members/vao_app_screen.dart';
 import 'package:beong/features/onboarding/onboarding_screen.dart';
 import 'package:beong/features/parent_home/parent_home_screen.dart';
 import 'package:beong/features/rewards/rewards_screen.dart';
@@ -34,7 +34,9 @@ abstract final class Routes {
   static const onboarding = '/onboarding';
 
   /// Máy đã có dữ liệu nhưng chưa chọn ai đang dùng.
-  static const chonNguoiDung = '/chon-nguoi-dung';
+  ///
+  /// Bốn bước: chọn nhà → chọn vai → chọn hồ sơ → điền mật khẩu (ADR-027).
+  static const chonNguoiDung = '/vao-app';
 
   /// Cố ý tạo thêm một nhà nữa trên máy đã có dữ liệu.
   ///
@@ -119,7 +121,7 @@ GoRouter createRouter({
       ),
       GoRoute(
         path: Routes.chonNguoiDung,
-        builder: (context, state) => const ChonNguoiDungScreen(),
+        builder: (context, state) => const VaoAppScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

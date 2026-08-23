@@ -17,6 +17,7 @@ import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:beong/domain/services/age_band.dart';
 import 'package:beong/features/members/child_profile_form.dart';
+import 'package:beong/features/members/mat_khau_sheet.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -161,6 +162,40 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       );
     }
 
+    // Bước cuối của onboarding theo ADR-027: **mọi** hồ sơ vừa tạo phải có mật
+    // khẩu, không bỏ qua được. Đặt ở đây chứ không phải trong Cài đặt, vì mật
+    // khẩu giờ là cách định danh ai đang dùng máy — thiếu nó thì luồng "chọn vai
+    // → chọn hồ sơ → điền mật khẩu" không có gì để hỏi.
+    //
+    // Thứ tự ở đây **quan trọng và đã từng sai**: phải hỏi mật khẩu *trước*
+    // `login()`. Đăng nhập là đặt session, mà session đổi thì router đá ngay
+    // khỏi onboarding sang Trang chính — màn này unmount, `mounted` thành
+    // `false`, và cả vòng lặp dưới đây bị nuốt trong im lặng. Bản đầu đặt sau
+    // `login()` và onboarding chạy xong với hai hồ sơ `pin_hash = NULL`, không
+    // một lời báo nào.
+    //
+    // Đặt **sau** khi ghi xong dữ liệu thì vẫn đúng: hỏng ở giữa thì nhà vẫn
+    // còn, và lần vào sau màn chọn hồ sơ bắt đặt nốt. Ghi trước rồi hỏng thì
+    // mất cả nhà.
+    final matKhau = ref.read(matKhauHoSoProvider);
+    for (final (memberId, ten) in [
+      (parentId, 'Bố mẹ'),
+      (childId, childName),
+    ]) {
+      if (!mounted) return;
+      await datMatKhauMoi(
+        context,
+        memberId: memberId,
+        tenHienThi: ten,
+        service: matKhau,
+        batBuoc: true,
+      );
+    }
+
+    // Máy vừa có gia đình đầu tiên — router phải biết, nếu không lần khoá máy
+    // sau lại rơi về onboarding.
+    ref.read(mayDaCoDuLieuProvider.notifier).danhDauDaCo();
+
     await ref
         .read(sessionProvider.notifier)
         .login(
@@ -175,10 +210,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     await ref
         .read(dayStartServiceProvider)
         .runIfNeeded(familyId: familyId, force: true);
-
-    // Máy vừa có gia đình đầu tiên — router phải biết, nếu không lần khoá máy
-    // sau lại rơi về onboarding.
-    ref.read(mayDaCoDuLieuProvider.notifier).danhDauDaCo();
 
     if (mounted) context.go('/');
   }

@@ -17,11 +17,11 @@ số trẻ hay số task.
 
 ## Trạng thái
 
-**`v0.2.3` — chạy đủ trên một máy, chưa lên store.**
+**`v0.2.4` — chạy đủ trên một máy, chưa lên store.**
 
 | | |
 |---|---|
-| Đã xong | Việc nhà, thói quen kéo thả, xu và các hũ, phần thưởng có duyệt, 8 huy hiệu, mục tiêu để dành, nhiều con, PIN phụ huynh, giao diện Sáng/Tối, báo lỗi |
+| Đã xong | Việc nhà, thói quen kéo thả, xu và các hũ, phần thưởng có duyệt, 8 huy hiệu, mục tiêu để dành, nhiều con, mật khẩu riêng từng hồ sơ, giao diện Sáng/Tối, báo lỗi |
 | Đang làm | Đồng bộ nhiều máy — bố mẹ cấu hình xong, máy con quét QR nhận hồ sơ (Sprint 3) |
 | Chưa có | Thông báo nhắc việc, chế độ chụp ảnh làm bằng chứng, bản trên store |
 
@@ -53,7 +53,7 @@ dựng môi trường chụp màn hình: `.claude/skills/flutter-8-buoc/SKILL.md
 | [`docs/03-data-model.md`](docs/03-data-model.md) | Schema, quan hệ, RLS, chỉ mục, migration |
 | [`docs/04-design-system.md`](docs/04-design-system.md) | Màu, chữ, component, preset, mô tả từng màn hình |
 | [`docs/05-roadmap.md`](docs/05-roadmap.md) | 7 sprint tới v1.0, đánh dấu từng mục đã xong hay chưa |
-| [`docs/06-decisions.md`](docs/06-decisions.md) | 26 ADR + câu hỏi còn mở |
+| [`docs/06-decisions.md`](docs/06-decisions.md) | 27 ADR + câu hỏi còn mở |
 | [`docs/07-competitive-analysis.md`](docs/07-competitive-analysis.md) | Phân tích ChoreReward từ App Store listing + việc phải làm |
 | [`docs/08-release-cicd.md`](docs/08-release-cicd.md) | Ký số, secret, đưa lên TestFlight và Play Internal |
 | [`docs/09-onboarding-pairing.md`](docs/09-onboarding-pairing.md) | Luồng tạo hồ sơ và ghép cặp máy con bằng QR |
@@ -61,7 +61,7 @@ dựng môi trường chụp màn hình: `.claude/skills/flutter-8-buoc/SKILL.md
 | [`docs/11-bao-loi-endpoint.md`](docs/11-bao-loi-endpoint.md) | Dựng endpoint nhận báo lỗi (Cloudflare Worker) |
 | [`docs/12-huong-dan-su-dung.md`](docs/12-huong-dan-su-dung.md) | **Hướng dẫn cho bố mẹ** — 16 mục, kèm ảnh |
 | [`docs/13-audit-luong-vao-app.md`](docs/13-audit-luong-vao-app.md) | **Audit luồng vào app** — 2 lỗi nghiêm trọng, phương án, và bản sửa ở v0.2.3 |
-| [`docs/screenshot/`](docs/screenshot/) | 74 ảnh chụp toàn bộ app, có mục lục |
+| [`docs/screenshot/`](docs/screenshot/) | 80 ảnh chụp toàn bộ app, có mục lục |
 
 ## Ý tưởng cốt lõi
 

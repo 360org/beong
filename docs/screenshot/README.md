@@ -1,6 +1,6 @@
-# Ảnh chụp màn hình — Bé Ong v0.2.3
+# Ảnh chụp màn hình — Bé Ong v0.2.4
 
-74 ảnh, chụp trên bản dựng Linux debug ở **412×900** (cỡ điện thoại thật), đi hết
+80 ảnh, chụp trên bản dựng Linux debug ở **412×900** (cỡ điện thoại thật), đi hết
 luồng chứ không chỉ mở từng màn: tạo nhà → làm việc → nhận huy hiệu → đổi thưởng →
 bố mẹ duyệt → con tự chia xu.
 
@@ -115,6 +115,18 @@ Cả hai vai, đủ các tab chính. `42`–`46` là vai bố mẹ, `47`–`49` 
 | `73-nhap-pin-co-quen-pin.png` | Nhập PIN — có đường **"Quên PIN?"**, mở được cả từ màn chọn người dùng |
 | `74-go-pin-xac-nhan.png` | Hộp thoại gỡ PIN: nói rõ hệ quả rồi mới gỡ |
 
+### Luồng vào app theo ADR-027 (75–80)
+Mỗi hồ sơ một mật khẩu riêng, đặt bắt buộc ngay từ onboarding.
+
+| Ảnh | Màn |
+|---|---|
+| `75-onboarding-dat-mat-khau-bo-me.png` | Onboarding, bước cuối — đặt mật khẩu cho **Bố mẹ**. Không có nút HUỶ |
+| `76-onboarding-dat-mat-khau-con.png` | …rồi tới mật khẩu của bé |
+| `77-vao-app-chon-vai.png` | Khoá lại → **chọn vai**. Nhà một hộ nên bước "chọn nhà" tự bỏ qua |
+| `78-vao-app-chon-ho-so.png` | Nhà hai bé → thêm bước **chọn hồ sơ**, có nút Quay lại |
+| `79-mat-khau-cheo-bi-tu-choi.png` | Mật khẩu của Bố mẹ **không** mở được hồ sơ của con — điều ADR-027 đổi so với PIN chung cũ |
+| `80-them-be-bat-dat-mat-khau.png` | Thêm bé cũng bắt đặt mật khẩu, nếu không là thủng ngay quy tắc vừa đặt |
+
 ## Lỗi bộ ảnh này bắt được — **đã sửa**
 
 Cả hai chỉ hiện ra khi chụp xong rồi *nhìn*, trong khi `flutter analyze
@@ -144,7 +156,21 @@ nền thẻ, dù đều qua test cũ — vì test cũ chỉ canh **nền trắng
 hầu như không có chữ nào của app nằm trên nền trắng thuần. Đã hạ độ sáng cả ba và
 thêm test canh đúng nền thẻ.
 
-## Lỗi bộ ảnh này bắt được ở lượt chụp v0.2.3 — **đã sửa**
+## Lỗi bộ ảnh này bắt được ở lượt chụp v0.2.4 — **đã sửa**
+
+**Bước đặt mật khẩu của onboarding không bao giờ chạy.** Bấm BẮT ĐẦU xong app
+vào thẳng Trang chính, và DB có hai hồ sơ `pin_hash = NULL` — không một lời báo
+nào. Nguyên nhân: `login()` gọi **trước** vòng đặt mật khẩu; đăng nhập là đặt
+session, session đổi thì router đá ngay khỏi onboarding, màn unmount, `mounted`
+thành `false`, và `if (!mounted) return` nuốt gọn cả vòng lặp.
+
+Lại đúng loại lặp đi lặp lại của dự án — **code có mà không bao giờ chạy** — và
+lần này `flutter analyze` sạch, 507 test xanh, không cái nào chạm tới nó.
+
+→ Sửa: hỏi mật khẩu **trước** `login()`. Test đi hết onboarding thật
+(`integration_test/luong_day_du_test.dart`) rồi canh "không hồ sơ nào trống mật
+khẩu"; dựng lại đúng bug thì **cả ba** test đỏ.
+ — **đã sửa**
 
 Lại đúng loại cũ: **thứ hiện ra mà không ai giữ cho đúng**.
 

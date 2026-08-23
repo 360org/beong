@@ -77,6 +77,53 @@ void main() {
     await settle(tester);
   }
 
+  /// Đi hết onboarding: tên nhà → tên bé → một thói quen → mật khẩu hai hồ sơ.
+  ///
+  /// Bước mật khẩu là **bắt buộc** từ ADR-027, và nó cũng là chỗ đã từng sai
+  /// theo cách không test nào cũ bắt được: bản đầu gọi `login()` trước, session
+  /// đổi thì router đá ngay khỏi onboarding, màn unmount, và cả vòng đặt mật
+  /// khẩu bị nuốt trong im lặng — onboarding chạy xong với hai hồ sơ
+  /// `pin_hash = NULL`. Vì vậy helper này **luôn** kết thúc bằng
+  /// [khongHoSoNaoTrongMatKhau].
+  Future<void> xongOnboarding(
+    WidgetTester tester, {
+    String tenNha = 'Nhà Bé Ong',
+    String tenBe = 'Minh',
+  }) async {
+    await tester.enterText(find.byType(TextField).first, tenNha);
+    await settle(tester);
+    await tapText(tester, 'TIẾP TỤC');
+
+    await tester.enterText(find.byType(TextField).first, tenBe);
+    await settle(tester);
+    await tapText(tester, 'TIẾP TỤC');
+
+    // Không chọn thói quen nào thì nhà mới không có việc, và các test sau không
+    // có gì để bấm.
+    await tapText(tester, 'Buổi sáng');
+    await tapText(tester, 'BẮT ĐẦU');
+
+    // Hai sheet mật khẩu bắt buộc, đúng thứ tự onboarding tạo hồ sơ.
+    for (final (ten, matKhau) in [('Bố mẹ', '1111'), (tenBe, '2222')]) {
+      expect(
+        find.text('Đặt mật khẩu cho $ten'),
+        findsOneWidget,
+        reason: 'ADR-027: onboarding phải bắt đặt mật khẩu cho $ten',
+      );
+      await tester.enterText(find.byType(TextField).last, matKhau);
+      await settle(tester);
+    }
+  }
+
+  /// ADR-027: không hồ sơ nào được để trống mật khẩu.
+  Future<void> khongHoSoNaoTrongMatKhau() async {
+    final trong = (await db.select(db.members).get())
+        .where((m) => (m.pinHash ?? '').isEmpty)
+        .map((m) => m.displayName)
+        .toList();
+    expect(trong, isEmpty, reason: 'hồ sơ chưa có mật khẩu: $trong');
+  }
+
   testWidgets('onboarding tạo được gia đình và vào thẳng màn chính', (
     tester,
   ) async {
@@ -85,19 +132,7 @@ void main() {
     // Chưa có session thì router đẩy về onboarding.
     expect(find.text('Đặt tên gia đình'), findsOneWidget);
 
-    await tester.enterText(find.byType(TextField).first, 'Nhà Bé Ong');
-    await settle(tester);
-    await tapText(tester, 'TIẾP TỤC');
-
-    expect(find.text('Thêm bé'), findsOneWidget);
-    await tester.enterText(find.byType(TextField).first, 'Minh');
-    await settle(tester);
-    await tapText(tester, 'TIẾP TỤC');
-
-    // Bước cuối: chọn một thói quen rồi bắt đầu. Không chọn gì thì nhà mới
-    // không có việc nào, và các test sau không có gì để bấm.
-    await tapText(tester, 'Buổi sáng');
-    await tapText(tester, 'BẮT ĐẦU');
+    await xongOnboarding(tester);
 
     // Gia đình và hai hồ sơ đã nằm trong DB thật.
     final members = await db.select(db.members).get();
@@ -110,19 +145,14 @@ void main() {
     // Ba hũ mặc định phải có hàng thật trong bảng `jars`: không gieo thì màn
     // quản lý hũ rỗng trong khi Cài đặt vẫn khoe "3 hũ".
     expect(await db.select(db.jars).get(), isNotEmpty);
+
+    await khongHoSoNaoTrongMatKhau();
   });
 
   testWidgets('con bấm xong việc thì xu vào ví ngay', (tester) async {
     await pumpApp(tester);
 
-    await tester.enterText(find.byType(TextField).first, 'Nhà Bé Ong');
-    await settle(tester);
-    await tapText(tester, 'TIẾP TỤC');
-    await tester.enterText(find.byType(TextField).first, 'Minh');
-    await settle(tester);
-    await tapText(tester, 'TIẾP TỤC');
-    await tapText(tester, 'Buổi sáng');
-    await tapText(tester, 'BẮT ĐẦU');
+    await xongOnboarding(tester);
 
     final child = (await db.select(db.members).get()).firstWhere(
       (m) => m.kind == MemberKind.child.name,
@@ -164,14 +194,7 @@ void main() {
   testWidgets('đổi phần thưởng phải qua bố mẹ duyệt (ADR-025)', (tester) async {
     await pumpApp(tester);
 
-    await tester.enterText(find.byType(TextField).first, 'Nhà Bé Ong');
-    await settle(tester);
-    await tapText(tester, 'TIẾP TỤC');
-    await tester.enterText(find.byType(TextField).first, 'Minh');
-    await settle(tester);
-    await tapText(tester, 'TIẾP TỤC');
-    await tapText(tester, 'Buổi sáng');
-    await tapText(tester, 'BẮT ĐẦU');
+    await xongOnboarding(tester);
 
     final family = (await db.select(db.families).get()).single;
     final child = (await db.select(db.members).get()).firstWhere(
