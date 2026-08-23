@@ -57,10 +57,15 @@ class TaskReviewService {
     final task = await _tasks.getTaskById(instance.taskId);
     final family = await _members.getFamily(instance.familyId);
 
-    final mustReview = needsApproval(
-      familyRequiresApproval: family.requireApproval,
-      taskMode: approvalModeFromDb(task.approvalMode),
-    );
+    // Việc yêu cầu bằng chứng (ảnh/ghi chú) bắt buộc bố mẹ duyệt trước khi cộng xu,
+    // bất kể nhà đang bật hay tắt duyệt (Audit §2).
+    final hasProofRequired = task.proofMode != ProofMode.none.name;
+    final mustReview =
+        hasProofRequired ||
+        needsApproval(
+          familyRequiresApproval: family.requireApproval,
+          taskMode: approvalModeFromDb(task.approvalMode),
+        );
 
     if (mustReview) {
       await _tasks.markPendingReview(instanceId);

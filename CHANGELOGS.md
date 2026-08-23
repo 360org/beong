@@ -24,6 +24,11 @@ Toàn bộ các thay đổi và cột mốc phát triển của dự án **Bé O
 - **Linh Hoạt Chia Xu Dở Dang**:
   - Cho phép lưu kết quả chia xu từng phần từ hũ chờ mà không bắt buộc chia hết 100%.
 
+### 🐛 Sửa Lỗi Audit (Fixes)
+- **Nối `proof_mode` vào `TaskReviewService`**: Khi việc yêu cầu bằng chứng (ảnh/ghi chú), lượt làm việc bắt buộc chuyển sang hàng đợi duyệt bất kể cấu hình chung của gia đình.
+- **Minh bạch trạng thái ghép cặp QR**: Cập nhật thông báo rõ ràng về tính năng đồng bộ mạng.
+- **Đồng bộ ADR-027 & Roadmap**: Chuẩn hoá quyết định mật khẩu phụ huynh bắt buộc, mật khẩu bé tuỳ chọn và phân định rõ trạng thái `SyncEngine`, `NotificationService`.
+
 ---
 
 ## [0.2.5] - 2026-08-23

@@ -25,27 +25,48 @@ Future<void> main() async {
 
   // Máy này đã có gia đình nào chưa — router cần biết **trước** khung hình đầu
   // để phân biệt "máy trống" với "máy có dữ liệu, chưa chọn ai đang dùng".
-  await container.read(mayDaCoDuLieuProvider.notifier).nap();
+  try {
+    await container.read(mayDaCoDuLieuProvider.notifier).nap();
+  } on Exception catch (error, stack) {
+    nhatKyLoi.ghi(
+      'Khởi động: Đọc danh sách gia đình thất bại: $error',
+      stack: stack,
+      nguon: 'startup',
+    );
+  }
 
   // Nạp trước khung hình đầu: nếu để router chạy trước rồi mới nạp, người dùng
   // thấy màn hình onboarding nháy lên rồi mới về đúng chỗ.
-  final restored = await container.read(sessionStoreProvider).load();
-  if (restored != null) {
-    container.read(sessionProvider.notifier).restore(restored);
+  try {
+    final restored = await container.read(sessionStoreProvider).load();
+    if (restored != null) {
+      container.read(sessionProvider.notifier).restore(restored);
 
-    // Sinh việc cho hôm nay **trước khung hình đầu** (`03-data-model.md` §3).
-    // Không có bước này, bố mẹ mở app thấy "0 / 0 việc hôm nay" dù đã tạo
-    // routine, và lượt quá hạn không bao giờ được đánh dấu bỏ lỡ.
-    //
-    // Lỗi ở đây không được chặn app khởi động: hỏng bộ lập lịch thì tệ, nhưng
-    // không mở được app thì tệ hơn.
-    try {
-      await container
-          .read(dayStartServiceProvider)
-          .runIfNeeded(familyId: restored.familyId);
-    } on Exception catch (error, stack) {
-      debugPrint('Không chạy được bộ sinh việc đầu ngày: $error\n$stack');
+      // Sinh việc cho hôm nay **trước khung hình đầu** (`03-data-model.md` §3).
+      // Không có bước này, bố mẹ mở app thấy "0 / 0 việc hôm nay" dù đã tạo
+      // routine, và lượt quá hạn không bao giờ được đánh dấu bỏ lỡ.
+      //
+      // Lỗi ở đây không được chặn app khởi động: hỏng bộ lập lịch thì tệ, nhưng
+      // không mở được app thì tệ hơn.
+      try {
+        await container
+            .read(dayStartServiceProvider)
+            .runIfNeeded(familyId: restored.familyId);
+      } on Exception catch (error, stack) {
+        nhatKyLoi.ghi(
+          'Khởi động: Bộ sinh việc đầu ngày thất bại: $error',
+          stack: stack,
+          nguon: 'startup',
+        );
+        debugPrint('Không chạy được bộ sinh việc đầu ngày: $error\n$stack');
+      }
     }
+  } on Exception catch (error, stack) {
+    nhatKyLoi.ghi(
+      'Khởi động: Nạp session thất bại: $error',
+      stack: stack,
+      nguon: 'startup',
+    );
   }
 
   runApp(

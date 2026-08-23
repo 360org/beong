@@ -33,6 +33,7 @@ void main() {
     required String id,
     int points = 10,
     String? approvalMode,
+    String? proofMode,
   }) async {
     await db
         .into(db.tasks)
@@ -45,6 +46,9 @@ void main() {
             approvalMode: approvalMode == null
                 ? const Value.absent()
                 : Value(approvalMode),
+            proofMode: proofMode == null
+                ? const Value.absent()
+                : Value(proofMode),
           ),
         );
     await db
@@ -190,6 +194,26 @@ void main() {
 
       expect((await reload('i1')).status, InstanceStatus.approved.name);
       expect(await db.select(db.pointTransactions).get(), isEmpty);
+    });
+
+    test('nhà tắt duyệt nhưng task yêu cầu photo proof thì vẫn phải chờ duyệt', () async {
+      await makeInstance(id: 'i-proof-photo', proofMode: 'photo');
+
+      final result = await service.complete('i-proof-photo');
+
+      expect(result.xuCongNgay, isFalse);
+      expect((await reload('i-proof-photo')).status, InstanceStatus.pendingReview.name);
+      expect((await walletDao.balanceOf(childId)).total, 0);
+    });
+
+    test('nhà tắt duyệt nhưng task yêu cầu note proof thì vẫn phải chờ duyệt', () async {
+      await makeInstance(id: 'i-proof-note', proofMode: 'note');
+
+      final result = await service.complete('i-proof-note');
+
+      expect(result.xuCongNgay, isFalse);
+      expect((await reload('i-proof-note')).status, InstanceStatus.pendingReview.name);
+      expect((await walletDao.balanceOf(childId)).total, 0);
     });
   });
 

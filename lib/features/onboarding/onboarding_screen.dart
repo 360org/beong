@@ -311,7 +311,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            'Đã nhận mã: ${code.substring(0, 8).toUpperCase()}... Đang tải dữ liệu.',
+                            'Đã nhận mã: ${code.substring(0, 8).toUpperCase()}. '
+                            'Tính năng đồng bộ qua mạng đang được hoàn thiện.',
                           ),
                         ),
                       );

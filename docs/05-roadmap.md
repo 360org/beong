@@ -160,7 +160,7 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
 - [ ] Mời phụ huynh thứ hai vào gia đình (dùng lại hạ tầng QR, cấp vai `parent`)
 
 **Sync:**
-- [x] Outbox + SyncEngine + retry/backoff + idempotency (`SyncEngine` quản lý hàng đợi biến đổi local, đẩy tuần tự và xử lý lỗi retry)
+- [ ] Outbox + SyncEngine (Đã viết logic hàng đợi local, unit test đầy đủ; đang chờ tích hợp client Supabase ở runtime)
 - [ ] Realtime subscribe theo `family_id`
 - [ ] Test xung đột: 2 thiết bị offline cùng sửa → kết quả hội tụ
 - [ ] Job đối soát `balance_cache`
@@ -237,7 +237,7 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 - [ ] FCM push (mobile) + local notification (desktop)
 - [ ] 7 loại thông báo trong bảng ở `01-product-spec.md` §4.7
 - [ ] Bộ điều tiết "nhắc nhẹ, không cằn nhằn": trần 2 thông báo/ngày cho trẻ, gộp sự kiện,
-      chặn gửi sau giờ đi ngủ — có unit test riêng
+      chặn gửi sau giờ đi ngủ — `NotificationService` đã viết logic và có unit test riêng, chờ nối tầng push notification native
 - [x] Cài đặt: **chủ đề sáng/tối** (lưu theo thiết bị) và **giờ đổi ngày** (0/3/4/5/6 giờ). Sửa
       kèm một lỗi chờ sẵn: các màn hình tự dựng `FamilyClock` với mặc định 4 và bỏ qua cột
       `day_rollover_hour` mà `DayStartService` vẫn đọc — hai bên sẽ lệch ngày ngay khi có ai đổi.
@@ -283,12 +283,7 @@ Tìm ra ngày 22/08 khi chạy app thật; chi tiết, nguyên nhân gốc và c
 - [x] 🔴 **Quên PIN là mất quyền bố mẹ vĩnh viễn** — sửa ở `v0.2.3`, mở rộng ở `v0.2.4`. Có
       "Quên mật khẩu?" ngay ở màn nhập; từ ADR-027 thì nó **đổi** mật khẩu chứ không **gỡ**, vì
       gỡ sẽ để lại hồ sơ trống. Bố mẹ cũng đặt lại được mật khẩu cho con từ Cài đặt.
-- [ ] Thêm dấu vết chẩn đoán lúc khởi động (đọc session thành công/thất bại, đường dẫn dữ liệu)
-      để lần sau chẩn được ca "mở lại app phải cấu hình từ đầu" thay vì đoán.
-
-      **Vẫn để mở, và cố ý.** §1 của audit chưa dựng lại được lần nào trên bản Linux, nên chưa có
-      gì để sửa. Nhưng lưới an toàn của §2 che một phần ca xấu nhất: nếu cờ "máy đã có dữ liệu"
-      sai vì đọc DB lúc khởi động hỏng, onboarding vẫn hỏi lại trước khi ghi đè.
+- [x] Thêm dấu vết chẩn đoán lúc khởi động (đọc session thành công/thất bại, bắt lỗi khởi động ghi vào `NhatKyLoi`) để chẩn được ca lỗi khi người dùng gửi báo cáo lỗi từ app.
 
 ### Sửa thêm sau khi chạy thật, không nằm trong audit
 

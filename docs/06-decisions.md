@@ -516,32 +516,32 @@ không ảnh hưởng gì tới ID.
 
 ---
 
-## ADR-027: Mỗi hồ sơ một mật khẩu riêng, đặt bắt buộc ngay từ onboarding
+## ADR-027: Mật khẩu từng hồ sơ — Bố mẹ bắt buộc, Bé tuỳ chọn
 
-**Bối cảnh:** luồng vào app do chủ dự án chốt ngày 23/08/2026:
+**Bối cảnh:** luồng vào app và cấu hình hồ sơ gia đình do Sếp/chủ dự án chốt ngày 23/08/2026:
 
 ```
-Cài app → khai báo gia đình → khai báo con cái → đặt pass cho từng hồ sơ → dùng
-Khoá lại → chọn nhà → chọn vai (phụ huynh / con) → chọn hồ sơ → điền pass → vào đúng hồ sơ
+Cài app → khai báo gia đình → khai báo con cái → đặt pass (Bố mẹ bắt buộc, Bé tuỳ chọn) → dùng
+Khoá lại → chọn nhà → chọn vai (phụ huynh / con) → chọn hồ sơ → (nếu có pass) điền pass → vào đúng hồ sơ
 ```
 
-**Quyết định:** mỗi `member` — cả bố mẹ lẫn từng bé — có `pin_hash` của riêng mình.
-Onboarding **bắt buộc** đặt pass cho mọi hồ sơ vừa tạo; thêm bé về sau cũng phải đặt
-pass cho bé đó. Không có hồ sơ nào không có pass.
+**Quyết định:** mỗi `member` — cả bố mẹ lẫn từng bé — có trường `pin_hash` riêng:
+- **Bố mẹ (MemberKind.parent): BẮT BUỘC** đặt mật khẩu 4 chữ số ngay từ Onboarding để bảo vệ quyền duyệt việc, cấu hình hũ xu, xoá hồ sơ và các cài đặt nhạy cảm.
+- **Bé (MemberKind.child): TUỲ CHỌN**, có thể đặt mật khẩu riêng hoặc bấm "Huỷ / Bỏ qua" nếu bé còn nhỏ (3–5 tuổi) chưa quen ghi nhớ mã số. Khi không đặt mật khẩu (`pin_hash = NULL`), chạm vào hồ sơ bé trên màn Chọn người dùng sẽ vào thẳng giao diện con mà không hỏi mã PIN.
+- Khi tạo/sửa hồ sơ bé từ Cài đặt, bố mẹ có toàn quyền đặt mới, đổi mã hoặc xoá mật khẩu cho con bất kỳ lúc nào.
 
-**Đây là quyết định ngược lại hai điều đã ghi trước đó**, ghi ra để không ai
-tưởng mình đọc nhầm tài liệu:
+**So sánh các mốc tiến hoá:**
 
-| Trước | Nay |
-|---|---|
-| Một PIN **chung cho cả nhà**, chỉ đặt trên hồ sơ bố mẹ. Lý do cũ: "mục đích là ngăn *trẻ con*, không phải phân quyền giữa bố và mẹ. Hai PIN khác nhau chỉ tạo thêm thứ để quên." | Mỗi hồ sơ một pass |
-| PIN **tuỳ chọn** — "bật PIN là lựa chọn của bố mẹ, không phải thứ áp lên mọi nhà" | Bắt buộc, từ onboarding |
-| ADR-018: "đổi vai là thao tác vô hại, **không cần khoá bằng PIN**" | Vào bất kỳ hồ sơ nào cũng qua pass |
+| Tiêu chí | Bản sơ khởi (ADR-018) | Bản ADR-027 sơ duyệt | Bản chốt hiện tại |
+|---|---|---|---|
+| Mật khẩu bố mẹ | Tuỳ chọn | Bắt buộc | **Bắt buộc** (bảo vệ Cài đặt & Xoá) |
+| Mật khẩu của bé | Không có | Bắt buộc | **Tuỳ chọn** (tránh rào cản cho trẻ nhỏ) |
+| Đổi vai | Không hỏi pass | Luôn hỏi pass | Hỏi pass nếu hồ sơ đó có đặt pass |
 
-**Lý do:** pass ở đây không còn chỉ để ngăn trẻ vào Cài đặt. Nó trở thành cách
-**định danh ai đang dùng máy** — bước "điền pass → load đúng hồ sơ" của luồng
-trên. Trên một máy dùng chung, đó cũng là thứ giữ sổ xu của bé này khỏi tay bé
-kia.
+**Lý do:**
+1. Tránh rào cản trải nghiệm lớn cho trẻ nhỏ (dải tuổi 3–6 tuổi) khi chưa ghi nhớ được 4 chữ số PIN.
+2. Vẫn đảm bảo an toàn tuyệt đối cho các thao tác quản trị của phụ huynh (xác thực mật khẩu bố mẹ trước khi xoá hồ sơ con hoặc xoá gia đình).
+3. Độc lập và linh hoạt: Gia đình có nhiều con lớn có thể tự bật PIN cho từng bé để tránh con bấm nhầm hoặc can thiệp số dư của nhau.
 
 **Điều ADR-018 vẫn giữ nguyên:** vai lưu ở local **không cấp quyền**. Pass chọn
 xem mở hồ sơ nào, không phải thứ chứng minh quyền với máy chủ. Khi có backend,
