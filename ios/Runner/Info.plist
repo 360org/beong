@@ -47,6 +47,19 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Bé Ong cần quyền truy cập camera để quét mã QR ghép cặp thiết bị giữa máy phụ huynh và máy con.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>net.beong.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>beong</string>
+			</array>
+		</dict>
+	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 </dict>

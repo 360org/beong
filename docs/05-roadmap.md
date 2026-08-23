@@ -150,7 +150,11 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
 
 **Ghép cặp máy con:**
 - [x] Bảng `pairing_codes` (lưu hash, TTL, cờ đã dùng) + bảng `devices` (schema Supabase)
-- [x] **Ghép cặp bằng QR** — chi tiết ở `09-onboarding-pairing.md` §4 (`PairingService` sinh URI chuẩn `beong://pair?v=1&c=<code>`, sheet cấp mã QR trên máy bố mẹ kèm đếm ngược 10 phút, dialog quét/nhập mã trên máy con)
+- [x] **Ghép cặp bằng QR Universal Link / App Link** — chi tiết ở `09-onboarding-pairing.md` §4:
+      - `PairingService` sinh URL Universal Link chuẩn `https://beong.net/pair?v=1&c=<code>`.
+      - Máy bố mẹ mở sheet cấp mã QR kèm đếm ngược 10 phút.
+      - **Quét bằng Camera mặc định của điện thoại**: Quét camera iOS/Android tự động nhận link `https://beong.net/pair`, mở trang web `pair.html` tự kích hoạt mở app `beong://pair` và tự đăng nhập; nếu máy con chưa cài app thì tự chuyển hướng tới App Store / Google Play để tải.
+      - Máy con đã mở sẵn app có thể quét trực tiếp qua camera native (`mobile_scanner`) hoặc dán mã.
 - [ ] Credential phạm vi hẹp + **RLS theo hàng** cho máy con
 - [ ] Nhiều hồ sơ con trên cùng một máy + nút chuyển; danh sách thiết bị + thu hồi
 - [ ] Mời phụ huynh thứ hai vào gia đình (dùng lại hạ tầng QR, cấp vai `parent`)

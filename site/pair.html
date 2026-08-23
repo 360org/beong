@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ghép cặp thiết bị — Bé Ong</title>
+<meta name="description" content="Liên kết ghép cặp thiết bị máy con vào gia đình trên ứng dụng Bé Ong.">
+<link rel="canonical" href="https://beong.net/pair">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
+<link rel="stylesheet" href="style.css?v=0.2.6">
+<style>
+.pair-card {
+  max-width: 520px;
+  margin: 60px auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 36px 28px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.pair-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--honey-light);
+  border-radius: var(--radius-pill);
+}
+.pair-code-badge {
+  display: inline-block;
+  background: var(--blue-light);
+  color: var(--blue);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  margin: 16px 0;
+  border: 1px dashed var(--blue);
+}
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+.btn-store {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none;
+  transition: var(--transition);
+}
+.btn-primary-action {
+  background: var(--honey);
+  color: var(--honey-ink);
+}
+.btn-primary-action:hover {
+  background: var(--honey-deep);
+  color: #fff;
+}
+.btn-secondary-action {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.btn-secondary-action:hover {
+  background: var(--bg-alt);
+}
+</style>
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap head-in">
+    <a class="brand" href="index.html">
+      <img src="img/logo.png" alt="Logo Bé Ong" width="36" height="36" class="logo">
+      <div class="brand-text">
+        <span class="brand-name">Bé Ong</span>
+        <span class="brand-slogan">Bé Ong chăm chỉ</span>
+      </div>
+    </a>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <div class="pair-card">
+      <div class="pair-icon">
+        <img src="img/logo.png" alt="Bé Ong" width="44" height="44">
+      </div>
+      <h2>Đang kết nối hồ sơ của con...</h2>
+      <p style="color: var(--ink-muted); margin-top: 8px;">
+        Nếu thiết bị của bạn đã cài đặt ứng dụng <strong>Bé Ong</strong>, ứng dụng sẽ tự động mở lên để hoàn tất kết nối.
+      </p>
+
+      <div id="codeDisplay" style="display: none;">
+        <span class="pair-code-badge" id="pairingCodeText">------</span>
+      </div>
+
+      <div class="btn-group">
+        <a id="btnOpenApp" href="#" class="btn-store btn-primary-action">
+          🚀 Mở ứng dụng Bé Ong
+        </a>
+        <a id="btnDownloadIos" href="https://testflight.apple.com/join/placeholder" class="btn-store btn-secondary-action">
+          🍏 Tải trên App Store (iOS)
+        </a>
+        <a id="btnDownloadAndroid" href="https://play.google.com/store/apps/details?id=net.beong.app" class="btn-store btn-secondary-action">
+          🤖 Tải trên Google Play (Android)
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('c');
+  const version = urlParams.get('v') || '1';
+
+  if (code) {
+    document.getElementById('codeDisplay').style.display = 'block';
+    document.getElementById('pairingCodeText').textContent = code.substring(0, 8).toUpperCase();
+
+    // Tạo custom scheme deep link để mở trực tiếp app
+    const appDeepLink = 'beong://pair?v=' + encodeURIComponent(version) + '&c=' + encodeURIComponent(code);
+    document.getElementById('btnOpenApp').href = appDeepLink;
+
+    // Lưu mã vào localStorage trên trình duyệt điện thoại để khi mở lại web vẫn nhớ mã
+    try {
+      localStorage.setItem('beong_pairing_code', code);
+    } catch(e) {}
+
+    // Tự động thử mở app bằng custom scheme
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      setTimeout(function() {
+        window.location.href = appDeepLink;
+      }, 500);
+
+      // Nếu sau 2.5s không mở được app (chưa cài đặt), chuyển hướng tới store phù hợp
+      setTimeout(function() {
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        if (isIOS) {
+          // window.location.href = 'https://apps.apple.com/app/id...';
+        } else if (isAndroid) {
+          // window.location.href = 'https://play.google.com/store/apps/details?id=net.beong.app';
+        }
+      }, 2500);
+    }
+  }
+})();
+</script>
+</body>
+</html>

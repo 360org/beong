@@ -4,6 +4,28 @@ Toàn bộ các thay đổi và cột mốc phát triển của dự án **Bé O
 
 ---
 
+## [0.2.6] - 2026-08-23
+
+**Nâng cấp toàn diện Quản lý Gia đình, Hồ sơ con, Dải tuổi và QR Universal Link.**
+
+### ✨ Mới (Features)
+- **Hỗ trợ Quét QR Ghép Cặp bằng Camera Mặc Định**:
+  - Mã QR của con sinh dưới dạng Universal Link `https://beong.net/pair?v=1&c=<code>`.
+  - Quét bằng camera gốc của iOS/Android sẽ tự động mở ứng dụng Bé Ong và chuyển thẳng vào hồ sơ con; nếu máy chưa cài app thì tự chuyển hướng tới App Store / Google Play.
+- **Xoá Gia Đình & Bảo Vệ Mật Khẩu Phụ Huynh**:
+  - Thêm nút xoá gia đình trong Cài đặt, bắt buộc nhập mật khẩu bố mẹ và xác nhận cảnh báo an toàn trước khi xoá.
+- **Mở Rộng Dải Tuổi Bắt Đầu Từ 3 Tuổi**:
+  - Hỗ trợ trẻ từ 3 đến 15 tuổi, tính toán động dựa trên `birthYear` để tự động tăng tuổi theo thời gian.
+- **Phân Định Rõ Ràng Cài Đặt vs Trang Chính**:
+  - Chạm vào con trong Cài đặt mở bảng sửa thông tin / xoá hồ sơ bé.
+  - Chạm vào avatar bé trên Trang chính phụ huynh để chuyển sang hồ sơ của bé.
+- **Xem Chi Tiết Việc Chưa Hoàn Thành Hôm Nay**:
+  - Hiển thị danh sách nhiệm vụ chưa làm của từng bé ngay trên Trang chính bố mẹ.
+- **Linh Hoạt Chia Xu Dở Dang**:
+  - Cho phép lưu kết quả chia xu từng phần từ hũ chờ mà không bắt buộc chia hết 100%.
+
+---
+
 ## [0.2.5] - 2026-08-23
 
 **Bấm xong việc không còn giật.**

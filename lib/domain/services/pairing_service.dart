@@ -28,17 +28,23 @@ class PairingService {
     return sha256.convert(bytes).toString();
   }
 
-  /// Đóng gói mã thành chuỗi URI QR chuẩn theo spec.
+  /// Đóng gói mã thành chuỗi Universal Link chuẩn để mở app hoặc chuyển hướng App Store / Google Play.
   String buildPairingUri(String code) {
-    return 'beong://pair?v=1&c=$code';
+    return 'https://beong.net/pair?v=1&c=$code';
   }
 
-  /// Trích xuất mã ghép cặp từ chuỗi quét QR.
+  /// Trích xuất mã ghép cặp từ chuỗi quét QR (chấp nhận cả Universal Link https://beong.net/pair lẫn Custom Scheme beong://pair).
   /// Trả về null nếu định dạng URI không hợp lệ.
   String? parsePairingUri(String rawUri) {
     try {
       final uri = Uri.parse(rawUri.trim());
-      if (uri.scheme != 'beong' || uri.host != 'pair') return null;
+      final isCustomScheme = uri.scheme == 'beong' && uri.host == 'pair';
+      final isUniversalLink = (uri.scheme == 'https' || uri.scheme == 'http') &&
+          uri.host == 'beong.net' &&
+          uri.path.startsWith('/pair');
+
+      if (!isCustomScheme && !isUniversalLink) return null;
+
       final version = uri.queryParameters['v'];
       final code = uri.queryParameters['c'];
       if (version != '1' || code == null || code.isEmpty) return null;
