@@ -81,7 +81,7 @@ class RewardsScreen extends ConsumerWidget {
                 _EmptyState(
                   isParent: session.isParent,
                   onAdd: () =>
-                      _showAddReward(context, rewardDao, session.familyId),
+                      _showRewardEditor(context, rewardDao, session.familyId),
                   onPickPreset: (preset) => unawaited(
                     _createFromPreset(rewardDao, session.familyId, preset),
                   ),
@@ -105,7 +105,7 @@ class RewardsScreen extends ConsumerWidget {
       floatingActionButton: session.isParent
           ? FloatingActionButton(
               onPressed: () =>
-                  _showAddReward(context, rewardDao, session.familyId),
+                  _showRewardEditor(context, rewardDao, session.familyId),
               child: const Icon(Icons.add),
             )
           : null,
@@ -132,23 +132,25 @@ class RewardsScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  void _showAddReward(
-    BuildContext context,
-    RewardRepository rewardDao,
-    String familyId,
-  ) {
-    unawaited(
-      showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        builder: (context) => _AddRewardSheet(
-          rewardDao: rewardDao,
-          familyId: familyId,
-        ),
+void _showRewardEditor(
+  BuildContext context,
+  RewardRepository rewardDao,
+  String familyId, [
+  Reward? reward,
+]) {
+  unawaited(
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => _RewardEditorSheet(
+        rewardDao: rewardDao,
+        familyId: familyId,
+        reward: reward,
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _RewardCard extends StatelessWidget {
@@ -243,7 +245,20 @@ class _RewardCard extends StatelessWidget {
                 walletDao: walletDao,
                 redemptionService: redemptionService,
               ),
-            if (session.isParent)
+            if (session.isParent) ...[
+              IconButton(
+                onPressed: () => _showRewardEditor(
+                  context,
+                  rewardDao,
+                  session.familyId,
+                  reward,
+                ),
+                icon: Icon(
+                  Icons.edit_outlined,
+                  color: context.semantic.onSurfaceMuted,
+                ),
+                tooltip: 'Sửa',
+              ),
               IconButton(
                 onPressed: () => rewardDao.deleteReward(reward.id),
                 icon: Icon(
@@ -252,6 +267,7 @@ class _RewardCard extends StatelessWidget {
                 ),
                 tooltip: 'Xoá',
               ),
+            ],
           ],
         ),
       ),
@@ -465,37 +481,48 @@ class _PresetSuggestions extends StatelessWidget {
   }
 }
 
-/// Một hình để chọn cho phần thưởng. Vùng chạm 48dp; ô đang chọn có **viền**
-/// chứ không chỉ đổi nền (WCAG 1.4.1).
-class _AddRewardSheet extends StatefulWidget {
-  const _AddRewardSheet({
+/// Form thêm hoặc sửa phần thưởng.
+///
+/// Bố mẹ có thể tạo mới hoặc chỉnh sửa tên, hình đại diện, mức giá (xu) và số
+/// lượng tồn kho (`stock`) nếu có.
+class _RewardEditorSheet extends StatefulWidget {
+  const _RewardEditorSheet({
     required this.rewardDao,
     required this.familyId,
+    this.reward,
   });
 
   final RewardRepository rewardDao;
   final String familyId;
+  final Reward? reward;
 
   @override
-  State<_AddRewardSheet> createState() => _AddRewardSheetState();
+  State<_RewardEditorSheet> createState() => _RewardEditorSheetState();
 }
 
-class _AddRewardSheetState extends State<_AddRewardSheet> {
-  final _titleController = TextEditingController();
-  int _cost = 50;
-  String _type = RewardType.custom.name;
+class _RewardEditorSheetState extends State<_RewardEditorSheet> {
+  late final TextEditingController _titleController;
+  late final TextEditingController _stockController;
+  late int _cost;
+  late String _type;
   String? _selectedPreset;
+  late String _iconKey;
+  bool _hasStockLimit = false;
 
-  /// Hình của phần thưởng. Luôn có giá trị — không có đường nào tạo ra phần
-  /// thưởng thiếu hình. Mặc định 🎁 chứ không phải ✏️ của nhiệm vụ: dùng chung
-  /// một mặc định thì mọi phần thưởng tự nhập trông như một việc phải làm.
-  String _iconKey = kDefaultRewardIconKey;
+  bool get _isEditing => widget.reward != null;
 
   @override
   void initState() {
     super.initState();
-    // Nút LƯU đọc `_titleController.text` lúc build; gõ chữ không tự dựng lại
-    // widget nên thiếu listener này thì nút không bao giờ đổi trạng thái.
+    final r = widget.reward;
+    _titleController = TextEditingController(text: r?.title ?? '');
+    _cost = r?.costPoints ?? 50;
+    _type = r?.rewardType ?? RewardType.custom.name;
+    _iconKey = r?.iconKey ?? kDefaultRewardIconKey;
+    _hasStockLimit = r?.stock != null;
+    _stockController = TextEditingController(
+      text: r?.stock != null ? '${r!.stock}' : '',
+    );
     _titleController.addListener(_onTitleChanged);
   }
 
@@ -506,6 +533,7 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
     _titleController
       ..removeListener(_onTitleChanged)
       ..dispose();
+    _stockController.dispose();
     super.dispose();
   }
 
@@ -513,19 +541,35 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
     final title = _titleController.text.trim();
     if (title.isEmpty || _cost <= 0) return;
 
-    final id = 'reward-${DateTime.now().millisecondsSinceEpoch}';
-    await widget.rewardDao.createReward(
-      RewardsCompanion.insert(
-        id: id,
-        familyId: widget.familyId,
-        title: title,
-        costPoints: _cost,
-        rewardType: Value(_type),
-        // Hình đang chọn, không phải hình của template: bố mẹ chọn template rồi
-        // đổi hình vẫn được, và lần đổi sau cùng mới là ý của họ.
-        iconKey: Value(_iconKey),
-      ),
-    );
+    final stock = _hasStockLimit
+        ? int.tryParse(_stockController.text.trim())
+        : null;
+
+    if (_isEditing) {
+      await widget.rewardDao.updateReward(
+        widget.reward!.id,
+        RewardsCompanion(
+          title: Value(title),
+          costPoints: Value(_cost),
+          rewardType: Value(_type),
+          iconKey: Value(_iconKey),
+          stock: Value(stock),
+        ),
+      );
+    } else {
+      final id = 'reward-${DateTime.now().millisecondsSinceEpoch}';
+      await widget.rewardDao.createReward(
+        RewardsCompanion.insert(
+          id: id,
+          familyId: widget.familyId,
+          title: title,
+          costPoints: _cost,
+          rewardType: Value(_type),
+          iconKey: Value(_iconKey),
+          stock: Value(stock),
+        ),
+      );
+    }
 
     if (mounted) Navigator.pop(context);
   }
@@ -544,33 +588,38 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Thêm phần thưởng', style: context.text.titleLarge),
-            const SizedBox(height: AppSpacing.lg),
-            Text('Chọn nhanh', style: context.text.titleSmall),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: kRewardPresets.map((preset) {
-                final selected = _selectedPreset == preset.key;
-                return PresetChip(
-                  iconKey: preset.iconKey,
-                  label: preset.titleVi,
-                  selected: selected,
-                  onTap: () {
-                    setState(() {
-                      _selectedPreset = selected ? null : preset.key;
-                      if (!selected) {
-                        _titleController.text = preset.titleVi;
-                        _cost = preset.defaultCost;
-                        _type = preset.rewardType;
-                        _iconKey = preset.iconKey;
-                      }
-                    });
-                  },
-                );
-              }).toList(),
+            Text(
+              _isEditing ? 'Sửa phần thưởng' : 'Thêm phần thưởng',
+              style: context.text.titleLarge,
             ),
+            if (!_isEditing) ...[
+              const SizedBox(height: AppSpacing.lg),
+              Text('Chọn nhanh', style: context.text.titleSmall),
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: kRewardPresets.map((preset) {
+                  final selected = _selectedPreset == preset.key;
+                  return PresetChip(
+                    iconKey: preset.iconKey,
+                    label: preset.titleVi,
+                    selected: selected,
+                    onTap: () {
+                      setState(() {
+                        _selectedPreset = selected ? null : preset.key;
+                        if (!selected) {
+                          _titleController.text = preset.titleVi;
+                          _cost = preset.defaultCost;
+                          _type = preset.rewardType;
+                          _iconKey = preset.iconKey;
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
             const SizedBox(height: AppSpacing.xl),
             Text('Giá (xu)', style: context.text.titleSmall),
             const SizedBox(height: AppSpacing.sm),
@@ -613,6 +662,39 @@ class _AddRewardSheetState extends State<_AddRewardSheet> {
               decoration: const InputDecoration(hintText: 'Tên phần thưởng'),
               textCapitalization: TextCapitalization.sentences,
             ),
+            const SizedBox(height: AppSpacing.xl),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text('Giới hạn số lượng', style: context.text.titleSmall),
+              subtitle: Text(
+                'Tự động hết hàng khi con đổi đủ số lần quy định',
+                style: context.text.bodySmall?.copyWith(
+                  color: context.semantic.onSurfaceMuted,
+                ),
+              ),
+              value: _hasStockLimit,
+              onChanged: (val) {
+                setState(() {
+                  _hasStockLimit = val;
+                  if (!val) {
+                    _stockController.clear();
+                  } else if (_stockController.text.isEmpty) {
+                    _stockController.text = '1';
+                  }
+                });
+              },
+            ),
+            if (_hasStockLimit) ...[
+              const SizedBox(height: AppSpacing.sm),
+              TextField(
+                controller: _stockController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Số lượng còn lại',
+                  hintText: 'VD: 5',
+                ),
+              ),
+            ],
             const SizedBox(height: AppSpacing.xxl),
             SizedBox(
               width: double.infinity,

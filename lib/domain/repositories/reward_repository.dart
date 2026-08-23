@@ -16,6 +16,7 @@ export 'package:beong/data/local/database.dart'
 /// như ví xu ().
 abstract interface class RewardRepository {
   Future<void> createReward(RewardsCompanion reward);
+  Future<void> updateReward(String id, RewardsCompanion reward);
   Future<void> deleteReward(String id);
   Future<Redemption?> getRedemption(String id);
   Future<Reward?> getReward(String id);
@@ -37,6 +38,10 @@ final class LocalRewardRepository implements RewardRepository {
   @override
   Future<void> createReward(RewardsCompanion reward) =>
       _dao.createReward(reward);
+
+  @override
+  Future<void> updateReward(String id, RewardsCompanion reward) =>
+      _dao.updateReward(id, reward);
 
   @override
   Future<void> deleteReward(String id) => _dao.deleteReward(id);

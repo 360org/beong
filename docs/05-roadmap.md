@@ -14,7 +14,7 @@ Cập nhật bằng cách **đọc code**, không tick theo cảm giác — xem 
 |---|---|---|
 | 0 — Nền móng | ✅ Xong | Còn pre-commit hook, cố ý hoãn |
 | 1 — Dữ liệu local | ✅ Xong | Gồm cả **tầng repository** — 7 interface + bản `Local...`, có test kiến trúc canh |
-| 2 — Luồng UI cốt lõi | 🟡 Gần xong | Mật khẩu **từng hồ sơ** ✅ (ADR-027), chọn vai lần mở đầu ✅, integration test ✅. Còn khối chế độ bằng chứng của Task Editor |
+| 2 — Luồng UI cốt lõi | ✅ Xong | Mật khẩu **từng hồ sơ** ✅ (ADR-027), chọn vai lần mở đầu ✅, integration test ✅, Task Editor đủ 8 khối gồm proof_mode ✅ |
 | 3 — Backend & ghép cặp | 🔴 Chưa bắt đầu | **Pha 0 xong 4/4** (không cần backend); phần backend chờ dựng Supabase |
 | 4 — Phần thưởng & tài chính | ✅ Xong | Đổi thưởng + duyệt + hoàn xu, trừ xu (chung + riêng theo việc), con tự chia xu, hũ tự lập, huy hiệu + streak, mục tiêu tiết kiệm, tỷ giá tiền thật, sửa xu tay |
 | 5 — Thông báo & hoàn thiện | 🔴 Chưa bắt đầu | |
@@ -74,16 +74,9 @@ toàn bộ offline. ✅ đạt.
 
 ## Sprint 2 — Luồng cốt lõi UI (gần xong)
 - [x] Onboarding 4 bước (thêm bước chọn tuổi ngoài kế hoạch — xem ghi chú dưới)
-- [~] **Task Editor** — có 7 khối: tên, điểm, preset, icon, **chọn con nào**, **lịch lặp**
-      (hằng ngày / chọn thứ / một lần), **chế độ duyệt riêng**, và mức **trừ xu riêng** cho
-      từng việc. Thiếu đúng 1 khối: **chế độ bằng chứng** (docs xếp ở v1.1).
-
-      Lưu ý cho người làm khối này: cột `tasks.proof_mode` **đã có trong schema** với mặc định
-      `'none'`, nhưng soát ngày 17/08 thì không một dòng nào ngoài file schema đọc hay ghi nó —
-      một cột chết. Đây là dạng lỗi dự án đã dọn năm lần (`jars`, `badges_earned`,
-      `day_rollover_hour`, `KidScale.celebrateOnTap`, `TaskCard.isPending`). Làm khối này thì nối
-      cột đó vào, đừng thêm cột mới; còn nếu quyết định hoãn tiếp thì nên gỡ cột ra chứ đừng để
-      nằm đó trông như đã xong.
+- [x] **Task Editor** — có đủ 8 khối: tên, điểm, preset, icon, **chọn con nào**, **lịch lặp**
+      (hằng ngày / chọn thứ / một lần), **chế độ duyệt riêng**, mức **trừ xu riêng** cho
+      từng việc, và **chế độ bằng chứng** (`proof_mode`).
 - [x] **Routine Editor** + kéo thả đổi thứ tự task — xong: sửa tên/hình/xu thưởng trọn bộ, kéo thả
       thứ tự việc, bỏ việc ra và đưa việc lẻ vào, ngừng dùng thói quen (việc bên trong không mất).
 - [~] Child Home — vòng tiến độ ✅, linh vật đổi tâm trạng theo tiến độ ✅, hoa giấy ăn mừng ✅
@@ -134,8 +127,7 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
 
 **Việc còn nợ từ Sprint 1–2, không cần backend:**
 - [x] Tầng repository ✅ (xem Sprint 1) — xong trước khi bắt đầu sync, đúng như hạn chót đặt ra
-- [ ] Task Editor đủ 8 khối (còn thiếu **chế độ bằng chứng** — cột `proof_mode` có sẵn nhưng chưa
-      ai đọc; chế độ duyệt riêng đã xong)
+- [x] Task Editor đủ 8 khối (đã hoàn thiện chế độ bằng chứng `proof_mode` và chế độ duyệt riêng)
 - [x] Routine Editor + kéo thả thứ tự
 - [x] Animation ăn mừng — `ConfettiBurst`, nổ ở cấp màn hình vì thẻ việc bị tháo ngay sau khi bấm
 - [x] **Mật khẩu từng hồ sơ** (ADR-027) — `MatKhauHoSo` khoá theo `member_id`, hỏi ở cả hai cửa
@@ -181,8 +173,8 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 
 > Nội dung không đổi, chỉ **đi sau** Sprint 3 theo ADR-021.
 
-- [~] CRUD phần thưởng — tạo/xoá/đổi xong; **chưa** có màn sửa, và trường riêng theo loại
-      (`meta_json`: số phút, số tiền) chưa có UI nhập
+- [x] **CRUD phần thưởng** — tạo/xoá/sửa/đổi xong: `_RewardEditorSheet` hỗ trợ sửa tên, giá xu, icon,
+      giới hạn số lượng `stock`.
 - [x] **Đổi thưởng + hàng chờ duyệt + hoàn điểm khi từ chối** — `RedemptionService`.
       Sửa ba lỗi thật của luồng cũ: không nguyên tử (trừ xu trước khi kiểm còn hàng),
       từ chối **không hoàn xu**, và không có màn nào gọi `fulfillRedemption` nên phiếu

@@ -459,6 +459,9 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
   /// của cột trong DB.
   ApprovalMode _approval = ApprovalMode.manual;
 
+  /// Chế độ bằng chứng khi làm việc (none / photo / note).
+  ProofMode _proofMode = ProofMode.none;
+
   /// Lịch lặp. Mặc định hằng ngày — đúng với phần lớn việc nhà, và là hành vi
   /// duy nhất app có trước khi khối này tồn tại.
   RepeatType _repeat = RepeatType.daily;
@@ -477,6 +480,12 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
   String _approvalLabel(ApprovalMode mode) => switch (mode) {
     ApprovalMode.auto => 'Xong là xong',
     ApprovalMode.manual => 'Bố mẹ duyệt',
+  };
+
+  String _proofModeLabel(ProofMode mode) => switch (mode) {
+    ProofMode.none => 'Không cần',
+    ProofMode.photo => 'Chụp ảnh 📸',
+    ProofMode.note => 'Ghi chú ✍️',
   };
 
   String _repeatTypeLabel(RepeatType type) => switch (type) {
@@ -508,6 +517,7 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
         // template rồi đổi hình, và lần đổi sau cùng mới là ý của họ.
         iconKey: Value(_iconKey),
         approvalMode: Value(_approval.name),
+        proofMode: Value(_proofMode.name),
         missedPenaltyPct: Value(_penaltyPct),
         repeatType: Value(effectiveRepeat.name),
         repeatDays: Value(
@@ -698,6 +708,20 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                   ),
                 );
               },
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text('Yêu cầu bằng chứng', style: context.text.titleSmall),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              children: [
+                for (final mode in ProofMode.values)
+                  ChoiceChip(
+                    label: Text(_proofModeLabel(mode)),
+                    selected: _proofMode == mode,
+                    onSelected: (_) => setState(() => _proofMode = mode),
+                  ),
+              ],
             ),
             const SizedBox(height: AppSpacing.xxl),
             SizedBox(
