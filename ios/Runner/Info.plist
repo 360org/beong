@@ -45,6 +45,8 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Bé Ong cần quyền truy cập camera để quét mã QR ghép cặp thiết bị giữa máy phụ huynh và máy con.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 </dict>

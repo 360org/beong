@@ -5,6 +5,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/domain/services/pairing_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 /// Màn hình/Dialog quét hoặc nhập mã ghép cặp cho thiết bị của con.
 ///
@@ -28,16 +29,28 @@ class _ScanPairingDialog extends ConsumerStatefulWidget {
 class _ScanPairingDialogState extends ConsumerState<_ScanPairingDialog> {
   static const _pairingService = PairingService();
   final _inputController = TextEditingController();
+  MobileScannerController? _scannerController;
   String? _errorMessage;
   bool _isProcessing = false;
 
   @override
+  void initState() {
+    super.initState();
+    _scannerController = MobileScannerController(
+      detectionSpeed: DetectionSpeed.noDuplicates,
+      facing: CameraFacing.back,
+    );
+  }
+
+  @override
   void dispose() {
+    _scannerController?.dispose();
     _inputController.dispose();
     super.dispose();
   }
 
   Future<void> _handlePairing(String rawText) async {
+    if (_isProcessing) return;
     final text = rawText.trim();
     if (text.isEmpty) return;
 
@@ -60,8 +73,8 @@ class _ScanPairingDialogState extends ConsumerState<_ScanPairingDialog> {
       return;
     }
 
-    // Giả lập hoặc gọi logic kết nối
-    await Future<void>.delayed(const Duration(milliseconds: 600));
+    // Dừng camera nếu đang quét
+    await _scannerController?.stop();
     if (!mounted) return;
 
     Navigator.of(context).pop(code);
@@ -91,23 +104,37 @@ class _ScanPairingDialogState extends ConsumerState<_ScanPairingDialog> {
                 color: context.semantic.onSurfaceMuted,
               ),
             ),
-            const SizedBox(height: AppSpacing.lg),
-            Container(
-              height: 160,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(AppRadius.card),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+            const SizedBox(height: AppSpacing.md),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.card),
+              child: Container(
+                height: 200,
+                color: Colors.black,
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    const Icon(Icons.camera_alt_outlined, size: 48, color: Colors.black54),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      'Khung quét QR Camera',
-                      style: context.text.bodySmall?.copyWith(color: Colors.black54),
+                    if (_scannerController != null)
+                      MobileScanner(
+                        controller: _scannerController,
+                        onDetect: (capture) {
+                          final barcodes = capture.barcodes;
+                          for (final barcode in barcodes) {
+                            final rawVal = barcode.rawValue;
+                            if (rawVal != null && rawVal.isNotEmpty) {
+                              _handlePairing(rawVal);
+                              break;
+                            }
+                          }
+                        },
+                      ),
+                    // Khung ngắm quét QR
+                    Container(
+                      width: 140,
+                      height: 140,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.brand360Blue, width: 2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ],
                 ),

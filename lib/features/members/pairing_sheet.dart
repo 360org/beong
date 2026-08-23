@@ -5,6 +5,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/domain/services/pairing_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 /// Sheet hiển thị mã ghép cặp (QR code / text code) cho phụ huynh cấp cho máy con.
 ///
@@ -153,11 +154,23 @@ class _PairingCodeSheetState extends State<_PairingCodeSheet> {
                             width: 180,
                             height: 180,
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Center(
-                              child: Icon(Icons.qr_code_2_rounded, size: 140, color: Colors.black87),
+                            child: Center(
+                              child: QrImageView(
+                                data: _uri,
+                                version: QrVersions.auto,
+                                size: 170,
+                                eyeStyle: const QrEyeStyle(
+                                  eyeShape: QrEyeShape.square,
+                                  color: Colors.black87,
+                                ),
+                                dataModuleStyle: const QrDataModuleStyle(
+                                  dataModuleShape: QrDataModuleShape.square,
+                                  color: Colors.black87,
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(height: AppSpacing.sm),
