@@ -25,7 +25,7 @@ enum AgeBand {
 }
 
 /// Tuổi nhỏ nhất app nhắm tới. Dưới mốc này vẫn xếp vào [AgeBand.little].
-const int kMinSupportedAge = 5;
+const int kMinSupportedAge = 3;
 
 /// Tuổi lớn nhất app nhắm tới. Trên mốc này vẫn xếp vào [AgeBand.teen].
 const int kMaxSupportedAge = 15;

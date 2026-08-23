@@ -90,20 +90,16 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
         );
     if (!mounted) return;
 
-    // ADR-027: không hồ sơ nào được để trống mật khẩu. Bỏ qua ở đây là thủng
-    // ngay quy tắc vừa đặt — bé mới sẽ là hồ sơ duy nhất ai cũng mở được.
-    //
-    // Đặt **sau** khi ghi bé: hỏng ở giữa thì bé vẫn còn và màn chọn hồ sơ bắt
-    // đặt nốt; đặt trước rồi hỏng thì mất cả bé.
+    // Cho phép tuỳ chọn đặt mật khẩu hoặc không cho bé (batBuoc: false).
     await datMatKhauMoi(
       context,
       memberId: childId,
       tenHienThi: ten,
       service: ref.read(matKhauHoSoProvider),
-      batBuoc: true,
+      batBuoc: false,
       moTa:
-          'Bốn chữ số cho hồ sơ của $ten. Bé nhập nó để mở hồ sơ của mình; '
-          'bố mẹ đặt lại được bất cứ lúc nào trong Cài đặt.',
+          'Bốn chữ số cho hồ sơ của $ten (tuỳ chọn). Bé nhập nó để mở hồ sơ của mình; '
+          'bấm HUỶ nếu không cần mật khẩu. Bố mẹ đặt lại được bất cứ lúc nào.',
     );
 
     if (mounted) Navigator.of(context).pop(true);

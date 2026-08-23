@@ -135,13 +135,11 @@ class _AllocateXuSheetState extends State<AllocateXuSheet> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              // Chỉ cho lưu khi đã chia **hết**: để lại một phần trong hũ chờ
-              // thì con quay lại thấy số lẻ và không hiểu vì sao.
-              onPressed: _placed > 0 && _left == 0
-                  ? () => unawaited(_save())
-                  : null,
+              // Cho phép lưu khi đã đặt xu (_placed > 0), không bắt buộc phải chia hết
+              // một lần để bé có thể chia nhiều lần tuỳ ý.
+              onPressed: _placed > 0 ? () => unawaited(_save()) : null,
               child: Text(
-                _left == 0 ? 'XONG' : 'CÒN $_left XU CHƯA CHIA',
+                _left == 0 ? 'XONG' : 'LƯU ($_placed XU)',
               ),
             ),
           ),

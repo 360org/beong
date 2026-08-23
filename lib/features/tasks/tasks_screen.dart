@@ -115,6 +115,14 @@ class _TaskListState extends State<_TaskList> {
       ),
       [for (final c in children) c.id],
     );
+    // Sinh ngay instance cho hôm nay để việc mới hiện ngay trên hồ sơ con
+    final today = FamilyClock(
+      timeZoneOffset: DateTime.now().timeZoneOffset,
+    ).today();
+    await widget.taskDao.generateInstances(
+      familyId: widget.familyId,
+      today: today,
+    );
     // Không cần nạp lại tay: `watchActiveTasks` tự phát lại.
   }
 
@@ -532,6 +540,15 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
         ),
       ),
       _selectedChildren.toList(),
+    );
+
+    // Sinh ngay instance cho hôm nay để việc mới phản ánh ngay trên hồ sơ con
+    final today = FamilyClock(
+      timeZoneOffset: DateTime.now().timeZoneOffset,
+    ).today();
+    await widget.taskDao.generateInstances(
+      familyId: widget.familyId,
+      today: today,
     );
 
     if (mounted) Navigator.pop(context);

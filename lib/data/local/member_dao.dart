@@ -234,6 +234,24 @@ class MemberDao extends DatabaseAccessor<AppDatabase> with _$MemberDaoMixin {
     );
   }
 
+  /// Xoá mềm một thành viên.
+  Future<void> deleteMember(String memberId) {
+    return (update(members)..where((m) => m.id.equals(memberId))).write(
+      MembersCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  /// Xoá toàn bộ một gia đình và toàn bộ thành viên, dữ liệu liên quan.
+  Future<void> deleteFamily(String familyId) async {
+    await transaction(() async {
+      await (delete(members)..where((m) => m.familyId.equals(familyId))).go();
+      await (delete(families)..where((f) => f.id.equals(familyId))).go();
+    });
+  }
+
   /// Cập nhật streak cache cho một trẻ.
   Future<void> upsertStreak({
     required String memberId,

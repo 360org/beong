@@ -5,7 +5,7 @@ một người UI).
 
 ## Trạng thái hiện tại
 
-*Soát lần cuối: 23/08/2026, bản `v0.2.5+8`.*
+*Soát lần cuối: 23/08/2026, bản `v0.2.6+11`.*
 
 Cập nhật bằng cách **đọc code**, không tick theo cảm giác — xem quy trình ở
 `.claude/skills/flutter-8-buoc`.
@@ -14,11 +14,11 @@ Cập nhật bằng cách **đọc code**, không tick theo cảm giác — xem 
 |---|---|---|
 | 0 — Nền móng | ✅ Xong | Còn pre-commit hook, cố ý hoãn |
 | 1 — Dữ liệu local | ✅ Xong | Gồm cả **tầng repository** — 7 interface + bản `Local...`, có test kiến trúc canh |
-| 2 — Luồng UI cốt lõi | ✅ Xong | Mật khẩu **từng hồ sơ** ✅ (ADR-027), chọn vai lần mở đầu ✅, integration test ✅, Task Editor đủ 8 khối gồm proof_mode ✅ |
-| 3 — Backend & ghép cặp | 🟡 Đang làm | **Pha 0 xong 4/4**; migration SQL & RLS policy Supabase ✅ (`supabase/migrations/`); chờ kết nối client |
-| 4 — Phần thưởng & tài chính | ✅ Xong | Đổi thưởng + duyệt + hoàn xu, trừ xu (chung + riêng theo việc), con tự chia xu, hũ tự lập, huy hiệu + streak, mục tiêu tiết kiệm, tỷ giá tiền thật, sửa xu tay, CRUD sửa phần thưởng |
-| 5 — Thông báo & hoàn thiện | 🟡 Đang làm | Báo lỗi trong app ✅; từ điển i18n app_vi/app_en mở rộng ✅; chờ FCM push |
-| 6 — Phát hành v1.0 | 🟡 Đang chạy | **Đã lên TestFlight thật** (`0.2.5+8`, run #19). Chặn còn lại **không phải mã**: hồ sơ App Store chưa điền, secret Play Console chưa hợp lệ |
+| 2 — Luồng UI cốt lõi | ✅ Xong | Mật khẩu **từng hồ sơ** ✅ (ADR-027), chọn vai lần mở đầu ✅, integration test ✅, Task Editor đủ 8 khối gồm proof_mode ✅, CRUD hồ sơ con & xoá gia đình ✅, xem việc chưa xong hôm nay trên Home bố mẹ ✅ |
+| 3 — Backend & ghép cặp | 🟡 Đang làm | **Pha 0 xong 4/4**; migration SQL & RLS policy Supabase ✅ (`supabase/migrations/`); QR scanner camera native & QR code ✅; chờ kết nối client |
+| 4 — Phần thưởng & tài chính | ✅ Xong | Đổi thưởng + duyệt + hoàn xu, trừ xu (chung + riêng theo việc), con tự chia xu linh hoạt dở dang, hũ tự lập, huy hiệu + streak, mục tiêu tiết kiệm, tỷ giá tiền thật, sửa xu tay, CRUD sửa phần thưởng |
+| 5 — Thông báo & hoàn thiện | 🟡 Đang làm | Báo lỗi trong app ✅; từ điển i18n app_vi/app_en mở rộng ✅; dải tuổi 3–15 tính động từ birthYear ✅; chờ FCM push |
+| 6 — Phát hành v1.0 | 🟡 Đang chạy | **Đã lên TestFlight thật** (`0.2.6+11`). Chặn còn lại **không phải mã**: hồ sơ App Store chưa điền, secret Play Console chưa hợp lệ |
 
 **Hai lỗi 🔴 chặn phát hành tìm ra ngày 22/08 đã sửa xong**, cộng hai lỗi nữa lộ ra sau đó khi
 chạy app thật — xem mục *Chặn phát hành* bên dưới. Còn đúng một mục để mở, và cố ý: dấu vết chẩn

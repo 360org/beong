@@ -178,20 +178,30 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     // Đặt **sau** khi ghi xong dữ liệu thì vẫn đúng: hỏng ở giữa thì nhà vẫn
     // còn, và lần vào sau màn chọn hồ sơ bắt đặt nốt. Ghi trước rồi hỏng thì
     // mất cả nhà.
+    // Bố mẹ bắt buộc có mật khẩu để bảo vệ cài đặt. Bé thì cho phép tuỳ chọn
+    // đặt mật khẩu hoặc không (bỏ qua được).
     final matKhau = ref.read(matKhauHoSoProvider);
-    for (final (memberId, ten) in [
-      (parentId, 'Bố mẹ'),
-      (childId, childName),
-    ]) {
-      if (!mounted) return;
-      await datMatKhauMoi(
-        context,
-        memberId: memberId,
-        tenHienThi: ten,
-        service: matKhau,
-        batBuoc: true,
-      );
-    }
+    if (!mounted) return;
+    await datMatKhauMoi(
+      context,
+      memberId: parentId,
+      tenHienThi: 'Bố mẹ',
+      service: matKhau,
+      batBuoc: true,
+      moTa: 'Bốn chữ số cho hồ sơ Bố mẹ. Dùng để khoá cài đặt và duyệt việc.',
+    );
+
+    if (!mounted) return;
+    await datMatKhauMoi(
+      context,
+      memberId: childId,
+      tenHienThi: childName,
+      service: matKhau,
+      batBuoc: false,
+      moTa:
+          'Bốn chữ số cho hồ sơ của $childName (tuỳ chọn). Bé nhập nó để mở hồ sơ '
+          'của mình; bạn có thể bấm HUỶ nếu không cần mật khẩu.',
+    );
 
     // Máy vừa có gia đình đầu tiên — router phải biết, nếu không lần khoá máy
     // sau lại rơi về onboarding.

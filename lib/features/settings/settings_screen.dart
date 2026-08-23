@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:beong/app/router.dart';
 import 'package:beong/core/providers/database_provider.dart';
+import 'package:beong/core/providers/du_lieu_may_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/providers/theme_mode_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
@@ -14,6 +15,7 @@ import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/services/money_exchange.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:beong/features/members/add_child_sheet.dart';
+import 'package:beong/features/members/edit_child_sheet.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
 import 'package:beong/features/members/pairing_sheet.dart';
 import 'package:beong/features/settings/bao_loi_screen.dart';
@@ -30,6 +32,53 @@ class SettingsScreen extends ConsumerWidget {
     if (session == null) return const SizedBox.shrink();
 
     final memberDao = ref.watch(memberRepositoryProvider);
+
+    Future<void> deleteFamily(Family family) async {
+      // 1. Yêu cầu nhập mật khẩu bố mẹ trước khi xoá gia đình
+      final hopLe = await hoiMatKhau(
+        context,
+        memberId: session.activeMemberId,
+        tenHienThi: 'Bố mẹ',
+        service: ref.read(matKhauHoSoProvider),
+        batBuoc: true,
+        moTa: 'Nhập mật khẩu phụ huynh để xác nhận xoá toàn bộ gia đình',
+      );
+      if (hopLe != true || !context.mounted) return;
+
+      // 2. Hộp thoại cảnh báo lần cuối
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('Xoá gia đình «${family.name}»?'),
+          content: const Text(
+            'Toàn bộ hồ sơ thành viên, danh sách nhiệm vụ, thói quen, lịch sử làm việc '
+            'và tích luỹ xu của gia đình này sẽ bị xoá hoàn toàn khỏi máy.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('HUỶ'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: AppColors.kpiRed),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('XOÁ TOÀN BỘ'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true || !context.mounted) return;
+
+      // 3. Thực hiện xoá và đăng xuất
+      await ref.read(memberRepositoryProvider).deleteFamily(family.id);
+      await ref.read(sessionProvider.notifier).logout();
+      await ref.read(mayDaCoDuLieuProvider.notifier).nap();
+
+      if (context.mounted) {
+        context.go(Routes.chonNguoiDung);
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -51,7 +100,10 @@ class SettingsScreen extends ConsumerWidget {
                 builder: (context, familySnap) {
                   final family = familySnap.data;
                   if (family == null) return const SizedBox.shrink();
-                  return _FamilyInfoCard(family: family);
+                  return _FamilyInfoCard(
+                    family: family,
+                    onDelete: () => unawaited(deleteFamily(family)),
+                  );
                 },
               ),
               const SizedBox(height: AppSpacing.xxl),
@@ -63,9 +115,15 @@ class SettingsScreen extends ConsumerWidget {
                   child: _MemberTile(
                     member: member,
                     isActive: member.id == session.activeMemberId,
-                    onTap: () => unawaited(
-                      _switchMember(context, ref, member: member),
-                    ),
+                    onTap: () {
+                      if (member.kind == MemberKind.child.name) {
+                        unawaited(showEditChildSheet(context, child: member));
+                      } else {
+                        unawaited(
+                          _switchMember(context, ref, member: member),
+                        );
+                      }
+                    },
                   ),
                 ),
               ),
@@ -157,9 +215,13 @@ class SettingsScreen extends ConsumerWidget {
 }
 
 class _FamilyInfoCard extends StatelessWidget {
-  const _FamilyInfoCard({required this.family});
+  const _FamilyInfoCard({
+    required this.family,
+    required this.onDelete,
+  });
 
   final Family family;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -193,6 +255,12 @@ class _FamilyInfoCard extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+            IconButton(
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline_rounded),
+              color: AppColors.kpiRed,
+              tooltip: 'Xoá gia đình này',
             ),
           ],
         ),

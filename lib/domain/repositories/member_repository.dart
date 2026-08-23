@@ -28,6 +28,9 @@ abstract interface class MemberRepository {
   Future<void> setPenaltyPolicy(String familyId, PenaltyPolicy policy);
   Future<void> setRequireApproval(String familyId, {required bool value});
   Future<void> setTimezone(String familyId, String timezone);
+  Future<void> deleteMember(String memberId);
+  Future<void> deleteFamily(String familyId);
+  Future<void> updateMember(String id, MembersCompanion companion);
   Stream<AllocationMode> watchAllocationMode(String familyId);
   Stream<int> watchDayRolloverHour(String familyId);
   Stream<MoneyExchange> watchExchangeRate(String familyId);
@@ -118,4 +121,14 @@ final class LocalMemberRepository implements MemberRepository {
   @override
   Future<void> setExchangeRate(String familyId, int? xuPerUnit) =>
       _dao.setExchangeRate(familyId, xuPerUnit);
+
+  @override
+  Future<void> deleteMember(String memberId) => _dao.deleteMember(memberId);
+
+  @override
+  Future<void> deleteFamily(String familyId) => _dao.deleteFamily(familyId);
+
+  @override
+  Future<void> updateMember(String id, MembersCompanion companion) =>
+      _dao.updateMember(id, companion);
 }

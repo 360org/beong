@@ -18,6 +18,7 @@ import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/task_review_service.dart';
+import 'package:beong/features/members/mat_khau_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -34,6 +35,21 @@ class ParentHomeScreen extends ConsumerWidget {
     final taskDao = ref.watch(taskRepositoryProvider);
     final walletDao = ref.watch(walletRepositoryProvider);
     final reviewService = ref.watch(taskReviewServiceProvider);
+
+    Future<void> switchMember(Member member) async {
+      final hopLe = await hoiMatKhau(
+        context,
+        memberId: member.id,
+        tenHienThi: member.displayName,
+        service: ref.read(matKhauHoSoProvider),
+        batBuoc: false,
+        moTa: 'Bốn chữ số của ${member.displayName}',
+      );
+      if (hopLe != true || !context.mounted) return;
+
+      await ref.read(sessionProvider.notifier).switchMember(member.id);
+      if (context.mounted) context.go('/');
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -78,6 +94,7 @@ class ParentHomeScreen extends ConsumerWidget {
                     walletDao: walletDao,
                     reviewService: reviewService,
                     reviewerId: session.activeMemberId,
+                    onTapProfile: () => unawaited(switchMember(child)),
                   ),
                 ),
               ),
@@ -460,6 +477,7 @@ class _ChildSummaryCard extends ConsumerWidget {
     required this.walletDao,
     required this.reviewService,
     required this.reviewerId,
+    required this.onTapProfile,
   });
 
   final Member child;
@@ -467,6 +485,7 @@ class _ChildSummaryCard extends ConsumerWidget {
   final WalletRepository walletDao;
   final TaskReviewService reviewService;
   final String reviewerId;
+  final VoidCallback onTapProfile;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -483,66 +502,86 @@ class _ChildSummaryCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.18),
-                    shape: BoxShape.circle,
+            InkWell(
+              onTap: onTapProfile,
+              borderRadius: BorderRadius.circular(AppRadius.card),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.18),
+                      shape: BoxShape.circle,
+                    ),
+                    child: AppIcon(
+                      iconKeyForEmoji(avatarForKey(child.avatarKey)),
+                      size: 28,
+                    ),
                   ),
-                  child: AppIcon(
-                    iconKeyForEmoji(avatarForKey(child.avatarKey)),
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.lg),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(child.displayName, style: context.text.titleMedium),
-                      const SizedBox(height: AppSpacing.xs),
-                      StreamBuilder<List<TaskInstance>>(
-                        stream: taskDao.watchInstancesForMember(
-                          memberId: child.id,
-                          date: today,
-                        ),
-                        builder: (context, snap) {
-                          final instances = snap.data ?? [];
-                          final done = instances
-                              .where(
-                                (i) =>
-                                    i.status == InstanceStatus.approved.name ||
-                                    i.status ==
-                                        InstanceStatus.pendingReview.name,
-                              )
-                              .length;
-                          return Text(
-                            '$done / ${instances.length} việc hôm nay',
-                            style: context.text.bodySmall?.copyWith(
+                  const SizedBox(width: AppSpacing.lg),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              child.displayName,
+                              style: context.text.titleMedium,
+                            ),
+                            const SizedBox(width: AppSpacing.xs),
+                            Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 12,
                               color: context.semantic.onSurfaceMuted,
                             ),
-                          );
-                        },
-                      ),
-                    ],
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        StreamBuilder<List<TaskInstance>>(
+                          stream: taskDao.watchInstancesForMember(
+                            memberId: child.id,
+                            date: today,
+                          ),
+                          builder: (context, snap) {
+                            final instances = snap.data ?? [];
+                            final done = instances
+                                .where(
+                                  (i) =>
+                                      i.status == InstanceStatus.approved.name ||
+                                      i.status ==
+                                          InstanceStatus.pendingReview.name,
+                                )
+                                .length;
+                            return Text(
+                              '$done / ${instances.length} việc hôm nay · Chạm để vào hồ sơ',
+                              style: context.text.bodySmall?.copyWith(
+                                color: context.semantic.onSurfaceMuted,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                StreamBuilder<WalletBalance>(
-                  stream: walletDao.watchBalance(child.id),
-                  builder: (context, snap) {
-                    final balance = snap.data ?? WalletBalance.zero;
-                    return XuBadge(amount: balance.total);
-                  },
-                ),
-              ],
+                  StreamBuilder<WalletBalance>(
+                    stream: walletDao.watchBalance(child.id),
+                    builder: (context, snap) {
+                      final balance = snap.data ?? WalletBalance.zero;
+                      return XuBadge(amount: balance.total);
+                    },
+                  ),
+                ],
+              ),
             ),
-            // Việc đã xong hôm nay, kèm nút mở lại. Bắt buộc phải có: khi nhà tắt
-            // tính năng duyệt thì không còn hàng đợi nào, nên đây là **đường duy
-            // nhất** để bố mẹ mở lại việc con bấm xong mà chưa làm (ADR-023).
+            const SizedBox(height: AppSpacing.xs),
+            _IncompleteTodayList(
+              memberId: child.id,
+              date: today,
+              taskDao: taskDao,
+            ),
             _DoneTodayList(
               memberId: child.id,
               date: today,
@@ -552,6 +591,117 @@ class _ChildSummaryCard extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Việc con chưa xong hôm nay, mở ra xem chi tiết.
+class _IncompleteTodayList extends StatelessWidget {
+  const _IncompleteTodayList({
+    required this.memberId,
+    required this.date,
+    required this.taskDao,
+  });
+
+  final String memberId;
+  final CalendarDate date;
+  final TaskRepository taskDao;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<TaskInstance>>(
+      stream: taskDao.watchInstancesForMember(memberId: memberId, date: date),
+      builder: (context, snap) {
+        final all = snap.data ?? const <TaskInstance>[];
+        final pending = all
+            .where((i) => i.status == InstanceStatus.scheduled.name)
+            .toList();
+        if (pending.isEmpty) return const SizedBox.shrink();
+
+        return Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: EdgeInsets.zero,
+            title: Text(
+              'Chưa hoàn thành (${pending.length})',
+              style: context.text.bodySmall?.copyWith(
+                color: context.semantic.onSurfaceMuted,
+              ),
+            ),
+            children: pending
+                .map(
+                  (instance) => _IncompleteRow(
+                    key: ValueKey(instance.id),
+                    instance: instance,
+                    taskDao: taskDao,
+                  ),
+                )
+                .toList(),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _IncompleteRow extends StatefulWidget {
+  const _IncompleteRow({
+    required this.instance,
+    required this.taskDao,
+    super.key,
+  });
+
+  final TaskInstance instance;
+  final TaskRepository taskDao;
+
+  @override
+  State<_IncompleteRow> createState() => _IncompleteRowState();
+}
+
+class _IncompleteRowState extends State<_IncompleteRow> {
+  Task? _task;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadTask());
+  }
+
+  @override
+  void didUpdateWidget(_IncompleteRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.instance.taskId != widget.instance.taskId) {
+      unawaited(_loadTask());
+    }
+  }
+
+  Future<void> _loadTask() async {
+    final task = await widget.taskDao.getTaskById(widget.instance.taskId);
+    if (mounted) setState(() => _task = task);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final task = _task;
+    if (task == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      child: Row(
+        children: [
+          AppIcon.task(task.iconKey, size: 20),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: Text(task.title, style: context.text.bodyMedium)),
+          Text(
+            '+${task.points} xu',
+            style: context.text.bodySmall?.copyWith(
+              color: context.semantic.xuText,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
