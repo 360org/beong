@@ -15,9 +15,9 @@ Cập nhật bằng cách **đọc code**, không tick theo cảm giác — xem 
 | 0 — Nền móng | ✅ Xong | Còn pre-commit hook, cố ý hoãn |
 | 1 — Dữ liệu local | ✅ Xong | Gồm cả **tầng repository** — 7 interface + bản `Local...`, có test kiến trúc canh |
 | 2 — Luồng UI cốt lõi | ✅ Xong | Mật khẩu **từng hồ sơ** ✅ (ADR-027), chọn vai lần mở đầu ✅, integration test ✅, Task Editor đủ 8 khối gồm proof_mode ✅ |
-| 3 — Backend & ghép cặp | 🔴 Chưa bắt đầu | **Pha 0 xong 4/4** (không cần backend); phần backend chờ dựng Supabase |
-| 4 — Phần thưởng & tài chính | ✅ Xong | Đổi thưởng + duyệt + hoàn xu, trừ xu (chung + riêng theo việc), con tự chia xu, hũ tự lập, huy hiệu + streak, mục tiêu tiết kiệm, tỷ giá tiền thật, sửa xu tay |
-| 5 — Thông báo & hoàn thiện | 🔴 Chưa bắt đầu | |
+| 3 — Backend & ghép cặp | 🟡 Đang làm | **Pha 0 xong 4/4**; migration SQL & RLS policy Supabase ✅ (`supabase/migrations/`); chờ kết nối client |
+| 4 — Phần thưởng & tài chính | ✅ Xong | Đổi thưởng + duyệt + hoàn xu, trừ xu (chung + riêng theo việc), con tự chia xu, hũ tự lập, huy hiệu + streak, mục tiêu tiết kiệm, tỷ giá tiền thật, sửa xu tay, CRUD sửa phần thưởng |
+| 5 — Thông báo & hoàn thiện | 🟡 Đang làm | Báo lỗi trong app ✅; từ điển i18n app_vi/app_en mở rộng ✅; chờ FCM push |
 | 6 — Phát hành v1.0 | 🟡 Đang chạy | **Đã lên TestFlight thật** (`0.2.5+8`, run #19). Chặn còn lại **không phải mã**: hồ sơ App Store chưa điền, secret Play Console chưa hợp lệ |
 
 **Hai lỗi 🔴 chặn phát hành tìm ra ngày 22/08 đã sửa xong**, cộng hai lỗi nữa lộ ra sau đó khi
@@ -140,7 +140,7 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
       việc / tên phần thưởng**, **trạng thái** (chữ + màu, theo dõi sống), và chi tiết từng hũ
 
 **Backend & tài khoản:**
-- [ ] Dự án Supabase, migration SQL, RLS policy theo `family_id`
+- [x] Dự án Supabase, migration SQL, RLS policy theo `family_id` — `supabase/migrations/20260823000000_init_beong_schema.sql` (11 bảng + RLS policy theo từng vai)
 - [ ] Auth phụ huynh: Sign in with Apple + Google (cả hai — `09` §5.2)
 - [ ] Liên kết tài khoản ↔ hồ sơ gia đình; ca "đăng nhập lại trên máy mới"
 - [x] Tạo **nhiều** con — ô "Thêm bé" trong Cài đặt, dùng chung `ChildProfileForm` với
