@@ -43,7 +43,7 @@ class PairingService {
       final code = uri.queryParameters['c'];
       if (version != '1' || code == null || code.isEmpty) return null;
       return code.trim().toLowerCase();
-    } catch (_) {
+    } on FormatException {
       return null;
     }
   }

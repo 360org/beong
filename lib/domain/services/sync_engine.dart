@@ -71,11 +71,11 @@ class SyncEngine {
     try {
       final pending = await getPendingOps();
       for (final item in pending) {
-        bool success = true;
+        var success = true;
         if (uploader != null) {
           try {
             success = await uploader(item);
-          } catch (e) {
+          } on Exception catch (e) {
             success = false;
             await markFailed(item.seq, e.toString());
           }

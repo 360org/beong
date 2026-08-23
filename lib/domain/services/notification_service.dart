@@ -78,8 +78,9 @@ class NotificationService {
   void recordSent(BeOngNotification notification, {DateTime? now}) {
     final current = now ?? DateTime.now();
     if (notification.recipientRole == MemberKind.child) {
-      final list = _childDailySentLog.putIfAbsent(notification.memberId, () => []);
-      list.add(current);
+      _childDailySentLog
+          .putIfAbsent(notification.memberId, () => [])
+          .add(current);
     } else if (notification.recipientRole == MemberKind.parent &&
         notification.category == 'approval_needed') {
       _parentLastApprovalSent[notification.memberId] = current;
