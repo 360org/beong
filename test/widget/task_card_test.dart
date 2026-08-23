@@ -137,4 +137,81 @@ void main() {
       expect(find.byIcon(Icons.check_rounded), findsNothing);
     });
   });
+
+  group('phản hồi ngay khi chạm', () {
+    // "Bấm hoàn thành nhiệm vụ bị giật cục" — chủ dự án báo 23/08.
+    //
+    // Một nửa cảm giác đó là khoảng lặng: trạng thái thật đi một vòng dài (ghi
+    // DB → cộng xu → thưởng trọn bộ → huy hiệu → luồng phát lại), và trước bản
+    // này thẻ chỉ vẽ theo trạng thái thật. Con chạm vào, **không có gì xảy
+    // ra**, rồi đột nhiên mọi thứ nhảy một lượt.
+
+    testWidgets('tích hiện ngay trong khung hình chạm, không chờ DB', (
+      tester,
+    ) async {
+      var goi = 0;
+      await tester.pumpWidget(
+        wrap(
+          TaskCard(
+            title: 'Gấp chăn màn',
+            points: 10,
+            isCompleted: false,
+            // Cố ý **không** đổi `isCompleted` sau khi gọi: mô phỏng đúng lúc
+            // DB chưa trả lời. Đó là khoảng thời gian cần lấp.
+            onToggle: () => goi++,
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.check_rounded), findsNothing);
+
+      await tester.tap(find.byType(TaskCard));
+      await tester.pump();
+
+      expect(goi, 1);
+      expect(
+        find.byIcon(Icons.check_rounded),
+        findsOneWidget,
+        reason: 'chạm xong phải thấy ngay, không đợi vòng dữ liệu',
+      );
+    });
+
+    testWidgets('chạm hai lần chỉ tính một', (tester) async {
+      var goi = 0;
+      await tester.pumpWidget(
+        wrap(
+          TaskCard(
+            title: 'Gấp chăn màn',
+            points: 10,
+            isCompleted: false,
+            onToggle: () => goi++,
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(TaskCard));
+      await tester.pump();
+      await tester.tap(find.byType(TaskCard));
+      await tester.pump();
+
+      // Trẻ nhỏ bấm hai lần là chuyện thường. Không chặn thì lượt thứ hai lại
+      // gọi cả vòng ghi DB một lần nữa.
+      expect(goi, 1);
+    });
+
+    testWidgets('trạng thái thật về thì thẻ nhả cờ tạm', (tester) async {
+      // Nếu không nhả, thẻ giữ một lời hứa sai khi việc ghi hỏng — sai mà im
+      // lặng còn khó lần ra hơn một cú chậm.
+      await tester.pumpWidget(wrap(the()));
+      await tester.tap(find.byType(TaskCard));
+      await tester.pump();
+      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+
+      await tester.pumpWidget(wrap(the(isMissed: true)));
+      await tester.pump();
+
+      expect(find.byIcon(Icons.check_rounded), findsNothing);
+      expect(find.byIcon(Icons.close), findsOneWidget);
+    });
+  });
 }

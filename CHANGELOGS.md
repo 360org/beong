@@ -4,6 +4,25 @@ Toàn bộ các thay đổi và cột mốc phát triển của dự án **Bé O
 
 ---
 
+## [0.2.5] - 2026-08-23
+
+**Bấm xong việc không còn giật.**
+
+### 🐛 Sửa Lỗi (Fixes)
+- **Danh sách việc bị xé đi dựng lại sau mỗi cú chạm.** Con bấm xong một việc thì cả danh
+  sách nháy thành vòng xoay rồi mới hiện lại — mỗi lần bấm hai lượt như vậy. Nguyên nhân:
+  bốn luồng dữ liệu của màn hình con được tạo mới trong mỗi lần dựng, nên chỗ hiển thị
+  tưởng là luồng khác và đăng ký lại từ đầu.
+- **Chạm xong không có gì xảy ra cho tới khi ghi xong.** Nay ô tròn tích **ngay trong khung
+  hình chạm**, không đợi hết vòng ghi xu – thưởng trọn bộ – huy hiệu.
+- **Mỗi thẻ việc tự đi hỏi dữ liệu riêng**, và trong lúc chờ thì cao bằng 0 nên danh sách
+  co lại rồi bung ra. Nay cả danh sách nạp một lần.
+- **Bấm hai lần liên tiếp chỉ tính một** — trẻ nhỏ bấm đúp là chuyện thường.
+
+Ảnh: chưa chụp lại được ở bản này, môi trường dựng ảnh trong máy build đang hỏng.
+
+---
+
 ## [0.2.4] - 2026-08-23
 
 **Luồng vào app làm lại đúng như chủ dự án chốt.** Mỗi hồ sơ giờ có mật khẩu riêng.
