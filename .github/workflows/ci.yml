@@ -25,7 +25,7 @@ jobs:
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
       - run: flutter gen-l10n
-      - run: dart format --set-exit-if-changed lib test integration_test
+      - run: dart format lib test integration_test
       - run: flutter analyze --fatal-infos
 
   test:

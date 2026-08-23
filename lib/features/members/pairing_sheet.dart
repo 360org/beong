@@ -113,6 +113,7 @@ class _PairingCodeSheetState extends State<_PairingCodeSheet> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
+                  tooltip: 'Đóng',
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],

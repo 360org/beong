@@ -123,6 +123,7 @@ class _ScanPairingDialogState extends ConsumerState<_ScanPairingDialog> {
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.arrow_forward_rounded),
+                  tooltip: 'Gửi mã kết nối',
                   onPressed: _isProcessing
                       ? null
                       : () => _handlePairing(_inputController.text),
