@@ -19,154 +19,215 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <a class="skip" href="#main">Bỏ qua, tới nội dung chính</a>
+
 <header class="site-head">
   <div class="wrap head-in">
-    <a class="brand" href="index.html"><img src="img/logo.png" alt="" width="32" height="32" class="logo"> Bé Ong</a>
-    <button class="navtoggle" id="navtoggle" aria-expanded="false" aria-controls="mainnav"
-            aria-label="Mở menu">☰</button>
+    <a class="brand" href="index.html">
+      <img src="img/logo.png" alt="Logo Bé Ong" width="36" height="36" class="logo">
+      <span>Bé Ong</span>
+    </a>
+    <button class="navtoggle" id="navtoggle" aria-expanded="false" aria-controls="mainnav" aria-label="Mở menu">☰</button>
     <nav class="mainnav" id="mainnav" aria-label="Điều hướng chính">
       <a href="index.html" aria-current="page">Trang chủ</a>
-      <a href="gioi-thieu.html">Giới thiệu &amp; hướng dẫn</a>
+      <a href="gioi-thieu.html">Giới thiệu &amp; Hướng dẫn</a>
       <a href="quyen-rieng-tu.html">Quyền riêng tư</a>
     </nav>
   </div>
 </header>
+
 <main id="main">
 
-<section>
+<!-- HERO SECTION -->
+<section class="hero-section">
  <div class="wrap hero">
   <div>
-   <p class="eyebrow">Cho gia đình có trẻ 5–15 tuổi</p>
+   <span class="eyebrow">🐝 Cho gia đình có trẻ 5–15 tuổi</span>
    <h1>Con làm việc nhà, và học luôn cách <span class="hl">giữ tiền</span>.</h1>
-   <p class="lede">Con làm xong việc thì được xu. Xu tự chia vào ba hũ — Tiêu, Để dành,
-   Cho đi — rồi đổi lấy phần thưởng do chính bố mẹ đặt ra. Mỗi lần con kiếm được xu
-   cũng là một lần con phải quyết định để dành bao nhiêu.</p>
+   <p class="lede">Con làm xong việc thì được xu. Xu tự chia vào ba hũ — Tiêu, Để dành, Cho đi — rồi đổi lấy phần thưởng do chính bố mẹ đặt ra. Mỗi lần con kiếm được xu cũng là một lần con phải quyết định để dành bao nhiêu.</p>
    <div class="cta">
-    <a class="btn btn-primary" href="gioi-thieu.html">Xem app làm được gì</a>
-    <a class="btn btn-ghost" href="gioi-thieu.html#bat-dau">Bắt đầu thế nào</a>
+    <a class="btn btn-primary" href="gioi-thieu.html">Khám phá tính năng 🚀</a>
+    <a class="btn btn-ghost" href="gioi-thieu.html#bat-dau">Bắt đầu trong 1 phút →</a>
    </div>
-   <p class="note">Dùng đủ khi không có mạng · Không quảng cáo · Không mua trong app · Miễn phí</p>
+   <div class="note">
+    <span>✨ Dùng đủ khi mất mạng</span>
+    <span>•</span>
+    <span>🛡️ Không quảng cáo</span>
+    <span>•</span>
+    <span>🎁 Hoàn toàn miễn phí</span>
+   </div>
   </div>
   <div class="phones">
-   <div class="phone tilt-l"><img src="img/26-child-home.jpg" width="340" height="743"
-     alt="Màn hình của con: linh vật Bé Ong, vòng tiến độ và danh sách việc cần làm"></div>
-   <div class="phone tilt-r"><img src="img/28-child-home-hoan-thanh.jpg" width="340" height="743"
-     alt="Con làm xong 12 trên 12 việc và nhận huy hiệu Ong chăm chỉ hôm nay"></div>
+   <div class="phone tilt-l"><img src="img/26-child-home.jpg" width="340" height="743" alt="Màn hình của con: linh vật Bé Ong, vòng tiến độ và danh sách việc cần làm" loading="lazy"></div>
+   <div class="phone tilt-r"><img src="img/28-child-home-hoan-thanh.jpg" width="340" height="743" alt="Con làm xong 12 trên 12 việc và nhận huy hiệu Ong chăm chỉ hôm nay" loading="lazy"></div>
   </div>
  </div>
 </section>
 
+<!-- BA LỜI HỨA -->
 <section class="band">
  <div class="wrap">
-  <p class="eyebrow">Ba lời hứa</p>
-  <h2>Những thứ app này cố ý <em>không</em> làm</h2>
+  <div class="center-head">
+    <span class="eyebrow">🌱 Nguyên tắc vững chắc</span>
+    <h2>Những điều Bé Ong cam kết <em>không bao giờ làm</em></h2>
+  </div>
   <div class="grid g3" style="margin-top:36px">
-   <div class="card"><div class="ico">📴</div><h3>Không cần mạng</h3>
-    <p>Dữ liệu nằm trên chính máy của bạn. Không tài khoản, không đăng nhập, không nơi nào
-    khác giữ bản sao. Máy bay, vùng sóng yếu, hết 4G — app vẫn chạy đủ.</p></div>
-   <div class="card"><div class="ico">🚫</div><h3>Không quảng cáo, không mua trong app</h3>
-    <p>Không banner, không “mở khoá bản Pro”. Không có màn hình nào dụ trẻ chi tiền,
-    vì không có luồng chi tiền nào cả.</p></div>
-   <div class="card"><div class="ico">🔍</div><h3>Không theo dõi hành vi</h3>
-    <p>Không đo lường, không hồ sơ người dùng, không tự gửi gì đi. Chỗ duy nhất đưa dữ liệu
-    ra khỏi máy là nút Báo lỗi, và nó chỉ chạy khi bạn chủ động bấm.</p></div>
+   <div class="card feature-card">
+    <div class="ico-badge">📴</div>
+    <h3>100% Không cần mạng</h3>
+    <p>Dữ liệu lưu an toàn trên máy của bạn. Không tài khoản, không máy chủ thu thập. Trên máy bay hay vùng không có 4G app vẫn chạy mượt mà.</p>
+   </div>
+   <div class="card feature-card">
+    <div class="ico-badge">🚫</div>
+    <h3>Không quảng cáo, không nạp tiền</h3>
+    <p>Không banner, không gạ mua bản Pro. Không có bất kỳ luồng chi tiền hay dụ trẻ nạp xu nào trong ứng dụng.</p>
+   </div>
+   <div class="card feature-card">
+    <div class="ico-badge">🔒</div>
+    <h3>Tuyệt đối không theo dõi</h3>
+    <p>Không đo lường hành vi, không định danh hồ sơ. Dữ liệu chỉ ra khỏi máy khi bố mẹ chủ động bấm nút gửi Báo lỗi trong app.</p>
+   </div>
   </div>
  </div>
 </section>
 
+<!-- BA HŨ XU -->
 <section id="hu-xu">
  <div class="wrap split">
   <div>
-   <p class="eyebrow">Giáo dục tài chính</p>
-   <h2>Mỗi lần được xu là một lần chia tiền</h2>
-   <p class="lede" style="margin-top:16px">Xu không vào một túi chung. Nó chia vào ba hũ theo
-   mô hình <em>spend · save · give</em> — thứ mà các chương trình dạy tiền cho trẻ dùng từ lâu,
-   chỉ là ít khi được đưa vào app.</p>
+   <span class="eyebrow">💰 Giáo dục tài chính thông minh</span>
+   <h2>Mỗi lần nhận xu là một bài học chia tiền</h2>
+   <p class="lede" style="margin-top:16px">Xu không vào một túi chung dễ tiêu sạch. App tự động chia vào ba hũ theo nguyên tắc quốc tế <em>Spend · Save · Give</em> giúp trẻ hình thành phản xạ quản lý tài chính từ nhỏ.</p>
    <div class="jars">
-    <div class="jar"><div class="e">🛍️</div><div class="pct">50%</div><div class="nm">Tiêu</div><p>Đổi phần thưởng ngay</p></div>
-    <div class="jar"><div class="e">🐷</div><div class="pct">40%</div><div class="nm">Để dành</div><p>Tích cho mục tiêu lớn</p></div>
-    <div class="jar"><div class="e">💝</div><div class="pct">10%</div><div class="nm">Cho đi</div><p>Dành để tặng, để giúp</p></div>
+    <div class="jar">
+      <div class="e">🛍️</div>
+      <div class="pct">50%</div>
+      <div class="nm">Hũ Tiêu Dùng</div>
+      <p>Đổi món quà con thích ngay</p>
+    </div>
+    <div class="jar">
+      <div class="e">🐷</div>
+      <div class="pct">40%</div>
+      <div class="nm">Hũ Để Dành</div>
+      <p>Tích cho mục tiêu lớn</p>
+    </div>
+    <div class="jar">
+      <div class="e">💝</div>
+      <div class="pct">10%</div>
+      <div class="nm">Hũ Cho Đi</div>
+      <p>Dành tặng, sẻ chia yêu thương</p>
+    </div>
    </div>
-   <p class="lede" style="margin-top:22px">Tỷ lệ sửa được, tên và emoji đổi được, và bố mẹ tự
-   lập thêm hũ mới. Khi con đủ lớn thì bật <b>“Con tự chia xu”</b>: xu dồn vào hũ Chờ chia và
-   chính con quyết định bỏ bao nhiêu vào đâu.</p>
+   <p class="lede" style="margin-top:22px">Bố mẹ tuỳ chỉnh được tỷ lệ, đổi tên, đổi biểu tượng hoặc lập thêm hũ mới. Khi con lớn, bật chế độ <b>“Con tự chia xu”</b> để trẻ tự tay phân bổ ngân sách của mình.</p>
   </div>
-  <div><img class="phone-img" src="img/59-child-man-chia-xu.jpg" width="340" height="743"
-   alt="Màn chia xu vào hũ: còn 30 xu chưa chia, mỗi hũ có nút cộng 1, cộng 5 và Hết"
-   style="width:min(300px,80%);margin:0 auto"></div>
+  <div style="text-align:center;">
+    <img class="phone-img" src="img/59-child-man-chia-xu.jpg" width="340" height="743"
+         alt="Màn chia xu vào hũ: còn 30 xu chưa chia, mỗi hũ có nút cộng 1, cộng 5 và Hết"
+         style="width:min(300px,82%);margin:0 auto;" loading="lazy">
+  </div>
  </div>
 </section>
 
+<!-- TRẠNG THÁI APP -->
 <section class="band" id="trang-thai">
  <div class="wrap">
-  <p class="eyebrow">Nói thẳng</p>
-  <h2>App chưa lên store</h2>
-  <div class="status" style="margin-top:26px">
-   <p>Bé Ong đang ở <b>v0.2.5</b>. Phần dùng hằng ngày đã chạy đủ và ổn định, nhưng app
-   <b>chưa có trên App Store hay Google Play</b>. Trang này không có nút tải vì chưa có gì
-   để tải — đặt nút giả để lấy lượt truy cập thì tệ hơn là không có.</p>
-   <ul>
-    <li><b>Đã xong:</b> việc nhà, thói quen, xu và các hũ, phần thưởng có duyệt, huy hiệu,
-    mục tiêu để dành, nhiều con, mật khẩu riêng cho từng hồ sơ, giao diện Sáng/Tối.</li>
-    <li><b>Đang làm:</b> đồng bộ nhiều máy — bố mẹ cấu hình xong, máy con quét mã QR để
-    nhận hồ sơ.</li>
-    <li><b>Chưa có:</b> thông báo nhắc việc, chế độ chụp ảnh làm bằng chứng, và bản trên store.</li>
-   </ul>
-   <p style="margin-top:16px"><a href="gioi-thieu.html">Xem đầy đủ công năng và hướng dẫn dùng →</a></p>
+  <div class="status-card">
+   <div class="status-header">
+     <span class="eyebrow">📢 Minh bạch phát hành</span>
+     <h2>Trạng thái phát hành phiên bản</h2>
+   </div>
+   <p class="status-desc">Bé Ong hiện đạt phiên bản <b>v0.2.5</b>. Toàn bộ tính năng cốt lõi cho gia đình đã hoàn thiện và hoạt động ổn định trên thiết bị.</p>
+   <div class="status-grid">
+    <div class="status-box done">
+      <h4>✅ Đã hoàn thiện</h4>
+      <ul>
+        <li>Nhiệm vụ &amp; Thói quen kéo thả theo buổi</li>
+        <li>Hệ thống 3 hũ xu &amp; tuỳ biến hũ riêng</li>
+        <li>Đổi thưởng &amp; hàng đợi duyệt của bố mẹ</li>
+        <li>Huy hiệu, ngọn lửa Streak &amp; Mục tiêu tiết kiệm</li>
+        <li>Bảo mật từng hồ sơ (mật khẩu riêng con / bố mẹ)</li>
+        <li>Chế độ giao diện Sáng / Tối</li>
+      </ul>
+    </div>
+    <div class="status-box doing">
+      <h4>⚡ Đang triển khai</h4>
+      <ul>
+        <li>Đồng bộ nhiều thiết bị qua quét mã QR gia đình</li>
+        <li>Hỗ trợ ghép cặp máy con độc lập</li>
+      </ul>
+    </div>
+    <div class="status-box todo">
+      <h4>⏳ Kế hoạch kế tiếp</h4>
+      <ul>
+        <li>Thông báo nhắc nhở nhẹ nhàng theo lịch</li>
+        <li>Phát hành chính thức lên App Store &amp; Google Play</li>
+      </ul>
+    </div>
+   </div>
+   <div style="margin-top:24px;text-align:center;">
+    <a class="btn btn-primary" href="gioi-thieu.html">Xem chi tiết hướng dẫn tính năng →</a>
+   </div>
   </div>
  </div>
 </section>
+
 </main>
+
 <footer class="site-foot">
   <div class="wrap">
     <div class="foot-grid">
       <div class="foot-brand">
-        <a class="brand" href="index.html"><img src="img/logo.png" alt="" width="32" height="32" class="logo"> Bé Ong</a>
-        <p>Việc nhà, thói quen và những đồng xu đầu tiên của con. Dành cho gia đình có
-        trẻ 5–15 tuổi.</p>
+        <a class="brand" href="index.html">
+          <img src="img/logo.png" alt="" width="36" height="36" class="logo">
+          <span>Bé Ong</span>
+        </a>
+        <p>Ứng dụng rèn luyện thói quen, tự lập và những đồng xu quản lý tài chính đầu đời cho trẻ 5–15 tuổi.</p>
       </div>
       <div class="foot-col">
-        <h2>Sản phẩm</h2>
-        <a href="gioi-thieu.html#gia-tri">Giá trị mang lại</a>
-        <a href="gioi-thieu.html#cong-nang">Công năng</a>
-        <a href="index.html#hu-xu">Ba hũ xu</a>
-        <a href="index.html#trang-thai">Trạng thái phát hành</a>
+        <h2>Tính năng</h2>
+        <a href="gioi-thieu.html#cong-nang">Nhiệm vụ &amp; Thói quen</a>
+        <a href="index.html#hu-xu">Mô hình 3 hũ xu</a>
+        <a href="gioi-thieu.html#cong-nang">Huy hiệu &amp; Streak</a>
+        <a href="index.html#trang-thai">Lộ trình phát triển</a>
       </div>
       <div class="foot-col">
-        <h2>Hướng dẫn</h2>
-        <a href="gioi-thieu.html#bat-dau">Bắt đầu trong một phút</a>
-        <a href="gioi-thieu.html#huong-dan">Hướng dẫn dùng</a>
-        <a href="gioi-thieu.html#cau-hoi">Câu hỏi hay gặp</a>
+        <h2>Tài liệu</h2>
+        <a href="gioi-thieu.html#bat-dau">Bắt đầu trong 1 phút</a>
+        <a href="gioi-thieu.html#huong-dan">Cẩm nang bố mẹ</a>
+        <a href="gioi-thieu.html#cau-hoi">Hỏi đáp thường gặp</a>
       </div>
       <div class="foot-col">
-        <h2>Liên hệ</h2>
-        <span>Góp ý và báo lỗi: mở app,<br>vào <b>Cài đặt → Báo lỗi</b></span>
+        <h2>Liên hệ &amp; Hỗ trợ</h2>
+        <span>Phản hồi trực tiếp trong app qua mục <b>Cài đặt → Báo lỗi</b></span>
         <a href="quyen-rieng-tu.html">Chính sách quyền riêng tư</a>
       </div>
     </div>
     <div class="foot-bar">
       <span>© 2026 Bé Ong</span>
-      <span class="badge">Không quảng cáo</span>
-      <span class="badge">Không mua trong app</span>
-      <span class="badge">Dùng được khi mất mạng</span>
+      <span class="badge">🚫 Không quảng cáo</span>
+      <span class="badge">🛡️ Không mua trong app</span>
+      <span class="badge">📴 Hoạt động ngoại tuyến</span>
     </div>
   </div>
 </footer>
+
 <script>
 (function(){
-  var t=document.getElementById('navtoggle'), n=document.getElementById('mainnav');
-  t.addEventListener('click',function(){
-    var open=n.classList.toggle('open');
-    t.setAttribute('aria-expanded',open?'true':'false');
-    t.setAttribute('aria-label',open?'Đóng menu':'Mở menu');
+  var t = document.getElementById('navtoggle'), n = document.getElementById('mainnav');
+  t.addEventListener('click', function(){
+    var open = n.classList.toggle('open');
+    t.setAttribute('aria-expanded', open ? 'true' : 'false');
+    t.setAttribute('aria-label', open ? 'Đóng menu' : 'Mở menu');
   });
-  n.addEventListener('click',function(e){
-    if(e.target.tagName==='A'){n.classList.remove('open');t.setAttribute('aria-expanded','false');}
+  n.addEventListener('click', function(e){
+    if (e.target.tagName === 'A') {
+      n.classList.remove('open');
+      t.setAttribute('aria-expanded', 'false');
+    }
   });
 })();
 </script>
