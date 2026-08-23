@@ -146,5 +146,3 @@ SyncEngine syncEngine(Ref ref) => SyncEngine(
 
 @riverpod
 NotificationService notificationService(Ref ref) => NotificationService();
-
-

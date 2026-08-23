@@ -134,7 +134,9 @@ class _PairingCodeSheetState extends State<_PairingCodeSheet> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(AppRadius.card),
                   border: Border.all(
-                    color: isExpired ? AppColors.dangerLight : AppColors.brand360Blue,
+                    color: isExpired
+                        ? AppColors.dangerLight
+                        : AppColors.brand360Blue,
                     width: 2,
                   ),
                 ),
@@ -142,9 +144,18 @@ class _PairingCodeSheetState extends State<_PairingCodeSheet> {
                     ? Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.timer_off_outlined, size: 64, color: AppColors.dangerLight),
+                          const Icon(
+                            Icons.timer_off_outlined,
+                            size: 64,
+                            color: AppColors.dangerLight,
+                          ),
                           const SizedBox(height: AppSpacing.sm),
-                          Text('Mã đã hết hạn', style: context.text.titleSmall?.copyWith(color: AppColors.dangerLight)),
+                          Text(
+                            'Mã đã hết hạn',
+                            style: context.text.titleSmall?.copyWith(
+                              color: AppColors.dangerLight,
+                            ),
+                          ),
                         ],
                       )
                     : Column(
@@ -192,13 +203,19 @@ class _PairingCodeSheetState extends State<_PairingCodeSheet> {
                 Icon(
                   Icons.timer_outlined,
                   size: 18,
-                  color: isExpired ? AppColors.dangerLight : context.semantic.onSurfaceMuted,
+                  color: isExpired
+                      ? AppColors.dangerLight
+                      : context.semantic.onSurfaceMuted,
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  isExpired ? 'Đã hết hạn' : 'Hiệu lực còn: ${_formatTime(_secondsLeft)}',
+                  isExpired
+                      ? 'Đã hết hạn'
+                      : 'Hiệu lực còn: ${_formatTime(_secondsLeft)}',
                   style: context.text.bodyMedium?.copyWith(
-                    color: isExpired ? AppColors.dangerLight : context.semantic.onSurfaceMuted,
+                    color: isExpired
+                        ? AppColors.dangerLight
+                        : context.semantic.onSurfaceMuted,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -217,7 +234,9 @@ class _PairingCodeSheetState extends State<_PairingCodeSheet> {
               onPressed: () {
                 unawaited(Clipboard.setData(ClipboardData(text: _uri)));
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Đã sao chép liên kết ghép cặp!')),
+                  const SnackBar(
+                    content: Text('Đã sao chép liên kết ghép cặp!'),
+                  ),
                 );
               },
               icon: const Icon(Icons.copy_rounded),

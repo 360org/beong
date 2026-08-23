@@ -40,10 +40,9 @@ class SettingsScreen extends ConsumerWidget {
         memberId: session.activeMemberId,
         tenHienThi: 'Bố mẹ',
         service: ref.read(matKhauHoSoProvider),
-        batBuoc: true,
         moTa: 'Nhập mật khẩu phụ huynh để xác nhận xoá toàn bộ gia đình',
       );
-      if (hopLe != true || !context.mounted) return;
+      if (!hopLe || !context.mounted) return;
 
       // 2. Hộp thoại cảnh báo lần cuối
       final confirmed = await showDialog<bool>(
@@ -60,7 +59,9 @@ class SettingsScreen extends ConsumerWidget {
               child: const Text('HUỶ'),
             ),
             FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: AppColors.kpiRed),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.dangerLight,
+              ),
               onPressed: () => Navigator.of(ctx).pop(true),
               child: const Text('XOÁ TOÀN BỘ'),
             ),
@@ -259,7 +260,7 @@ class _FamilyInfoCard extends StatelessWidget {
             IconButton(
               onPressed: onDelete,
               icon: const Icon(Icons.delete_outline_rounded),
-              color: AppColors.kpiRed,
+              color: AppColors.dangerLight,
               tooltip: 'Xoá gia đình này',
             ),
           ],
@@ -635,7 +636,11 @@ class _TimezoneTile extends ConsumerWidget {
     );
   }
 
-  Future<void> _pick(BuildContext context, WidgetRef ref, String current) async {
+  Future<void> _pick(
+    BuildContext context,
+    WidgetRef ref,
+    String current,
+  ) async {
     final chosen = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -661,7 +666,10 @@ class _TimezoneTile extends ConsumerWidget {
                         title: Text(entry.value),
                         subtitle: Text(entry.key),
                         trailing: entry.key == current
-                            ? Icon(Icons.check_circle, color: context.colors.primary)
+                            ? Icon(
+                                Icons.check_circle,
+                                color: context.colors.primary,
+                              )
                             : null,
                         onTap: () => Navigator.pop(sheetContext, entry.key),
                       ),

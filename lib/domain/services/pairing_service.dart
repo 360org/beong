@@ -7,7 +7,10 @@ import 'package:crypto/crypto.dart';
 /// Tuân thủ quy định tại `docs/09-onboarding-pairing.md` §4:
 /// - Mã ghép cặp ngẫu nhiên 128 bit.
 /// - Thời hạn hiệu lực: 10 phút.
-/// - Định dạng URI mã hoá QR: `beong://pair?v=1&c=<code>` (không chứa id gia đình hay tên con).
+/// - Định dạng URI mã hoá QR: `https://beong.net/pair?v=1&c=<code>` (không chứa
+///   id gia đình hay tên con). Universal Link chứ không phải `beong://`, vì
+///   Camera mặc định của máy mở được https còn custom scheme thì không.
+///   Khi quét vẫn **chấp nhận cả hai** để mã QR in ra từ bản cũ không thành rác.
 /// - Server/Local chỉ lưu trữ chuỗi hash SHA-256 của mã.
 class PairingService {
   const PairingService();
@@ -39,7 +42,8 @@ class PairingService {
     try {
       final uri = Uri.parse(rawUri.trim());
       final isCustomScheme = uri.scheme == 'beong' && uri.host == 'pair';
-      final isUniversalLink = (uri.scheme == 'https' || uri.scheme == 'http') &&
+      final isUniversalLink =
+          (uri.scheme == 'https' || uri.scheme == 'http') &&
           uri.host == 'beong.net' &&
           uri.path.startsWith('/pair');
 

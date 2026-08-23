@@ -28,14 +28,22 @@ void main() {
       const code = 'abc123def45678901234567890123456';
       final uri = service.buildPairingUri(code);
 
-      expect(uri, equals('beong://pair?v=1&c=abc123def45678901234567890123456'));
+      // Universal Link chứ không phải custom scheme: Camera mặc định của máy
+      // mở được https, còn `beong://` thì nó không biết là gì (commit f87ee31).
+      expect(
+        uri,
+        equals('https://beong.net/pair?v=1&c=abc123def45678901234567890123456'),
+      );
 
       final parsed = service.parsePairingUri(uri);
       expect(parsed, equals(code));
     });
 
     test('parsePairingUri từ chối các định dạng sai', () {
-      expect(service.parsePairingUri('https://beong.net/pair?code=123'), isNull);
+      expect(
+        service.parsePairingUri('https://beong.net/pair?code=123'),
+        isNull,
+      );
       expect(service.parsePairingUri('beong://pair?v=2&c=123'), isNull);
       expect(service.parsePairingUri('beong://wrong?v=1&c=123'), isNull);
       expect(service.parsePairingUri('beong://pair?v=1'), isNull);

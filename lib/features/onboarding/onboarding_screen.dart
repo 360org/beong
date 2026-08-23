@@ -197,7 +197,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       memberId: childId,
       tenHienThi: childName,
       service: matKhau,
-      batBuoc: false,
       moTa:
           'Bốn chữ số cho hồ sơ của $childName (tuỳ chọn). Bé nhập nó để mở hồ sơ '
           'của mình; bạn có thể bấm HUỶ nếu không cần mật khẩu.',
@@ -311,7 +310,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     if (code != null && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Đã nhận mã: ${code.substring(0, 8).toUpperCase()}... Đang tải dữ liệu.'),
+                          content: Text(
+                            'Đã nhận mã: ${code.substring(0, 8).toUpperCase()}... Đang tải dữ liệu.',
+                          ),
                         ),
                       );
                     }

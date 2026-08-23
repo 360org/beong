@@ -112,7 +112,11 @@ class MemberDao extends DatabaseAccessor<AppDatabase> with _$MemberDaoMixin {
   Future<void> setTimezone(String familyId, String timezone) async {
     final tz = timezone.trim();
     if (tz.isEmpty) {
-      throw ArgumentError.value(timezone, 'timezone', 'Múi giờ không được để trống');
+      throw ArgumentError.value(
+        timezone,
+        'timezone',
+        'Múi giờ không được để trống',
+      );
     }
     await (update(families)..where((f) => f.id.equals(familyId))).write(
       FamiliesCompanion(

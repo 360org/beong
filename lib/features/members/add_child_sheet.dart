@@ -96,7 +96,6 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
       memberId: childId,
       tenHienThi: ten,
       service: ref.read(matKhauHoSoProvider),
-      batBuoc: false,
       moTa:
           'Bốn chữ số cho hồ sơ của $ten (tuỳ chọn). Bé nhập nó để mở hồ sơ của mình; '
           'bấm HUỶ nếu không cần mật khẩu. Bố mẹ đặt lại được bất cứ lúc nào.',

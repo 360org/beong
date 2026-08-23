@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
-import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/features/members/child_profile_form.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
@@ -50,7 +50,7 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
     _name = TextEditingController(text: widget.child.displayName);
     _name.addListener(_onNameChanged);
     _colorIndex = widget.child.colorIndex;
-    _avatar = widget.child.avatarKey;
+    _avatar = widget.child.avatarKey ?? kAvatarEmojis.first;
     _birthYear = widget.child.birthYear;
   }
 
@@ -68,7 +68,9 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
     setState(() => _busy = true);
     final ten = _name.text.trim();
 
-    await ref.read(memberRepositoryProvider).updateMember(
+    await ref
+        .read(memberRepositoryProvider)
+        .updateMember(
           widget.child.id,
           MembersCompanion(
             displayName: Value(ten),
@@ -96,7 +98,9 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
             child: const Text('HUỶ'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.kpiRed),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.dangerLight,
+            ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('XOÁ HỒ SƠ'),
           ),
@@ -117,8 +121,8 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
       memberId: widget.child.id,
       tenHienThi: widget.child.displayName,
       service: ref.read(matKhauHoSoProvider),
-      batBuoc: false,
-      moTa: 'Bốn chữ số mới cho hồ sơ của ${widget.child.displayName}. Bấm HUỶ nếu muốn bỏ mật khẩu.',
+      moTa:
+          'Bốn chữ số mới cho hồ sơ của ${widget.child.displayName}. Bấm HUỶ nếu muốn bỏ mật khẩu.',
     );
   }
 
@@ -164,8 +168,8 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
             width: double.infinity,
             child: OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.kpiRed,
-                side: const BorderSide(color: AppColors.kpiRed),
+                foregroundColor: AppColors.dangerLight,
+                side: const BorderSide(color: AppColors.dangerLight),
               ),
               onPressed: _busy ? null : _deleteProfile,
               icon: const Icon(Icons.delete_outline_rounded),

@@ -16,6 +16,7 @@ Future<bool> hoiMatKhau(
   required String memberId,
   required String tenHienThi,
   required MatKhauHoSo service,
+  String? moTa,
 }) async {
   if (!await service.daDat(memberId)) return true;
   if (!context.mounted) return false;
@@ -29,7 +30,9 @@ Future<bool> hoiMatKhau(
       ),
       child: _MatKhauSheet(
         tieuDe: 'Mật khẩu của $tenHienThi',
-        moTa: 'Nhập 4 chữ số để mở hồ sơ này.',
+        // Lời nhắc thay được: xác minh để **mở hồ sơ** và xác minh để **xoá cả
+        // gia đình** là hai việc khác hẳn nhau, không nên nói cùng một câu.
+        moTa: moTa ?? 'Nhập 4 chữ số để mở hồ sơ này.',
         onSubmit: (matKhau) =>
             service.dung(memberId: memberId, matKhau: matKhau),
         onQuen: () => _quenMatKhau(

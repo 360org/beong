@@ -42,12 +42,16 @@ class ParentHomeScreen extends ConsumerWidget {
         memberId: member.id,
         tenHienThi: member.displayName,
         service: ref.read(matKhauHoSoProvider),
-        batBuoc: false,
         moTa: 'Bốn chữ số của ${member.displayName}',
       );
-      if (hopLe != true || !context.mounted) return;
+      if (!hopLe || !context.mounted) return;
 
-      await ref.read(sessionProvider.notifier).switchMember(member.id);
+      await ref
+          .read(sessionProvider.notifier)
+          .switchMember(
+            member.id,
+            isParent: member.kind == MemberKind.parent.name,
+          );
       if (context.mounted) context.go('/');
     }
 
@@ -550,7 +554,8 @@ class _ChildSummaryCard extends ConsumerWidget {
                             final done = instances
                                 .where(
                                   (i) =>
-                                      i.status == InstanceStatus.approved.name ||
+                                      i.status ==
+                                          InstanceStatus.approved.name ||
                                       i.status ==
                                           InstanceStatus.pendingReview.name,
                                 )

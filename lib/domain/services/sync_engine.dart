@@ -22,7 +22,9 @@ class SyncEngine {
     required Map<String, dynamic> payload,
     required String clientOpId,
   }) async {
-    await db.into(db.outbox).insert(
+    await db
+        .into(db.outbox)
+        .insert(
           OutboxCompanion.insert(
             op: op,
             entity: entity,
@@ -48,7 +50,9 @@ class SyncEngine {
 
   /// Ghi nhận lỗi và tăng số lần thử lại nếu đẩy dữ liệu thất bại.
   Future<void> markFailed(int seq, String error) async {
-    final current = await (db.select(db.outbox)..where((t) => t.seq.equals(seq))).getSingleOrNull();
+    final current = await (db.select(
+      db.outbox,
+    )..where((t) => t.seq.equals(seq))).getSingleOrNull();
     if (current == null) return;
 
     await (db.update(db.outbox)..where((t) => t.seq.equals(seq))).write(

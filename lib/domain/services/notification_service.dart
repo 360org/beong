@@ -18,7 +18,8 @@ class BeOngNotification {
   final MemberKind recipientRole; // parent | child
   final String title;
   final String body;
-  final String category; // routine_reminder | task_deadline | approval_needed | streak_warning | summary
+  final String
+  category; // routine_reminder | task_deadline | approval_needed | streak_warning | summary
   final DateTime createdAt;
   final DateTime? scheduledFor;
 }
@@ -52,10 +53,14 @@ class NotificationService {
 
       // 2. Giới hạn tối đa 2 thông báo/ngày cho trẻ
       final timestamps = _childDailySentLog[notification.memberId] ?? [];
-      final todaySent = timestamps.where((t) =>
-          t.year == current.year &&
-          t.month == current.month &&
-          t.day == current.day).toList();
+      final todaySent = timestamps
+          .where(
+            (t) =>
+                t.year == current.year &&
+                t.month == current.month &&
+                t.day == current.day,
+          )
+          .toList();
 
       if (todaySent.length >= 2) {
         return false;

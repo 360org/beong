@@ -57,25 +57,28 @@ void main() {
       expect(remaining, isEmpty);
     });
 
-    test('processQueue tăng retryCount và giữ lại bản ghi khi thất bại', () async {
-      await engine.enqueue(
-        op: 'update',
-        entity: 'task_instances',
-        entityId: 'inst-2',
-        payload: {'status': 'completed'},
-        clientOpId: 'client-op-3',
-      );
+    test(
+      'processQueue tăng retryCount và giữ lại bản ghi khi thất bại',
+      () async {
+        await engine.enqueue(
+          op: 'update',
+          entity: 'task_instances',
+          entityId: 'inst-2',
+          payload: {'status': 'completed'},
+          clientOpId: 'client-op-3',
+        );
 
-      final processed = await engine.processQueue(
-        uploader: (op) async => throw Exception('Network timeout'),
-      );
+        final processed = await engine.processQueue(
+          uploader: (op) async => throw Exception('Network timeout'),
+        );
 
-      expect(processed, 0);
+        expect(processed, 0);
 
-      final remaining = await engine.getPendingOps();
-      expect(remaining.length, 1);
-      expect(remaining.first.retryCount, 1);
-      expect(remaining.first.lastError, contains('Network timeout'));
-    });
+        final remaining = await engine.getPendingOps();
+        expect(remaining.length, 1);
+        expect(remaining.first.retryCount, 1);
+        expect(remaining.first.lastError, contains('Network timeout'));
+      },
+    );
   });
 }

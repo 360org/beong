@@ -67,7 +67,8 @@ class _ScanPairingDialogState extends ConsumerState<_ScanPairingDialog> {
     if (code == null) {
       setState(() {
         _isProcessing = false;
-        _errorMessage = 'Mã ghép cặp không hợp lệ. Vui lòng quét lại mã QR trên máy bố mẹ.';
+        _errorMessage =
+            'Mã ghép cặp không hợp lệ. Vui lòng quét lại mã QR trên máy bố mẹ.';
       });
       return;
     }
@@ -87,7 +88,10 @@ class _ScanPairingDialogState extends ConsumerState<_ScanPairingDialog> {
       ),
       title: Row(
         children: [
-          const Icon(Icons.qr_code_scanner_rounded, color: AppColors.brand360Blue),
+          const Icon(
+            Icons.qr_code_scanner_rounded,
+            color: AppColors.brand360Blue,
+          ),
           const SizedBox(width: AppSpacing.sm),
           Text('Ghép cặp máy con', style: context.text.titleMedium),
         ],
@@ -131,7 +135,10 @@ class _ScanPairingDialogState extends ConsumerState<_ScanPairingDialog> {
                       width: 140,
                       height: 140,
                       decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.brand360Blue, width: 2),
+                        border: Border.all(
+                          color: AppColors.brand360Blue,
+                          width: 2,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
