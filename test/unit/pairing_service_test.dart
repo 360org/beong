@@ -43,7 +43,7 @@ void main() {
     });
 
     test('isExpired kiểm tra đúng thời hạn 10 phút', () {
-      final now = DateTime(2026, 8, 23, 10, 0);
+      final now = DateTime(2026, 8, 23, 10);
       final created9MinAgo = now.subtract(const Duration(minutes: 9));
       final created11MinAgo = now.subtract(const Duration(minutes: 11));
 

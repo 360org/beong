@@ -6,7 +6,7 @@ void main() {
   late NotificationService service;
 
   setUp(() {
-    service = NotificationService(bedtimeHour: 21);
+    service = NotificationService();
   });
 
   group('NotificationService Policy Tests', () {
@@ -18,7 +18,7 @@ void main() {
         title: 'Nhắc việc',
         body: 'Đến giờ đọc sách rồi!',
         category: 'routine_reminder',
-        createdAt: DateTime(2026, 8, 23, 8, 0),
+        createdAt: DateTime(2026, 8, 23, 8),
       );
 
       final notif2 = BeOngNotification(
@@ -28,7 +28,7 @@ void main() {
         title: 'Sắp hết hạn',
         body: 'Nhiệm vụ sắp hết hạn nè bé!',
         category: 'task_deadline',
-        createdAt: DateTime(2026, 8, 23, 14, 0),
+        createdAt: DateTime(2026, 8, 23, 14),
       );
 
       final notif3 = BeOngNotification(
@@ -38,18 +38,18 @@ void main() {
         title: 'Nhắc nhở thêm',
         body: 'Làm bài tập nhé',
         category: 'routine_reminder',
-        createdAt: DateTime(2026, 8, 23, 16, 0),
+        createdAt: DateTime(2026, 8, 23, 16),
       );
 
-      final time1 = DateTime(2026, 8, 23, 8, 0);
+      final time1 = DateTime(2026, 8, 23, 8);
       expect(service.shouldSend(notif1, now: time1), isTrue);
       service.recordSent(notif1, now: time1);
 
-      final time2 = DateTime(2026, 8, 23, 14, 0);
+      final time2 = DateTime(2026, 8, 23, 14);
       expect(service.shouldSend(notif2, now: time2), isTrue);
       service.recordSent(notif2, now: time2);
 
-      final time3 = DateTime(2026, 8, 23, 16, 0);
+      final time3 = DateTime(2026, 8, 23, 16);
       expect(service.shouldSend(notif3, now: time3), isFalse);
     });
 
@@ -76,7 +76,7 @@ void main() {
         title: 'Có việc cần duyệt',
         body: 'Bé vừa làm xong việc!',
         category: 'approval_needed',
-        createdAt: DateTime(2026, 8, 23, 10, 0),
+        createdAt: DateTime(2026, 8, 23, 10),
       );
 
       final parentNotif2 = BeOngNotification(
@@ -89,7 +89,7 @@ void main() {
         createdAt: DateTime(2026, 8, 23, 10, 20),
       );
 
-      final time1 = DateTime(2026, 8, 23, 10, 0);
+      final time1 = DateTime(2026, 8, 23, 10);
       expect(service.shouldSend(parentNotif1, now: time1), isTrue);
       service.recordSent(parentNotif1, now: time1);
 

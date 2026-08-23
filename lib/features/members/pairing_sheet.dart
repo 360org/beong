@@ -203,7 +203,7 @@ class _PairingCodeSheetState extends State<_PairingCodeSheet> {
             const SizedBox(height: AppSpacing.sm),
             OutlinedButton.icon(
               onPressed: () {
-                Clipboard.setData(ClipboardData(text: _uri));
+                unawaited(Clipboard.setData(ClipboardData(text: _uri)));
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Đã sao chép liên kết ghép cặp!')),
                 );

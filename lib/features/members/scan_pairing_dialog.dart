@@ -47,7 +47,7 @@ class _ScanPairingDialogState extends ConsumerState<_ScanPairingDialog> {
     });
 
     // Thử phân tích dạng URI QR hoặc mã code trực tiếp
-    String? code = _pairingService.parsePairingUri(text);
+    var code = _pairingService.parsePairingUri(text);
     if (code == null && RegExp(r'^[0-9a-fA-F]{8,32}$').hasMatch(text)) {
       code = text.toLowerCase();
     }
