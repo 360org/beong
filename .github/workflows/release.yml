@@ -16,8 +16,9 @@ name: Release
 #
 # Hai điều phải làm trước khi tag:
 #
-# 1. Tăng `version:` trong pubspec.yaml. Apple từ chối build có `+build` trùng
-#    bản đã nộp, kể cả bản chỉ nằm trên TestFlight.
+# 1. Tăng phần *marketing version* của `version:` trong pubspec.yaml (và
+#    `kPhienBanApp` kèm theo). Phần `+build` thì không cần đụng tới: CI tự cấp
+#    build number từ số thứ tự run, nên không bao giờ trùng bản đã nộp nữa.
 # 2. Kiểm `CHANGELOGS.md` xem còn lỗi nghiêm trọng nào chưa sửa không. Tag là
 #    đường một chiều: bản đã phát hành công khai thì gỡ xuống được, nhưng người
 #    đã cài rồi thì không thu lại được.
@@ -111,7 +112,16 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: flutter build appbundle --release
+        run: |
+          # Build number do CI cấp, **không** lấy `+build` trong pubspec.
+          # Lý do ở đây, không phải lý thuyết: run #27 (24/08/2026) build IPA
+          # thành công rồi hỏng ở bước đẩy, vì `+14` đã nằm trên TestFlight —
+          # `ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE`. Con người quên tăng
+          # build number; công thức dưới đây thì không. Nhân 10 rồi cộng
+          # `run_attempt` để chạy lại một run cũng ra số mới.
+          BUILD_NUMBER=$(( 1000 + GITHUB_RUN_NUMBER * 10 + GITHUB_RUN_ATTEMPT ))
+          echo "Build number: $BUILD_NUMBER"
+          flutter build appbundle --release --build-number="$BUILD_NUMBER"
 
       # `printf %s` với giá trị đi qua env, không phải `echo '...'` nội suy
       # thẳng: JSON có dấu nháy đơn là câu lệnh vỡ, và giá trị lọt vào chỗ shell
@@ -249,7 +259,13 @@ jobs:
           PY
 
       - name: Build IPA
-        run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+        run: |
+          # Cùng công thức với Android — xem chú thích ở bước Build App Bundle.
+          BUILD_NUMBER=$(( 1000 + GITHUB_RUN_NUMBER * 10 + GITHUB_RUN_ATTEMPT ))
+          echo "Build number: $BUILD_NUMBER"
+          flutter build ipa --release \
+            --build-number="$BUILD_NUMBER" \
+            --export-options-plist=ios/ExportOptions.plist
 
       - name: Giải mã App Store Connect API key
         env:

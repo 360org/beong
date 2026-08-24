@@ -29,8 +29,14 @@
 Workflow: `.github/workflows/release.yml`, chạy tay từ tab **Actions → Release → Run workflow**.
 Repo public nên GitHub-hosted runner (kể cả macOS) miễn phí không giới hạn phút.
 
-Trước mỗi lần chạy: tăng `version:` trong `pubspec.yaml` (`x.y.z+build`) — build number
-phải tăng, cả hai store đều từ chối nộp trùng build number.
+Trước mỗi lần chạy: tăng phần **marketing version** của `version:` trong `pubspec.yaml`
+(`x.y.z`) nếu đây là bản mới, và sửa `kPhienBanApp` trong
+`lib/features/settings/bao_loi_screen.dart` cho khớp.
+
+Phần `+build` **không cần đụng tới**. Từ 24/08/2026, CI tự cấp build number theo công thức
+`1000 + run_number*10 + run_attempt` và truyền vào `flutter build` bằng `--build-number`,
+nên hai store không bao giờ nhận trùng nữa — kể cả khi chạy lại một run đã hỏng. Giá trị
+`+build` trong pubspec chỉ còn ý nghĩa khi build tại máy.
 
 ## Bundle ID / package name
 
@@ -257,8 +263,9 @@ Workflow được kích hoạt tự động khi **push tag `v*`** (VD: `v0.2.0`)
 Play Console Internal Testing / TestFlight, sau đó mới chạy `production` / `release`.
 
 > **`ios_lane: release` upload một build MỚI**, không đề bạt build đang có trên TestFlight.
-> Nên chạy `beta` rồi chạy `release` mà **không tăng `+build`** thì Apple từ chối lần sau
-> (*"The bundle version must be higher"*). Muốn đưa đúng cái build đã test trên TestFlight lên
+> Mỗi lần chạy là một build number mới do CI cấp, nên `beta` rồi `release` không còn đụng
+> nhau — nhưng đó là **hai binary khác nhau**: bản lên App Store không phải bản đã test trên
+> TestFlight. Muốn đưa đúng cái build đã test trên TestFlight lên
 > App Store thì chọn build đó trên App Store Connect và bấm tay — nhanh hơn và chắc hơn.
 
 ## 4. Android: lần đầu lên Play Store
@@ -283,7 +290,7 @@ privacy policy URL — bắt buộc vì app có trẻ em, xem thêm yêu cầu *
 
 | Triệu chứng | Nguyên nhân thật |
 |---|---|
-| `Version code X has already been used` / `The bundle version must be higher` | Chưa tăng `+build` trong `pubspec.yaml`. Build number phải tăng **mỗi lần nộp**, kể cả khi nộp lại bản vừa bị từ chối |
+| `Version code X has already been used` / `The bundle version must be higher` | Build number trùng bản đã nộp. Từ 24/08/2026 CI tự cấp số nên lỗi này không được phép quay lại — nếu vẫn gặp, xem bước `Build App Bundle` / `Build IPA` trong `release.yml` còn truyền `--build-number` không |
 | `No profile matching 'X' found` | `IOS_PROVISIONING_PROFILE_NAME` khác tên profile trên developer.apple.com — dán tên **file** thay vì tên profile là ca phổ biến nhất |
 | `No signing certificate "iOS Distribution" found` | `.p12` export thiếu private key, hoặc cert đã hết hạn (Apple Distribution sống 1 năm — hết hạn thì làm lại B-2 và B-3) |
 | `keystore was tampered with, or password was incorrect` | Sai mật khẩu, hoặc base64 bị chèn newline. Trên Linux dùng `base64 -w0`, không dùng `base64` trần |

@@ -325,8 +325,16 @@ sai phiên bản thì mọi kết luận rút ra từ nó sai theo.
 
 #### Trước khi tag phát hành, kiểm thêm
 
-- **Build number đã tăng chưa?** Apple từ chối `+build` trùng bản đã nộp, kể cả
-  bản chỉ nằm trên TestFlight, kể cả khi lần nộp trước hỏng giữa chừng.
+- **Build number**: đã tự động, đừng tăng tay nữa. CI cấp
+  `1000 + run_number*10 + run_attempt` cho cả hai nền tảng, nên `+build` trong
+  pubspec chỉ còn dùng khi build tại máy. Bối cảnh: Apple từ chối `+build`
+  trùng bản đã nộp — kể cả bản chỉ nằm trên TestFlight, kể cả khi lần nộp
+  trước hỏng giữa chừng — và run #27 (24/08/2026) đã dựng IPA xong 2 phút 22
+  rồi hỏng ở giây thứ 8 của bước đẩy vì `+14` đã có trên TestFlight
+  (`ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE`, `previousBundleVersion: 14`).
+  Quy tắc "nhớ tăng build number" đã nằm trong tài liệu từ trước mà vẫn hỏng —
+  đó là bằng chứng quy tắc trông chờ trí nhớ thì không phải là quy tắc. Nếu
+  lần sau vẫn gặp lỗi này, sửa **công thức trong workflow**, đừng sửa pubspec.
 - **Hồ sơ trên store đã điền xong chưa?** Nếu chưa, lane `release` sẽ dựng xong
   binary rồi mới hỏng ở `submit_for_review` — tốn một build number cho không.
   Chi tiết ở đầu `docs/08-release-cicd.md`.
@@ -433,3 +441,4 @@ chưa từng được kiểm.
 | `The method 'unawaited' isn't defined` | Thiếu `import 'dart:async'` | 7 |
 | `The named parameter 'X' isn't defined` | Gọi hàm bằng tham số của **hàm khác** tên gần giống | 7 |
 | Test phiên bản đỏ sau khi bump | Quên `kPhienBanApp` trong `bao_loi_screen.dart` | 7 |
+| Đẩy store hỏng sau ~8 giây, `ENTITY_ERROR...DUPLICATE` | Build number trùng bản đã nộp — CI đã tự cấp, kiểm công thức trong `release.yml` | 7 |
