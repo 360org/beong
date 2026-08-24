@@ -222,6 +222,7 @@ các mục §1–§8.
 | #24, #25, #26 | tag v0.2.6 / v0.2.7 | bước **build** | `main` không biên dịch được |
 | #27 | `67b7dae` | bước **đẩy store**, giây thứ 8 | `+14` đã có trên TestFlight |
 | #28 | `71d9752` | — | **xanh**, IPA lên TestFlight |
+| #29 | `b0518ef` | bước **nộp duyệt** (iOS) / **đẩy Play** (Android) | hồ sơ App Store thiếu 6 mục; Play chưa bật API |
 
 Hai nguyên nhân khác hẳn nhau và phải đọc log mới phân biệt được — đỏ ở bước
 build là lỗi mã, sửa được tại máy trong 20 giây; đỏ ở bước đẩy là chuyện của
@@ -231,9 +232,41 @@ Lỗi của #27 nay không quay lại được nữa: build number do CI cấp t
 `1000 + run_number*10 + run_attempt`, không còn phụ thuộc ai đó nhớ tăng
 `+build` trong pubspec. #28 dùng build number 1281.
 
-Còn lại là việc của chủ dự án, không phải của agent: điền hồ sơ App Store (lane
-`release` vẫn sẽ hỏng ở `submit_for_review` nếu thiếu), sửa secret
-`PLAY_STORE_SERVICE_ACCOUNT_JSON`, và đẩy tag từ máy cá nhân.
+### Run #29 — thử lane công khai, và đây là danh sách còn thiếu
+
+Chạy `ios_lane: release` + `android_track: production` trên `b0518ef`. Cả hai
+nền tảng đỏ, nhưng **không nền tảng nào đỏ vì mã**:
+
+**iOS** — IPA build xong, `upload_to_app_store` đẩy binary lên App Store Connect
+xong, rồi hỏng đúng ở `submit_for_review` (Fastfile dòng 37). Apple trả về đủ
+sáu thứ còn thiếu trong hồ sơ, chép nguyên văn để khỏi đoán:
+
+| Thiếu | Điền ở đâu trên App Store Connect |
+|---|---|
+| `Answers to what data your app collects and how it's used` | App Privacy → Data Collection |
+| `primaryCategory` | App Information → Category |
+| `privacyPolicyUrl` | App Privacy → Privacy Policy URL |
+| `privacyPolicyText` | App Privacy → Privacy Policy Text |
+| `App is missing required pricing` | Pricing and Availability |
+| `contentRightsDeclaration` | App Information → Content Rights |
+
+Binary thì **đã lên** — điền xong sáu mục trên là bấm nộp duyệt tay được ngay,
+không cần chạy lại CI.
+
+**Android** — hỏng trước cả khi đụng tới bản build:
+
+```
+PERMISSION_DENIED: Google Play Android Developer API has not been used in
+project 369552230110 before or it is disabled.
+```
+
+Bật API tại `console.developers.google.com/apis/api/androidpublisher.googleapis.com`
+cho đúng project đó, đợi vài phút rồi chạy lại. Đây là chuyện của Google Cloud,
+không phải secret sai như đã đoán trước đây — secret đọc được, chỉ là project
+chưa mở API.
+
+Cả hai đều là việc của chủ dự án, không phải của agent. Cộng thêm: đẩy tag phải
+làm từ máy cá nhân (proxy của môi trường agent chặn ref dạng tag, trả 403).
 
 ## Cách kiểm lại toàn bộ
 
