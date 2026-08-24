@@ -5,6 +5,7 @@ import 'package:beong/core/theme/kid_scale.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Thẻ một việc trong danh sách của con.
 ///
@@ -75,6 +76,8 @@ class _TaskCardState extends State<TaskCard> {
         onTap: isDone || isMissed
             ? null
             : () {
+                // Phản hồi xúc giác (haptic) nhẹ khi con chạm hoàn thành việc (§9)
+                HapticFeedback.lightImpact();
                 // Tích ngay trong khung hình chạm, không chờ DB.
                 setState(() => _vuaBam = true);
                 widget.onToggle();

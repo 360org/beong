@@ -1,0 +1,154 @@
+# Changelogs — Bé Ong
+
+Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao diện và sửa lỗi của dự án **Bé Ong** (Flutter Mobile Client) được quản lý tập trung và chuẩn hoá theo quy chuẩn AIaC.
+
+---
+
+## v0.2.7+14 (2026-08-24) — Tích hợp Push Notification (Supabase + FCM) & Cải tiến Giao diện (Audit Phần II)
+
+### [NEW]
+- **Kiến trúc Push Notification (Supabase Edge Function + Google FCM v1)**:
+  - Bảng cơ sở dữ liệu `device_tokens` lưu định danh thiết bị kèm cơ chế phân quyền Row Level Security (RLS) theo từng gia đình (`supabase/migrations/20260824000000_device_tokens_and_push.sql`).
+  - Supabase Edge Function `notify-fcm` (`supabase/functions/notify-fcm/index.ts`) xử lý xác thực Google OAuth2 JWT và phát thông báo đa nền tảng (Android notification channel + iOS APNs badge/sound) hoàn toàn miễn phí 0đ.
+  - Tích hợp `PushNotificationService` (`lib/core/services/push_notification_service.dart`) hỗ trợ đồng bộ token và gửi thông báo từ xa 2 chiều giữa Bố Mẹ và Con.
+  - Cấu hình Firebase gốc `google-services.json` (Android) và `GoogleService-Info.plist` (iOS) cho bundle ID `net.beong.app`.
+
+### [IMPROVE]
+- **Tách banner "Chờ chia" trong Sổ của con (§12)**:
+  - Tách ô "Chờ chia" ra khỏi lưới hiển thị hũ tại `StatsScreen`, đưa lên thành `_UnallocatedBanner` nổi bật trên cùng chiếm trọn chiều ngang kèm nút **"Chia ngay"** mở trực tiếp `AllocateXuSheet`.
+  - Lưới hũ bên dưới chỉ còn hiển thị các hũ tích luỹ thật (`Tiêu`, `Để dành`, `Cho đi`...).
+  - Tự động ẩn banner khi số xu chờ chia bằng 0 (`inbox == 0`).
+- **Tái cấu trúc màn hình Cài đặt thành 4 nhóm khoa học (§10)**:
+  - Chia toàn bộ 11 mục cài đặt phẳng trước đây thành 4 khối `_SettingsSection` có tiêu đề phân nhóm rõ ràng:
+    1. **Gia đình**: Danh sách thành viên, Thêm bé, Múi giờ (`_TimezoneTile`), Giờ đổi ngày (`_RolloverTile`).
+    2. **Quy tắc xu**: Cần bố mẹ duyệt (`_ApprovalTile`), Con tự chia xu (`_AllocationTile`), Các hũ (`_JarsTile`), Trừ xu (`_PenaltyTile`), Quy đổi tiền thật (`_ExchangeRateTile`).
+    3. **Ứng dụng**: Giao diện sáng/tối (`_ThemeTile`), Mật khẩu hồ sơ (`_MatKhauTile`).
+    4. **Thông tin**: Báo lỗi (`_SettingsTile`), Phiên bản ứng dụng (`_SettingsTile`).
+- **Nhóm lịch sử giao dịch theo ngày lịch (§11)**:
+  - Tái cấu trúc danh sách giao dịch phẳng trong `StatsScreen` thành từng nhóm theo ngày (`_DailyHistoryList`, `_DayHistoryGroup`).
+  - Mỗi ngày là một khối thẻ gập/mở gọn gàng hiển thị tóm tắt `Thứ, ngày/tháng · X việc xong · ±xu`.
+  - Mặc định mở sẵn các giao dịch của ngày hôm nay (`isExpandedByDefault`), các ngày trước đó được gập lại để phụ huynh dễ theo dõi.
+- **Thu gọn bảng chọn Icon việc nhà & phần thưởng (§8)**:
+  - Nâng cấp `IconPickerGrid` thành `StatefulWidget`: mặc định chỉ hiển thị 1 hàng (6 icon đầu tiên, đảm bảo luôn kèm icon đang chọn).
+  - Tích hợp nút toggle **"Xem thêm (N hình)"** / **"Thu gọn"** để mở rộng/thu nhỏ lưới icon linh hoạt, không đẩy tràn biểu mẫu nhập liệu.
+- **Mở rộng bộ khoá Icon việc nhà (§7)**:
+  - Bổ sung các icon từ bundle Fluent Emoji 3D asset (`clipboard`, `gem`, `party`, `warning`, `bee`, `run`, `eye_off`...) vào `kTaskIconKeys`.
+- **Tăng cường tương tác & Phản hồi xúc giác vai con (§9)**:
+  - Tích hợp rung xúc giác nhẹ (`HapticFeedback.lightImpact()`) khi con chạm tích hoàn thành nhiệm vụ trên `TaskCard`.
+  - Bổ sung tương tác chạm vào linh vật Bé Ong (`BeeMascot`) để kích hoạt chuyển động nảy vui nhộn.
+
+---
+
+## v0.2.6+13 (2026-08-23) — Sửa lỗi Luồng Chạy & Đồng bộ Tài liệu (Audit Phần I)
+
+### [FIX]
+- **Sửa thông điệp ghép cặp QR**: Cập nhật câu thông báo sau khi quét mã QR sang *"Tính năng đồng bộ qua mạng đang được hoàn thiện"*, phản ánh trung thực trạng thái tính năng.
+- **Kích hoạt chế độ kiểm tra bằng chứng (`proof_mode`)**: Nối trường `proof_mode` vào quy trình hoàn thành nhiệm vụ tại `TaskReviewService.complete`. Khi việc yêu cầu chụp ảnh, bắt buộc chuyển trạng thái sang `pendingReview` để bố mẹ duyệt bất kể cấu hình chung của gia đình.
+- **Đồng bộ tài liệu ADR-027**: Chuẩn hoá quy định mật khẩu hồ sơ (Bố mẹ bắt buộc, Bé tuỳ chọn).
+- **Kiểm chứng giao diện thực tế**: Chụp bổ sung 10 ảnh kiểm chứng các màn hình mới (`docs/screenshot/81`–`90`).
+
+---
+
+## v0.2.6 (2026-08-23) — Universal Link QR, Quản lý Gia đình & Supabase Schema
+
+### [NEW]
+- **Ghép cặp thiết bị bằng Camera native & Universal Link**:
+  - Hỗ trợ quét mã ghép cặp QR trực tiếp bằng ứng dụng Camera mặc định của điện thoại thông qua Universal Link / App Link (`https://beong.net/pair?code=...`).
+  - Tích hợp `mobile_scanner` quét mã QR trực tiếp trong app và hiển thị vector QR bằng `qr_flutter`.
+- **Quản lý Hồ sơ Con & Xoá Gia đình**:
+  - Thêm tính năng sửa thông tin con (tên, avatar, màu đại diện, ngày sinh/năm sinh).
+  - Hỗ trợ xoá toàn bộ dữ liệu gia đình kèm cơ chế xác thực mật khẩu phụ huynh và cảnh báo nguy hiểm.
+- **Múi giờ & Giờ đổi ngày linh hoạt**:
+  - Cho phép chọn múi giờ (`Asia/Ho_Chi_Minh`, `Asia/Tokyo`, `America/New_York`...) độc lập với múi giờ thiết bị.
+  - Cho phép cấu hình giờ đổi ngày (`day_rollover_hour`) từ 0h đến 6h sáng để tính toán streak và nhiệm vụ chính xác theo lịch sinh hoạt.
+- **Chế độ Bằng chứng hình ảnh (`proof_mode`)**: Bổ sung tuỳ chọn yêu cầu chụp ảnh khi tạo/sửa việc trong Task Editor.
+- **CRUD Quản lý Phần thưởng**: Cho phép bố mẹ tạo mới, chỉnh sửa tên, icon, giá xu và xóa phần thưởng.
+- **Backend Schema & RLS Policies (Sprint 3)**: Hoàn thiện 11 bảng cơ sở dữ liệu PostgreSQL + Supabase Row Level Security tại `supabase/migrations/`.
+
+### [FIX]
+- Nâng deployment target iOS lên 15.5 tương thích thư viện `mobile_scanner`.
+- Sửa 13 lỗi strict linter và warning liên quan đến `discarded_futures` và unawaited async.
+
+---
+
+## v0.2.5 (2026-08-23) — Bảo mật Hồ sơ ADR-027 & Tối ưu Trải nghiệm Con
+
+### [NEW]
+- **Mật khẩu bảo vệ từng hồ sơ (ADR-027)**:
+  - Cơ chế mã hoá và băm mật khẩu hồ sơ bằng SHA-256 (`crypto`).
+  - Hộp thoại nhập mật khẩu (`MatKhauSheet`, `hoiMatKhau`) khi chuyển đổi giữa các vai hoặc mở các tính năng nhạy cảm.
+- **Khung pháp lý & Quyền riêng tư**:
+  - Bổ sung `PrivacyInfo.xcprivacy` cho hệ sinh thái Apple iOS.
+  - Cập nhật chính sách quyền riêng tư (`10-privacy-policy.md`) và điều khoản bản quyền EULA 360 CORP.
+
+### [IMPROVE]
+- **Khắc phục triệt để hiện tượng giật danh sách việc**:
+  - Tối ưu hoá luồng dữ liệu `StreamBuilder` tại `ChildHomeScreen`, lưu trữ stream trong State để tránh huỷ/đăng ký lại stream khi `setState` nổ hoa giấy.
+
+---
+
+## v0.2.3 & v0.2.4 (2026-08-22) — Bảo vệ Phiên làm việc & Tự động hoá CI/CD Release
+
+### [NEW]
+- **Cơ chế Khoá lại (Lock App)**: Nút "KHOÁ LẠI" thay cho nút Đăng xuất cũ, giúp phụ huynh đưa máy cho con mà không lo mất dữ liệu.
+- **Lối thoát khi quên PIN/Mật khẩu**: Cơ chế xác thực an toàn giúp phụ huynh lấy lại quyền quản trị khi quên mật khẩu.
+
+### [IMPROVE]
+- Tự động hoá kiểm tra và xác thực chứng chỉ Play Console / App Store Distribution trước khi build release trong GitHub Actions.
+
+---
+
+## v0.2.1 & v0.2.2 (2026-08-17 – 2026-08-20) — Tách lớp Clean Architecture (Tầng Repository)
+
+### [NEW]
+- **Tầng Repository chuẩn Clean Architecture**:
+  - Đóng gói 7 abstract interfaces tại `lib/domain/repositories/` (`MemberRepository`, `TaskRepository`, `WalletRepository`, `RewardRepository`, `JarRepository`, `GoalRepository`, `BadgeRepository`).
+  - Tách biệt hoàn toàn tầng UI (`lib/features/`) khỏi tầng dữ liệu trực tiếp SQLite DAO (`lib/data/`).
+  - Bổ sung bộ kiểm thử kiến trúc `kien_truc_test.dart` ngăn chặn vi phạm layer boundaries.
+
+### [FIX]
+- Khắc phục lỗi cộng xu 2 lần cho cùng một lượt việc.
+- Sửa lỗi hiển thị trạng thái chờ duyệt của phiếu đổi thưởng.
+- Dọn dẹp loại bỏ 6 thư viện dependency không sử dụng để giảm kích thước bundle.
+
+---
+
+## v0.2.0 (2026-08-15 – 2026-08-16) — Hệ thống Tài chính, Thói quen & Báo lỗi Chẩn đoán
+
+### [NEW]
+- **Mục tiêu Tiết kiệm (`SavingsGoal`)**: Cho phép trẻ đặt mục tiêu để dành xu kèm thanh tiến độ trực quan.
+- **Hệ thống 8 Huy hiệu (`Badges`) & Chuỗi ngày liên tiếp (`Streaks`)**: Tự động tính streak có ngày ân hạn và trao huy hiệu danh dự khi đạt các mốc thành tích.
+- **Trình chỉnh sửa Thói quen (`RoutineEditor`)**: Hỗ trợ kéo thả sắp xếp thứ tự nhiệm vụ trong bộ thói quen và tuỳ chỉnh mức thưởng trọn bộ.
+- **Quy đổi Xu ra Tiền thật (ADR-017)**: Hỗ trợ phụ huynh cấu hình tỷ lệ quy đổi hiển thị (ví dụ 1 xu = 1.000đ), mặc định tắt.
+- **Bộ Icon 3D Fluent Emoji (MIT)**: Chuyển đổi toàn bộ icon sang asset PNG 3D chất lượng cao, đồng nhất trên tất cả các nền tảng (iOS, Android, Desktop).
+- **Hệ thống Báo lỗi Chẩn đoán trong App (`NhatKyLoi`)**: Tự động thu thập log, thông số thiết bị và gửi issue chẩn đoán trực tiếp cho đội ngũ phát triển.
+- **Điều chỉnh Xu thủ công**: Cho phép bố mẹ cộng/trừ xu tay kèm bắt buộc nhập lý do điều chỉnh để minh bạch sổ cái.
+
+---
+
+## v0.1.0 (2026-08-08 – 2026-08-10) — Quy tắc 3 Hũ Xu, Trừ Xu & Giao diện 5 Tab
+
+### [NEW]
+- **Mô hình 3 Hũ Tài chính (ADR-024)**:
+  - Thiết kế bảng `jars` với 3 hũ mặc định: `Tiêu`, `Để dành`, `Cho đi`.
+  - Hỗ trợ tạo thêm các hũ tuỳ chỉnh riêng của từng gia đình.
+  - Cơ chế con tự chia xu từ hũ chờ (`inbox`) vào các hũ theo tỷ lệ mong muốn.
+- **Cơ chế Trừ Xu vi phạm & Duyệt việc (ADR-022, ADR-023)**:
+  - Hỗ trợ thiết lập mức phạt trừ xu khi bỏ lỡ nhiệm vụ.
+  - Cơ chế duyệt nhiệm vụ linh hoạt: mặc định "làm xong là xong", tuỳ chọn duyệt theo từng việc hoặc theo gia đình.
+- **Quy trình Đổi thưởng & Duyệt thưởng (ADR-025)**: Hệ thống quà tặng, phiếu đổi thưởng và hoàn xu tự động khi bị từ chối.
+- **Giao diện Trẻ em Thích ứng theo Nhóm tuổi (`KidScale`)**: Tự động căn chỉnh kích thước nút bấm, font chữ, khoảng cách theo nhóm tuổi (5–8 tuổi vs 9–15 tuổi).
+- **Linh vật Bé Ong (`BeeMascot`)**: Vẽ bằng CustomPainter với các biểu cảm sinh động theo tiến độ trong ngày (`sleepy`, `happy`, `celebrating`).
+
+---
+
+## v0.0.1 (2026-08-01 – 2026-08-04) — Khởi tạo Nền tảng Đa nền tảng (Sprint 0)
+
+### [NEW]
+- **Khởi tạo mã nguồn dự án**: Dựng nền tảng Flutter đa nền tảng (iOS, Android, macOS, Windows, Linux).
+- **Cơ sở dữ liệu Local Offline-First**: Thiết lập Drift SQLite ORM với đầy đủ bảng dữ liệu ban đầu và sổ cái ví xu (`wallet_ledger`).
+- **State Management & Routing**: Tích hợp Riverpod (`StateNotifier`, `Provider`) và `go_router` với `StatefulShellRoute`.
+- **Hệ thống Thiết kế & Đa ngôn ngữ**:
+  - Design tokens, typography font Nunito, theme màu vàng nhận diện Bé Ong kết hợp xanh 360 CORP.
+  - Hỗ trợ song ngữ Tiếng Việt và Tiếng Anh (`app_vi.arb`, `app_en.arb`).
+- **Quy trình CI/CD**: Thiết lập GitHub Actions tự động kiểm tra code (`analyze --fatal-infos`), format, chạy unit test và build đa nền tảng.

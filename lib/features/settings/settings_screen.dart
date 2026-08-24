@@ -108,7 +108,7 @@ class SettingsScreen extends ConsumerWidget {
                 },
               ),
               const SizedBox(height: AppSpacing.xxl),
-              Text('Thành viên', style: context.text.titleMedium),
+              Text('Gia đình', style: context.text.titleMedium),
               const SizedBox(height: AppSpacing.md),
               ...members.map(
                 (member) => Padding(
@@ -142,21 +142,39 @@ class SettingsScreen extends ConsumerWidget {
                   label: const Text('Thêm bé'),
                 ),
               ),
-              const SizedBox(height: AppSpacing.xxl),
+              const SizedBox(height: AppSpacing.md),
               _SettingsSection(
                 children: [
-                  // Không có ô "Thông báo" ở đây: app chưa gửi thông báo nào
-                  // (Sprint 5). Một dòng ghi "Bật" mà không có gì bật là lời
-                  // hứa suông — bố mẹ sẽ ngồi đợi nhắc nhở không bao giờ tới.
-                  const _ThemeTile(),
-                  _MatKhauTile(familyId: session.familyId),
+                  _TimezoneTile(familyId: session.familyId),
+                  _RolloverTile(familyId: session.familyId),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+              Text('Quy tắc xu', style: context.text.titleMedium),
+              const SizedBox(height: AppSpacing.md),
+              _SettingsSection(
+                children: [
                   _ApprovalTile(familyId: session.familyId),
                   _AllocationTile(familyId: session.familyId),
                   _JarsTile(familyId: session.familyId),
                   _PenaltyTile(familyId: session.familyId),
-                  _TimezoneTile(familyId: session.familyId),
-                  _RolloverTile(familyId: session.familyId),
                   _ExchangeRateTile(familyId: session.familyId),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+              Text('Ứng dụng', style: context.text.titleMedium),
+              const SizedBox(height: AppSpacing.md),
+              _SettingsSection(
+                children: [
+                  const _ThemeTile(),
+                  _MatKhauTile(familyId: session.familyId),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+              Text('Thông tin', style: context.text.titleMedium),
+              const SizedBox(height: AppSpacing.md),
+              _SettingsSection(
+                children: [
                   _SettingsTile(
                     icon: Icons.bug_report_outlined,
                     title: 'Báo lỗi',
@@ -166,9 +184,6 @@ class SettingsScreen extends ConsumerWidget {
                   _SettingsTile(
                     icon: Icons.info_outline,
                     title: 'Phiên bản',
-                    // Cùng một hằng số với báo cáo lỗi: hai chỗ tự chép số
-                    // riêng thì có ngày màn Cài đặt nói một đằng, issue gửi
-                    // lên nói một nẻo.
                     subtitle: kPhienBanApp,
                     onTap: () {},
                   ),

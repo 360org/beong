@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "875790474596",
+    "project_id": "beong-app",
+    "storage_bucket": "beong-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:875790474596:android:7a7b72c03bd3076a9cae71",
+        "android_client_info": {
+          "package_name": "net.beong.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoU0gfB_K7UfoKWwMX4iyn-4Yu_Wlrvy0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

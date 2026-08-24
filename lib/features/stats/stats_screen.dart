@@ -14,13 +14,16 @@ import 'package:beong/domain/entities/badge_def.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/repositories/goal_repository.dart';
+import 'package:beong/domain/repositories/jar_repository.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/repositories/reward_repository.dart';
 import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:beong/domain/repositories/wallet_repository.dart';
+import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/money_exchange.dart';
 import 'package:beong/features/goals/goal_section.dart';
 import 'package:beong/features/goals/goal_sheet.dart';
+import 'package:beong/features/rewards/allocate_xu_sheet.dart';
 import 'package:beong/features/stats/adjust_xu_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -175,6 +178,7 @@ class _ChildStatsCard extends ConsumerWidget {
             return _JarOverview(
               balance: balance,
               familyId: child.familyId,
+              memberId: child.id,
             );
           },
         ),
@@ -246,7 +250,11 @@ class _ChildStats extends StatelessWidget {
             stream: walletDao.watchBalance(memberId),
             builder: (context, snap) {
               final balance = snap.data ?? WalletBalance.zero;
-              return _JarOverview(balance: balance, familyId: familyId);
+              return _JarOverview(
+                balance: balance,
+                familyId: familyId,
+                memberId: memberId,
+              );
             },
           ),
           const SizedBox(height: AppSpacing.xxl),
@@ -290,19 +298,11 @@ class _ChildStats extends StatelessWidget {
                     ),
                   );
                 }
-                return Column(
-                  children: [
-                    for (final tx in txns)
-                      _TransactionTile(
-                        // Key theo nhóm: thiếu key thì State bị tái dùng theo vị
-                        // trí và dòng hiện tên của giao dịch cũ.
-                        key: ValueKey(tx.groupId),
-                        tx: tx,
-                        taskDao: taskDao,
-                        rewardDao: rewardDao,
-                        jarTitles: jarTitles,
-                      ),
-                  ],
+                return _DailyHistoryList(
+                  txns: txns,
+                  taskDao: taskDao,
+                  rewardDao: rewardDao,
+                  jarTitles: jarTitles,
                 );
               },
             ),
@@ -387,20 +387,26 @@ class _JarTitles extends ConsumerWidget {
 /// đó mất khỏi màn hình. Con cộng ba ô lại thấy 11 trong khi tổng ghi 25 — không
 /// có cách nào hiểu được chuyện gì xảy ra.
 class _JarOverview extends ConsumerWidget {
-  const _JarOverview({required this.balance, required this.familyId});
+  const _JarOverview({
+    required this.balance,
+    required this.familyId,
+    this.memberId,
+  });
 
   final WalletBalance balance;
   final String familyId;
+  final String? memberId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final walletDao = ref.watch(walletRepositoryProvider);
+    final jarDao = ref.watch(jarRepositoryProvider);
+
     return StreamBuilder<List<JarDef>>(
-      stream: ref.watch(jarRepositoryProvider).watchActiveJars(familyId),
+      stream: jarDao.watchActiveJars(familyId),
       builder: (context, snap) {
         final jars = snap.data ?? kDefaultJars;
 
-        // Hũ chờ không nằm trong bảng `jars` nhưng vẫn phải hiện khi còn xu:
-        // không hiện thì con thấy tổng lớn hơn tổng các ô mà không biết vì sao.
         final tiles = <Widget>[
           for (final jar in jars)
             _JarCard(
@@ -408,23 +414,34 @@ class _JarOverview extends ConsumerWidget {
               iconKey: iconKeyForEmoji(jar.emoji),
               amount: balance.ofKey(jar.key),
             ),
-          if (balance.inbox > 0)
-            _JarCard(
-              label: 'Chờ chia',
-              iconKey: 'jar_inbox',
-              amount: balance.inbox,
-              // Khác hẳn các hũ thật: đây **không phải một hũ**, mà là số xu
-              // chưa vào hũ nào. Trông giống hệt các ô kia thì con đếm nó như
-              // hũ thứ tư và tưởng mình đang để dành ở đâu đó.
-              pending: true,
-            ),
         ];
 
-        // Wrap chứ không Row: bốn hũ trở lên thì Row bóp mỗi ô còn quá hẹp để
-        // đọc số.
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (balance.inbox > 0) ...[
+              _UnallocatedBanner(
+                inbox: balance.inbox,
+                onAllocate: memberId == null
+                    ? null
+                    : () async {
+                        final activeJars = await jarDao.activeJars(familyId);
+                        if (!context.mounted) return;
+                        await showModalBottomSheet<void>(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (context) => AllocateXuSheet(
+                            familyId: familyId,
+                            memberId: memberId!,
+                            inbox: balance.inbox,
+                            walletDao: walletDao,
+                            jars: activeJars,
+                          ),
+                        );
+                      },
+              ),
+              const SizedBox(height: AppSpacing.md),
+            ],
             LayoutBuilder(
               builder: (context, constraints) {
                 const gap = AppSpacing.sm;
@@ -445,6 +462,71 @@ class _JarOverview extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// Banner xu chưa chia (ADR-024, §12) — nằm tách riêng phía trên các hũ thật.
+class _UnallocatedBanner extends StatelessWidget {
+  const _UnallocatedBanner({
+    required this.inbox,
+    this.onAllocate,
+  });
+
+  final int inbox;
+  final VoidCallback? onAllocate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: context.semantic.xu.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(color: context.semantic.xuText, width: 1.5),
+      ),
+      child: Row(
+        children: [
+          const AppIcon('jar_inbox', size: 28),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$inbox xu chờ chia',
+                  style: context.text.titleSmall?.copyWith(
+                    color: context.semantic.xuText,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  'Con chia xu vào các hũ để dùng và để dành.',
+                  style: context.text.bodySmall?.copyWith(
+                    color: context.semantic.onSurfaceMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (onAllocate != null)
+            FilledButton.tonal(
+              onPressed: onAllocate,
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                visualDensity: VisualDensity.compact,
+              ),
+              child: const Text('Chia ngay'),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -575,6 +657,138 @@ class _StreakCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Danh sách lịch sử nhóm theo ngày (ADR-024, §11).
+///
+/// Mỗi ngày là một thẻ gập/mở, hiển thị thứ/ngày, số việc xong, và tổng xu thay đổi.
+class _DailyHistoryList extends StatelessWidget {
+  const _DailyHistoryList({
+    required this.txns,
+    required this.taskDao,
+    required this.rewardDao,
+    required this.jarTitles,
+  });
+
+  final List<LedgerEntry> txns;
+  final TaskRepository taskDao;
+  final RewardRepository rewardDao;
+  final Map<String, String> jarTitles;
+
+  @override
+  Widget build(BuildContext context) {
+    // Nhóm các giao dịch theo ngày (CalendarDate)
+    final grouped = <CalendarDate, List<LedgerEntry>>{};
+    for (final tx in txns) {
+      final date = CalendarDate.fromDateTime(tx.createdAt);
+      grouped.putIfAbsent(date, () => []).add(tx);
+    }
+
+    final sortedDates = grouped.keys.toList()
+      ..sort((a, b) => b.compareTo(a)); // Mới nhất lên đầu
+
+    final today = CalendarDate.fromDateTime(DateTime.now());
+
+    return Column(
+      children: [
+        for (final date in sortedDates)
+          _DayHistoryGroup(
+            key: ValueKey(date.toString()),
+            date: date,
+            txns: grouped[date] ?? const [],
+            isExpandedByDefault: date == today,
+            taskDao: taskDao,
+            rewardDao: rewardDao,
+            jarTitles: jarTitles,
+          ),
+      ],
+    );
+  }
+}
+
+class _DayHistoryGroup extends StatelessWidget {
+  const _DayHistoryGroup({
+    required this.date,
+    required this.txns,
+    required this.isExpandedByDefault,
+    required this.taskDao,
+    required this.rewardDao,
+    required this.jarTitles,
+    super.key,
+  });
+
+  final CalendarDate date;
+  final List<LedgerEntry> txns;
+  final bool isExpandedByDefault;
+  final TaskRepository taskDao;
+  final RewardRepository rewardDao;
+  final Map<String, String> jarTitles;
+
+  @override
+  Widget build(BuildContext context) {
+    final completedCount = txns
+        .where((t) => t.reason == 'taskApproved' || t.reason == 'routineBonus')
+        .length;
+    final totalDelta = txns.fold<int>(0, (sum, t) => sum + t.delta);
+    final deltaLabel = switch (totalDelta) {
+      0 => '0 xu',
+      final d when d > 0 => '+$d xu',
+      final d => '$d xu',
+    };
+
+    final title = '${thuNganGon(date.weekday)}, ${ngayNganGon(date)}';
+    final subtitle = [
+      if (completedCount > 0) '$completedCount việc xong',
+      deltaLabel,
+    ].join(' · ');
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Card(
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            initiallyExpanded: isExpandedByDefault,
+            tilePadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.xs,
+            ),
+            childrenPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+            ),
+            title: Text(
+              title,
+              style: context.text.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            subtitle: Text(
+              subtitle,
+              style: context.text.bodySmall?.copyWith(
+                color: totalDelta > 0
+                    ? context.semantic.success
+                    : totalDelta < 0
+                    ? context.semantic.danger
+                    : context.semantic.onSurfaceMuted,
+                fontWeight: totalDelta != 0 ? FontWeight.w600 : null,
+              ),
+            ),
+            children: [
+              for (final tx in txns)
+                _TransactionTile(
+                  key: ValueKey(tx.groupId),
+                  tx: tx,
+                  taskDao: taskDao,
+                  rewardDao: rewardDao,
+                  jarTitles: jarTitles,
+                ),
+              const SizedBox(height: AppSpacing.xs),
+            ],
+          ),
         ),
       ),
     );

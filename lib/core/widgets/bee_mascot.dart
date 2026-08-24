@@ -39,6 +39,7 @@ class BeeMascot extends StatefulWidget {
     required this.mood,
     super.key,
     this.size = 72,
+    this.onTap,
   });
 
   /// Màu viền ngoài thân ong.
@@ -52,6 +53,7 @@ class BeeMascot extends StatefulWidget {
 
   final BeeMood mood;
   final double size;
+  final VoidCallback? onTap;
 
   @override
   State<BeeMascot> createState() => _BeeMascotState();
@@ -96,19 +98,36 @@ class _BeeMascotState extends State<BeeMascot>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        // Nảy tối đa 8% chiều cao — đủ thấy vui, không tới mức nhấp nháy.
-        final lift = Curves.easeInOut.transform(_controller.value);
-        return Transform.translate(
-          offset: Offset(0, -lift * widget.size * 0.08),
-          child: CustomPaint(
-            size: Size.square(widget.size),
-            painter: _BeePainter(mood: widget.mood),
-          ),
-        );
+    return GestureDetector(
+      onTap: () {
+        final onTap = widget.onTap;
+        if (onTap != null) {
+          onTap();
+        } else {
+          // Nảy một lượt khi chạm vào linh vật
+          _controller.forward(from: 0).then((_) {
+            if (widget.mood == BeeMood.celebrating) {
+              unawaited(_controller.repeat(reverse: true));
+            } else {
+              _controller.value = 0;
+            }
+          });
+        }
       },
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          // Nảy tối đa 8% chiều cao — đủ thấy vui, không tới mức nhấp nháy.
+          final lift = Curves.easeInOut.transform(_controller.value);
+          return Transform.translate(
+            offset: Offset(0, -lift * widget.size * 0.08),
+            child: CustomPaint(
+              size: Size.square(widget.size),
+              painter: _BeePainter(mood: widget.mood),
+            ),
+          );
+        },
+      ),
     );
   }
 }

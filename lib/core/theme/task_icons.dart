@@ -105,6 +105,11 @@ const Map<String, String> taskIcons = {
   'phone_off': '🔇',
   'clock': '⏰',
   'star': '⭐',
+  'clipboard': '📋',
+  'gem': '💎',
+  'party': '🎉',
+  'warning': '⚠️',
+  'bee': '🐝',
 
   // Phần thưởng — `lib/domain/entities/reward_presets.dart`.
   'phone': '📱',
@@ -216,6 +221,12 @@ const List<String> kTaskIconKeys = [
   'paw',
   'toy',
   'heart',
+  'clipboard',
+  'gem',
+  'party',
+  'warning',
+  'run',
+  'eye_off',
   'phone_off',
   'clock',
   // Hai hình của routine dựng sẵn ("Buổi sáng", "Sau giờ học"). Thiếu chúng thì
