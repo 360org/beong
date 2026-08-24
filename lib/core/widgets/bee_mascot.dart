@@ -105,13 +105,15 @@ class _BeeMascotState extends State<BeeMascot>
           onTap();
         } else {
           // Nảy một lượt khi chạm vào linh vật
-          _controller.forward(from: 0).then((_) {
-            if (widget.mood == BeeMood.celebrating) {
-              unawaited(_controller.repeat(reverse: true));
-            } else {
-              _controller.value = 0;
-            }
-          });
+          unawaited(
+            _controller.forward(from: 0).then((_) {
+              if (widget.mood == BeeMood.celebrating) {
+                unawaited(_controller.repeat(reverse: true));
+              } else {
+                _controller.value = 0;
+              }
+            }),
+          );
         }
       },
       child: AnimatedBuilder(

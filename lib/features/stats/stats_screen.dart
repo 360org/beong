@@ -14,7 +14,6 @@ import 'package:beong/domain/entities/badge_def.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/repositories/goal_repository.dart';
-import 'package:beong/domain/repositories/jar_repository.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/repositories/reward_repository.dart';
 import 'package:beong/domain/repositories/task_repository.dart';
@@ -567,22 +566,13 @@ class _JarCard extends StatelessWidget {
     required this.label,
     required this.amount,
     required this.iconKey,
-    this.pending = false,
   });
 
   final String label;
   final int amount;
 
-  /// Khoá icon của hũ, suy từ emoji bố mẹ đã chọn. Thay cho bộ icon cứng ba hũ
-  /// trước đây — hũ tự lập không có icon nào trong bộ đó.
+  /// Khoá icon của hũ, suy từ emoji bố mẹ đã chọn.
   final String iconKey;
-
-  /// Ô "chờ chia" — số xu **chưa** vào hũ nào.
-  ///
-  /// Vẽ khác hẳn: nền vàng xu, viền rõ, nhãn in đậm — thay vì thẻ trắng phẳng
-  /// như các hũ thật. Có viền chứ không chỉ đổi nền, vì nền đậm nhạt một chút
-  /// thì người không phân biệt màu tốt sẽ thấy mọi ô như nhau (WCAG 1.4.1).
-  final bool pending;
 
   @override
   Widget build(BuildContext context) {

@@ -77,7 +77,7 @@ class _TaskCardState extends State<TaskCard> {
             ? null
             : () {
                 // Phản hồi xúc giác (haptic) nhẹ khi con chạm hoàn thành việc (§9)
-                HapticFeedback.lightImpact();
+                unawaited(HapticFeedback.lightImpact());
                 // Tích ngay trong khung hình chạm, không chờ DB.
                 setState(() => _vuaBam = true);
                 widget.onToggle();

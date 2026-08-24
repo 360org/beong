@@ -30,21 +30,23 @@ class PushNotificationService {
     required String supabaseUrl,
     required String supabaseAnonKey,
     required String familyId,
-    String? targetRole, // 'parent' | 'child' | 'all'
-    String? targetMemberId,
     required String title,
     required String body,
+    String? targetRole, // 'parent' | 'child' | 'all'
+    String? targetMemberId,
     Map<String, String>? data,
   }) async {
     try {
       final endpoint = Uri.parse('$supabaseUrl/functions/v1/notify-fcm');
-      final payload = {
+      final payload = <String, dynamic>{
         'family_id': familyId,
-        if (targetRole != null) 'target_role': targetRole,
-        if (targetMemberId != null) 'target_member_id': targetMemberId,
+        ...?targetRole != null ? {'target_role': targetRole} : null,
+        ...?targetMemberId != null
+            ? {'target_member_id': targetMemberId}
+            : null,
         'title': title,
         'body': body,
-        'data': data ?? {},
+        'data': data ?? <String, String>{},
       };
 
       final response = await http
@@ -59,7 +61,7 @@ class PushNotificationService {
           .timeout(const Duration(seconds: 10));
 
       return response.statusCode == 200;
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('❌ [PushNotificationService] Failed to send push: $e');
       return false;
     }
@@ -100,7 +102,7 @@ class PushNotificationService {
           'device_name': Platform.localHostname,
         }),
       );
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('❌ [PushNotificationService] Failed to sync token: $e');
     }
   }
