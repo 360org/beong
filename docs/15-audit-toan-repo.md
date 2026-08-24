@@ -212,6 +212,29 @@ hỏi:
 Mục §1 trượt đúng câu thứ hai: `proof_mode` bật lên thì việc vào hàng chờ duyệt
 — nhưng thứ người dùng *tưởng* mình bật là "được xem ảnh", và điều đó không xảy ra.
 
+## Trạng thái phát hành (cập nhật 24/08/2026, 22:43)
+
+Đường phát hành **đã thông**. Không còn việc gì phải làm ở đây trước khi nhận
+các mục §1–§8.
+
+| Run | Commit | Hỏng ở đâu | Nguyên nhân |
+|---|---|---|---|
+| #24, #25, #26 | tag v0.2.6 / v0.2.7 | bước **build** | `main` không biên dịch được |
+| #27 | `67b7dae` | bước **đẩy store**, giây thứ 8 | `+14` đã có trên TestFlight |
+| #28 | `71d9752` | — | **xanh**, IPA lên TestFlight |
+
+Hai nguyên nhân khác hẳn nhau và phải đọc log mới phân biệt được — đỏ ở bước
+build là lỗi mã, sửa được tại máy trong 20 giây; đỏ ở bước đẩy là chuyện của
+store, build lại bao nhiêu lần cũng không hết.
+
+Lỗi của #27 nay không quay lại được nữa: build number do CI cấp theo
+`1000 + run_number*10 + run_attempt`, không còn phụ thuộc ai đó nhớ tăng
+`+build` trong pubspec. #28 dùng build number 1281.
+
+Còn lại là việc của chủ dự án, không phải của agent: điền hồ sơ App Store (lane
+`release` vẫn sẽ hỏng ở `submit_for_review` nếu thiếu), sửa secret
+`PLAY_STORE_SERVICE_ACCOUNT_JSON`, và đẩy tag từ máy cá nhân.
+
 ## Cách kiểm lại toàn bộ
 
 ```bash
