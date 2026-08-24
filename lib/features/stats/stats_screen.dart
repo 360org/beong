@@ -587,26 +587,17 @@ class _JarCard extends StatelessWidget {
           Text(
             label,
             style: context.text.bodySmall?.copyWith(
-              color: pending
-                  ? context.semantic.xuText
-                  : context.semantic.onSurfaceMuted,
-              fontWeight: pending ? FontWeight.w700 : null,
+              color: context.semantic.onSurfaceMuted,
             ),
           ),
         ],
       ),
     );
 
-    if (!pending) return Card(child: body);
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: context.semantic.xu.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: context.semantic.xuText, width: 1.5),
-      ),
-      child: body,
-    );
+    // Chỉ còn hũ **thật** đi qua đây. Xu chưa chia nay là `_UnallocatedBanner`
+    // riêng phía trên (audit §12), nên nhánh `pending` cũ bỏ hẳn thay vì để
+    // lại một cờ không ai truyền — đúng loại code chết dự án dọn nhiều lần.
+    return Card(child: body);
   }
 }
 

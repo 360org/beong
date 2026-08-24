@@ -380,3 +380,64 @@ Cách này cũng làm màn chia xu (`89`, `90`) nhất quán với sổ: cả ha
 **Ghi cho người làm §9:** đây là mục duy nhất trong sáu mục **không kiểm được
 bằng test**. Cách duy nhất biết nó có tác dụng là đưa cho một đứa trẻ thật dùng
 và ngồi nhìn. Ràng buộc khả dụng thì test canh được, còn "ngộ nghĩnh" thì không.
+
+---
+
+# Phần III — Vì sao release hỏng (24/08)
+
+**Câu trả lời ngắn: code không biên dịch được.** Release #24 (`v0.2.6`), #25 và
+#26 (`v0.2.7`) đều hỏng ở **bước build**, không phải bước đẩy lên store — khác
+hẳn nguyên nhân của đợt 22/08.
+
+```
+Android · Build App Bundle   ✗   →  các bước đẩy Play: skipped
+iOS     · Build IPA          ✗   →  các bước đẩy App Store: skipped
+```
+
+## Bốn lỗi biên dịch
+
+Trớ trêu là chúng đến từ chính commit tên **`fix(linter): resolve analyzer
+warnings`** (`bdf074e`) — commit nhằm dọn cảnh báo lại làm hỏng bản dựng.
+
+| Chỗ | Lỗi |
+|---|---|
+| `stats_screen.dart:590, 593, 600` | `_JarCard` dùng `pending` nhưng trường đó **đã bị xoá** khi tách banner (§12). Ba chỗ dùng còn sót |
+| `task_card.dart:80` | `unawaited(HapticFeedback...)` nhưng file **thiếu `import 'dart:async'`** |
+
+Dựng lại được ở local trong **19 giây**: `flutter analyze --fatal-infos` ra đúng
+bốn lỗi đó, không cần chạy CI.
+
+## Hai test đỏ nữa, và cả hai đang làm đúng việc
+
+- **`kPhienBanApp` = `0.2.6` trong khi pubspec đã `0.2.7+14`.** Đây là **lần thứ
+  ba** cùng một drift. Test này tồn tại đúng vì lý do đó: báo cáo lỗi ghi sai
+  phiên bản thì mọi kết luận từ nó sai theo.
+- **`'run'` (🏃) được thêm vào bộ hình bố mẹ chọn** — vi phạm một quy tắc đã có
+  từ lâu: *"Hình người luôn mang theo giới tính và màu da, mà đây là bộ hình
+  dùng chung cho mọi bé."*
+
+  Đã gỡ `'run'` khỏi danh sách chọn và ghi lý do ngay cạnh, để lần sau ai định
+  thêm lại thì đọc được. Việc vận động vẫn có `'soccer'` ⚽ và `'bike'` 🚲.
+
+  **Chưa đụng tới:** preset `exercise` **vẫn** dùng `iconKey: 'run'`, tức 🏃 vẫn
+  hiện trên thẻ việc của bé. Về nguyên tắc đó là cùng một vấn đề, chỉ là chưa
+  test nào canh. Đổi hình của preset là quyết định thiết kế, để chủ dự án chốt.
+
+## Điều đáng nói hơn cả bốn lỗi
+
+Tag `v0.2.7` được đẩy lên **trong khi `main` không biên dịch được**. Nghĩa là
+chuỗi kiểm trước khi phát hành đã bị bỏ qua — `analyze` mất 19 giây, một vòng
+release mất 4–5 phút và tiêu một build number mỗi lần.
+
+Đây là **mục §5 của Phần I quay lại**, ở dạng nặng hơn: lần trước là đẩy code đỏ
+lên `main`, lần này là **gắn tag phát hành lên code đỏ**.
+
+Đề nghị lặp lại, và lần này cụ thể hơn: **chốt chặn trước khi tag** — không tag
+nếu `flutter analyze --fatal-infos && flutter test` chưa xanh ở local. Mục
+"pre-commit hook" trong Sprint 0 vẫn để trống; đây là lần thứ hai nó đáng làm.
+
+## Trạng thái sau bản sửa
+
+`analyze --fatal-infos` sạch · **523 test + 4 integration test xanh** · phiên bản
+đồng bộ `0.2.7`. Cần **tag lại** (hoặc chạy tay Release) trên commit đã sửa —
+tag `v0.2.7` hiện đang trỏ vào code hỏng.

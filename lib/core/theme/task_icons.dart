@@ -225,7 +225,9 @@ const List<String> kTaskIconKeys = [
   'gem',
   'party',
   'warning',
-  'run',
+  // Cố ý **không** có 'run' (🏃) ở đây: đó là emoji người, mà bộ hình này bố mẹ
+  // chọn cho mọi bé — hình người luôn mang theo giới tính và màu da. Việc vận
+  // động đã có 'soccer' ⚽ và 'bike' 🚲. Xem `test/unit/task_icons_test.dart`.
   'eye_off',
   'phone_off',
   'clock',

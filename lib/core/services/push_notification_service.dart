@@ -79,10 +79,10 @@ class PushNotificationService {
     final platform = Platform.isAndroid
         ? 'android'
         : Platform.isIOS
-            ? 'ios'
-            : Platform.isMacOS
-                ? 'macos'
-                : 'web';
+        ? 'ios'
+        : Platform.isMacOS
+        ? 'macos'
+        : 'web';
 
     try {
       final endpoint = Uri.parse('$supabaseUrl/rest/v1/device_tokens');
