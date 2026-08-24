@@ -273,6 +273,64 @@ Test tốt còn chặn được cả việc **tiền đề bị đổi trôi**:
 Với danh sách động, test luôn: **sau khi item chuyển mục/xoá, mỗi tên còn xuất
 hiện đúng một lần** — đó chính là bẫy thiếu `key`.
 
+### Chốt chặn trước khi đẩy và trước khi tag — **không thương lượng**
+
+> **Chưa chạy ba lệnh trên thì chưa được `git push`. Chưa xanh thì chưa được
+> `git tag`.**
+
+`flutter analyze --fatal-infos` mất **dưới 20 giây**. Một vòng CI mất **3–8
+phút**, một vòng release mất **4–5 phút và tiêu một build number vĩnh viễn**
+(Apple không nhận lại `+build` đã dùng). Đổi 20 giây lấy chừng đó là phép tính
+không cần cân nhắc.
+
+Đây là bài học đắt nhất của dự án tính tới nay, và nó đã lặp **ba** lần:
+
+| Ngày | Chuyện gì xảy ra |
+|---|---|
+| 23/08 | 8/16 lượt CI đỏ liên tiếp; `main` để đỏ qua đêm. Chuỗi commit `fix(linter)`, `fix(domain): tuân thủ strict linter` là dấu hiệu của vòng lặp đẩy-lên-xem-CI-đỏ-sửa-đẩy-lại |
+| 24/08 | **Tag `v0.2.7` gắn lên code không biên dịch được.** Ba lượt release đỏ ở bước *build*, không phải bước đẩy store. Bốn lỗi, phát hiện ở local trong 19 giây |
+| 24/08 | Commit gây ra chúng tên là **`fix(linter): resolve analyzer warnings`** — commit dọn cảnh báo lại làm hỏng bản dựng |
+
+**CI không phải trình biên dịch của bạn.** Nó là lưới an toàn cuối, chạy sau khi
+bạn đã tự tin. Dùng nó để *phát hiện* lỗi cú pháp là biến mỗi lỗi vặt thành 5
+phút chờ, và trong lúc đó không ai khác build được.
+
+#### Bốn cái bẫy đã thật sự xảy ra ở dự án này
+
+Cả bốn đều **không** bị `dart format` hay code review bắt, và cả bốn đều làm
+hỏng bản dựng release:
+
+1. **Xoá một trường nhưng còn chỗ dùng.** Tách "xu chưa chia" ra banner riêng,
+   xoá trường `pending` khỏi `_JarCard`, để sót ba chỗ còn đọc nó.
+   → Sau khi xoá field/param, `grep` tên đó trên cả `lib/` trước khi commit.
+2. **Dùng `unawaited` mà thiếu `import 'dart:async'`.** Trình soạn thảo không
+   tự thêm vì `unawaited` trông như một hàm sẵn có.
+3. **Gọi hàm bằng tham số của hàm khác.** `hoiMatKhau(batBuoc:, moTa:)` —
+   `batBuoc` thuộc `datMatKhauMoi`. Tên gần giống nhau là đủ để nhầm.
+4. **Bịa tên token màu.** `AppColors.kpiRed` không tồn tại; bảng màu có
+   `dangerLight`. Đặt màu cho nút phá huỷ thì dùng `context.semantic.danger`,
+   không dùng hằng số cứng — hằng số cứng sai màu ở giao diện Tối.
+
+#### Ba thứ luôn phải đồng bộ khi đổi phiên bản
+
+Đổi `pubspec.yaml` mà quên hai chỗ kia là test đỏ — và đã đỏ **ba lần**:
+
+```
+pubspec.yaml  version: X.Y.Z+N
+lib/features/settings/bao_loi_screen.dart   kPhienBanApp = 'X.Y.Z'
+```
+
+Test `test/unit/core/bao_cao_loi_test.dart` canh đúng cặp này: báo cáo lỗi ghi
+sai phiên bản thì mọi kết luận rút ra từ nó sai theo.
+
+#### Trước khi tag phát hành, kiểm thêm
+
+- **Build number đã tăng chưa?** Apple từ chối `+build` trùng bản đã nộp, kể cả
+  bản chỉ nằm trên TestFlight, kể cả khi lần nộp trước hỏng giữa chừng.
+- **Hồ sơ trên store đã điền xong chưa?** Nếu chưa, lane `release` sẽ dựng xong
+  binary rồi mới hỏng ở `submit_for_review` — tốn một build number cho không.
+  Chi tiết ở đầu `docs/08-release-cicd.md`.
+
 ### Ngân sách hiệu năng — đo được, không tuyên bố suông
 
 App mobile bị giới hạn bởi pin, RAM và mạng, nên đặt ngưỡng **kèm cách đo**.
@@ -369,3 +427,9 @@ chưa từng được kiểm.
 | CI đỏ mà máy local xanh | `--fatal-infos`, hoặc thiếu codegen trên CI | 4, 7 |
 | Chữ mờ khó đọc | Chưa tính tương phản, hoặc dùng màu nền làm màu chữ | 2 |
 | `pkill` tự giết shell | `-f` khớp command line của chính script | 6 |
+| Release đỏ ở bước **build** (không phải bước đẩy store) | Code không biên dịch được — chạy `analyze` ở local, 20 giây | 7 |
+| Release đỏ ở bước **đẩy store** | Hồ sơ store chưa điền, hoặc secret sai — không phải lỗi mã | 7 |
+| `The getter 'X' isn't defined` sau khi refactor | Xoá field/param nhưng còn chỗ dùng — `grep` tên đó trên `lib/` | 7 |
+| `The method 'unawaited' isn't defined` | Thiếu `import 'dart:async'` | 7 |
+| `The named parameter 'X' isn't defined` | Gọi hàm bằng tham số của **hàm khác** tên gần giống | 7 |
+| Test phiên bản đỏ sau khi bump | Quên `kPhienBanApp` trong `bao_loi_screen.dart` | 7 |
