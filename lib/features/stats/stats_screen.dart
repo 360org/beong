@@ -79,8 +79,9 @@ class _WeeklyOverviewCard extends StatelessWidget {
         .where((t) => t.reason == 'taskApproved' || t.reason == 'routineBonus')
         .length;
     final totalDelta = txns.fold<int>(0, (sum, t) => sum + t.delta);
-    final rewardRedeemedCount =
-        txns.where((t) => t.reason == 'rewardRedeemed').length;
+    final rewardRedeemedCount = txns
+        .where((t) => t.reason == 'rewardRedeemed')
+        .length;
 
     final weekLabel = switch (currentWeekOffset) {
       0 => 'Tuần này',
@@ -145,7 +146,7 @@ class _WeeklyOverviewCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: context.colors.surface,
-                      borderRadius: BorderRadius.circular(AppRadius.button),
+                      borderRadius: BorderRadius.circular(AppRadius.field),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,7 +178,7 @@ class _WeeklyOverviewCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: context.colors.surface,
-                      borderRadius: BorderRadius.circular(AppRadius.button),
+                      borderRadius: BorderRadius.circular(AppRadius.field),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,7 +191,9 @@ class _WeeklyOverviewCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          totalDelta >= 0 ? '+$totalDelta xu' : '$totalDelta xu',
+                          totalDelta >= 0
+                              ? '+$totalDelta xu'
+                              : '$totalDelta xu',
                           style: context.text.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
                             color: context.semantic.xuText,
@@ -210,7 +213,7 @@ class _WeeklyOverviewCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: context.colors.surface,
-                        borderRadius: BorderRadius.circular(AppRadius.button),
+                        borderRadius: BorderRadius.circular(AppRadius.field),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,8 +428,11 @@ class _ChildStatsState extends State<_ChildStats> {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final currentMonday = DateTime(now.year, now.month, now.day)
-        .subtract(Duration(days: now.weekday - 1));
+    final currentMonday = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: now.weekday - 1));
     final targetMonday = currentMonday.add(Duration(days: _weekOffset * 7));
     final targetNextMonday = targetMonday.add(const Duration(days: 7));
 

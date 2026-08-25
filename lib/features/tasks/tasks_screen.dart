@@ -590,6 +590,7 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                 Text('Thêm việc mới', style: context.text.titleLarge),
                 IconButton(
                   icon: const Icon(Icons.close_rounded),
+                  tooltip: 'Đóng',
                   onPressed: () => Navigator.pop(context),
                 ),
               ],

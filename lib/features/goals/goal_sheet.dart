@@ -109,7 +109,7 @@ class _GoalSheetState extends ConsumerState<_GoalSheet> {
     setState(() {
       _title.text = reward.title;
       _target = reward.costPoints;
-      _iconKey = reward.iconKey;
+      _iconKey = reward.iconKey ?? kDefaultGoalIconKey;
     });
   }
 
@@ -161,7 +161,7 @@ class _GoalSheetState extends ConsumerState<_GoalSheet> {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: rewards.length,
-                      separatorBuilder: (_, __) =>
+                      separatorBuilder: (_, _) =>
                           const SizedBox(width: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final r = rewards[index];

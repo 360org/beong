@@ -19,8 +19,12 @@ void main() {
   );
 
   group('danh mục huy hiệu', () {
-    test('đúng 8 huy hiệu như spec', () {
-      expect(kBadges.length, 8);
+    // Con số cứng ở đây là **cố ý**: nó không canh "đúng 11" cho vui, nó canh
+    // việc không ai xoá nhầm một huy hiệu. Xoá huy hiệu là lấy lại thứ đã trao
+    // cho một đứa trẻ — thêm thì cứ thêm và sửa số này, xoá thì phải dừng lại
+    // nghĩ. 8 -> 11 khi bổ sung bậc cho thói quen và đổi thưởng.
+    test('đủ số huy hiệu trong danh mục', () {
+      expect(kBadges.length, 11);
     });
 
     test('khoá không trùng nhau', () {

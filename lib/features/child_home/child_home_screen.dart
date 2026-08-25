@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:beong/app/router.dart';
 import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/family_clock_provider.dart';
@@ -28,7 +27,6 @@ import 'package:beong/features/members/mat_khau_sheet.dart';
 import 'package:beong/features/rewards/allocate_xu_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 class ChildHomeScreen extends ConsumerStatefulWidget {
   const ChildHomeScreen({super.key});
@@ -157,11 +155,13 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
       }
     }
 
-    final ketQua = await ref.read(taskReviewServiceProvider).complete(
-      instanceId,
-      proofNote: proofNote,
-      proofUrl: proofUrl,
-    );
+    final ketQua = await ref
+        .read(taskReviewServiceProvider)
+        .complete(
+          instanceId,
+          proofNote: proofNote,
+          proofUrl: proofUrl,
+        );
     if (!mounted || ketQua.huyHieuMoi.isEmpty) return;
     _khoeHuyHieu(ketQua.huyHieuMoi);
   }
@@ -294,21 +294,27 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
                   // Mục tiêu nằm ngay dưới ví, trên danh sách việc: nó là lý do
                   // con làm việc hôm nay, nên phải thấy trước khi cuộn.
                   const SizedBox(height: AppSpacing.lg),
-                  GoalSection(
-                    memberId: memberId,
-                    onTap: () async {
-                      final current = await ref
-                          .read(goalRepositoryProvider)
-                          .activeGoal(memberId);
-                      if (!context.mounted) return;
-                      await showGoalSheet(
-                        context,
-                        familyId: session.familyId,
-                        memberId: memberId,
-                        childName: member?.displayName ?? 'Con',
-                        current: current,
-                      );
-                    },
+                  // Dùng lại đúng luồng đã giữ trong State (`_dungLuongNeuCan`),
+                  // không tạo luồng mới: luồng mới mỗi lần dựng là đúng nguyên
+                  // nhân giật cục đã sửa ở 0.2.5.
+                  StreamBuilder<Member>(
+                    stream: _luongThanhVien,
+                    builder: (context, goalMemberSnap) => GoalSection(
+                      memberId: memberId,
+                      onTap: () async {
+                        final current = await ref
+                            .read(goalRepositoryProvider)
+                            .activeGoal(memberId);
+                        if (!context.mounted) return;
+                        await showGoalSheet(
+                          context,
+                          familyId: session.familyId,
+                          memberId: memberId,
+                          childName: goalMemberSnap.data?.displayName ?? 'Con',
+                          current: current,
+                        );
+                      },
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   if (instSnap.connectionState == ConnectionState.waiting)
@@ -1088,7 +1094,8 @@ class _BadgeCelebrationDialog extends StatefulWidget {
   final List<BadgeDef> badges;
 
   @override
-  State<_BadgeCelebrationDialog> createState() => _BadgeCelebrationDialogState();
+  State<_BadgeCelebrationDialog> createState() =>
+      _BadgeCelebrationDialogState();
 }
 
 class _BadgeCelebrationDialogState extends State<_BadgeCelebrationDialog> {
