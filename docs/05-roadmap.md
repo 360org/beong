@@ -332,7 +332,7 @@ Tăng 1.5 tuần so với bản đầu do đôn Routines, phần thưởng phân
 (`07-competitive-analysis.md` §7); bù lại giảm ~1 tuần vì **v1 miễn phí hoàn toàn** nên không
 phải làm StoreKit / Play Billing / paywall / khôi phục mua hàng (ADR-014).
 
-## Học từ đối thủ — 19 việc về thiết kế & UX
+## Học từ đối thủ — 22 việc về thiết kế & UX
 
 Đối chiếu ChoreReward với code thật của Bé Ong ngày 24/08/2026, ra 9 việc chưa
 ai ghi ở đâu: `16-roadmap-hoc-tu-chorereward.md`. Hai mục 🔴 nằm thẳng trên
@@ -349,7 +349,7 @@ ai ghi ở đâu: `16-roadmap-hoc-tu-chorereward.md`. Hai mục 🔴 nằm thẳ
   mảnh thứ ba của cùng tính năng dở dang ở `15-audit-toan-repo.md` §1. Làm ảnh
   chụp mà không có chỗ này thì bố mẹ chụp xong ảnh đi đâu?
 
-Mười sáu mục còn lại (mục Thông tin trong Cài đặt, điều hướng tuần + thẻ tổng ở
+Mười chín mục còn lại (mục Thông tin trong Cài đặt, điều hướng tuần + thẻ tổng ở
 Thống kê, buổi trong ngày cho việc nhà, nút −/+ cho điểm, nút LƯU dính đáy;
 điều ước do con đề xuất, huy hiệu chia nhóm, màn Hành trình, thanh điều hướng
 theo vai) xếp sau, thứ tự đề nghị ghi trong chính tài liệu đó.

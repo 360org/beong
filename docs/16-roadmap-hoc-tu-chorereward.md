@@ -25,7 +25,7 @@ tài liệu này không nhắc lại. Ở đây chỉ có thứ chưa ai ghi.
 | 8 | Điểm bằng nút −/+ | 🟡 | Bàn phím số cho giá trị nhảy bước 5 là ma sát thừa |
 | 9 | Nút LƯU dính đáy | 🟡 | Biểu mẫu dài, nút lưu trôi khỏi màn |
 
-*Phần II bổ sung §10–§14 từ đợt ảnh thứ hai, Phần III bổ sung §15–§19 từ đợt thứ ba — bảng riêng ở mỗi phần.*
+*Phần II bổ sung §10–§14, Phần III §15–§19, Phần IV §20–§22 — bảng riêng ở mỗi phần.*
 
 ---
 
@@ -499,3 +499,106 @@ nhiễu. Và phải **đóng được**, đóng rồi thì đừng hiện lại 
 3. **§17 trước §13** — biết mốc lấy từ đâu rồi mới dựng được màn Hành trình.
    Cũng nên làm **cùng đợt với §11**, vì hai mục dùng chung một bảng.
 4. **§18**, rồi **§19** — cả hai là phần thưởng cảm xúc, làm sau khi phần cơ chế đứng vững.
+
+---
+
+# Phần IV — Đợt ảnh thứ tư (24/08/2026)
+
+Bốn ảnh, và đều là **cùng một luồng chụp liên tiếp**: bốn huy hiệu trao một
+lúc, lật từng cái. Ít ảnh nhưng ra ba mục, vì nó soi đúng vào chỗ Bé Ong đang
+làm sơ sài nhất.
+
+| # | Việc | Mức | Vì sao đáng làm |
+|---|---|---|---|
+| 20 | Nhiều huy hiệu một lúc phải lật từng cái | 🟠 | Bốn huy hiệu đang bị nhét vào một dòng chữ |
+| 21 | Tên là danh hiệu, mô tả nói với con | 🟠 | Tên hiện tại là con số, mô tả là điều kiện |
+| 22 | Thêm loại điều kiện huy hiệu | 🟡 | 4 loại hiện có đều đo "nhiều hơn", không đo "khác đi" |
+
+## 20 · 🟠 Trao nhiều huy hiệu một lúc thì phải lật từng cái
+
+**Họ làm gì.** Bốn ảnh là bốn bước liên tiếp của **một** lần trao: *First Step*
+→ *Say Cheese* → *Explorer* → *Perfect Day*. Mỗi bước một hộp riêng, hoa giấy
+riêng, hình riêng, và **chấm phân trang** ở dưới cho biết đang ở cái thứ mấy
+trên bốn. Ba cái đầu nút ghi **NEXT**, cái cuối ghi **AWESOME!**.
+
+**Bé Ong đang thế nào — và đây là chỗ đáng nói.** `child_home_screen.dart:116`
+nối tên tất cả huy hiệu bằng dấu phẩy vào **một** SnackBar:
+
+```dart
+final ten = huyHieu.map((b) => b.title).join(', ');
+// -> Con vừa nhận huy hiệu "Ba ngày liền, Mười việc đầu tiên, Thói quen vững"!
+```
+
+Bốn thành tựu tách biệt, mỗi cái là kết quả của một chặng khác nhau, bị ép
+thành một dòng chữ trôi mất sau bốn giây. Đó là **thời khắc lớn nhất mà app
+này có thể trao cho một đứa trẻ**, và nó đang được xử lý như một thông báo hệ
+thống.
+
+**Chi tiết nhỏ mà đúng.** Nút cuối đổi chữ từ "Tiếp" sang một câu reo. Nút giữa
+là điều hướng; nút cuối là ăn mừng — hai việc khác nhau thì không dùng chung
+một chữ.
+
+**Ghi chú thực thi.** Mục này là §18 làm cho đủ, nên **làm chung một đợt**. Và
+số huy hiệu trao một lúc sẽ tăng khi §12/§15/§22 thêm huy hiệu — nghĩa là làm
+sớm thì càng đỡ, để muộn thì cái dòng chữ nối bằng dấu phẩy càng dài.
+
+## 21 · 🟠 Tên huy hiệu là danh hiệu, mô tả là lời nói với con
+
+**Họ đặt tên thế nào.** *First Step · Helper · Chore Champion* · *Spark · On
+Fire · Unstoppable* · *Explorer · Say Cheese · Perfect Day*. Không cái nào là
+con số. Mỗi cái là một **danh hiệu** — thứ đứa trẻ có thể tự nhận về mình.
+
+**Họ viết mô tả thế nào.** Điều kiện, rồi **một câu nói với con**:
+
+> *"Finish your very first chore. Everyone starts somewhere — this is your first step!"*
+> *"Complete 3 different chores. Try new things — you're an explorer!"*
+
+**Bé Ong đang thế nào.** Chín huy hiệu, tên phần lớn **là chính con số**: "Mười
+việc đầu tiên" · "Năm mươi việc" · "Một trăm việc" · "Ba ngày liền" · "Trọn một
+tuần" · "Cả tháng chăm chỉ". Mô tả thì là điều kiện viết lại: *"Hoàn thành 10
+việc"*, *"Làm hết việc 3 ngày liên tiếp"*.
+
+**Vì sao đáng sửa, dù chỉ là chữ.** "Con đạt huy hiệu Năm mươi việc" không nói
+được điều gì về đứa trẻ; nó chỉ đọc lại cái đồng hồ đếm. "Con là Người chăm
+chỉ" thì có. Huy hiệu tồn tại để **đặt tên cho một phẩm chất**, không phải để
+xác nhận một con số con vốn đã nhìn thấy trên màn hình.
+
+Đây là mục **rẻ nhất trong cả tài liệu** — chỉ là chuỗi trong ARB, không đụng
+lược đồ, không đụng logic.
+
+**Ràng buộc.** `key` giữ nguyên (`tasks_50`...). Đổi khoá là mất huy hiệu đã
+trao — `badge_def.dart` đã ghi sẵn cảnh báo đó. Chỉ đổi `title` và
+`description`.
+
+## 22 · 🟡 Thêm loại điều kiện: "khác đi", không chỉ "nhiều hơn"
+
+**Họ có gì mà Bé Ong chưa có.**
+
+| Huy hiệu của họ | Đo cái gì |
+|---|---|
+| *Explorer* — "làm 3 việc **khác nhau**" | Sự đa dạng |
+| *Perfect Day* — "cả ngày được duyệt hết" | Trọn vẹn một ngày |
+| *Say Cheese* — "lần đầu gửi kèm ảnh" | Đã dùng thử một tính năng |
+
+**Bé Ong đang thế nào.** `BadgeKind` có đúng **bốn** loại: `streak` ·
+`tasksDone` · `routinePerfectDays` · `redemptions`. Cả bốn đều đo *nhiều hơn* —
+làm thêm, giữ thêm ngày, đổi thêm lần. Không loại nào đo *khác đi*.
+
+**Vì sao thiếu loại là thiếu thật.** Một bộ huy hiệu chỉ thưởng cho số lượng
+thì dạy đúng một điều: cứ làm nhiều lên. Trong khi thứ bố mẹ muốn thường là
+**đổi hành vi** — thử việc mới, làm trọn một ngày, chịu chụp ảnh khi được nhờ.
+Huy hiệu là công cụ trực tiếp nhất để nói "cái này cũng đáng".
+
+**Đáng chú ý nhất là *Say Cheese*** — một huy hiệu tồn tại để **dạy con dùng
+một tính năng**. Bé Ong sắp có ảnh bằng chứng (§10); kèm một huy hiệu cho lần
+gửi ảnh đầu tiên là cách rẻ nhất để tính năng đó được dùng thật thay vì nằm im.
+
+**Làm gì.** Thêm loại vào `BadgeKind` và trường tương ứng trong `BadgeProgress`:
+số **loại việc** khác nhau đã làm · số **ngày trọn vẹn** · các cột mốc **dùng
+tính năng lần đầu**. Làm sau §10 để *Say Cheese* có thật thứ để đếm.
+
+## Thứ tự đề nghị cho Phần IV
+
+1. **§21** — rẻ nhất cả tài liệu, chỉ là chữ. Làm được ngay hôm nay.
+2. **§20 gộp vào §18** — cùng một luồng, đừng dựng hộp ăn mừng hai lần.
+3. **§22 sau §10** — để huy hiệu "gửi ảnh lần đầu" có thứ thật để đếm.

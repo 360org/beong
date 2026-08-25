@@ -61,7 +61,7 @@ dựng môi trường chụp màn hình: `.claude/skills/flutter-8-buoc/SKILL.md
 | [`docs/11-bao-loi-endpoint.md`](docs/11-bao-loi-endpoint.md) | Dựng endpoint nhận báo lỗi (Cloudflare Worker) |
 | [`docs/12-huong-dan-su-dung.md`](docs/12-huong-dan-su-dung.md) | **Hướng dẫn cho bố mẹ** — 16 mục, kèm ảnh |
 | [`docs/13-audit-luong-vao-app.md`](docs/13-audit-luong-vao-app.md) | **Audit luồng vào app** — 2 lỗi nghiêm trọng, phương án, và bản sửa ở v0.2.3 |
-| [`docs/16-roadmap-hoc-tu-chorereward.md`](docs/16-roadmap-hoc-tu-chorereward.md) | **Lộ trình học từ ChoreReward** — 19 việc về thiết kế, UX/UI và tính năng, mỗi việc đối chiếu với code thật |
+| [`docs/16-roadmap-hoc-tu-chorereward.md`](docs/16-roadmap-hoc-tu-chorereward.md) | **Lộ trình học từ ChoreReward** — 22 việc về thiết kế, UX/UI và tính năng, mỗi việc đối chiếu với code thật |
 | [`docs/15-audit-toan-repo.md`](docs/15-audit-toan-repo.md) | **Audit toàn repo** — 8 việc giao cho agent, mỗi việc kèm cách dựng lại và cách biết là xong |
 | [`docs/14-audit-tinh-nang-moi.md`](docs/14-audit-tinh-nang-moi.md) | **Audit Sprint 3 & 5** — Phần I: 3 tính năng tick ✅ chưa nằm trên đường chạy nào. Phần II: 6 điểm cải tiến giao diện |
 | [`docs/screenshot/`](docs/screenshot/) | 90 ảnh chụp toàn bộ app, có mục lục |
