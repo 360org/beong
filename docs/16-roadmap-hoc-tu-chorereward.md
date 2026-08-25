@@ -25,7 +25,7 @@ tài liệu này không nhắc lại. Ở đây chỉ có thứ chưa ai ghi.
 | 8 | Điểm bằng nút −/+ | 🟡 | Bàn phím số cho giá trị nhảy bước 5 là ma sát thừa |
 | 9 | Nút LƯU dính đáy | 🟡 | Biểu mẫu dài, nút lưu trôi khỏi màn |
 
-*Phần II bổ sung 5 mục nữa (§10–§14) từ đợt ảnh thứ hai — bảng riêng ở cuối tài liệu.*
+*Phần II bổ sung §10–§14 từ đợt ảnh thứ hai, Phần III bổ sung §15–§19 từ đợt thứ ba — bảng riêng ở mỗi phần.*
 
 ---
 
@@ -361,3 +361,141 @@ nó.
 2. **§12** — rẻ, và làm ngay được vì huy hiệu đã có sẵn máy móc trao/hiện.
 3. **§11** — tính năng mới, cần bàn kỹ chuyện ai chốt giá trước khi viết code.
 4. **§13**, rồi **§14** — cả hai đều cần §12 xong mới cân được.
+
+---
+
+# Phần III — Đợt ảnh thứ ba (24/08/2026)
+
+Đợt này là các màn của **vai con**, có dữ liệu và có cả khoảnh khắc ăn mừng —
+thứ hai đợt trước chưa thấy.
+
+| # | Việc | Mức | Vì sao đáng làm |
+|---|---|---|---|
+| 15 | Vòng cung tiến độ trên huy hiệu chưa đạt | 🟠 | Biết còn bao xa mới là động lực; biết mình chưa có thì không |
+| 16 | Nút Đổi mờ đi khi chưa đủ xu | 🟠 | Nói trước, đừng để bấm xong mới báo hỏng |
+| 17 | Chọn mục tiêu **từ danh sách phần thưởng** | 🟠 | Nối phần thưởng với Hành trình bằng một cơ chế, không phải hai màn rời |
+| 18 | Ăn mừng huy hiệu bằng một màn, không phải SnackBar | 🟡 | Thứ trôi mất sau 4 giây thì không phải phần thưởng |
+| 19 | Cho linh vật nói một câu | 🟡 | Linh vật đã có sẵn, chỉ thiếu tiếng nói |
+
+## Đính chính cho §11 — ô "Con muốn gì" đã có, nhưng con không mở được
+
+Phần II ghi "Bé Ong không có khái niệm điều ước". Chính xác hơn — và tệ hơn:
+`goal_sheet.dart:137` có sẵn ô nhãn **"Con muốn gì"**, gợi ý *"Ví dụ: Bộ Lego
+cảnh sát"*, ngay cạnh ô "Cần bao nhiêu xu".
+
+Nhưng `showGoalSheet` chỉ được gọi từ **một** chỗ: `stats_screen.dart:135`,
+trong `_ChildStatsCard` — tức thẻ của **bố mẹ** xem từng con. Con nhìn thấy
+`GoalSection` trên trang chính của mình nhưng **không có đường nào mở bảng đó**.
+
+Nói cách khác: app đang hỏi "Con muốn gì" rồi bắt bố mẹ trả lời hộ. §11 vì thế
+không phải thêm tính năng mới từ đầu — phần lớn máy móc đã có, thiếu đúng cái
+đường cho con nói và đường gửi cho bố mẹ duyệt.
+
+## 15 · 🟠 Vòng cung tiến độ trên huy hiệu chưa đạt
+
+**Họ làm gì.** Huy hiệu chưa đạt là vòng tròn xám dấu **?**, nhưng viền ngoài có
+một **cung tròn tím** vẽ đúng phần trăm đã đi được — cái sắp đạt thì cung gần
+khép kín, cái mới bắt đầu chỉ là một vạch ngắn. Trên đầu màn: **"Đã có 4 trên
+29"** kèm huy chương lớn và hoa giấy.
+
+Nhóm MY CHORES của họ xếp **theo bậc ba**: First Step → Helper → Chore Champion;
+Spark → On Fire → Unstoppable; On Time → Schedule Keeper → Timing Master.
+
+**Bé Ong đang thế nào.**
+- Câu tổng: **đã có** — `badges_screen.dart:78` ghi "Con đã có X trên Y huy hiệu".
+- Huy hiệu chưa đạt mờ đi kèm tên và điều kiện: **đã có**.
+- Vòng cung tiến độ: **chưa có**.
+- Số lượng: **9**, so với 29 của họ.
+
+**Vì sao cung tròn quan trọng hơn nó trông.** "Con chưa có huy hiệu Chăm chỉ"
+là một câu đóng — không nói được nên làm gì tiếp. "Con đã đi được hai phần ba
+chặng" là một câu mở. Với trẻ con thì khoảng cách nhìn thấy được mới kéo được,
+còn một danh sách những thứ mình không có thì chỉ làm nản.
+
+**Làm gì.** Mục này chồng lên §12 — làm **một lượt**: thêm trường nhóm, xếp theo
+bậc ba, rồi vẽ cung tiến độ. Điều kiện đạt đã là con số ngưỡng
+(`BadgeDef.threshold`), nên phần trăm tính được ngay, không cần dữ liệu mới.
+
+## 16 · 🟠 Nút Đổi phải mờ đi khi chưa đủ xu
+
+**Họ làm gì.** Hai thẻ phần thưởng, con có 55 xu: *Screen time* giá 50 — nút
+**Claim** tím đậm, bấm được. *Pocket money* giá 100 — nút Claim **mờ hẳn**,
+không bấm được. Nhìn một cái là biết cái nào với tới được.
+
+**Bé Ong đang thế nào.** `rewards_screen.dart:350` — `FilledButton.tonal` với
+`onPressed: _redeem`, **luôn bấm được**. Không đủ xu thì service ném lỗi và màn
+hình hiện SnackBar báo hỏng.
+
+**Vì sao đổi.** Đây là nói sau thay vì nói trước. Con bấm vào thứ mình tưởng
+lấy được, rồi bị từ chối — với trẻ nhỏ thì đó là một cú hụt không cần thiết, và
+lặp lại mỗi lần con nhìn vào danh sách.
+
+**Đừng chỉ làm mờ.** Một nút xám không lý do là cái bẫy khác: con không biết vì
+sao. Thay nhãn thành **"Còn thiếu 45 xu"** — vừa nói được tình trạng, vừa nói
+được còn bao xa, và vẫn giữ đúng nguyên tắc không dùng mỗi màu làm kênh thông tin.
+
+## 17 · 🟠 Mục tiêu chọn **từ danh sách phần thưởng đã có**
+
+**Họ làm gì.** Trên trang Phần thưởng của con có một nút viền **"Chọn mục
+tiêu"** đặt ngay dưới thẻ tổng. Bấm vào mở bảng trượt *"Đặt mục tiêu và theo dõi
+tiến độ"*, liệt kê **chính các phần thưởng đang có** để chọn (Pocket money —
+Mục tiêu: 100 xu). Nút xác nhận mờ cho tới khi chọn xong.
+
+**Đây là mắt xích em bỏ sót ở §13.** Nó trả lời câu "các mốc trên núi ở đâu ra":
+mốc **chính là phần thưởng**. Không phải hai hệ thống rời nhau — một hệ thống,
+nhìn từ hai chỗ.
+
+**Bé Ong đang thế nào.** Mục tiêu là ô chữ tự do, không liên quan gì tới danh
+sách phần thưởng. Nên một nhà có thể có "Bộ Lego cảnh sát" ở mục tiêu và "Bộ
+Lego" ở phần thưởng — hai bản ghi cho cùng một thứ, hai lần phải sửa.
+
+**Làm gì.** Cho chọn từ danh sách phần thưởng làm đường chính, giữ ô tự do làm
+đường phụ (con muốn thứ chưa có trong danh sách — và đó chính là §11). Thêm nút
+"Chọn mục tiêu" hiện rõ khi chưa đặt mục tiêu nào.
+
+## 18 · 🟡 Ăn mừng huy hiệu bằng một màn, không phải SnackBar
+
+**Họ làm gì.** Huy hiệu mới nổ ra thành một hộp giữa màn: hoa giấy, hình huy
+hiệu lớn, chip **HUY HIỆU MỚI**, tên, một câu mô tả điều kiện, **chấm phân
+trang** khi nhận nhiều cái một lúc, và một nút to để đóng.
+
+**Bé Ong đang thế nào — và chỗ này đã nghĩ đúng một nửa rồi.**
+`child_home_screen.dart:112` có sẵn ghi chú: *"Nổ hoa giấy **và** hiện tên huy
+hiệu: hoa giấy một mình thì con tưởng là hiệu ứng của việc vừa bấm, không biết
+mình vừa đạt được thứ gì."* Cách giải hiện tại là hoa giấy + SnackBar có nút XEM.
+
+**Vì sao đi tiếp một bước.** SnackBar trôi mất sau bốn giây và nằm ở mép dưới
+màn — đúng chỗ ngón tay vừa rời khỏi. Một thứ con phải *kịp đọc* thì không phải
+phần thưởng. Huy hiệu là đỉnh của cả vòng động lực; nó xứng đáng chiếm màn hình
+một lúc.
+
+**Giữ nguyên một ràng buộc đã có.** `celebrateOnTap` tắt với tuổi teen — hoa
+giấy với bé 14 tuổi là rườm rà. Màn ăn mừng phải theo đúng quy tắc đó, không
+làm ngoại lệ.
+
+## 19 · 🟡 Cho linh vật nói một câu
+
+**Họ làm gì.** Ở màn Hành trình, linh vật đứng góc dưới trái với bong bóng
+thoại: *"Cuộc sống như leo núi. Có lúc vất vả, nhưng đáng lắm! Làm xong việc mỗi
+ngày để leo dần tới mục tiêu của con."* Đóng được bằng dấu ✕.
+
+**Bé Ong đang thế nào.** Linh vật **đã có sẵn và đã có cảm xúc**: `BeeMascot`
+với `BeeMood`, dùng ở ba chỗ — trang chính của con (`BeeMood.fromProgress`, tức
+tâm trạng đổi theo tiến độ), màn vào app, và onboarding. Thiếu đúng một thứ:
+**tiếng nói**.
+
+**Vì sao rẻ mà đáng.** Toàn bộ phần khó — hình, cảm xúc, chỗ đặt — đã xong. Thêm
+một bong bóng thoại là việc nhỏ, mà nó biến con ong từ hình trang trí thành nhân
+vật có mặt cùng con.
+
+**Hai ràng buộc.** Câu nói phải **đổi theo tình trạng thật** (chưa có mục tiêu ·
+sắp tới đích · vừa hụt chuỗi ngày) — lặp một câu mãi thì lần thứ ba đã thành
+nhiễu. Và phải **đóng được**, đóng rồi thì đừng hiện lại ngay trong ngày.
+
+## Thứ tự đề nghị cho Phần III
+
+1. **§15 gộp vào §12** — cùng một màn, cùng một cấu trúc dữ liệu. Đừng làm hai lượt.
+2. **§16** — nhỏ nhất trong cả tài liệu, và sửa được một cú hụt lặp đi lặp lại.
+3. **§17 trước §13** — biết mốc lấy từ đâu rồi mới dựng được màn Hành trình.
+   Cũng nên làm **cùng đợt với §11**, vì hai mục dùng chung một bảng.
+4. **§18**, rồi **§19** — cả hai là phần thưởng cảm xúc, làm sau khi phần cơ chế đứng vững.
