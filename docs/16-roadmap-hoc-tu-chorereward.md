@@ -25,6 +25,8 @@ tài liệu này không nhắc lại. Ở đây chỉ có thứ chưa ai ghi.
 | 8 | Điểm bằng nút −/+ | 🟡 | Bàn phím số cho giá trị nhảy bước 5 là ma sát thừa |
 | 9 | Nút LƯU dính đáy | 🟡 | Biểu mẫu dài, nút lưu trôi khỏi màn |
 
+*Phần II bổ sung 5 mục nữa (§10–§14) từ đợt ảnh thứ hai — bảng riêng ở cuối tài liệu.*
+
 ---
 
 ## Nhóm A — Chặn phát hành, hoặc đóng nợ cũ
@@ -211,3 +213,151 @@ Biểu mẫu tám khối thì nút lưu trôi khỏi tầm nhìn gần như su�
 - Mọi chuỗi hiển thị phải nằm trong ARB, tiếng Việt.
 - Ba mục 🟡 đừng gộp chung một commit với ba mục 🔴/🟠 — trộn vào là lúc cần lùi
   một cái phải lùi cả cụm.
+
+---
+
+# Phần II — 5 ảnh chụp đợt hai (24/08/2026)
+
+Năm ảnh sau cho thấy những màn có **dữ liệu thật**, không phải màn rỗng — nên
+lộ ra thứ đợt một không thấy. Cũng như Phần I: mỗi mục đối chiếu code trước khi
+ghi.
+
+| # | Việc | Mức | Vì sao đáng làm |
+|---|---|---|---|
+| 10 | Ảnh bằng chứng hiện ngay trên thẻ chờ duyệt, kèm Từ chối / Duyệt | 🔴 | Cho §1 của docs/15 một chỗ để đáp xuống |
+| 11 | "Điều ước" — con tự đề xuất phần thưởng | 🟠 | Đảo chiều người đặt mục tiêu |
+| 12 | Huy hiệu chia nhóm, và nhiều hơn 9 cái | 🟠 | Bảng huy hiệu hiện quá thưa để thành động lực |
+| 13 | "Hành trình" — một chỗ nhìn thấy đích dài hạn | 🟡 | Mục tiêu đang là thanh tiến độ lẫn trong danh sách |
+| 14 | Thanh điều hướng khác nhau theo vai | 🟡 | Con không bao giờ cần thứ dành cho bố mẹ |
+
+## 10 · 🔴 Thẻ chờ duyệt phải hiện ảnh, và duyệt/từ chối được từng cái
+
+**Họ làm gì.** Mỗi mục chờ duyệt là một thẻ đầy đủ: hình việc, chip **TASK**,
+**💎 +10**, giờ nộp (07:07), tên việc, **ảnh con chụp hiện nguyên khổ ngay trong
+thẻ**, rồi hai nút cuối thẻ — **✕ Reject** (đỏ nhạt) và **✓ Approve** (xanh
+nhạt).
+
+**Bé Ong đang thế nào.** `parent_home_screen.dart` có hàng chờ duyệt thật, có
+đếm số, có **Duyệt tất cả**. Nhưng trong cả file **không có một chỗ nào** dựng
+ảnh — không `Image`, không `proof`. Và không có nút từ chối cho từng mục; chỉ có
+`_reopen` mở lại việc.
+
+**Vì sao 🔴, và vì sao nó quan trọng hơn vẻ ngoài.** `15-audit-toan-repo.md` §1
+đã ghi: nút "Chụp ảnh" không chụp gì, `proof_url` không bao giờ được ghi, và
+hàng chờ duyệt không hiện gì. Ba mảnh của **cùng một** tính năng dở dang. Ảnh
+này cho thấy mảnh thứ ba phải trông thế nào — và quan trọng hơn: **làm ảnh chụp
+mà không có chỗ này thì vô nghĩa**. Bố mẹ chụp xong ảnh đi đâu? Nếu không ai
+nhìn thấy nó, thì "yêu cầu bằng chứng" chỉ là bắt con thao tác thêm một bước
+không dẫn tới đâu.
+
+**Làm gì.** Làm **cả cụm** trong một đợt, đúng thứ tự: ghi được ảnh → hiện được
+ảnh → duyệt/từ chối theo ảnh. Nút **Duyệt tất cả** giữ nguyên, nhưng khi có ảnh
+thì nó thành thứ mâu thuẫn — duyệt hàng loạt tức là không xem ảnh nào cả. Cân
+nhắc: có ảnh thì tách khỏi luồng "duyệt hết", hoặc hỏi lại rõ ràng.
+
+**Từ chối cần một câu.** Họ bấm Reject là xong. Với trẻ con thì bị từ chối mà
+không biết vì sao là chuyện tổn thương thật — nên kèm một dòng lý do ngắn (chọn
+nhanh hoặc gõ), và con phải đọc được nó.
+
+## 11 · 🟠 "Điều ước" — con tự đề xuất phần thưởng
+
+**Họ làm gì.** Màn *New wish* cho con: **WHAT DO YOU WANT?** (ô chữ, gợi ý
+"e.g. New bike") · **ADDITIONAL INFO** (mô tả, đường dẫn) · **HOW MANY POINTS?**
+(nút −/+) · nút **SEND TO PARENT** nằm đáy, **mờ và không bấm được** cho tới khi
+điền đủ.
+
+**Bé Ong đang thế nào.** Không có khái niệm này. Tìm khắp `lib/` không ra chỗ
+nào cho con đề xuất phần thưởng — mọi phần thưởng đều do bố mẹ tạo.
+
+**Vì sao đáng làm.** Nó đảo chiều người đặt mục tiêu. Một danh sách phần thưởng
+do bố mẹ viết hết là danh sách **những gì bố mẹ nghĩ con muốn** — mà hai thứ đó
+lệch nhau nhiều hơn người lớn tưởng. Cho con nói ra điều mình muốn là cách rẻ
+nhất để phần thưởng thật sự có sức kéo. Nó cũng nối thẳng vào mục tiêu tiết
+kiệm đã có (`features/goals/`): điều ước được duyệt thì thành đích để dành.
+
+**Ràng buộc phải giữ.** **Giá vẫn là quyết định của bố mẹ.** Nếu con vừa đặt
+điều ước vừa tự định giá thì cái xe đạp sẽ có giá 5 xu. Ô "bao nhiêu điểm" của
+con nên đọc là **đề nghị**, và bố mẹ chốt lại khi duyệt.
+
+**Chi tiết nhỏ đáng lấy.** Nút gửi mờ cho tới khi hợp lệ — hứa đúng thứ làm được,
+thay vì cho bấm rồi mới báo lỗi.
+
+## 12 · 🟠 Huy hiệu: chia nhóm, và nhiều hơn 9 cái
+
+**Họ làm gì.** Bảng huy hiệu chia nhóm có tiêu đề — **PHOTOS** (Say Cheese ·
+Photographer · Proof Pro), **WISHES** (sáu cái), **SPECIAL** (Perfect Day · Goal
+Getter) — và còn nhóm nữa ở trên (First Treat · Big Spender · Dream Chaser). Cái
+chưa đạt hiện dạng huy hiệu xám có dấu **?**, **nhưng vẫn ghi rõ tên**.
+
+**Bé Ong đang thế nào.**
+- Hiện huy hiệu chưa đạt: **đã làm rồi** — `badges_screen.dart:116` mờ đi
+  `opacity: 0.35`, vẫn ghi tên và điều kiện. Phần này không cần đụng.
+- Chia nhóm: **chưa có**. `BadgeDef` không có trường nhóm nào
+  (`badge_def.dart:6–12`), màn hình đổ ra một danh sách phẳng.
+- Số lượng: **9 huy hiệu**, tất cả. Riêng ba nhóm nhìn thấy trong một ảnh của họ
+  đã hơn con số đó.
+
+**Làm gì.** Thêm trường nhóm vào `BadgeDef` và chia theo **tính năng của Bé
+Ong**, không chép nhóm của họ: việc nhà · xu & hũ · chuỗi ngày · mục tiêu. Rồi
+mới thêm huy hiệu cho đủ mỗi nhóm có ba bậc — một nhóm chỉ có một huy hiệu thì
+chia nhóm còn rối hơn để phẳng.
+
+**Cảnh báo.** `key` của huy hiệu đi thẳng vào `badges_earned.badge_key`, và
+`badge_def.dart` đã ghi sẵn: đổi khoá là **mất huy hiệu đã trao**. Thêm thì
+thoải mái, đổi thì không.
+
+## 13 · 🟡 "Hành trình" — một chỗ nhìn thấy đích dài hạn
+
+**Họ làm gì.** Cả một tab riêng: núi tuyết, khinh khí cầu bay lên từ trong mây,
+các mốc là vòng tròn trắng gắn trên sườn núi (túi tiền gần đỉnh, điện thoại thấp
+hơn), số xu ở góc trái. Không có chữ nào. Khinh khí cầu lên cao dần theo số xu.
+
+**Bé Ong đang thế nào.** Mục tiêu tiết kiệm **đã chạy thật** — `GoalSection`
+được dùng ở cả `child_home_screen.dart:244` và `stats_screen.dart:194,272`.
+Nhưng nó là **thanh tiến độ nằm lẫn trong danh sách**, cùng cỡ với mọi thứ khác
+trên màn.
+
+**Cái đáng học không phải quả núi.** Là chuyện: đích dài hạn cần **một chỗ riêng
+và một hình ảnh**, vì với trẻ con thì "còn 340 xu nữa" là con số trừu tượng, còn
+"cái khinh khí cầu đã lên tới đây" thì không.
+
+**Đừng làm bản đắt trước.** Tranh minh hoạ nhiều lớp là thứ tốn tiền và dễ sai
+gu. Bản rẻ làm trước: một màn, dùng đúng dữ liệu mục tiêu đã có, một đường dọc
+với các mốc và một dấu chỉ vị trí hiện tại. Đẹp hơn thì thay tranh sau — dữ liệu
+không đổi.
+
+## 14 · 🟡 Thanh điều hướng nên khác nhau theo vai
+
+**Họ làm gì.** Máy bố mẹ: Activity · Tasks · Rewards · Stats. Máy con: Tasks ·
+Rewards · **Awards** · **Journey**. Bốn tab mỗi bên, **không phải cùng bốn tab**.
+
+**Bé Ong đang thế nào.** Một bộ 5 tab dùng chung (`router.dart:249–277`), Cài
+đặt bị chặn cho vai con bằng redirect ở router.
+
+**Đáng nghĩ lại.** Chặn bằng redirect là đúng về an toàn, nhưng con vẫn phải
+nhìn thấy tab rồi bị đá ra. Và ngược lại: huy hiệu với hành trình là thứ **của
+con**, mà đang nằm chung chỗ với thống kê của bố mẹ. Việc này nên làm **sau**
+§12 và §13 — lúc đó mới biết con thật sự cần mấy tab.
+
+## Bổ sung cho §5 — dòng ngày trong Thống kê
+
+Ảnh có dữ liệu cho thấy một dòng ngày gồm ba thứ: thanh tiến độ vàng, **2/3**
+bên phải, và chip **💎 +35** xuống dòng dưới. Ngày trống thì chỉ có chữ "No
+activity", không có thanh — tức là ba mức hiển thị khác nhau cho ba tình trạng
+(có hoạt động · đã qua mà trống · chưa tới), đúng mạch §6.
+
+## Không lấy — banner "Get Premium" trên Trang chính
+
+Họ chèn một banner cam to đùng ngay giữa thẻ Dashboard và hàng việc chờ duyệt,
+đẩy **đúng phần việc phải làm** xuống dưới. Bé Ong miễn phí hoàn toàn ở v1
+(ADR-014) nên chuyện này không đặt ra — nhưng ghi lại làm mốc: chỗ ngay dưới
+thẻ tổng là chỗ đắt nhất màn hình, đừng để thứ gì không phải việc cần làm chiếm
+nó.
+
+## Thứ tự đề nghị cho Phần II
+
+1. **§10** — 🔴, và làm trọn cụm ảnh bằng chứng (ghi → hiện → duyệt/từ chối).
+   Đừng làm nửa cụm: nửa cụm thì vẫn là tính năng nói dối, chỉ dối chỗ khác.
+2. **§12** — rẻ, và làm ngay được vì huy hiệu đã có sẵn máy móc trao/hiện.
+3. **§11** — tính năng mới, cần bàn kỹ chuyện ai chốt giá trước khi viết code.
+4. **§13**, rồi **§14** — cả hai đều cần §12 xong mới cân được.
