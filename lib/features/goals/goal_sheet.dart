@@ -2,15 +2,17 @@ import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/icon_picker.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/repositories/goal_repository.dart';
+import 'package:beong/domain/repositories/reward_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Đặt hoặc đổi mục tiêu tiết kiệm cho một trẻ.
 ///
-/// Trả `true` nếu có thay đổi (đặt mới hoặc bỏ), `null`/`false` nếu bố mẹ đóng
+/// Trả `true` nếu có thay đổi (đặt mới hoặc bỏ), `null`/`false` nếu đóng
 /// sheet mà không làm gì.
 Future<bool?> showGoalSheet(
   BuildContext context, {
@@ -90,7 +92,7 @@ class _GoalSheetState extends ConsumerState<_GoalSheet> {
         .setGoal(
           familyId: widget.familyId,
           memberId: widget.memberId,
-          title: _title.text,
+          title: _title.text.trim(),
           targetXu: _target,
           iconKey: _iconKey,
         );
@@ -103,9 +105,18 @@ class _GoalSheetState extends ConsumerState<_GoalSheet> {
     if (mounted) Navigator.of(context).pop(true);
   }
 
+  void _selectReward(Reward reward) {
+    setState(() {
+      _title.text = reward.title;
+      _target = reward.costPoints;
+      _iconKey = reward.iconKey;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final canSave = !_busy && _title.text.trim().isNotEmpty;
+    final rewardDao = ref.watch(rewardRepositoryProvider);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -126,6 +137,52 @@ class _GoalSheetState extends ConsumerState<_GoalSheet> {
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
+
+          // Chọn nhanh từ danh sách phần thưởng đã có (§17)
+          StreamBuilder<List<Reward>>(
+            stream: rewardDao.watchRewards(widget.familyId),
+            builder: (context, snap) {
+              final rewards = snap.data ?? const <Reward>[];
+              if (rewards.isEmpty) return const SizedBox.shrink();
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'CHỌN TỪ PHẦN THƯỞNG CÓ SẴN',
+                    style: context.text.labelSmall?.copyWith(
+                      color: context.semantic.onSurfaceMuted,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  SizedBox(
+                    height: 40,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: rewards.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(width: AppSpacing.sm),
+                      itemBuilder: (context, index) {
+                        final r = rewards[index];
+                        final isSelected = _title.text == r.title;
+                        return ActionChip(
+                          avatar: AppIcon.task(r.iconKey, size: 18),
+                          label: Text('${r.title} (${r.costPoints} xu)'),
+                          backgroundColor: isSelected
+                              ? context.colors.primaryContainer
+                              : null,
+                          onPressed: () => _selectReward(r),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                ],
+              );
+            },
+          ),
+
           Text('Chọn hình', style: context.text.titleSmall),
           const SizedBox(height: AppSpacing.sm),
           IconPickerGrid(

@@ -4,6 +4,32 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.2.8+16 (2026-08-25) — Hoàn thiện Toàn diện Trải nghiệm Gamification, Mục tiêu & Huy hiệu (Roadmap docs/16)
+
+### [NEW]
+- **Hệ thống Ăn mừng & Vinh danh Huy hiệu Đa tầng (§18, §20)**:
+  - Dialog vinh danh `_BadgeCelebrationDialog` xuất hiện khi con đạt thành tựu mới, hỗ trợ lật mở từng huy hiệu kèm chấm phân trang khi nhận nhiều danh hiệu cùng lúc thay vì SnackBar trôi mất sau 4s.
+  - Phân loại 4 nhóm danh mục huy hiệu chuẩn mực (`BadgeCategory`: Chuỗi kiên trì, Việc nhà chăm chỉ, Thói quen vững vàng, Phần thưởng & Tiết kiệm).
+  - Đổi tên huy hiệu thành danh hiệu phẩm chất và câu mô tả truyền cảm hứng cho trẻ (§21).
+- **Trải nghiệm Thao tác & Thiết kế Trình soạn thảo Nhiệm vụ (§7, §8, §9)**:
+  - Bổ sung chọn Buổi trong ngày (Sáng / Chiều / Tối) tối ưu thực tế cho phụ huynh.
+  - Điều chỉnh điểm thưởng bằng bộ nút tròn `− / +` bước nhảy 5 xu tiện dụng.
+  - Cố định nút `LƯU` dính đáy màn hình (Sticky Bottom) chống trôi khi cuộn form.
+- **Tiếng nói Linh vật Ong (§19)**:
+  - Tích hợp thoại tương tác cho `BeeMascot` tại Dashboard vai con, phản hồi trực tiếp theo tiến độ hoàn thành công việc trong ngày.
+
+### [IMPROVE]
+- **Tối ưu Luồng Đổi thưởng & Đặt mục tiêu Tiết kiệm (§11, §16, §17)**:
+  - Nút `Đổi` trong `RewardsScreen` hiển thị trạng thái và tính toán số xu còn thiếu (`Thiếu X xu`) khi chưa đủ điều kiện đổi thưởng.
+  - `GoalSheet` cho phép chọn nhanh các phần thưởng có sẵn trong gia đình để tự động điền mục tiêu tiết kiệm.
+  - Trẻ có thể mở `GoalSheet` và tự đặt/đề xuất mục tiêu tiết kiệm trực tiếp từ màn hình chính của mình.
+- **Nâng cấp Giao diện Huy hiệu & Thống kê Tuần (§4, §5, §6, §12, §15)**:
+  - Vẽ vòng cung tiến độ (`ProgressRing`) ôm quanh icon huy hiệu hiển thị trực quan tỷ lệ % đã đạt được.
+  - Bổ sung điều hướng tuần `‹ ›` và thẻ tổng kết tuần trực quan tại đầu màn hình Thống kê `StatsScreen`.
+  - Phân biệt rõ ràng giữa ngày trống không hoạt động trong quá khứ và các ngày chưa tới trong tuần.
+
+---
+
 ## v0.2.7+15 (2026-08-25) — Hoàn thiện Bằng chứng Việc nhà, Pháp lý Store & Trạng thái Ghép cặp
 
 ### [NEW]

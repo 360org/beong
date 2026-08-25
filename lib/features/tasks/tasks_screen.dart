@@ -444,6 +444,7 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
   final _pointsController = TextEditingController(text: '10');
   final _selectedChildren = <String>{};
   String? _selectedPreset;
+  DayPart? _dayPart;
 
   @override
   void initState() {
@@ -502,6 +503,20 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
     RepeatType.once => 'Một lần',
   };
 
+  String _dayPartLabel(DayPart part) => switch (part) {
+    DayPart.morning => 'Sáng 🌅',
+    DayPart.afternoon => 'Chiều ☀️',
+    DayPart.evening => 'Tối 🌙',
+  };
+
+  void _stepPoints(int delta) {
+    final current = int.tryParse(_pointsController.text.trim()) ?? 10;
+    final next = (current + delta).clamp(1, 1000);
+    setState(() {
+      _pointsController.text = next.toString();
+    });
+  }
+
   Future<void> _save() async {
     final title = _titleController.text.trim();
     final points = int.tryParse(_pointsController.text.trim()) ?? 10;
@@ -521,13 +536,12 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
         title: title,
         points: Value(points),
         presetKey: Value(_selectedPreset),
-        // Icon bố mẹ đang chọn, không phải icon của preset: bố mẹ có thể chọn
-        // template rồi đổi hình, và lần đổi sau cùng mới là ý của họ.
         iconKey: Value(_iconKey),
         approvalMode: Value(_approval.name),
         proofMode: Value(_proofMode.name),
         missedPenaltyPct: Value(_penaltyPct),
         repeatType: Value(effectiveRepeat.name),
+        dayPart: Value(_dayPart?.name),
         repeatDays: Value(
           effectiveRepeat == RepeatType.custom
               ? (_repeatDays.toList()..sort()).join(',')
@@ -556,200 +570,280 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: AppSpacing.screenPaddingMobile,
-        right: AppSpacing.screenPaddingMobile,
-        top: AppSpacing.xxl,
-        bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.xxl,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.85,
       ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Thêm việc mới', style: context.text.titleLarge),
-            const SizedBox(height: AppSpacing.lg),
-            Text('Chọn nhanh', style: context.text.titleSmall),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: kTaskPresets.map((preset) {
-                final selected = _selectedPreset == preset.key;
-                return PresetChip(
-                  iconKey: preset.iconKey,
-                  label: preset.titleVi,
-                  selected: selected,
-                  onTap: () {
-                    setState(() {
-                      _selectedPreset = selected ? null : preset.key;
-                      if (!selected) {
-                        _titleController.text = preset.titleVi;
-                        _pointsController.text = preset.defaultPoints
-                            .toString();
-                        // Lấy luôn icon của template: bố mẹ chọn "Đánh răng" thì
-                        // không phải đi tìm 🪥 lần nữa.
-                        _iconKey = preset.iconKey;
-                      }
-                    });
-                  },
-                );
-              }).toList(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(
+              left: AppSpacing.screenPaddingMobile,
+              right: AppSpacing.screenPaddingMobile,
+              top: AppSpacing.xl,
+              bottom: AppSpacing.md,
             ),
-            const SizedBox(height: AppSpacing.xl),
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(hintText: 'Tên việc'),
-              textCapitalization: TextCapitalization.sentences,
-              autofocus: true,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            TextField(
-              controller: _pointsController,
-              decoration: const InputDecoration(
-                hintText: 'Điểm',
-                suffixText: 'xu',
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text('Chọn hình', style: context.text.titleSmall),
-            const SizedBox(height: AppSpacing.sm),
-            IconPickerGrid(
-              iconKeys: kTaskIconKeys,
-              selected: _iconKey,
-              onSelected: (key) => setState(() => _iconKey = key),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text('Lặp lại', style: context.text.titleSmall),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                for (final type in RepeatType.values)
-                  ChoiceChip(
-                    label: Text(_repeatTypeLabel(type)),
-                    selected: _repeat == type,
-                    onSelected: (_) => setState(() => _repeat = type),
-                  ),
-              ],
-            ),
-            if (_repeat == RepeatType.custom) ...[
-              const SizedBox(height: AppSpacing.md),
-              Wrap(
-                spacing: AppSpacing.xs,
-                runSpacing: AppSpacing.xs,
-                children: [
-                  for (var day = 1; day <= 7; day++)
-                    FilterChip(
-                      label: Text(thuNganGon(day)),
-                      selected: _repeatDays.contains(day),
-                      onSelected: (on) => setState(() {
-                        if (on) {
-                          _repeatDays.add(day);
-                        } else {
-                          _repeatDays.remove(day);
-                        }
-                      }),
-                    ),
-                ],
-              ),
-              if (_repeatDays.isEmpty) ...[
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  'Chưa chọn thứ nào — việc sẽ lặp hằng ngày.',
-                  style: context.text.bodySmall?.copyWith(
-                    color: context.semantic.onSurfaceMuted,
-                  ),
+                Text('Thêm việc mới', style: context.text.titleLarge),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded),
+                  onPressed: () => Navigator.pop(context),
                 ),
               ],
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            Text('Giao cho', style: context.text.titleSmall),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              children: widget.children.map((child) {
-                final selected = _selectedChildren.contains(child.id);
-                return FilterChip(
-                  label: Text(child.displayName),
-                  selected: selected,
-                  onSelected: (v) {
-                    setState(() {
-                      if (v) {
-                        _selectedChildren.add(child.id);
-                      } else {
-                        _selectedChildren.remove(child.id);
-                      }
-                    });
-                  },
-                );
-              }).toList(),
             ),
-            _PenaltyOverrideBlock(
-              familyId: widget.familyId,
-              memberDao: widget.memberDao,
-              value: _penaltyPct,
-              onChanged: (pct) => setState(() => _penaltyPct = pct),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text('Cần bố mẹ duyệt', style: context.text.titleSmall),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              children: [
-                for (final mode in ApprovalMode.values)
-                  ChoiceChip(
-                    label: Text(_approvalLabel(mode)),
-                    selected: _approval == mode,
-                    onSelected: (_) => setState(() => _approval = mode),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPaddingMobile,
+                vertical: AppSpacing.lg,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Chọn nhanh', style: context.text.titleSmall),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: kTaskPresets.map((preset) {
+                      final selected = _selectedPreset == preset.key;
+                      return PresetChip(
+                        iconKey: preset.iconKey,
+                        label: preset.titleVi,
+                        selected: selected,
+                        onTap: () {
+                          setState(() {
+                            _selectedPreset = selected ? null : preset.key;
+                            if (!selected) {
+                              _titleController.text = preset.titleVi;
+                              _pointsController.text = preset.defaultPoints
+                                  .toString();
+                              _iconKey = preset.iconKey;
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
                   ),
-              ],
-            ),
-            // Nhà đang tắt duyệt thì lựa chọn ở đây **không có tác dụng gì**
-            // (ADR-023). Nói thẳng ra, thay vì để bố mẹ đặt "cần duyệt" rồi
-            // ngồi đợi một hàng chờ không bao giờ có gì.
-            StreamBuilder<bool>(
-              stream: widget.memberDao.watchRequireApproval(widget.familyId),
-              builder: (context, snap) {
-                if (snap.data ?? false) return const SizedBox.shrink();
-                return Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.xs),
-                  child: Text(
-                    'Nhà đang tắt duyệt nên con bấm xong là xong. '
-                    'Bật trong Cài đặt thì lựa chọn này mới có tác dụng.',
-                    style: context.text.bodySmall?.copyWith(
-                      color: context.semantic.onSurfaceMuted,
+                  const SizedBox(height: AppSpacing.xl),
+                  TextField(
+                    controller: _titleController,
+                    decoration: const InputDecoration(hintText: 'Tên việc'),
+                    textCapitalization: TextCapitalization.sentences,
+                    autofocus: true,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text('Điểm thưởng', style: context.text.titleSmall),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: [
+                      IconButton.filledTonal(
+                        icon: const Icon(Icons.remove_rounded),
+                        tooltip: 'Giảm 5 xu',
+                        onPressed: () => _stepPoints(-5),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: TextField(
+                          controller: _pointsController,
+                          textAlign: TextAlign.center,
+                          decoration: const InputDecoration(
+                            hintText: 'Điểm',
+                            suffixText: 'xu',
+                          ),
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      IconButton.filledTonal(
+                        icon: const Icon(Icons.add_rounded),
+                        tooltip: 'Tăng 5 xu',
+                        onPressed: () => _stepPoints(5),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text('Buổi trong ngày (tuỳ chọn)', style: context.text.titleSmall),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    children: [
+                      ChoiceChip(
+                        label: const Text('Cả ngày'),
+                        selected: _dayPart == null,
+                        onSelected: (on) => setState(() => _dayPart = null),
+                      ),
+                      for (final part in DayPart.values)
+                        ChoiceChip(
+                          label: Text(_dayPartLabel(part)),
+                          selected: _dayPart == part,
+                          onSelected: (on) => setState(
+                            () => _dayPart = on ? part : null,
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text('Chọn hình', style: context.text.titleSmall),
+                  const SizedBox(height: AppSpacing.sm),
+                  IconPickerGrid(
+                    iconKeys: kTaskIconKeys,
+                    selected: _iconKey,
+                    onSelected: (key) => setState(() => _iconKey = key),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text('Lặp lại', style: context.text.titleSmall),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    children: [
+                      for (final type in RepeatType.values)
+                        ChoiceChip(
+                          label: Text(_repeatTypeLabel(type)),
+                          selected: _repeat == type,
+                          onSelected: (_) => setState(() => _repeat = type),
+                        ),
+                    ],
+                  ),
+                  if (_repeat == RepeatType.custom) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    Wrap(
+                      spacing: AppSpacing.xs,
+                      runSpacing: AppSpacing.xs,
+                      children: [
+                        for (var day = 1; day <= 7; day++)
+                          FilterChip(
+                            label: Text(thuNganGon(day)),
+                            selected: _repeatDays.contains(day),
+                            onSelected: (on) => setState(() {
+                              if (on) {
+                                _repeatDays.add(day);
+                              } else {
+                                _repeatDays.remove(day);
+                              }
+                            }),
+                          ),
+                      ],
                     ),
+                    if (_repeatDays.isEmpty) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'Chưa chọn thứ nào — việc sẽ lặp hằng ngày.',
+                        style: context.text.bodySmall?.copyWith(
+                          color: context.semantic.onSurfaceMuted,
+                        ),
+                      ),
+                    ],
+                  ],
+                  const SizedBox(height: AppSpacing.lg),
+                  Text('Giao cho', style: context.text.titleSmall),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    children: widget.children.map((child) {
+                      final selected = _selectedChildren.contains(child.id);
+                      return FilterChip(
+                        label: Text(child.displayName),
+                        selected: selected,
+                        onSelected: (v) {
+                          setState(() {
+                            if (v) {
+                              _selectedChildren.add(child.id);
+                            } else {
+                              _selectedChildren.remove(child.id);
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
                   ),
-                );
-              },
+                  _PenaltyOverrideBlock(
+                    familyId: widget.familyId,
+                    memberDao: widget.memberDao,
+                    value: _penaltyPct,
+                    onChanged: (pct) => setState(() => _penaltyPct = pct),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text('Cần bố mẹ duyệt', style: context.text.titleSmall),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    children: [
+                      for (final mode in ApprovalMode.values)
+                        ChoiceChip(
+                          label: Text(_approvalLabel(mode)),
+                          selected: _approval == mode,
+                          onSelected: (_) => setState(() => _approval = mode),
+                        ),
+                    ],
+                  ),
+                  StreamBuilder<bool>(
+                    stream: widget.memberDao.watchRequireApproval(widget.familyId),
+                    builder: (context, snap) {
+                      if (snap.data ?? false) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.xs),
+                        child: Text(
+                          'Nhà đang tắt duyệt nên con bấm xong là xong. '
+                          'Bật trong Cài đặt thì lựa chọn này mới có tác dụng.',
+                          style: context.text.bodySmall?.copyWith(
+                            color: context.semantic.onSurfaceMuted,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text('Yêu cầu bằng chứng', style: context.text.titleSmall),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    children: [
+                      for (final mode in ProofMode.values)
+                        ChoiceChip(
+                          label: Text(_proofModeLabel(mode)),
+                          selected: _proofMode == mode,
+                          onSelected: (_) => setState(() => _proofMode = mode),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xxl),
+                ],
+              ),
             ),
-            const SizedBox(height: AppSpacing.lg),
-            Text('Yêu cầu bằng chứng', style: context.text.titleSmall),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              children: [
-                for (final mode in ProofMode.values)
-                  ChoiceChip(
-                    label: Text(_proofModeLabel(mode)),
-                    selected: _proofMode == mode,
-                    onSelected: (_) => setState(() => _proofMode = mode),
-                  ),
+          ),
+          // Nút LƯU cố định dính đáy (Sticky bottom)
+          Container(
+            padding: EdgeInsets.only(
+              left: AppSpacing.screenPaddingMobile,
+              right: AppSpacing.screenPaddingMobile,
+              top: AppSpacing.md,
+              bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.lg,
+            ),
+            decoration: BoxDecoration(
+              color: context.colors.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -3),
+                ),
               ],
             ),
-            const SizedBox(height: AppSpacing.xxl),
-            SizedBox(
+            child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _save,
                 child: const Text('LƯU'),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

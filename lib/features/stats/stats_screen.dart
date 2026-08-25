@@ -60,6 +60,188 @@ class StatsScreen extends ConsumerWidget {
   }
 }
 
+class _WeeklyOverviewCard extends StatelessWidget {
+  const _WeeklyOverviewCard({
+    required this.txns,
+    required this.currentWeekOffset,
+    required this.onPrevWeek,
+    required this.onNextWeek,
+  });
+
+  final List<LedgerEntry> txns;
+  final int currentWeekOffset;
+  final VoidCallback onPrevWeek;
+  final VoidCallback? onNextWeek;
+
+  @override
+  Widget build(BuildContext context) {
+    final completedCount = txns
+        .where((t) => t.reason == 'taskApproved' || t.reason == 'routineBonus')
+        .length;
+    final totalDelta = txns.fold<int>(0, (sum, t) => sum + t.delta);
+    final rewardRedeemedCount =
+        txns.where((t) => t.reason == 'rewardRedeemed').length;
+
+    final weekLabel = switch (currentWeekOffset) {
+      0 => 'Tuần này',
+      -1 => 'Tuần trước',
+      final n => '${n.abs()} tuần trước',
+    };
+
+    return Card(
+      color: context.colors.primaryContainer.withValues(alpha: 0.7),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'TỔNG KẾT TUẦN',
+                      style: context.text.labelSmall?.copyWith(
+                        color: context.semantic.onSurfaceMuted,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      weekLabel,
+                      style: context.text.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.chevron_left_rounded),
+                      tooltip: 'Tuần trước',
+                      onPressed: onPrevWeek,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.chevron_right_rounded),
+                      tooltip: 'Tuần sau',
+                      onPressed: onNextWeek,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                    decoration: BoxDecoration(
+                      color: context.colors.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.button),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Việc đã xong',
+                          style: context.text.bodySmall?.copyWith(
+                            color: context.semantic.onSurfaceMuted,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '$completedCount việc',
+                          style: context.text.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: context.semantic.success,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                    decoration: BoxDecoration(
+                      color: context.colors.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.button),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Xu tích lũy',
+                          style: context.text.bodySmall?.copyWith(
+                            color: context.semantic.onSurfaceMuted,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          totalDelta >= 0 ? '+$totalDelta xu' : '$totalDelta xu',
+                          style: context.text.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: context.semantic.xuText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (rewardRedeemedCount > 0) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.sm,
+                      ),
+                      decoration: BoxDecoration(
+                        color: context.colors.surface,
+                        borderRadius: BorderRadius.circular(AppRadius.button),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Quà đã đổi',
+                            style: context.text.bodySmall?.copyWith(
+                              color: context.semantic.onSurfaceMuted,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '$rewardRedeemedCount quà',
+                            style: context.text.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ParentStats extends StatelessWidget {
   const _ParentStats({
     required this.session,
@@ -216,7 +398,7 @@ class _ChildStatsCard extends ConsumerWidget {
   }
 }
 
-class _ChildStats extends StatelessWidget {
+class _ChildStats extends StatefulWidget {
   const _ChildStats({
     required this.memberId,
     required this.familyId,
@@ -234,7 +416,20 @@ class _ChildStats extends StatelessWidget {
   final RewardRepository rewardDao;
 
   @override
+  State<_ChildStats> createState() => _ChildStatsState();
+}
+
+class _ChildStatsState extends State<_ChildStats> {
+  int _weekOffset = 0; // 0 = tuần này, -1 = tuần trước...
+
+  @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final currentMonday = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: now.weekday - 1));
+    final targetMonday = currentMonday.add(Duration(days: _weekOffset * 7));
+    final targetNextMonday = targetMonday.add(const Duration(days: 7));
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Sổ của con', style: context.text.titleLarge),
@@ -246,19 +441,19 @@ class _ChildStats extends StatelessWidget {
         ),
         children: [
           StreamBuilder<WalletBalance>(
-            stream: walletDao.watchBalance(memberId),
+            stream: widget.walletDao.watchBalance(widget.memberId),
             builder: (context, snap) {
               final balance = snap.data ?? WalletBalance.zero;
               return _JarOverview(
                 balance: balance,
-                familyId: familyId,
-                memberId: memberId,
+                familyId: widget.familyId,
+                memberId: widget.memberId,
               );
             },
           ),
           const SizedBox(height: AppSpacing.xxl),
           StreamBuilder<Streak?>(
-            stream: memberDao.watchStreak(memberId),
+            stream: widget.memberDao.watchStreak(widget.memberId),
             builder: (context, snap) {
               final streak = snap.data;
               if (streak == null) return const SizedBox.shrink();
@@ -269,39 +464,57 @@ class _ChildStats extends StatelessWidget {
           // Không truyền `onTap`: con xem được tiến độ nhưng không tự đổi mục
           // tiêu. Đổi mục tiêu mỗi khi thấy còn xa là đúng cái thói quen tính
           // năng này muốn dạy ngược lại.
-          GoalSection(memberId: memberId),
+          GoalSection(memberId: widget.memberId),
           const SizedBox(height: AppSpacing.xl),
-          _BadgesEntry(memberId: memberId),
+          _BadgesEntry(memberId: widget.memberId),
           const SizedBox(height: AppSpacing.xxl),
-          Text('Lịch sử', style: context.text.titleMedium),
-          const SizedBox(height: AppSpacing.md),
-          // Tên hũ tra từ bảng `jars`: sổ cái chỉ lưu `jar_key`, nên không có
-          // bảng tra thì dòng chia xu hiện ra khoá thô kiểu
-          // "jar1786289533739171 14" — con đọc không hiểu gì.
           _JarTitles(
-            familyId: familyId,
+            familyId: widget.familyId,
             builder: (context, jarTitles) => LuongDuLieu<List<LedgerEntry>>(
-              // Đã gộp: một việc là **một** mục, không phải ba dòng theo hũ.
-              stream: walletDao.watchGroupedHistory(memberId),
-              builder: (context, txns) {
-                if (txns.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xxl),
-                    child: Center(
-                      child: Text(
-                        'Chưa có giao dịch nào.',
-                        style: context.text.bodyMedium?.copyWith(
-                          color: context.semantic.onSurfaceMuted,
-                        ),
-                      ),
+              stream: widget.walletDao.watchGroupedHistory(widget.memberId),
+              builder: (context, allTxns) {
+                // Lọc giao dịch trong tuần được chọn
+                final weekTxns = allTxns.where((tx) {
+                  return !tx.createdAt.isBefore(targetMonday) &&
+                      tx.createdAt.isBefore(targetNextMonday);
+                }).toList();
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _WeeklyOverviewCard(
+                      txns: weekTxns,
+                      currentWeekOffset: _weekOffset,
+                      onPrevWeek: () => setState(() => _weekOffset--),
+                      onNextWeek: _weekOffset < 0
+                          ? () => setState(() => _weekOffset++)
+                          : null,
                     ),
-                  );
-                }
-                return _DailyHistoryList(
-                  txns: txns,
-                  taskDao: taskDao,
-                  rewardDao: rewardDao,
-                  jarTitles: jarTitles,
+                    const SizedBox(height: AppSpacing.xl),
+                    Text('Lịch sử theo ngày', style: context.text.titleMedium),
+                    const SizedBox(height: AppSpacing.md),
+                    if (weekTxns.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(AppSpacing.xxl),
+                        child: Center(
+                          child: Text(
+                            _weekOffset == 0
+                                ? 'Chưa có hoạt động nào trong tuần này.'
+                                : 'Không có hoạt động nào trong tuần này.',
+                            style: context.text.bodyMedium?.copyWith(
+                              color: context.semantic.onSurfaceMuted,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      _DailyHistoryList(
+                        txns: weekTxns,
+                        taskDao: widget.taskDao,
+                        rewardDao: widget.rewardDao,
+                        jarTitles: jarTitles,
+                      ),
+                  ],
                 );
               },
             ),

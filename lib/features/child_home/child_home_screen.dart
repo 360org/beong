@@ -23,6 +23,7 @@ import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/features/goals/goal_section.dart';
+import 'package:beong/features/goals/goal_sheet.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
 import 'package:beong/features/rewards/allocate_xu_sheet.dart';
 import 'package:flutter/material.dart';
@@ -165,20 +166,14 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
     _khoeHuyHieu(ketQua.huyHieuMoi);
   }
 
-  /// Khoe huy hiệu vừa nhận.
-  ///
-  /// Nổ hoa giấy **và** hiện tên huy hiệu: hoa giấy một mình thì con tưởng là
-  /// hiệu ứng của việc vừa bấm, không biết mình vừa đạt được thứ gì.
+  /// Khoe huy hiệu vừa nhận dạng dialog vinh danh lật từng cái (§18, §20).
   void _khoeHuyHieu(List<BadgeDef> huyHieu) {
     unawaited(_celebrateOnce());
-    final ten = huyHieu.map((b) => b.title).join(', ');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Con vừa nhận huy hiệu "$ten"!'),
-        action: SnackBarAction(
-          label: 'XEM',
-          onPressed: () => context.go(Routes.badges),
-        ),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => _BadgeCelebrationDialog(badges: huyHieu),
       ),
     );
   }
@@ -299,7 +294,22 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
                   // Mục tiêu nằm ngay dưới ví, trên danh sách việc: nó là lý do
                   // con làm việc hôm nay, nên phải thấy trước khi cuộn.
                   const SizedBox(height: AppSpacing.lg),
-                  GoalSection(memberId: memberId),
+                  GoalSection(
+                    memberId: memberId,
+                    onTap: () async {
+                      final current = await ref
+                          .read(goalRepositoryProvider)
+                          .activeGoal(memberId);
+                      if (!context.mounted) return;
+                      await showGoalSheet(
+                        context,
+                        familyId: session.familyId,
+                        memberId: memberId,
+                        childName: member?.displayName ?? 'Con',
+                        current: current,
+                      );
+                    },
+                  ),
                   const SizedBox(height: AppSpacing.xl),
                   if (instSnap.connectionState == ConnectionState.waiting)
                     const Padding(
@@ -645,6 +655,32 @@ class _DashboardCard extends StatelessWidget {
                           total: total,
                         ),
                         size: 62,
+                        onTap: () {
+                          final msg = switch (BeeMood.fromProgress(
+                            completed: completed,
+                            total: total,
+                          )) {
+                            BeeMood.celebrating =>
+                              'Hoan hô! Con đã hoàn thành hết việc hôm nay rồi đó!',
+                            BeeMood.happy =>
+                              'Cố lên con ơi! Còn ${total - completed} việc nữa là xong hết!',
+                            BeeMood.sleepy =>
+                              'Chào con! Bắt đầu làm việc nhà hôm nay nhé!',
+                          };
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Row(
+                                children: [
+                                  const AppIcon('star', size: 18),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  Expanded(child: Text(msg)),
+                                ],
+                              ),
+                              duration: const Duration(seconds: 3),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
                       )
                     : Text(
                         '$completed/$total',
@@ -1043,4 +1079,116 @@ Future<void> _openAllocateSheet({
       jars: jars,
     ),
   );
+}
+
+/// Hộp thoại vinh danh huy hiệu mới (§18, §20) với chấm phân trang khi nhận nhiều cái.
+class _BadgeCelebrationDialog extends StatefulWidget {
+  const _BadgeCelebrationDialog({required this.badges});
+
+  final List<BadgeDef> badges;
+
+  @override
+  State<_BadgeCelebrationDialog> createState() => _BadgeCelebrationDialogState();
+}
+
+class _BadgeCelebrationDialogState extends State<_BadgeCelebrationDialog> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final badge = widget.badges[_currentIndex];
+    final total = widget.badges.length;
+    final isLast = _currentIndex == total - 1;
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.card),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.xs,
+              ),
+              decoration: BoxDecoration(
+                color: context.colors.primaryContainer,
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const AppIcon('star', size: 16),
+                  const SizedBox(width: 4),
+                  Text(
+                    'HUY HIỆU MỚI!',
+                    style: context.text.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: context.colors.primary,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            AppIcon(badge.iconKey, size: 72),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              badge.title,
+              style: context.text.titleLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              badge.description,
+              style: context.text.bodyMedium?.copyWith(
+                color: context.semantic.onSurfaceMuted,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (total > 1) ...[
+              const SizedBox(height: AppSpacing.lg),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(total, (i) {
+                  final active = i == _currentIndex;
+                  return Container(
+                    width: active ? 20 : 8,
+                    height: 6,
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(3),
+                      color: active
+                          ? context.colors.primary
+                          : context.colors.outline,
+                    ),
+                  );
+                }),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.xxl),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  if (isLast) {
+                    Navigator.of(context).pop();
+                  } else {
+                    setState(() => _currentIndex++);
+                  }
+                },
+                child: Text(isLast ? 'TUYỆT VỜI!' : 'TIẾP TỤC'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

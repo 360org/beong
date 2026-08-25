@@ -300,9 +300,7 @@ class _RedeemButtonState extends State<_RedeemButton> {
   Future<void> _redeem() async {
     setState(() => _loading = true);
     try {
-      // Đi qua service: nó kiểm còn hàng và đủ xu **trước khi** trừ xu. Bản cũ
-      // trừ xu rồi mới ghi phiếu, nên phần thưởng hết hàng là con mất xu mà
-      // không có phiếu nào.
+      // Đi qua service: nó kiểm còn hàng và đủ xu **trước khi** trừ xu.
       await widget.redemptionService.redeem(
         familyId: widget.session.familyId,
         memberId: widget.session.activeMemberId,
@@ -347,9 +345,27 @@ class _RedeemButtonState extends State<_RedeemButton> {
       );
     }
 
-    return FilledButton.tonal(
-      onPressed: _redeem,
-      child: const Text('Đổi'),
+    return StreamBuilder<WalletBalance>(
+      stream: widget.walletDao.watchBalance(widget.session.activeMemberId),
+      builder: (context, snapshot) {
+        final balance = snapshot.data ?? WalletBalance.zero;
+        final currentSpend = balance.of(Jar.spend);
+        final cost = widget.reward.costPoints;
+        final hasEnough = currentSpend >= cost;
+        final deficit = cost - currentSpend;
+
+        if (!hasEnough) {
+          return FilledButton.tonal(
+            onPressed: null,
+            child: Text('Thiếu $deficit xu'),
+          );
+        }
+
+        return FilledButton.tonal(
+          onPressed: _redeem,
+          child: const Text('Đổi'),
+        );
+      },
     );
   }
 }

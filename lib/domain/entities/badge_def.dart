@@ -1,6 +1,18 @@
 import 'package:meta/meta.dart';
 
-/// Một huy hiệu và điều kiện đạt được — `01-product-spec.md` §4.6.
+/// Nhóm phân loại huy hiệu.
+enum BadgeCategory {
+  streak('Chuỗi kiên trì', 'fire'),
+  tasksDone('Việc nhà chăm chỉ', 'clipboard'),
+  routine('Thói quen vững vàng', 'sunrise'),
+  rewards('Phần thưởng & Tiết kiệm', 'jar_gift');
+
+  const BadgeCategory(this.titleVi, this.iconKey);
+  final String titleVi;
+  final String iconKey;
+}
+
+/// Một huy hiệu và điều kiện đạt được — `01-product-spec.md` §4.6 & docs/16 §12, §21.
 @immutable
 class BadgeDef {
   const BadgeDef({
@@ -9,6 +21,7 @@ class BadgeDef {
     required this.description,
     required this.iconKey,
     required this.kind,
+    required this.category,
     required this.threshold,
   });
 
@@ -18,12 +31,12 @@ class BadgeDef {
 
   final String title;
 
-  /// Câu mô tả cho **trẻ** đọc, không phải cho lập trình viên: nói con cần làm gì
-  /// chứ không tả công thức.
+  /// Câu mô tả cho **trẻ** đọc: nói con cần làm gì.
   final String description;
 
   final String iconKey;
   final BadgeKind kind;
+  final BadgeCategory category;
 
   /// Mốc cần đạt của [kind].
   final int threshold;
@@ -44,17 +57,16 @@ enum BadgeKind {
   redemptions,
 }
 
-/// 8 huy hiệu MVP, đúng danh sách ở `01-product-spec.md` §4.6.
-///
-/// Mốc chọn thưa dần (3 → 7 → 30, 10 → 50 → 100): huy hiệu quá dày thì mất giá
-/// trị, quá thưa thì trẻ nhỏ không bao giờ chạm tới cái đầu tiên.
+/// Danh sách huy hiệu theo nhóm (mỗi nhóm xếp theo bậc thang danh hiệu).
 const List<BadgeDef> kBadges = [
+  // 1. Chuỗi ngày
   BadgeDef(
     key: 'streak_3',
-    title: 'Ba ngày liền',
+    title: 'Khởi đầu kiên trì',
     description: 'Làm hết việc 3 ngày liên tiếp',
     iconKey: 'fire',
     kind: BadgeKind.streak,
+    category: BadgeCategory.streak,
     threshold: 3,
   ),
   BadgeDef(
@@ -63,55 +75,95 @@ const List<BadgeDef> kBadges = [
     description: 'Làm hết việc 7 ngày liên tiếp',
     iconKey: 'star',
     kind: BadgeKind.streak,
+    category: BadgeCategory.streak,
     threshold: 7,
   ),
   BadgeDef(
     key: 'streak_30',
-    title: 'Cả tháng chăm chỉ',
+    title: 'Chiến binh bất bại',
     description: 'Làm hết việc 30 ngày liên tiếp',
     iconKey: 'jar_bank',
     kind: BadgeKind.streak,
+    category: BadgeCategory.streak,
     threshold: 30,
   ),
+
+  // 2. Số lượng việc nhà
   BadgeDef(
     key: 'tasks_10',
-    title: 'Mười việc đầu tiên',
-    description: 'Hoàn thành 10 việc',
+    title: 'Bé con phụ việc',
+    description: 'Hoàn thành 10 việc nhà',
     iconKey: 'clipboard',
     kind: BadgeKind.tasksDone,
+    category: BadgeCategory.tasksDone,
     threshold: 10,
   ),
   BadgeDef(
     key: 'tasks_50',
-    title: 'Năm mươi việc',
-    description: 'Hoàn thành 50 việc',
+    title: 'Tay làm thoăn thoắt',
+    description: 'Hoàn thành 50 việc nhà',
     iconKey: 'books',
     kind: BadgeKind.tasksDone,
+    category: BadgeCategory.tasksDone,
     threshold: 50,
   ),
   BadgeDef(
     key: 'tasks_100',
-    title: 'Một trăm việc',
-    description: 'Hoàn thành 100 việc',
+    title: 'Bậc thầy việc nhà',
+    description: 'Hoàn thành 100 việc nhà',
     iconKey: 'jar_circus',
     kind: BadgeKind.tasksDone,
+    category: BadgeCategory.tasksDone,
     threshold: 100,
+  ),
+
+  // 3. Thói quen nề nếp
+  BadgeDef(
+    key: 'routine_3',
+    title: 'Bước đệm nề nếp',
+    description: 'Hoàn thành trọn bộ thói quen 3 ngày',
+    iconKey: 'sunrise',
+    kind: BadgeKind.routinePerfectDays,
+    category: BadgeCategory.routine,
+    threshold: 3,
   ),
   BadgeDef(
     key: 'routine_7',
-    title: 'Thói quen vững',
-    description: 'Làm trọn bộ một thói quen 7 ngày',
+    title: 'Thói quen vững vàng',
+    description: 'Hoàn thành trọn bộ thói quen 7 ngày',
     iconKey: 'sunrise',
     kind: BadgeKind.routinePerfectDays,
+    category: BadgeCategory.routine,
     threshold: 7,
   ),
   BadgeDef(
+    key: 'routine_21',
+    title: 'Kỷ luật thép',
+    description: 'Hoàn thành trọn bộ thói quen 21 ngày',
+    iconKey: 'party',
+    kind: BadgeKind.routinePerfectDays,
+    category: BadgeCategory.routine,
+    threshold: 21,
+  ),
+
+  // 4. Phần thưởng & Tiết kiệm
+  BadgeDef(
     key: 'first_reward',
-    title: 'Phần thưởng đầu tiên',
-    description: 'Đổi phần thưởng lần đầu',
+    title: 'Trái ngọt đầu tiên',
+    description: 'Đổi phần thưởng lần đầu tiên',
     iconKey: 'jar_gift',
     kind: BadgeKind.redemptions,
+    category: BadgeCategory.rewards,
     threshold: 1,
+  ),
+  BadgeDef(
+    key: 'reward_5',
+    title: 'Nhà sưu tầm quà',
+    description: 'Đổi thành công 5 phần thưởng',
+    iconKey: 'gem',
+    kind: BadgeKind.redemptions,
+    category: BadgeCategory.rewards,
+    threshold: 5,
   ),
 ];
 
@@ -139,9 +191,6 @@ class BadgeProgress {
 }
 
 /// Huy hiệu đã đạt theo [progress].
-///
-/// Thuần hàm, không đụng DB: nhờ vậy quy tắc trao huy hiệu test được mà không
-/// cần dựng cả cơ sở dữ liệu, và chỗ ghi vào DB chỉ còn việc lưu.
 List<BadgeDef> earnedBadges(BadgeProgress progress) => [
   for (final badge in kBadges)
     if (progress.valueFor(badge.kind) >= badge.threshold) badge,
