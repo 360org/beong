@@ -7,6 +7,8 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 ## v0.2.8+16 (2026-08-25) — Hoàn thiện Toàn diện Trải nghiệm Gamification, Mục tiêu & Huy hiệu (Roadmap docs/16)
 
 ### [NEW]
+- **Bộ Nhận diện & App Icon Chính thức**:
+  - Cập nhật đồng bộ bộ App Icon hoàn toàn mới từ `docs/icons/app-icon.png` cho toàn bộ các nền tảng: iOS (AppIcon xcassets 20x20..1024x1024), Android (mipmap mdpi..xxxhdpi), macOS (16x16..1024x1024), Web (favicon, apple-touch-icon, logo) và tài liệu.
 - **Hệ thống Ăn mừng & Vinh danh Huy hiệu Đa tầng (§18, §20)**:
   - Dialog vinh danh `_BadgeCelebrationDialog` xuất hiện khi con đạt thành tựu mới, hỗ trợ lật mở từng huy hiệu kèm chấm phân trang khi nhận nhiều danh hiệu cùng lúc thay vì SnackBar trôi mất sau 4s.
   - Phân loại 4 nhóm danh mục huy hiệu chuẩn mực (`BadgeCategory`: Chuỗi kiên trì, Việc nhà chăm chỉ, Thói quen vững vàng, Phần thưởng & Tiết kiệm).
