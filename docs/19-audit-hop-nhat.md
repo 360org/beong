@@ -85,10 +85,28 @@ chốt: giữ tới Sprint nhắc nhở, hay xoá bây giờ.
 
 `§6` ngày chưa tới ≠ ngày trống · `§8` điểm bằng nút −/+ · `§9` nút LƯU dính đáy
 · `§11` điều ước do con đề xuất · `§13` màn Hành trình · `§14` điều hướng theo
-vai · `§19` linh vật nói một câu · `§22` loại điều kiện huy hiệu mới · `§23`
-chạm huy hiệu mở màn chi tiết.
+vai · `§19` linh vật nói một câu · `§22` loại điều kiện huy hiệu mới ·
+**`§24` con chưa có tab Huy hiệu riêng**.
+
+`§23` (chạm huy hiệu mở màn chi tiết) **đã đóng** — `badges_screen.dart:150`
+`InkWell` → bảng chi tiết có cung tiến độ, chip trạng thái và dòng
+"Tiến độ thực tế `current / threshold`".
 
 Mười bốn mục còn lại của roadmap **đã đóng** — xem `17` và `18`.
+
+### §24 — chủ dự án nêu 26/08, và nó nặng hơn vẻ ngoài
+
+Huy hiệu **không nằm trong tab nào**. Con muốn xem chiến tích của mình phải mở
+tab Thống kê → cuộn tìm → chạm một ô (`stats_screen.dart:553`) mới tới. Ba
+bước, qua một màn vốn dựng cho bố mẹ đọc số liệu.
+
+Mà cùng thanh điều hướng đó, `Cài đặt` là tab con **bị chặn** bằng redirect.
+Nên con đang thấy một tab bấm vào bị đá ra, và **không** thấy tab dành riêng
+cho mình — hai lỗi ngược nhau trên cùng một thanh.
+
+Huy hiệu là phần thưởng cảm xúc của cả vòng động lực; chôn nó sau ba bước là
+đặt nó ngang hàng với báo cáo, trong khi nó phải ngang hàng với nhiệm vụ và
+phần thưởng. Làm §24 thì §14 coi như xong — gộp một đợt.
 
 ## Hai chốt chặn nên dựng, thay vì viết lại mục này lần nữa
 

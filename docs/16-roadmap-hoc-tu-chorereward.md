@@ -25,7 +25,7 @@ tài liệu này không nhắc lại. Ở đây chỉ có thứ chưa ai ghi.
 | 8 | Điểm bằng nút −/+ | 🟡 | Bàn phím số cho giá trị nhảy bước 5 là ma sát thừa |
 | 9 | Nút LƯU dính đáy | 🟡 | Biểu mẫu dài, nút lưu trôi khỏi màn |
 
-*Phần II bổ sung §10–§14, Phần III §15–§19, Phần IV §20–§22 — bảng riêng ở mỗi phần.*
+*Phần II bổ sung §10–§14, Phần III §15–§19, Phần IV §20–§22, Phần V §23–§24 — bảng riêng ở mỗi phần.*
 
 ---
 
@@ -602,3 +602,63 @@ tính năng lần đầu**. Làm sau §10 để *Say Cheese* có thật thứ đ
 1. **§21** — rẻ nhất cả tài liệu, chỉ là chữ. Làm được ngay hôm nay.
 2. **§20 gộp vào §18** — cùng một luồng, đừng dựng hộp ăn mừng hai lần.
 3. **§22 sau §10** — để huy hiệu "gửi ảnh lần đầu" có thứ thật để đếm.
+
+---
+
+# Phần V — Chủ dự án nêu (26/08/2026)
+
+> *"Thiếu một tab award các chiến tích đạt được trong màn hình của con."*
+
+## ✅ §23 đã đóng — kiểm lại thì làm còn đủ hơn mô tả
+
+Phần III ghi §23 là "chưa làm". Soát lại code hôm nay thì **đã xong**, và làm
+kỹ: `badges_screen.dart:150` bọc thẻ trong `InkWell`, chạm mở bảng chi tiết có
+vòng cung tiến độ, tên, chip trạng thái (**ĐÃ ĐẠT ĐƯỢC** / **ĐANG CHINH PHỤC**),
+mô tả, và dòng **"Tiến độ thực tế · `$current / ${threshold}`"**.
+
+So với họ thì chỉ khác một chi tiết nhỏ: họ ghi kèm **đơn vị đếm**
+(`1 / 1 CHORES`, `1 / 1 PHOTOS`), Bé Ong dùng nhãn "Tiến độ thực tế" đứng
+trước. Cả hai đều nói rõ đang đếm gì — không coi là thiếu.
+
+## 24 · 🟠 Con phải có tab riêng cho huy hiệu
+
+**Họ làm gì.** Thanh điều hướng máy con có bốn tab, và **Awards là một trong
+bốn**: Tasks · Rewards · **Awards** · Journey. Một chạm là tới, biểu tượng cúp
+riêng.
+
+**Bé Ong đang thế nào — đây mới là vấn đề.**
+
+```
+router.dart:249–277    Trang chính · Nhiệm vụ · Phần thưởng · Thống kê · Cài đặt
+stats_screen.dart:553  onTap: () => context.go(Routes.badges)
+```
+
+Năm tab **dùng chung cho cả hai vai**, và huy hiệu **không nằm trong tab nào**.
+Con muốn xem chiến tích của mình phải: mở tab **Thống kê** → cuộn tìm → chạm một
+ô → mới tới. Ba bước, qua một màn vốn dựng cho bố mẹ đọc số liệu.
+
+**Vì sao là vấn đề thật, không phải chuyện sắp xếp.** Huy hiệu là **phần thưởng
+cảm xúc** của cả vòng động lực — thứ con quay lại xem đi xem lại, khoe với bố
+mẹ, và là lý do con làm tiếp việc ngày mai. Nội dung ở đó nay đã dày (11 huy
+hiệu chia nhóm, cung tiến độ, bảng chi tiết ở §23) mà đường vào vẫn là một ô
+chôn trong màn thống kê. Đặt nó ngang hàng với báo cáo, trong khi nó phải ngang
+hàng với nhiệm vụ và phần thưởng.
+
+Cộng thêm một điều oái oăm trên **cùng một thanh điều hướng**: `Cài đặt` là tab
+con **bị chặn** bằng redirect. Nên con đang nhìn thấy một tab bấm vào bị đá ra,
+mà **không** thấy tab dành riêng cho mình — hai lỗi ngược chiều nhau.
+
+**Làm gì.** Tách thanh điều hướng theo vai — chính là §14, nay có lý do cụ thể
+để làm sớm:
+
+| Vai | Tab đề nghị |
+|---|---|
+| **Con** | Nhiệm vụ · Phần thưởng · **Huy hiệu** · Hành trình *(§13)* |
+| **Bố mẹ** | Trang chính · Nhiệm vụ · Phần thưởng · Thống kê · Cài đặt |
+
+Chưa có §13 thì tab thứ tư của con để **Trang chính** — bốn tab, không tab nào
+bấm vào bị từ chối.
+
+**Ghi chú thực thi.** Làm §24 thì §14 coi như xong; ngược lại thì không. Gộp
+hai mục một đợt. Nội dung cho tab mới đã sẵn sàng nhờ §12/§15/§23 — không phải
+chờ gì nữa.
