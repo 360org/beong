@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:beong/core/theme/app_colors.dart';
@@ -95,7 +94,7 @@ class _ConfettiBurstState extends State<ConfettiBurst>
           ),
       ];
     });
-    unawaited(_controller.forward(from: 0));
+    _controller.forward(from: 0);
   }
 
   @override

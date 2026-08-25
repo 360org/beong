@@ -80,9 +80,7 @@ class _BeeMascotState extends State<BeeMascot>
 
   void _syncAnimation() {
     if (widget.mood == BeeMood.celebrating) {
-      // repeat() trả Future chỉ hoàn thành khi controller bị dispose — không
-      // có gì để await, bỏ qua là đúng.
-      unawaited(_controller.repeat(reverse: true));
+      _controller.repeat(reverse: true);
     } else {
       _controller
         ..stop()
@@ -108,7 +106,7 @@ class _BeeMascotState extends State<BeeMascot>
           unawaited(
             _controller.forward(from: 0).then((_) {
               if (widget.mood == BeeMood.celebrating) {
-                unawaited(_controller.repeat(reverse: true));
+                _controller.repeat(reverse: true);
               } else {
                 _controller.value = 0;
               }

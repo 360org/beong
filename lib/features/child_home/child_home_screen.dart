@@ -64,6 +64,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
   // Giữ lại ở đây, chỉ dựng lại khi thứ *thật sự* quyết định nội dung đổi: đổi
   // bé, đổi nhà, hoặc sang ngày mới.
   String? _khoaLuong;
+  KidScale _currentScale = KidScale.middle;
   late Stream<List<TaskInstance>> _luongLuotViec;
   late Stream<List<Task>> _luongViec;
   late Stream<Member> _luongThanhVien;
@@ -167,24 +168,23 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
         );
     if (!mounted || ketQua.huyHieuMoi.isEmpty) return;
 
-    // Tôn trọng tuổi teen: hoa giấy và dialog chặn màn hình đều bỏ qua khi
-    // `celebrateOnTap == false` (audit 17 §2). Lấy scale từ member hiện tại.
-    final session = ref.read(sessionProvider);
-    if (session != null) {
-      final member = await ref
-          .read(memberRepositoryProvider)
-          .watchMember(session.activeMemberId)
-          .first;
-      if (!mounted) return;
-      final today =
-          (ref.watch(familyClockProvider(session.familyId)).value ??
-                  fallbackFamilyClock())
-              .today();
-      final scale = KidScale.forBirthYear(
-        member.birthYear,
-        currentYear: today.year,
+    // Tôn trọng tuổi teen: nếu celebrateOnTap == false thì không nổ hoa giấy
+    // và không bật dialog che màn hình, mà hạ xuống SnackBar kèm nút xem (audit 18 §1).
+    if (!_currentScale.celebrateOnTap) {
+      final names = ketQua.huyHieuMoi.map((b) => b.title).join(', ');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const AppIcon('star', size: 20),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(child: Text('Huy hiệu mới: $names')),
+            ],
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
-      if (!scale.celebrateOnTap) return;
+      return;
     }
 
     _khoeHuyHieu(ketQua.huyHieuMoi);
@@ -267,6 +267,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
                         member?.birthYear,
                         currentYear: today.year,
                       );
+                      _currentScale = scale;
 
                       return KidScaleScope(
                         scale: scale,

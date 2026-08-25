@@ -516,6 +516,8 @@ class _ChildStatsState extends State<_ChildStats> {
                     else
                       _DailyHistoryList(
                         txns: weekTxns,
+                        targetMonday: targetMonday,
+                        isCurrentWeek: _weekOffset == 0,
                         taskDao: widget.taskDao,
                         rewardDao: widget.rewardDao,
                         jarTitles: jarTitles,
@@ -869,12 +871,16 @@ class _StreakCard extends StatelessWidget {
 class _DailyHistoryList extends StatelessWidget {
   const _DailyHistoryList({
     required this.txns,
+    required this.targetMonday,
+    required this.isCurrentWeek,
     required this.taskDao,
     required this.rewardDao,
     required this.jarTitles,
   });
 
   final List<LedgerEntry> txns;
+  final DateTime targetMonday;
+  final bool isCurrentWeek;
   final TaskRepository taskDao;
   final RewardRepository rewardDao;
   final Map<String, String> jarTitles;
@@ -888,24 +894,88 @@ class _DailyHistoryList extends StatelessWidget {
       grouped.putIfAbsent(date, () => []).add(tx);
     }
 
-    final sortedDates = grouped.keys.toList()
-      ..sort((a, b) => b.compareTo(a)); // Mới nhất lên đầu
-
     final today = CalendarDate.fromDateTime(DateTime.now());
+
+    // 7 ngày trong tuần được chọn (từ Thứ 2 đến Chủ nhật)
+    final weekDays = List.generate(7, (i) {
+      final dt = targetMonday.add(Duration(days: i));
+      return CalendarDate.fromDateTime(dt);
+    });
 
     return Column(
       children: [
-        for (final date in sortedDates)
-          _DayHistoryGroup(
-            key: ValueKey(date.toString()),
-            date: date,
-            txns: grouped[date] ?? const [],
-            isExpandedByDefault: date == today,
-            taskDao: taskDao,
-            rewardDao: rewardDao,
-            jarTitles: jarTitles,
-          ),
+        for (final date in weekDays.reversed) ...[
+          if (grouped.containsKey(date))
+            _DayHistoryGroup(
+              key: ValueKey(date.toString()),
+              date: date,
+              txns: grouped[date] ?? const [],
+              isExpandedByDefault: date == today,
+              taskDao: taskDao,
+              rewardDao: rewardDao,
+              jarTitles: jarTitles,
+            )
+          else
+            _EmptyDayTile(
+              date: date,
+              isFuture: isCurrentWeek && date > today,
+            ),
+        ],
       ],
+    );
+  }
+}
+
+/// Dòng hiển thị ngày không có hoạt động — phân biệt ngày chưa tới vs ngày đã qua (§6).
+class _EmptyDayTile extends StatelessWidget {
+  const _EmptyDayTile({
+    required this.date,
+    required this.isFuture,
+  });
+
+  final CalendarDate date;
+  final bool isFuture;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = '${thuNganGon(date.weekday)}, ${ngayNganGon(date)}';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Card(
+        color: isFuture
+            ? context.colors.surfaceContainerLowest.withValues(alpha: 0.5)
+            : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          child: Row(
+            children: [
+              Text(
+                title,
+                style: context.text.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isFuture
+                      ? context.semantic.onSurfaceMuted.withValues(alpha: 0.5)
+                      : context.semantic.onSurfaceMuted,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                isFuture ? '—' : 'Không có hoạt động',
+                style: context.text.bodySmall?.copyWith(
+                  color: isFuture
+                      ? context.semantic.onSurfaceMuted.withValues(alpha: 0.4)
+                      : context.semantic.onSurfaceMuted,
+                  fontStyle: isFuture ? null : FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
