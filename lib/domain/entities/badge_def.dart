@@ -63,7 +63,7 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'streak_3',
     title: 'Khởi đầu kiên trì',
-    description: 'Làm hết việc 3 ngày liên tiếp',
+    description: 'Làm hết việc 3 ngày liên tiếp — con giỏi lắm, tiếp tục nhé!',
     iconKey: 'fire',
     kind: BadgeKind.streak,
     category: BadgeCategory.streak,
@@ -72,7 +72,7 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'streak_7',
     title: 'Trọn một tuần',
-    description: 'Làm hết việc 7 ngày liên tiếp',
+    description: 'Làm hết việc 7 ngày liên tiếp — một tuần trọn vẹn, con thật tuyệt vời!',
     iconKey: 'star',
     kind: BadgeKind.streak,
     category: BadgeCategory.streak,
@@ -81,7 +81,7 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'streak_30',
     title: 'Chiến binh bất bại',
-    description: 'Làm hết việc 30 ngày liên tiếp',
+    description: 'Làm hết việc 30 ngày liên tiếp — con là chiến binh thực thụ rồi đó!',
     iconKey: 'jar_bank',
     kind: BadgeKind.streak,
     category: BadgeCategory.streak,
@@ -92,7 +92,7 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'tasks_10',
     title: 'Bé con phụ việc',
-    description: 'Hoàn thành 10 việc nhà',
+    description: 'Hoàn thành 10 việc nhà — con đã bắt đầu giúp gia đình rồi!',
     iconKey: 'clipboard',
     kind: BadgeKind.tasksDone,
     category: BadgeCategory.tasksDone,
@@ -101,7 +101,7 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'tasks_50',
     title: 'Tay làm thoăn thoắt',
-    description: 'Hoàn thành 50 việc nhà',
+    description: 'Hoàn thành 50 việc nhà — bàn tay con nay thật khéo léo!',
     iconKey: 'books',
     kind: BadgeKind.tasksDone,
     category: BadgeCategory.tasksDone,
@@ -110,7 +110,7 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'tasks_100',
     title: 'Bậc thầy việc nhà',
-    description: 'Hoàn thành 100 việc nhà',
+    description: 'Hoàn thành 100 việc nhà — con là bậc thầy việc nhà của cả nhà!',
     iconKey: 'jar_circus',
     kind: BadgeKind.tasksDone,
     category: BadgeCategory.tasksDone,
@@ -121,7 +121,7 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'routine_3',
     title: 'Bước đệm nề nếp',
-    description: 'Hoàn thành trọn bộ thói quen 3 ngày',
+    description: 'Hoàn thành trọn bộ thói quen 3 ngày — con đang xây thói quen tốt đấy!',
     iconKey: 'sunrise',
     kind: BadgeKind.routinePerfectDays,
     category: BadgeCategory.routine,
@@ -130,7 +130,7 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'routine_7',
     title: 'Thói quen vững vàng',
-    description: 'Hoàn thành trọn bộ thói quen 7 ngày',
+    description: 'Hoàn thành trọn bộ thói quen 7 ngày — nề nếp của con thật đáng nể!',
     iconKey: 'sunrise',
     kind: BadgeKind.routinePerfectDays,
     category: BadgeCategory.routine,
@@ -139,7 +139,7 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'routine_21',
     title: 'Kỷ luật thép',
-    description: 'Hoàn thành trọn bộ thói quen 21 ngày',
+    description: 'Hoàn thành trọn bộ thói quen 21 ngày — con đã biến nó thành thói quen thật sự!',
     iconKey: 'party',
     kind: BadgeKind.routinePerfectDays,
     category: BadgeCategory.routine,
@@ -150,7 +150,7 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'first_reward',
     title: 'Trái ngọt đầu tiên',
-    description: 'Đổi phần thưởng lần đầu tiên',
+    description: 'Đổi phần thưởng lần đầu tiên — con đã biết tiết kiệm và hưởng thành quả!',
     iconKey: 'jar_gift',
     kind: BadgeKind.redemptions,
     category: BadgeCategory.rewards,
@@ -159,7 +159,7 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'reward_5',
     title: 'Nhà sưu tầm quà',
-    description: 'Đổi thành công 5 phần thưởng',
+    description: 'Đổi thành công 5 phần thưởng — bộ sưu tập của con thật ấn tượng!',
     iconKey: 'gem',
     kind: BadgeKind.redemptions,
     category: BadgeCategory.rewards,

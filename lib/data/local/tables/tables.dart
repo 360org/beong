@@ -39,6 +39,9 @@ class Families extends Table {
 
   /// Bao nhiêu xu bằng một đơn vị tiền. NULL = tắt quy đổi (ADR-017).
   IntColumn get exchangeRateXu => integer().nullable()();
+
+  /// **Chưa nối** — giao diện quy đổi tiền đang dùng cách khác (hardcode VND).
+  /// Để dành cho Sprint 3 khi hỗ trợ đa tiền tệ.
   TextColumn get currency => text().withDefault(const Constant('VND'))();
 
   /// Tỷ lệ ba hũ dạng JSON `{"spend":50,"save":40,"give":10}` — ADR-016.
@@ -76,6 +79,8 @@ class Families extends Table {
 /// Hồ sơ hiển thị — cả bố mẹ lẫn trẻ. Trẻ **không** có tài khoản đăng nhập
 /// (ADR-006): `userId` để NULL.
 class Members extends Table with FamilyScoped, Syncable {
+  /// **Chưa nối** — để dành cho Sprint 3 (đồng bộ Supabase). Trẻ không có tài
+  /// khoản đăng nhập (ADR-006), nên cột này NULL cho trẻ.
   TextColumn get userId => text().nullable()();
 
   /// `parent` hoặc `child` — `MemberKind`.
@@ -108,6 +113,8 @@ class Routines extends Table with FamilyScoped, Syncable {
   TextColumn get dayPart => text().nullable()();
 
   /// Giờ bắt đầu dạng `HH:mm`, dùng để nhắc.
+  /// **Chưa nối** — chưa có giao diện đặt giờ cho thói quen. Để dành khi thêm
+  /// tính năng nhắc nhở (Sprint 3 + push notification).
   TextColumn get startTime => text().nullable()();
 
   /// `RepeatType` — routine không dùng `once`.
@@ -151,6 +158,8 @@ class Tasks extends Table with FamilyScoped, Syncable {
   TextColumn get dayPart => text().nullable()();
 
   /// Mốc nhắc nhở dạng `HH:mm`.
+  /// **Chưa nối** — chưa có giao diện đặt giờ cho việc. Để dành khi thêm tính
+  /// năng nhắc nhở (Sprint 3 + push notification).
   TextColumn get dueTime => text().nullable()();
 
   /// Mức trừ xu riêng cho việc này, ghi đè mức chung của gia đình — ADR-022.
@@ -195,6 +204,8 @@ class TaskInstances extends Table with FamilyScoped {
   DateTimeColumn get completedAt => dateTime().nullable()();
   DateTimeColumn get reviewedAt => dateTime().nullable()();
   TextColumn get reviewedBy => text().nullable()();
+  /// **Chưa có ảnh thật** — thiếu `image_picker`. Hiện chỉ lưu ghi chú text
+  /// qua [proofNote]. Nâng cấp: thêm image_picker, lưu đường dẫn file thật.
   TextColumn get proofUrl => text().nullable()();
   TextColumn get proofNote => text().nullable()();
 

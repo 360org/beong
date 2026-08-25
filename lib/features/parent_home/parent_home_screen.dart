@@ -500,6 +500,8 @@ class _PendingCardState extends State<_PendingCard> {
                 ),
               ),
             ],
+            // ponytail: proofUrl chưa chứa ảnh thật (thiếu image_picker).
+            // Khi có ảnh thật, hiện Image.file ở đây thay vì chuỗi text.
             if (proofUrl != null && proofUrl.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.sm),
               Container(
@@ -511,11 +513,11 @@ class _PendingCardState extends State<_PendingCard> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.photo_camera_rounded, size: 18),
+                    const Icon(Icons.info_outline_rounded, size: 18),
                     const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: Text(
-                        'Đã chụp ảnh bằng chứng: $proofUrl',
+                        'Việc này yêu cầu bố mẹ kiểm tra trực tiếp',
                         style: context.text.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),

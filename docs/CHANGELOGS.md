@@ -18,8 +18,18 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 - **Tiếng nói Linh vật Ong (§19)**:
   - Tích hợp thoại tương tác cho `BeeMascot` tại Dashboard vai con, phản hồi trực tiếp theo tiến độ hoàn thành công việc trong ngày.
 
-### [IMPROVE]
-- **Tối ưu Luồng Đổi thưởng & Đặt mục tiêu Tiết kiệm (§11, §16, §17)**:
+### [FIX]
+- **Sửa Lỗi Bằng chứng Ảnh & Trung thực Trạng thái (Audit 15 §1, Audit 17 §1)**:
+  - Loại bỏ chuỗi giả `local_captured_...` khi con hoàn thành việc yêu cầu ảnh. Đổi thông điệp thoại thành trung thực ("Cần bố mẹ xem").
+  - Màn hình duyệt của bố mẹ hiển thị đúng yêu cầu kiểm tra trực tiếp thay vì ghi đã có ảnh chụp giả.
+- **Tôn trọng Trải nghiệm Tuổi Teen (Audit 17 §2)**:
+  - Dialog ăn mừng huy hiệu chặn màn hình tôn trọng cờ `celebrateOnTap` — không bật lên quấy rầy đối với nhóm tuổi 13–15.
+- **Hoàn thiện Câu Động viên Huy hiệu (Roadmap §21, Audit 17 §3)**:
+  - Bổ sung đầy đủ vế thứ hai — lời động viên xưng "con" cho toàn bộ 11 huy hiệu.
+- **Loại bỏ Emoji Người trong Preset (Audit 15 §8)**:
+  - Đổi icon preset `exercise` từ `run` (🏃) sang `soccer` (⚽) để đảm bảo tính trung tính cho mọi bé.
+- **Bổ sung Chú thích 5 Cột Schema Chưa Nối (Audit 15 §6)**:
+  - Chú thích rõ ràng trạng thái và lý do bảo lưu trong `tables.dart` cho `currency`, `userId`, `startTime`, `dueTime`, `proofUrl`.
   - Nút `Đổi` trong `RewardsScreen` hiển thị trạng thái và tính toán số xu còn thiếu (`Thiếu X xu`) khi chưa đủ điều kiện đổi thưởng.
   - `GoalSheet` cho phép chọn nhanh các phần thưởng có sẵn trong gia đình để tự động điền mục tiêu tiết kiệm.
   - Trẻ có thể mở `GoalSheet` và tự đặt/đề xuất mục tiêu tiết kiệm trực tiếp từ màn hình chính của mình.

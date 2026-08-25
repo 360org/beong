@@ -131,12 +131,15 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
         if (ok != true || !mounted) return;
         proofNote = noteController.text.trim();
       } else if (task.proofMode == ProofMode.photo.name) {
+        // ponytail: chụp ảnh thật chưa có (thiếu image_picker). Chỉ nhắc con
+        // đưa bố mẹ xem — không ghi proofUrl giả, không nói "đã chụp ảnh".
+        // Nâng cấp: thêm image_picker, lưu file local, ghi đường dẫn thật.
         final ok = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Bằng chứng chụp ảnh'),
+            title: const Text('Cần bố mẹ xem'),
             content: const Text(
-              'Việc này yêu cầu chụp ảnh xác nhận. Hãy đưa bố mẹ kiểm tra sau khi bấm xong nhé!',
+              'Việc này cần bố mẹ kiểm tra. Nhớ đưa bố mẹ xem kết quả nhé!',
             ),
             actions: [
               TextButton(
@@ -151,7 +154,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
           ),
         );
         if (ok != true || !mounted) return;
-        proofUrl = 'local_captured_${DateTime.now().millisecondsSinceEpoch}';
+        // Không ghi proofUrl — chưa có ảnh thật thì không nói có.
       }
     }
 
@@ -163,6 +166,27 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
           proofUrl: proofUrl,
         );
     if (!mounted || ketQua.huyHieuMoi.isEmpty) return;
+
+    // Tôn trọng tuổi teen: hoa giấy và dialog chặn màn hình đều bỏ qua khi
+    // `celebrateOnTap == false` (audit 17 §2). Lấy scale từ member hiện tại.
+    final session = ref.read(sessionProvider);
+    if (session != null) {
+      final member = await ref
+          .read(memberRepositoryProvider)
+          .watchMember(session.activeMemberId)
+          .first;
+      if (!mounted) return;
+      final today =
+          (ref.watch(familyClockProvider(session.familyId)).value ??
+                  fallbackFamilyClock())
+              .today();
+      final scale = KidScale.forBirthYear(
+        member.birthYear,
+        currentYear: today.year,
+      );
+      if (!scale.celebrateOnTap) return;
+    }
+
     _khoeHuyHieu(ketQua.huyHieuMoi);
   }
 

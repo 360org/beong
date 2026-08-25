@@ -196,7 +196,11 @@ const kTaskPresets = <TaskPreset>[
     key: 'exercise',
     titleVi: 'Tập thể dục',
     titleEn: 'Exercise',
-    iconKey: 'run',
+    // Không dùng 'run' (🏃): hình người mang giới tính và màu da, không phù hợp
+    // dùng chung cho mọi bé. Xem quy tắc tại task_icons.dart.
+    // ponytail: Sếp chọn medal nhưng icon chưa có trong bundle — dùng soccer
+    // tạm. Nâng cấp: thêm file medal.svg vào assets/icons/ rồi đổi lại.
+    iconKey: 'soccer',
     defaultPoints: 20,
   ),
   TaskPreset(
