@@ -5,6 +5,7 @@ import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/du_lieu_may_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
+import 'package:beong/core/services/push_notification_service.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
@@ -220,6 +221,42 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     await ref
         .read(dayStartServiceProvider)
         .runIfNeeded(familyId: familyId, force: true);
+
+    // Màn mồi xin quyền thông báo trước khi vào trang chính
+    if (mounted) {
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          icon: const Icon(Icons.notifications_active_rounded, size: 48),
+          title: const Text('Đừng bỏ lỡ hoạt động của con'),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '• Nhận thông báo ngay khi con làm xong việc nhà\n'
+                '• Duyệt yêu cầu đổi thưởng kịp thời\n'
+                '• Nhắc nhở con hoàn thành mục tiêu trong ngày',
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('ĐỂ SAU'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                // Kích hoạt xin quyền push notification
+                unawaited(PushNotificationService.instance.initialize());
+              },
+              child: const Text('BẬT THÔNG BÁO'),
+            ),
+          ],
+        ),
+      );
+    }
 
     if (mounted) context.go('/');
   }

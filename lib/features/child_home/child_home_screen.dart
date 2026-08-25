@@ -99,10 +99,68 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
   /// Ở **cấp màn hình** chứ không trong thẻ việc: thẻ bị tháo ngay khi việc đổi
   /// mục, nên `mounted` của nó đã `false` lúc `complete()` trả về và huy hiệu
   /// vừa nhận sẽ rơi vào im lặng.
-  Future<void> _hoanThanhViec(String instanceId) async {
-    final ketQua = await ref
-        .read(taskReviewServiceProvider)
-        .complete(instanceId);
+  Future<void> _hoanThanhViec(String instanceId, Task? task) async {
+    String? proofNote;
+    String? proofUrl;
+
+    if (task != null) {
+      if (task.proofMode == ProofMode.note.name) {
+        final noteController = TextEditingController();
+        final ok = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Ghi chú cho bố mẹ'),
+            content: TextField(
+              controller: noteController,
+              decoration: const InputDecoration(
+                hintText: 'Nhập lời nhắn hoặc kết quả làm việc...',
+              ),
+              maxLines: 3,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: const Text('Huỷ'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: const Text('Xong'),
+              ),
+            ],
+          ),
+        );
+        if (ok != true || !mounted) return;
+        proofNote = noteController.text.trim();
+      } else if (task.proofMode == ProofMode.photo.name) {
+        final ok = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Bằng chứng chụp ảnh'),
+            content: const Text(
+              'Việc này yêu cầu chụp ảnh xác nhận. Hãy đưa bố mẹ kiểm tra sau khi bấm xong nhé!',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: const Text('Để sau'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: const Text('Đã xong'),
+              ),
+            ],
+          ),
+        );
+        if (ok != true || !mounted) return;
+        proofUrl = 'local_captured_${DateTime.now().millisecondsSinceEpoch}';
+      }
+    }
+
+    final ketQua = await ref.read(taskReviewServiceProvider).complete(
+      instanceId,
+      proofNote: proofNote,
+      proofUrl: proofUrl,
+    );
     if (!mounted || ketQua.huyHieuMoi.isEmpty) return;
     _khoeHuyHieu(ketQua.huyHieuMoi);
   }
@@ -882,7 +940,7 @@ class _InstanceCard extends StatelessWidget {
 
   /// Báo lên màn hình rằng con vừa bấm xong lượt này. Màn hình gọi service và
   /// xử lý kết quả — nó sống qua lần xếp lại danh sách, còn thẻ thì không.
-  final Future<void> Function(String instanceId) onComplete;
+  final Future<void> Function(String instanceId, Task? task) onComplete;
 
   @override
   Widget build(BuildContext context) {
@@ -911,7 +969,7 @@ class _InstanceCard extends StatelessWidget {
         // "Cần làm" xuống "Đã xong" ngay, thẻ này bị tháo, và mọi
         // `if (!mounted) return` sau `await` sẽ nuốt mất kết quả — đúng cái bẫy
         // đã làm hoa giấy không bao giờ hiện.
-        unawaited(onComplete(instance.id));
+        unawaited(onComplete(instance.id, task));
       },
     );
   }

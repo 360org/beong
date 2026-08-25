@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
-<link rel="stylesheet" href="style.css?v=0.2.6">
+<link rel="stylesheet" href="style.css?v=0.2.7">
 </head>
 <body>
 <a class="skip" href="#main">Bỏ qua, tới nội dung chính</a>
@@ -47,54 +47,65 @@
 <main id="main">
 
 <!-- HERO SECTION -->
-<section class="hero-section">
+<section class="hero-section" aria-labelledby="hero-title">
  <div class="wrap hero">
   <div>
-   <span class="eyebrow">🐝 Thay đổi tư duy dài hạn cho trẻ 5–15 tuổi</span>
-   <h1>Rèn luyện tư duy kế hoạch, làm chủ <span class="hl">giá trị công sức</span>.</h1>
-   <p class="lede">Bé Ong không chỉ là app làm việc nhà, mà là phương pháp giúp con <b>thay đổi thói quen và cách tư duy lâu dài</b>: tự lập kế hoạch qua checklist công việc rõ ràng, sắp xếp mức độ ưu tiên và định lượng chính xác thành quả thay vì cảm tính. Con hiểu rõ <b>trách nhiệm, nghĩa vụ</b> và biết tự hào khi đóng góp công sức tạo ra giá trị chung cho bản thân, gia đình và xã hội.</p>
+   <span class="eyebrow">🐝 App thói quen cho trẻ 5–15 tuổi</span>
+   <h1 id="hero-title">Việc nhà hôm nay nối với <span class="hl">mục tiêu dài hạn</span> của con.</h1>
+   <p class="lede">Bé Ong biến checklist hằng ngày thành một vòng động lực rõ ràng: con làm việc, nhận xu, chia vào hũ, đổi phần thưởng và nhìn thấy mình tiến gần hơn tới điều ước.</p>
    <div class="cta">
-    <a class="btn btn-primary" href="#tai-ung-dung">Tải ứng dụng ngay 📲</a>
-    <a class="btn btn-ghost" href="gioi-thieu.html">Khám phá phương pháp →</a>
+    <a class="btn btn-primary" href="#trang-thai">Xem lộ trình mới →</a>
+    <a class="btn btn-ghost" href="gioi-thieu.html">Khám phá phương pháp</a>
    </div>
-   <div class="note">
-    <span>✨ Dùng đủ khi mất mạng</span>
+   <div class="note" aria-label="Cam kết sản phẩm">
+    <span>📴 Offline-first</span>
     <span>•</span>
     <span>🛡️ Không quảng cáo</span>
     <span>•</span>
-    <span>🎁 Hoàn toàn miễn phí</span>
+    <span>🎁 Miễn phí v1</span>
    </div>
   </div>
-  <div class="phones">
-   <div class="phone tilt-l"><img src="img/26-child-home.jpg" width="340" height="743" alt="Màn hình của con: linh vật Bé Ong, vòng tiến độ và danh sách việc cần làm" loading="lazy"></div>
-   <div class="phone tilt-r"><img src="img/28-child-home-hoan-thanh.jpg" width="340" height="743" alt="Con làm xong 12 trên 12 việc và nhận huy hiệu Ong chăm chỉ hôm nay" loading="lazy"></div>
+  <div class="phones" aria-label="Ảnh chụp giao diện Bé Ong">
+   <div class="phone tilt-l"><img src="img/26-child-home.jpg" width="340" height="743" alt="Màn hình của con: linh vật Bé Ong, vòng tiến độ và danh sách việc cần làm" loading="eager" fetchpriority="high"></div>
+   <div class="phone tilt-r"><img src="img/28-child-home-hoan-thanh.jpg" width="340" height="743" alt="Con làm xong 12 trên 12 việc và nhận huy hiệu Ong chăm chỉ hôm nay" loading="eager" fetchpriority="high"></div>
   </div>
  </div>
 </section>
 
-<!-- BA LỜI HỨA -->
-<section class="band">
- <div class="wrap">
-  <div class="center-head">
-    <span class="eyebrow">🌱 Nguyên tắc vững chắc</span>
-    <h2>Những điều Bé Ong cam kết <em>không bao giờ làm</em></h2>
+<!-- VÒNG ĐỘNG LỰC -->
+<section class="band product-loop" aria-labelledby="loop-title">
+ <div class="wrap loop-grid">
+  <div>
+   <span class="eyebrow">🌱 Vòng động lực mới</span>
+   <h2 id="loop-title">Con không chỉ tick việc — con thấy mình lớn lên từng ngày</h2>
+   <p class="lede">Roadmap mới đẩy Bé Ong khỏi kiểu “làm xong rồi thôi”: việc có bằng chứng, phần thưởng có mục tiêu, huy hiệu có tiến độ, và bố mẹ thấy rõ trạng thái kết nối của từng bé.</p>
   </div>
-  <div class="grid g3" style="margin-top:36px">
-   <div class="card feature-card">
-    <div class="ico-badge">📴</div>
-    <h3>100% Không cần mạng</h3>
-    <p>Dữ liệu lưu an toàn trên máy của bạn. Không tài khoản, không máy chủ thu thập. Trên máy bay hay vùng không có 4G app vẫn chạy mượt mà.</p>
-   </div>
-   <div class="card feature-card">
-    <div class="ico-badge">🚫</div>
-    <h3>Không quảng cáo, không nạp tiền</h3>
-    <p>Không banner, không gạ mua bản Pro. Không có bất kỳ luồng chi tiền hay dụ trẻ nạp xu nào trong ứng dụng.</p>
-   </div>
-   <div class="card feature-card">
-    <div class="ico-badge">🔒</div>
-    <h3>Tuyệt đối không theo dõi</h3>
-    <p>Không đo lường hành vi, không định danh hồ sơ. Dữ liệu chỉ ra khỏi máy khi bố mẹ chủ động bấm nút gửi Báo lỗi trong app.</p>
-   </div>
+  <div class="loop-steps" aria-label="Luồng sử dụng chính">
+   <article class="loop-step"><b>1</b><span>Hoàn thành nhiệm vụ</span></article>
+   <article class="loop-step"><b>2</b><span>Nhận xu &amp; chia vào hũ</span></article>
+   <article class="loop-step"><b>3</b><span>Đổi thưởng hoặc đặt điều ước</span></article>
+   <article class="loop-step"><b>4</b><span>Mở huy hiệu &amp; tiến tới mục tiêu</span></article>
+  </div>
+ </div>
+</section>
+
+<!-- ROADMAP VISUAL -->
+<section class="roadmap-visual" aria-labelledby="roadmap-visual-title">
+ <div class="wrap visual-grid">
+  <div class="visual-copy">
+   <span class="eyebrow">🏅 Từ ảnh roadmap thành trải nghiệm thật</span>
+   <h2 id="roadmap-visual-title">Ba màn đang được nâng cấp để con hiểu “còn bao xa nữa”</h2>
+   <p class="lede">Roadmap mới học đúng phần đáng học từ ChoreReward: không chép giao diện, chỉ lấy những tín hiệu giúp trẻ tự hiểu tiến độ, mục tiêu và phần thưởng.</p>
+   <ul class="visual-list">
+    <li><b>Huy hiệu:</b> chia nhóm, đổi tên thành danh hiệu, thêm vòng cung tiến độ.</li>
+    <li><b>Phần thưởng:</b> nút Đổi mờ đúng lúc và nói rõ còn thiếu bao nhiêu xu.</li>
+    <li><b>Hành trình:</b> mục tiêu dài hạn lấy mốc từ phần thưởng thật, không nhập trùng.</li>
+   </ul>
+  </div>
+  <div class="screen-bento" aria-label="Các màn Bé Ong liên quan roadmap">
+   <figure class="screen-shot main"><img src="img/29-child-huy-hieu.jpg" width="340" height="743" alt="Màn huy hiệu của con trong Bé Ong" loading="lazy"><figcaption>Huy hiệu có tiến độ</figcaption></figure>
+   <figure class="screen-shot"><img src="img/34-child-doi-thuong.jpg" width="340" height="743" alt="Màn đổi thưởng của con trong Bé Ong" loading="lazy"><figcaption>Đổi thưởng nói trước</figcaption></figure>
+   <figure class="screen-shot"><img src="img/33-child-thong-ke.jpg" width="340" height="743" alt="Màn thống kê và mục tiêu tiết kiệm của con" loading="lazy"><figcaption>Hành trình mục tiêu</figcaption></figure>
   </div>
  </div>
 </section>
@@ -137,43 +148,45 @@
 </section>
 
 <!-- TRẠNG THÁI APP -->
-<section class="band" id="trang-thai">
+<section class="band" id="trang-thai" aria-labelledby="status-title">
  <div class="wrap">
   <div class="status-card">
    <div class="status-header">
      <span class="eyebrow">📢 Minh bạch phát hành</span>
-     <h2>Trạng thái phát hành phiên bản</h2>
+     <h2 id="status-title">Roadmap giao diện sau bản v0.2.7</h2>
    </div>
-   <p class="status-desc">Bé Ong hiện đạt phiên bản <b>v0.2.5</b>. Toàn bộ tính năng cốt lõi cho gia đình đã hoàn thiện và hoạt động ổn định trên thiết bị.</p>
-   <div class="status-grid">
+   <p class="status-desc">Bé Ong đã có lõi nhiệm vụ, xu, hũ, đổi thưởng, huy hiệu và mục tiêu tiết kiệm. Đợt tối ưu tiếp theo tập trung vào những chỗ trẻ nhìn thấy mỗi ngày: trạng thái ghép cặp, bằng chứng ảnh, hành trình mục tiêu và khoảnh khắc nhận huy hiệu.</p>
+   <div class="status-grid roadmap-grid">
     <div class="status-box done">
-      <h4>✅ Đã hoàn thiện</h4>
+      <h4>✅ Đã chạy ổn định</h4>
       <ul>
-        <li>Nhiệm vụ &amp; Thói quen kéo thả theo buổi</li>
-        <li>Hệ thống 3 hũ xu &amp; tuỳ biến hũ riêng</li>
-        <li>Đổi thưởng &amp; hàng đợi duyệt của bố mẹ</li>
-        <li>Huy hiệu, ngọn lửa Streak &amp; Mục tiêu tiết kiệm</li>
-        <li>Bảo mật từng hồ sơ (mật khẩu riêng con / bố mẹ)</li>
-        <li>Chế độ giao diện Sáng / Tối</li>
+        <li>Nhiệm vụ &amp; thói quen kéo thả</li>
+        <li>Hũ xu linh hoạt và con tự chia xu</li>
+        <li>Đổi thưởng, duyệt, hoàn xu khi từ chối</li>
+        <li>Mật khẩu riêng từng hồ sơ</li>
       </ul>
     </div>
     <div class="status-box doing">
-      <h4>⚡ Đang triển khai</h4>
+      <h4>⚡ Đang ưu tiên</h4>
       <ul>
-        <li>Đồng bộ nhiều thiết bị qua quét mã QR gia đình</li>
-        <li>Hỗ trợ ghép cặp máy con độc lập</li>
+        <li>Thẻ con hiện rõ Chưa kết nối / Đang chờ / Đã kết nối</li>
+        <li>Ảnh bằng chứng nằm ngay trên thẻ chờ duyệt</li>
+        <li>Nút đổi thưởng nói trước khi con chưa đủ xu</li>
+        <li>Thông tin pháp lý: Điều khoản, Riêng tư, Liên hệ</li>
       </ul>
     </div>
     <div class="status-box todo">
-      <h4>⏳ Kế hoạch kế tiếp</h4>
+      <h4>⏳ Tiếp theo</h4>
       <ul>
-        <li>Thông báo nhắc nhở nhẹ nhàng theo lịch</li>
-        <li>Phát hành chính thức lên App Store &amp; Google Play</li>
+        <li>Huy hiệu chia nhóm, có vòng tiến độ và tên như danh hiệu</li>
+        <li>Màn ăn mừng lật từng huy hiệu khi nhận nhiều cái</li>
+        <li>Hành trình mục tiêu lấy mốc từ phần thưởng thật</li>
+        <li>Thông báo nhắc nhẹ sau màn mồi xin quyền</li>
       </ul>
     </div>
    </div>
-   <div style="margin-top:24px;text-align:center;">
-    <a class="btn btn-primary" href="gioi-thieu.html">Xem chi tiết hướng dẫn tính năng →</a>
+   <div class="status-actions">
+    <a class="btn btn-primary" href="gioi-thieu.html">Xem chi tiết tính năng →</a>
    </div>
   </div>
  </div>

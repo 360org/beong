@@ -279,6 +279,107 @@ section { padding: clamp(56px, 8vw, 96px) 0; position: relative; }
 .phone:hover { transform: scale(1.04) translateY(-6px) rotate(0deg) !important; z-index: 10; }
 @media (max-width: 540px) { .phone.tilt-l { display: none; } }
 
+/* ── VÒNG ĐỘNG LỰC / ROADMAP ──────────────────────── */
+.product-loop { overflow: hidden; }
+.loop-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: clamp(28px, 5vw, 56px);
+  align-items: center;
+}
+.loop-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 14px;
+}
+.loop-step {
+  min-height: 136px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--surface), var(--honey-light));
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.loop-step b {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--honey);
+  color: var(--honey-ink);
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+}
+.loop-step span { font-weight: 800; line-height: 1.35; }
+.roadmap-visual { background: var(--bg); overflow: hidden; }
+.visual-grid {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: clamp(32px, 6vw, 72px);
+  align-items: center;
+}
+.visual-list {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+  display: grid;
+  gap: 12px;
+}
+.visual-list li {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--ink-muted);
+  box-shadow: var(--shadow-sm);
+}
+.visual-list b { color: var(--ink); }
+.screen-bento {
+  display: grid;
+  grid-template-columns: 1fr 0.72fr;
+  gap: 18px;
+  align-items: end;
+}
+.screen-shot {
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: var(--shadow-hover);
+  transform: rotate(4deg);
+}
+.screen-shot.main {
+  grid-row: span 2;
+  transform: rotate(-3deg);
+}
+.screen-shot img { border-radius: 22px; }
+.screen-shot figcaption {
+  padding: 10px 6px 4px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-align: center;
+}
+.status-actions { margin-top: 24px; text-align: center; }
+@media (max-width: 920px) {
+  .loop-grid, .visual-grid { grid-template-columns: 1fr; }
+  .loop-steps { grid-template-columns: repeat(2, 1fr); }
+  .screen-bento { max-width: 640px; margin: 0 auto; }
+}
+@media (max-width: 560px) {
+  .loop-steps { grid-template-columns: 1fr; }
+  .screen-bento { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .screen-shot { padding: 6px; border-radius: 20px; transform: none; }
+  .screen-shot.main { grid-column: 1 / -1; transform: none; }
+  .screen-shot img { border-radius: 16px; }
+  .screen-shot figcaption { font-size: 0.78rem; }
+}
+
 /* ── BA HŨ XU ──────────────────────────────────────── */
 .split { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(32px, 5vw, 64px); align-items: center; }
 @media (max-width: 880px) { .split { grid-template-columns: 1fr; } }

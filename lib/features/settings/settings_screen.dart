@@ -171,10 +171,65 @@ class SettingsScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.xxl),
-              Text('Thông tin', style: context.text.titleMedium),
+              Text('Thông tin & Hỗ trợ', style: context.text.titleMedium),
               const SizedBox(height: AppSpacing.md),
               _SettingsSection(
                 children: [
+                  _SettingsTile(
+                    icon: Icons.shield_outlined,
+                    title: 'Chính sách quyền riêng tư',
+                    subtitle: 'beong.net/quyen-rieng-tu.html',
+                    onTap: () => unawaited(
+                      showDialog<void>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Quyền riêng tư'),
+                          content: const Text(
+                            'Bé Ong là ứng dụng offline-first, tôn trọng tuyệt đối dữ liệu của gia đình.\n\n'
+                            '• Không thu thập thông tin cá nhân của trẻ\n'
+                            '• Dữ liệu lưu trữ an toàn trên thiết bị của bạn\n'
+                            '• Chi tiết tại: https://beong.net/quyen-rieng-tu.html',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(),
+                              child: const Text('ĐÓNG'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  _SettingsTile(
+                    icon: Icons.description_outlined,
+                    title: 'Điều khoản sử dụng',
+                    subtitle: 'beong.net/dieu-khoan.html',
+                    onTap: () => unawaited(
+                      showDialog<void>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Điều khoản sử dụng'),
+                          content: const Text(
+                            'Bé Ong được phát triển phi lợi nhuận vì cộng đồng bởi 360 CORP.\n\n'
+                            '• Miễn phí 100% không quảng cáo\n'
+                            '• Xem đầy đủ tại: https://beong.net/dieu-khoan.html',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(),
+                              child: const Text('ĐÓNG'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  _SettingsTile(
+                    icon: Icons.mail_outline_rounded,
+                    title: 'Liên hệ hỗ trợ',
+                    subtitle: 'info@beong.net',
+                    onTap: () {},
+                  ),
                   _SettingsTile(
                     icon: Icons.bug_report_outlined,
                     title: 'Báo lỗi',
@@ -334,12 +389,34 @@ class _MemberTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(member.displayName, style: context.text.titleSmall),
-                    Text(
-                      isParent ? 'Bố mẹ' : 'Trẻ',
-                      style: context.text.bodySmall?.copyWith(
-                        color: context.semantic.onSurfaceMuted,
+                    if (isParent)
+                      Text(
+                        'Bố mẹ',
+                        style: context.text.bodySmall?.copyWith(
+                          color: context.semantic.onSurfaceMuted,
+                        ),
+                      )
+                    else
+                      Row(
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: context.semantic.warning,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Text(
+                            'Chưa kết nối máy',
+                            style: context.text.bodySmall?.copyWith(
+                              color: context.semantic.warning,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
                   ],
                 ),
               ),

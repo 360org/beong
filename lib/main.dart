@@ -4,11 +4,15 @@ import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/du_lieu_may_provider.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/providers/theme_mode_provider.dart';
+import 'package:beong/core/services/push_notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Khởi tạo dịch vụ push notification
+  await PushNotificationService.instance.initialize();
 
   // Gắn **trước** mọi thứ khác: lỗi lúc mở DB hay lúc nạp session cũng phải vào
   // được nhật ký, và đó chính là loại lỗi khó tái tạo nhất.

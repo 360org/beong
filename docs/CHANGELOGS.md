@@ -4,6 +4,27 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.2.7+15 (2026-08-25) — Hoàn thiện Bằng chứng Việc nhà, Pháp lý Store & Trạng thái Ghép cặp
+
+### [NEW]
+- **Hoàn thiện luồng Bằng chứng Việc nhà (`proof_mode`)**:
+  - Tích hợp ghi chú / chụp ảnh khi con bấm hoàn thành nhiệm vụ có yêu cầu bằng chứng (`ProofMode.note`, `ProofMode.photo`).
+  - Hàng đợi duyệt của Bố Mẹ hiển thị đầy đủ ghi chú và bằng chứng kèm theo để duyệt/từ chối chính xác.
+- **Màn mồi xin quyền Push Notification (Pre-permission Flow)**:
+  - Hiển thị màn mồi giải thích lợi ích sau Onboarding trước khi kích hoạt dialog xin quyền push của OS, tránh bị từ chối mất quyền vĩnh viễn trên iOS.
+  - Khởi tạo `PushNotificationService` trong `main.dart`.
+
+### [IMPROVE]
+- **Bổ sung Thông tin Pháp lý & Hỗ trợ trong Cài đặt**:
+  - Thêm mục Chính sách quyền riêng tư (`beong.net/quyen-rieng-tu.html`), Điều khoản sử dụng (`beong.net/dieu-khoan.html`) và Email hỗ trợ (`info@beong.net`) đáp ứng quy định kiểm duyệt của App Store & Google Play.
+- **Hiện trạng thái kết nối máy con trong Cài đặt**:
+  - Thẻ thành viên trẻ hiển thị trạng thái kết nối thực tế (`Chưa kết nối máy`).
+- **Dọn dẹp & Chuẩn hoá Repository**:
+  - Xoá file `CHANGELOGS.md` trùng lặp ở root.
+  - Chuẩn hoá quy tắc duyệt phần thưởng theo ADR-025.
+
+---
+
 ## v0.2.7+14 (2026-08-24) — Tích hợp Push Notification (Supabase + FCM) & Cải tiến Giao diện (Audit Phần II)
 
 ### [NEW]

@@ -249,15 +249,21 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
     )..where((i) => i.id.equals(instanceId))).watchSingleOrNull();
   }
 
-  /// Con bấm xong, việc vào hàng đợi duyệt.
+  /// Con bấm xong, việc vào hàng đợi duyệt kèm bằng chứng tuỳ chọn.
   ///
   /// **Quyết định auto/manual không nằm ở đây** mà ở `TaskReviewService`: nó
   /// phụ thuộc cấu hình gia đình lẫn cấu hình task, và cộng xu là việc của ví.
-  Future<void> markPendingReview(String instanceId) async {
+  Future<void> markPendingReview(
+    String instanceId, {
+    String? proofUrl,
+    String? proofNote,
+  }) async {
     await (update(taskInstances)..where((i) => i.id.equals(instanceId))).write(
       TaskInstancesCompanion(
         status: Value(InstanceStatus.pendingReview.name),
         completedAt: Value(DateTime.now()),
+        proofUrl: Value(proofUrl),
+        proofNote: Value(proofNote),
       ),
     );
   }

@@ -47,7 +47,11 @@ class TaskReviewService {
   /// sách huy hiệu mới, nhưng trước đây chỗ gọi vứt đi — nên con đạt huy hiệu
   /// mà màn hình **không nói gì cả**, phải tự mò vào màn Huy hiệu mới biết.
   /// Một cột mốc không ai chúc mừng thì không còn là cột mốc.
-  Future<KetQuaHoanThanh> complete(String instanceId) async {
+  Future<KetQuaHoanThanh> complete(
+    String instanceId, {
+    String? proofUrl,
+    String? proofNote,
+  }) async {
     final instance = await _tasks.getInstanceById(instanceId);
     if (instance == null) return const KetQuaHoanThanh.khongDoiGi();
     if (instance.status != InstanceStatus.scheduled.name) {
@@ -68,7 +72,11 @@ class TaskReviewService {
         );
 
     if (mustReview) {
-      await _tasks.markPendingReview(instanceId);
+      await _tasks.markPendingReview(
+        instanceId,
+        proofUrl: proofUrl,
+        proofNote: proofNote,
+      );
       return const KetQuaHoanThanh.choDuyet();
     }
 

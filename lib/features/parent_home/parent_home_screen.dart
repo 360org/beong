@@ -403,70 +403,128 @@ class _PendingCardState extends State<_PendingCard> {
     final task = _task;
     if (task == null) return const SizedBox.shrink();
 
+    final proofUrl = widget.instance.proofUrl;
+    final proofNote = widget.instance.proofNote;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(task.title, style: context.text.bodyLarge),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    '+${task.points} xu',
-                    style: context.text.bodySmall?.copyWith(
-                      color: context.semantic.xuText,
-                      fontWeight: FontWeight.w700,
-                    ),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(task.title, style: context.text.bodyLarge),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        '+${task.points} xu',
+                        style: context.text.bodySmall?.copyWith(
+                          color: context.semantic.xuText,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                IconButton(
+                  onPressed: () async {
+                    await widget.reviewService.reject(
+                      instanceId: widget.instance.id,
+                      reviewerId: widget.reviewerId,
+                    );
+                    widget.onActioned();
+                  },
+                  icon: Icon(
+                    Icons.close_rounded,
+                    color: context.semantic.danger,
+                  ),
+                  tooltip: 'Từ chối',
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                IconButton(
+                  onPressed: _reopen,
+                  icon: Icon(
+                    Icons.replay_rounded,
+                    color: context.semantic.warning,
+                  ),
+                  // "Chưa làm" chứ không phải "Từ chối": từ chối là đóng lượt lại,
+                  // còn mở lại là trả việc về cho con làm tiếp.
+                  tooltip: 'Chưa làm — mở lại',
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                IconButton.filled(
+                  onPressed: () async {
+                    // Cộng xu và thưởng trọn bộ routine nằm trong service, không
+                    // rải ở UI: đường tự động duyệt cũng phải chạy đúng logic đó.
+                    await widget.reviewService.approve(
+                      instanceId: widget.instance.id,
+                      reviewerId: widget.reviewerId,
+                    );
+                    widget.onActioned();
+                  },
+                  icon: const Icon(Icons.check_rounded),
+                  style: IconButton.styleFrom(
+                    backgroundColor: context.semantic.success,
+                    foregroundColor: Colors.white,
+                  ),
+                  tooltip: 'Duyệt',
+                ),
+              ],
             ),
-            IconButton(
-              onPressed: () async {
-                await widget.reviewService.reject(
-                  instanceId: widget.instance.id,
-                  reviewerId: widget.reviewerId,
-                );
-                widget.onActioned();
-              },
-              icon: Icon(
-                Icons.close_rounded,
-                color: context.semantic.danger,
+            if (proofNote != null && proofNote.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: context.colors.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(AppRadius.field),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.edit_note_rounded, size: 18),
+                    const SizedBox(width: AppSpacing.xs),
+                    Expanded(
+                      child: Text(
+                        proofNote,
+                        style: context.text.bodyMedium?.copyWith(
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              tooltip: 'Từ chối',
-            ),
-            const SizedBox(width: AppSpacing.xs),
-            IconButton(
-              onPressed: _reopen,
-              icon: Icon(
-                Icons.replay_rounded,
-                color: context.semantic.warning,
+            ],
+            if (proofUrl != null && proofUrl.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: context.colors.primaryContainer.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(AppRadius.field),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.photo_camera_rounded, size: 18),
+                    const SizedBox(width: AppSpacing.xs),
+                    Expanded(
+                      child: Text(
+                        'Đã chụp ảnh bằng chứng: $proofUrl',
+                        style: context.text.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              // "Chưa làm" chứ không phải "Từ chối": từ chối là đóng lượt lại,
-              // còn mở lại là trả việc về cho con làm tiếp.
-              tooltip: 'Chưa làm — mở lại',
-            ),
-            const SizedBox(width: AppSpacing.xs),
-            IconButton.filled(
-              onPressed: () async {
-                // Cộng xu và thưởng trọn bộ routine nằm trong service, không
-                // rải ở UI: đường tự động duyệt cũng phải chạy đúng logic đó.
-                await widget.reviewService.approve(
-                  instanceId: widget.instance.id,
-                  reviewerId: widget.reviewerId,
-                );
-                widget.onActioned();
-              },
-              icon: const Icon(Icons.check_rounded),
-              style: IconButton.styleFrom(
-                backgroundColor: context.semantic.success,
-                foregroundColor: Colors.white,
-              ),
-              tooltip: 'Duyệt',
-            ),
+            ],
           ],
         ),
       ),
