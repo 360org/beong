@@ -123,6 +123,13 @@ jobs:
           echo "Build number: $BUILD_NUMBER"
           flutter build appbundle --release --build-number="$BUILD_NUMBER"
 
+      - name: Lưu trữ file AAB (Artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: beong-release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 14
+
       # `printf %s` với giá trị đi qua env, không phải `echo '...'` nội suy
       # thẳng: JSON có dấu nháy đơn là câu lệnh vỡ, và giá trị lọt vào chỗ shell
       # phân tích cú pháp là thứ không nên có.
