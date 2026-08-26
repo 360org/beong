@@ -4,6 +4,18 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.2.11+19 (2026-08-26) — Triệt tiêu Lỗi Analyzer `discarded_futures` & Ổn định Hoàn toàn Pipeline CI
+
+### [FIX]
+- **Sửa Triệt để Lỗi Bất đồng bộ Không Chờ (`discarded_futures`)**:
+  - Bọc `unawaited(...)` cho các hiệu ứng hoạt ảnh cố ý không chặn:
+    - `BeeMascot._syncAnimation` và `BeeMascot.onTap` (`lib/core/widgets/bee_mascot.dart`).
+    - `ConfettiBurst._play` (`lib/core/widgets/celebration.dart`).
+    - `OnboardingScreen._nextPage` (`lib/features/onboarding/onboarding_screen.dart`).
+  - Thêm `import 'dart:async';` đảm bảo đúng thứ tự import và định dạng.
+
+---
+
 ## v0.2.10+18 (2026-08-26) — Chuẩn hoá Ràng buộc Kiến trúc & Danh mục Icon Huy hiệu
 
 ### [FIX]
