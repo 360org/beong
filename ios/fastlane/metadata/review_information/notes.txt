@@ -1,0 +1,8 @@
+Bé Ong is a family-oriented offline application.
+
+Getting Started for Reviewers:
+1. On the initial setup screen (Onboarding), you can quickly create a sample family (e.g., "Our Family"), add a child profile, and select preset routines.
+2. During setup, you will set a 4-digit PIN for the Parent profile and an optional PIN for the Child profile (e.g., Parent: 1234, Child: optional/skip).
+3. Switch seamlessly between Parent and Child modes using the top avatar/profile icon.
+4. The app operates completely locally on device SQLite without requiring external internet login or third-party authentication.
+5. All features (chores, habits, reward redemption, savings jars) are immediately testable.

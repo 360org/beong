@@ -1,0 +1,7 @@
+Welcome to the latest version of Bé Ong!
+
+What's New:
+• Expanded chore templates and presets for children starting from age 3.
+• Added optional Photo Evidence feature for task verification.
+• Improved Coin Allocation screen with draft-saving capability.
+• Enhanced performance, animations, and iOS experience.

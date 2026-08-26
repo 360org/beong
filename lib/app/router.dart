@@ -82,9 +82,11 @@ String? diemDenDauTien({
   // Đã chọn người dùng rồi thì hai màn "chưa vào được" kia không còn nghĩa.
   if (laOnboarding || laChonNguoiDung) return Routes.home;
 
-  // Vai con không có Cài đặt và Thống kê phụ huynh.
+  // Vai con không có Cài đặt, Thống kê và Nhiệm vụ (chỉ bố mẹ quản lý).
   if (!session.isParent &&
-      (viTri.startsWith(Routes.settings) || viTri.startsWith(Routes.stats))) {
+      (viTri.startsWith(Routes.settings) ||
+          viTri.startsWith(Routes.stats) ||
+          viTri.startsWith(Routes.tasks))) {
     return Routes.home;
   }
 
@@ -259,6 +261,7 @@ final _branches = <_Branch>[
     label: (c) => L10n.of(c).navTasks,
     icon: Icons.fact_check_outlined,
     selectedIcon: Icons.fact_check_rounded,
+    audience: RoleAudience.parentOnly,
   ),
   // 2: Rewards
   _Branch(

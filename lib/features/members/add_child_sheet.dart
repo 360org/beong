@@ -1,9 +1,15 @@
+import 'dart:convert';
+
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/entities/presets.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
+import 'package:beong/domain/repositories/task_repository.dart';
+import 'package:beong/domain/services/family_clock.dart';
+import 'package:beong/domain/services/jar_splitter.dart';
 import 'package:beong/features/members/child_profile_form.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
 import 'package:drift/drift.dart' show Value;
@@ -12,9 +18,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 /// Thêm một bé nữa vào gia đình.
-///
-/// Onboarding chỉ khai được **một** bé, và trước sheet này không có đường nào
-/// khác — nhà hai con phải đăng xuất rồi làm lại từ đầu, mất luôn dữ liệu cũ.
 Future<bool?> showAddChildSheet(
   BuildContext context, {
   required String familyId,
@@ -54,6 +57,15 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
   int? _birthYear;
   bool _busy = false;
 
+  // Bật/tắt mã PIN
+  bool _enablePin = false;
+
+  // Tuỳ chỉnh hũ riêng
+  JarSplit? _customJarSplit;
+
+  // Gán việc mẫu hàng loạt
+  Set<String> _selectedPresets = <String>{};
+
   @override
   void initState() {
     super.initState();
@@ -75,6 +87,10 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
     final childId = const Uuid().v4();
     final ten = _name.text.trim();
 
+    final jarSplitJson = _customJarSplit != null
+        ? jsonEncode(_customJarSplit!.toJson())
+        : null;
+
     await ref
         .read(memberRepositoryProvider)
         .addMember(
@@ -86,20 +102,51 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
             colorIndex: Value(_colorIndex),
             avatarKey: Value(_avatar),
             birthYear: Value(_birthYear),
+            jarSplitOverride: Value(jarSplitJson),
           ),
         );
+
+    // Tự động tạo và gán các việc mẫu đã chọn cho bé
+    if (_selectedPresets.isNotEmpty) {
+      final taskDao = ref.read(taskRepositoryProvider);
+      for (final presetKey in _selectedPresets) {
+        final preset = kTaskPresets.firstWhere((p) => p.key == presetKey);
+        final taskId = 'task-preset-$presetKey-$childId-${DateTime.now().millisecondsSinceEpoch}';
+        await taskDao.createTask(
+          TasksCompanion.insert(
+            id: taskId,
+            familyId: widget.familyId,
+            title: preset.titleVi,
+            iconKey: Value(preset.iconKey),
+            presetKey: Value(preset.key),
+            points: Value(preset.defaultPoints),
+            dayPart: Value(preset.dayPart),
+            repeatType: const Value('daily'),
+          ),
+          [childId],
+        );
+      }
+      // Tự động sinh luôn instance hôm nay cho bé
+      final clock = FamilyClock(timeZoneOffset: DateTime.now().timeZoneOffset);
+      await taskDao.generateInstances(
+        familyId: widget.familyId,
+        today: clock.today(),
+      );
+    }
+
     if (!mounted) return;
 
-    // Cho phép tuỳ chọn đặt mật khẩu hoặc không cho bé (batBuoc: false).
-    await datMatKhauMoi(
-      context,
-      memberId: childId,
-      tenHienThi: ten,
-      service: ref.read(matKhauHoSoProvider),
-      moTa:
-          'Bốn chữ số cho hồ sơ của $ten (tuỳ chọn). Bé nhập nó để mở hồ sơ của mình; '
-          'bấm HUỶ nếu không cần mật khẩu. Bố mẹ đặt lại được bất cứ lúc nào.',
-    );
+    if (_enablePin) {
+      await datMatKhauMoi(
+        context,
+        memberId: childId,
+        tenHienThi: ten,
+        service: ref.read(matKhauHoSoProvider),
+        moTa:
+            'Bốn chữ số cho hồ sơ của $ten. Bé nhập nó để mở hồ sơ của mình; '
+            'bố mẹ có thể đổi hoặc tắt lại bất cứ lúc nào.',
+      );
+    }
 
     if (mounted) Navigator.of(context).pop(true);
   }
@@ -120,9 +167,14 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
             onAvatarChanged: (a) => setState(() => _avatar = a),
             birthYear: _birthYear,
             onBirthYearChanged: (y) => setState(() => _birthYear = y),
-            // Bàn phím bật sẵn trong sheet sẽ che mất ô chọn con vật và màu
-            // ngay khi sheet vừa mở.
             autofocus: false,
+            onClose: () => Navigator.of(context).pop(false),
+            hasPin: _enablePin,
+            onTogglePin: (val) => setState(() => _enablePin = val),
+            customJarSplit: _customJarSplit,
+            onJarSplitChanged: (split) => setState(() => _customJarSplit = split),
+            selectedPresetKeys: _selectedPresets,
+            onPresetsChanged: (keys) => setState(() => _selectedPresets = keys),
           ),
           const SizedBox(height: AppSpacing.xxl),
           SizedBox(

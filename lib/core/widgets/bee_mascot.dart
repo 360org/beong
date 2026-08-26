@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -80,7 +79,7 @@ class _BeeMascotState extends State<BeeMascot>
 
   void _syncAnimation() {
     if (widget.mood == BeeMood.celebrating) {
-      unawaited(_controller.repeat(reverse: true));
+      _controller.repeat(reverse: true);
     } else {
       _controller
         ..stop()
@@ -97,21 +96,18 @@ class _BeeMascotState extends State<BeeMascot>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         final onTap = widget.onTap;
         if (onTap != null) {
           onTap();
         } else {
           // Nảy một lượt khi chạm vào linh vật
-          unawaited(
-            _controller.forward(from: 0).then((_) {
-              if (widget.mood == BeeMood.celebrating) {
-                unawaited(_controller.repeat(reverse: true));
-              } else {
-                _controller.value = 0;
-              }
-            }),
-          );
+          await _controller.forward(from: 0);
+          if (widget.mood == BeeMood.celebrating) {
+            _controller.repeat(reverse: true);
+          } else {
+            _controller.value = 0;
+          }
         }
       },
       child: AnimatedBuilder(

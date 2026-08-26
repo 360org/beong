@@ -4,6 +4,7 @@ import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/bee_mascot.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/repositories/goal_repository.dart';
@@ -15,9 +16,9 @@ import 'package:beong/features/goals/goal_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Màn hình Hành trình — Trực quan hoá đường tới đích tiết kiệm của con (§13).
+/// Màn hình Hành trình — Bản đồ leo núi nấc thang phiêu lưu chinh phục mục tiêu tiết kiệm (§13).
 ///
-/// Bản đồ tiến độ với các cột mốc (milestones) dọc đường và vị trí hiện tại của bé.
+/// Thể hiện các mốc chinh phục từ chân núi lên đỉnh núi (tương tự benchmark Chore Rewards).
 class JourneyScreen extends ConsumerWidget {
   const JourneyScreen({super.key});
 
@@ -37,7 +38,7 @@ class JourneyScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hành trình của con'),
+        title: const Text('Bản đồ hành trình'),
       ),
       body: StreamBuilder<SavingsGoal?>(
         stream: goalDao.watchActiveGoal(memberId),
@@ -82,12 +83,13 @@ class JourneyScreen extends ConsumerWidget {
                           final rewards = rewardSnap.data ?? const <Reward>[];
 
                           return ListView(
-                            padding: const EdgeInsets.all(
-                              AppSpacing.screenPaddingMobile,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.screenPaddingMobile,
+                              vertical: AppSpacing.lg,
                             ),
                             children: [
-                              // Thẻ mục tiêu hiện tại
-                              _CurrentGoalCard(
+                              // Thẻ đỉnh núi mục tiêu vinh quang
+                              _PeakGoalCard(
                                 goal: goal,
                                 saved: saved,
                                 target: target,
@@ -100,22 +102,45 @@ class JourneyScreen extends ConsumerWidget {
                                   current: goal,
                                 ),
                               ),
-                              const SizedBox(height: AppSpacing.xxl),
+                              const SizedBox(height: AppSpacing.xl),
 
-                              // Bản đồ hành trình từng mốc
-                              Text(
-                                'BẢN ĐỒ TIẾN ĐỘ',
-                                style: context.text.labelMedium?.copyWith(
-                                  color: context.semantic.onSurfaceMuted,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.5,
-                                ),
+                              // Header bản đồ
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const AppIcon('compass', size: 20),
+                                      const SizedBox(width: AppSpacing.xs),
+                                      Text(
+                                        'CON ĐƯỜNG CHINH PHỤC ĐỈNH CAO',
+                                        style:
+                                            context.text.labelMedium?.copyWith(
+                                          color: context.semantic.onSurfaceMuted,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Text(
+                                    '${(progress * 100).toInt()}%',
+                                    style: context.text.labelSmall?.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      color: context.colors.primary,
+                                    ),
+                                  ),
+                                ],
                               ),
                               const SizedBox(height: AppSpacing.md),
-                              _JourneyMap(
+
+                              // Bản đồ nấc thang phiêu lưu leo núi
+                              _AdventureMountainMap(
                                 goal: goal,
                                 saved: saved,
                                 target: target,
+                                progress: progress,
                                 rewards: rewards,
                               ),
                             ],
@@ -153,10 +178,10 @@ class _NoGoalJourneyView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const AppIcon('target', size: 64),
+            const BeeMascot(mood: BeeMood.happy, size: 96),
             const SizedBox(height: AppSpacing.xl),
             Text(
-              'Chưa có mục tiêu nào',
+              'Chưa có hành trình nào',
               style: context.text.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -164,7 +189,7 @@ class _NoGoalJourneyView extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Hãy đặt một mục tiêu để cùng linh vật Bé Ong chinh phục hành trình tiết kiệm!',
+              'Hãy đặt một mục tiêu để cùng Bé Ong leo núi phiêu lưu và chinh phục phần thưởng nhé!',
               style: context.text.bodyMedium?.copyWith(
                 color: context.semantic.onSurfaceMuted,
               ),
@@ -179,7 +204,7 @@ class _NoGoalJourneyView extends StatelessWidget {
                 childName: childName,
               ),
               icon: const Icon(Icons.flag_rounded),
-              label: const Text('ĐẶT MỤC TIÊU NGAY'),
+              label: const Text('BẮT ĐẦU HÀNH TRÌNH'),
             ),
           ],
         ),
@@ -188,8 +213,9 @@ class _NoGoalJourneyView extends StatelessWidget {
   }
 }
 
-class _CurrentGoalCard extends StatelessWidget {
-  const _CurrentGoalCard({
+/// Thẻ đỉnh núi mục tiêu với tiến độ và nút sửa.
+class _PeakGoalCard extends StatelessWidget {
+  const _PeakGoalCard({
     required this.goal,
     required this.saved,
     required this.target,
@@ -206,115 +232,152 @@ class _CurrentGoalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reached = saved >= target;
-    final iconKey = goal.iconKey ?? 'target';
+    final iconKey = goal.iconKey ?? 'trophy';
 
-    return Card(
-      color: reached
-          ? context.semantic.success.withValues(alpha: 0.12)
-          : context.colors.primaryContainer.withValues(alpha: 0.6),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                AppIcon.task(iconKey, size: 36),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        goal.title,
-                        style: context.text.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        reached
-                            ? '🎉 Đã đạt mục tiêu!'
-                            : 'Đã tích luỹ được $saved / $target xu',
-                        style: context.text.bodySmall?.copyWith(
-                          color: reached
-                              ? context.semantic.success
-                              : context.semantic.onSurfaceMuted,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      decoration: BoxDecoration(
+        gradient: context.dashboardGradient,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.22),
+                  borderRadius: BorderRadius.circular(AppRadius.field),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.edit_rounded, size: 20),
-                  tooltip: 'Đổi mục tiêu',
-                  onPressed: onEdit,
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 10,
-                backgroundColor: context.colors.surfaceContainerHighest,
-                valueColor: AlwaysStoppedAnimation(
-                  reached ? context.semantic.success : context.colors.primary,
+                child: AppIcon.task(iconKey, size: 34),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ĐÍCH ĐẾN: ${goal.title.toUpperCase()}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white.withValues(alpha: 0.85),
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      reached
+                          ? '🎉 ĐÃ CHINH PHỤC ĐỈNH CAO!'
+                          : '$saved / $target xu',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              IconButton(
+                icon: const Icon(Icons.edit_rounded, color: Colors.white, size: 20),
+                tooltip: 'Đổi mục tiêu',
+                onPressed: onEdit,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 12,
+              backgroundColor: Colors.white.withValues(alpha: 0.25),
+              valueColor: const AlwaysStoppedAnimation(Colors.white),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _JourneyMap extends StatelessWidget {
-  const _JourneyMap({
+/// Bản đồ nấc thang leo núi phiêu lưu từ chân núi lên đỉnh núi.
+class _AdventureMountainMap extends StatelessWidget {
+  const _AdventureMountainMap({
     required this.goal,
     required this.saved,
     required this.target,
+    required this.progress,
     required this.rewards,
   });
 
   final SavingsGoal goal;
   final int saved;
   final int target;
+  final double progress;
   final List<Reward> rewards;
 
   @override
   Widget build(BuildContext context) {
-    // Xây dựng các mốc hành trình: 25%, 50%, 75%, 100%
-    final milestones = <_Milestone>[
-      _Milestone(
-        percent: 0.25,
-        targetXu: (target * 0.25).round(),
-        title: 'Khởi động vững chắc',
-        iconKey: 'sparkles',
-      ),
-      _Milestone(
-        percent: 0.50,
-        targetXu: (target * 0.50).round(),
-        title: 'Nửa chặng đường',
-        iconKey: 'compass',
-      ),
-      _Milestone(
-        percent: 0.75,
-        targetXu: (target * 0.75).round(),
-        title: 'Sắp về đích rồi!',
-        iconKey: 'fire',
-      ),
-      _Milestone(
+    // 5 mốc bậc thang từ chân núi (0%) lên đỉnh núi (100%)
+    final milestones = <_AdventureMilestone>[
+      _AdventureMilestone(
+        level: 4,
         percent: 1,
         targetXu: target,
-        title: goal.title,
+        title: 'ĐỈNH VINH QUANG: ${goal.title}',
+        subtitle: 'Chạm tay vào phần thưởng mơ ước!',
         iconKey: goal.iconKey ?? 'trophy',
-        isFinal: true,
+        isSummit: true,
+      ),
+      _AdventureMilestone(
+        level: 3,
+        percent: 0.75,
+        targetXu: (target * 0.75).round(),
+        title: 'Trạm Cao Nguyên (75%)',
+        subtitle: 'Sắp tới đỉnh rồi, cố thêm chút nữa!',
+        iconKey: 'fire',
+      ),
+      _AdventureMilestone(
+        level: 2,
+        percent: 0.50,
+        targetXu: (target * 0.50).round(),
+        title: 'Lưng Chừng Núi (50%)',
+        subtitle: 'Đã hoàn thành nửa chặng đường!',
+        iconKey: 'compass',
+      ),
+      _AdventureMilestone(
+        level: 1,
+        percent: 0.25,
+        targetXu: (target * 0.25).round(),
+        title: 'Trạm Nghỉ Đầu Tiên (25%)',
+        subtitle: 'Khởi động vững vàng, tự tin tiến bước!',
+        iconKey: 'sparkles',
+      ),
+      const _AdventureMilestone(
+        level: 0,
+        percent: 0,
+        targetXu: 0,
+        title: 'Chân Núi Khởi Đầu',
+        subtitle: 'Bắt đầu tích luỹ xu từ việc nhà!',
+        iconKey: 'sunrise',
+        isBase: true,
       ),
     ];
+
+    // Xác định mốc hiện tại bé đang đứng
+    var currentStepIndex = 0;
+    for (var i = 0; i < milestones.length; i++) {
+      if (saved >= milestones[i].targetXu) {
+        currentStepIndex = i;
+        break;
+      }
+    }
 
     return Card(
       child: Padding(
@@ -324,16 +387,17 @@ class _JourneyMap extends StatelessWidget {
         ),
         child: Column(
           children: [
-            for (var i = milestones.length - 1; i >= 0; i--) ...[
-              _MilestoneTile(
+            for (var i = 0; i < milestones.length; i++) ...[
+              _AdventureMilestoneStep(
                 milestone: milestones[i],
                 saved: saved,
-                isTop: i == milestones.length - 1,
-                isBottom: i == 0,
+                isCurrentPosition: i == currentStepIndex,
+                alignRight: i.isOdd,
               ),
-              if (i > 0)
-                _ConnectingTrack(
-                  isPassed: saved >= milestones[i - 1].targetXu,
+              if (i < milestones.length - 1)
+                _SteppedClimbingPath(
+                  isPassed: saved >= milestones[i].targetXu,
+                  curveToRight: i.isEven,
                 ),
             ],
           ],
@@ -343,80 +407,105 @@ class _JourneyMap extends StatelessWidget {
   }
 }
 
-class _Milestone {
-  const _Milestone({
+class _AdventureMilestone {
+  const _AdventureMilestone({
+    required this.level,
     required this.percent,
     required this.targetXu,
     required this.title,
+    required this.subtitle,
     required this.iconKey,
-    this.isFinal = false,
+    this.isSummit = false,
+    this.isBase = false,
   });
 
+  final int level;
   final double percent;
   final int targetXu;
   final String title;
+  final String subtitle;
   final String iconKey;
-  final bool isFinal;
+  final bool isSummit;
+  final bool isBase;
 }
 
-class _MilestoneTile extends StatelessWidget {
-  const _MilestoneTile({
+/// Từng trạm dừng chân trên con đường leo núi.
+class _AdventureMilestoneStep extends StatelessWidget {
+  const _AdventureMilestoneStep({
     required this.milestone,
     required this.saved,
-    required this.isTop,
-    required this.isBottom,
+    required this.isCurrentPosition,
+    required this.alignRight,
   });
 
-  final _Milestone milestone;
+  final _AdventureMilestone milestone;
   final int saved;
-  final bool isTop;
-  final bool isBottom;
+  final bool isCurrentPosition;
+  final bool alignRight;
 
   @override
   Widget build(BuildContext context) {
     final reached = saved >= milestone.targetXu;
-    final isCurrent =
-        !reached &&
-        (milestone.targetXu == 0 ||
-            saved >= (milestone.targetXu * 0.5).round());
 
     return Row(
       children: [
-        // Điểm mốc dạng hình tròn
-        Container(
-          width: 52,
-          height: 52,
+        // Marker icon nấc thang
+        Stack(
+          clipBehavior: Clip.none,
           alignment: Alignment.center,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: reached
-                ? context.semantic.success
-                : (isCurrent
-                      ? context.colors.primary
-                      : context.colors.surfaceContainerHighest),
-            border: Border.all(
-              color: reached
-                  ? AppColors.brand360Green
-                  : (isCurrent
-                        ? context.colors.primary
-                        : context.colors.outlineVariant),
-              width: 3,
-            ),
-            boxShadow: isCurrent
-                ? [
-                    BoxShadow(
-                      color: context.colors.primary.withValues(alpha: 0.3),
-                      blurRadius: 10,
-                      spreadRadius: 2,
+          children: [
+            Container(
+              width: milestone.isSummit ? 64 : 54,
+              height: milestone.isSummit ? 64 : 54,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: reached
+                    ? (milestone.isSummit
+                        ? AppColors.beOngHoney
+                        : context.semantic.success)
+                    : (isCurrentPosition
+                        ? context.colors.primaryContainer
+                        : context.colors.surfaceContainerHighest.withValues(alpha: 0.6)),
+                border: Border.all(
+                  color: reached
+                      ? (milestone.isSummit
+                          ? AppColors.brand360Blue
+                          : AppColors.brand360Green)
+                      : (isCurrentPosition
+                          ? context.colors.primary
+                          : context.colors.outlineVariant),
+                  width: milestone.isSummit ? 4 : 3,
+                ),
+                boxShadow: isCurrentPosition
+                    ? [
+                        BoxShadow(
+                          color: context.colors.primary.withValues(alpha: 0.35),
+                          blurRadius: 12,
+                          spreadRadius: 3,
+                        ),
+                      ]
+                    : null,
+              ),
+              child: reached && !milestone.isSummit
+                  ? const Icon(Icons.check_rounded, color: Colors.white, size: 30)
+                  : AppIcon(
+                      milestone.iconKey,
+                      size: milestone.isSummit ? 34 : 26,
                     ),
-                  ]
-                : null,
-          ),
-          child: reached
-              ? const Icon(Icons.check_rounded, color: Colors.white, size: 28)
-              : AppIcon(milestone.iconKey),
+            ),
+            // Linh vật Bé Ong xuất hiện tại vị trí hiện tại của bé
+            if (isCurrentPosition)
+              const Positioned(
+                top: -18,
+                right: -14,
+                child: BeeMascot(mood: BeeMood.happy, size: 36),
+              ),
+          ],
         ),
         const SizedBox(width: AppSpacing.lg),
+
+        // Thông tin trạm dừng
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -424,25 +513,26 @@ class _MilestoneTile extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    milestone.title,
-                    style: context.text.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: reached
-                          ? context.semantic.success
-                          : (isCurrent ? context.colors.primary : null),
+                  Flexible(
+                    child: Text(
+                      milestone.title,
+                      style: context.text.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: reached
+                            ? context.semantic.success
+                            : (isCurrentPosition ? context.colors.primary : null),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  XuBadge(amount: milestone.targetXu, pill: true),
+                  if (milestone.targetXu > 0)
+                    XuBadge(amount: milestone.targetXu, pill: true),
                 ],
               ),
               const SizedBox(height: 2),
               Text(
-                reached
-                    ? 'Đã vượt qua mốc này'
-                    : (isCurrent
-                          ? 'Đang tiến về mốc này (còn ${milestone.targetXu - saved} xu)'
-                          : 'Mốc ${(milestone.percent * 100).toInt()}%'),
+                milestone.subtitle,
                 style: context.text.bodySmall?.copyWith(
                   color: context.semantic.onSurfaceMuted,
                 ),
@@ -455,19 +545,24 @@ class _MilestoneTile extends StatelessWidget {
   }
 }
 
-class _ConnectingTrack extends StatelessWidget {
-  const _ConnectingTrack({required this.isPassed});
+/// Nối các bậc thang leo núi dạng zic-zac
+class _SteppedClimbingPath extends StatelessWidget {
+  const _SteppedClimbingPath({
+    required this.isPassed,
+    required this.curveToRight,
+  });
 
   final bool isPassed;
+  final bool curveToRight;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(left: 24),
+      margin: const EdgeInsets.only(left: 26, top: 4, bottom: 4),
       alignment: Alignment.centerLeft,
       child: Container(
         width: 4,
-        height: 36,
+        height: 38,
         decoration: BoxDecoration(
           color: isPassed
               ? context.semantic.success

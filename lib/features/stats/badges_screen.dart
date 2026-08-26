@@ -10,7 +10,7 @@ import 'package:beong/domain/entities/badge_def.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Bảng huy hiệu của con — phân nhóm & có vòng cung tiến độ (docs/16 §12, §15, §21).
+/// Bảng huy hiệu của con — phong cách gamification đồ họa trực quan (Chore Rewards style).
 class BadgesScreen extends ConsumerWidget {
   const BadgesScreen({super.key});
 
@@ -23,7 +23,9 @@ class BadgesScreen extends ConsumerWidget {
     final memberId = session.activeMemberId;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Huy hiệu')),
+      appBar: AppBar(
+        title: const Text('Bộ sưu tập huy hiệu'),
+      ),
       body: FutureBuilder<BadgeProgress>(
         future: badgeDao.progressOf(memberId),
         builder: (context, progressSnap) {
@@ -34,24 +36,28 @@ class BadgesScreen extends ConsumerWidget {
               final earned = earnedSnap.data ?? const <String>{};
 
               return ListView(
-                padding: const EdgeInsets.all(AppSpacing.xl),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPaddingMobile,
+                  vertical: AppSpacing.lg,
+                ),
                 children: [
-                  _Summary(earned: earned.length, total: kBadges.length),
-                  const SizedBox(height: AppSpacing.xxl),
+                  _CollectionSummary(
+                    earned: earned.length,
+                    total: kBadges.length,
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
 
-                  // Chia danh sách theo nhóm danh mục
+                  // Lưới huy hiệu theo từng danh mục
                   for (final category in BadgeCategory.values) ...[
-                    _CategoryHeader(category: category),
-                    const SizedBox(height: AppSpacing.sm),
-                    for (final badge in kBadges.where(
-                      (b) => b.category == category,
-                    ))
-                      _BadgeTile(
-                        badge: badge,
-                        earned: earned.contains(badge.key),
-                        current: progress?.valueFor(badge.kind) ?? 0,
-                      ),
-                    const SizedBox(height: AppSpacing.lg),
+                    _CategorySection(
+                      category: category,
+                      badges: kBadges
+                          .where((b) => b.category == category)
+                          .toList(),
+                      earned: earned,
+                      progress: progress,
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
                   ],
                 ],
               );
@@ -63,63 +69,58 @@ class BadgesScreen extends ConsumerWidget {
   }
 }
 
-class _CategoryHeader extends StatelessWidget {
-  const _CategoryHeader({required this.category});
-  final BadgeCategory category;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        AppIcon(category.iconKey, size: 20),
-        const SizedBox(width: AppSpacing.xs),
-        Text(
-          category.titleVi.toUpperCase(),
-          style: context.text.labelLarge?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: context.semantic.onSurfaceMuted,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Summary extends StatelessWidget {
-  const _Summary({required this.earned, required this.total});
+/// Thẻ tổng quan bộ sưu tập phong cách "Collected 4 of 29" của Chore Rewards.
+class _CollectionSummary extends StatelessWidget {
+  const _CollectionSummary({required this.earned, required this.total});
 
   final int earned;
   final int total;
 
   @override
   Widget build(BuildContext context) {
+    final ratio = total > 0 ? earned / total : 0.0;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: context.colors.primaryContainer,
-        borderRadius: const BorderRadius.all(Radius.circular(AppRadius.card)),
+        gradient: context.dashboardGradient,
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Row(
         children: [
-          const AppIcon('star', size: 36),
-          const SizedBox(width: AppSpacing.md),
+          // Vòng cung tiến độ tổng thể
+          ProgressRing(
+            progress: ratio,
+            size: 64,
+            strokeWidth: 6,
+            trackColor: Colors.white.withValues(alpha: 0.25),
+            valueColor: Colors.white,
+            child: const AppIcon('trophy', size: 30),
+          ),
+          const SizedBox(width: AppSpacing.lg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Con đã có $earned trên $total huy hiệu',
-                  style: context.text.titleMedium?.copyWith(
+                  'ĐÃ THU THẬP $earned / $total',
+                  style: TextStyle(
+                    fontSize: 12,
                     fontWeight: FontWeight.w800,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    letterSpacing: 0.8,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Cố gắng làm việc nhà mỗi ngày để mở thêm nhé!',
-                  style: context.text.bodySmall?.copyWith(
-                    color: context.semantic.onSurfaceMuted,
+                  earned == total
+                      ? 'Tuyệt đỉnh! Đã mở khóa tất cả!'
+                      : 'Chạm vào từng huy hiệu để xem cách mở khoá!',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
                   ),
                 ),
               ],
@@ -131,8 +132,85 @@ class _Summary extends StatelessWidget {
   }
 }
 
-class _BadgeTile extends StatelessWidget {
-  const _BadgeTile({
+/// Khối danh mục hiển thị dạng Grid icon huy hiệu.
+class _CategorySection extends StatelessWidget {
+  const _CategorySection({
+    required this.category,
+    required this.badges,
+    required this.earned,
+    required this.progress,
+  });
+
+  final BadgeCategory category;
+  final List<BadgeDef> badges;
+  final Set<String> earned;
+  final BadgeProgress? progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final earnedInCategory =
+        badges.where((b) => earned.contains(b.key)).length;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                AppIcon(category.iconKey, size: 20),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  category.titleVi.toUpperCase(),
+                  style: context.text.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: context.semantic.onSurfaceMuted,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              '$earnedInCategory / ${badges.length}',
+              style: context.text.labelSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: context.semantic.onSurfaceMuted,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: AppSpacing.sm,
+            mainAxisSpacing: AppSpacing.sm,
+            childAspectRatio: 0.88,
+          ),
+          itemCount: badges.length,
+          itemBuilder: (context, index) {
+            final badge = badges[index];
+            final isEarned = earned.contains(badge.key);
+            final current = progress?.valueFor(badge.kind) ?? 0;
+
+            return _BadgeGridTile(
+              badge: badge,
+              earned: isEarned,
+              current: current,
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+/// Từng ô huy hiệu dạng lưới (Grid Item) đồ hoạ trực quan cho trẻ nhỏ.
+class _BadgeGridTile extends StatelessWidget {
+  const _BadgeGridTile({
     required this.badge,
     required this.earned,
     required this.current,
@@ -146,72 +224,65 @@ class _BadgeTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final ratio = (current / badge.threshold).clamp(0.0, 1.0);
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Card(
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadius.card),
-          onTap: () => _showBadgeDetail(context),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Row(
-              children: [
-                // Vòng cung tiến độ ôm quanh icon huy hiệu (§15)
-                ProgressRing(
-                  progress: earned ? 1.0 : ratio,
-                  size: 52,
-                  strokeWidth: 4,
-                  trackColor: context.colors.surfaceContainerHighest,
-                  valueColor: earned
-                      ? context.semantic.success
-                      : context.colors.primary,
-                  child: Opacity(
-                    opacity: earned ? 1.0 : 0.45,
-                    child: AppIcon(badge.iconKey, size: 26),
-                  ),
+    return Card(
+      elevation: earned ? 2 : 0,
+      color: earned
+          ? context.colors.primaryContainer.withValues(alpha: 0.5)
+          : context.colors.surfaceContainerHighest.withValues(alpha: 0.35),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        onTap: () => _showBadgeDetail(context),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Icon với vòng tiến độ bao quanh
+              ProgressRing(
+                progress: earned ? 1.0 : ratio,
+                size: 54,
+                strokeWidth: 4,
+                trackColor: context.colors.surfaceContainerHighest,
+                valueColor: earned
+                    ? context.semantic.success
+                    : context.colors.primary,
+                child: Opacity(
+                  opacity: earned ? 1.0 : 0.38,
+                  child: AppIcon(badge.iconKey, size: 28),
                 ),
-                const SizedBox(width: AppSpacing.lg),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        badge.title,
-                        style: context.text.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: earned
-                              ? null
-                              : context.semantic.onSurfaceMuted,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        badge.description,
-                        style: context.text.bodySmall?.copyWith(
-                          color: context.semantic.onSurfaceMuted,
-                        ),
-                      ),
-                      if (!earned) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          'Tiến độ: $current / ${badge.threshold}',
-                          style: context.text.labelSmall?.copyWith(
-                            color: context.colors.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                badge.title,
+                style: context.text.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: earned ? null : context.semantic.onSurfaceMuted,
+                  fontSize: 11,
                 ),
-                if (earned)
-                  Icon(
-                    Icons.check_circle_rounded,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 2),
+              if (earned)
+                Text(
+                  'Đã đạt',
+                  style: context.text.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
                     color: context.semantic.success,
-                    size: 24,
+                    fontSize: 10,
                   ),
-              ],
-            ),
+                )
+              else
+                Text(
+                  '$current/${badge.threshold}',
+                  style: context.text.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.primary,
+                    fontSize: 10,
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -253,7 +324,7 @@ class _BadgeTile extends StatelessWidget {
                       ? ctx.semantic.success
                       : ctx.colors.primary,
                   child: Opacity(
-                    opacity: earned ? 1.0 : 0.6,
+                    opacity: earned ? 1.0 : 0.55,
                     child: AppIcon(badge.iconKey, size: 40),
                   ),
                 ),

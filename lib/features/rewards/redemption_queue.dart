@@ -1,12 +1,16 @@
 import 'dart:async';
 
+import 'package:beong/core/providers/database_provider.dart';
+import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/repositories/reward_repository.dart';
 import 'package:beong/domain/services/redemption_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Hàng đợi phiếu đổi thưởng chờ bố mẹ duyệt.
 ///
@@ -82,7 +86,7 @@ class RedemptionQueue extends StatelessWidget {
   }
 }
 
-class _RedemptionCard extends StatefulWidget {
+class _RedemptionCard extends ConsumerStatefulWidget {
   const _RedemptionCard({
     required this.redemption,
     required this.rewardDao,
@@ -97,10 +101,10 @@ class _RedemptionCard extends StatefulWidget {
   final String reviewerId;
 
   @override
-  State<_RedemptionCard> createState() => _RedemptionCardState();
+  ConsumerState<_RedemptionCard> createState() => _RedemptionCardState();
 }
 
-class _RedemptionCardState extends State<_RedemptionCard> {
+class _RedemptionCardState extends ConsumerState<_RedemptionCard> {
   Reward? _reward;
 
   @override
@@ -151,47 +155,108 @@ class _RedemptionCardState extends State<_RedemptionCard> {
     final reward = _reward;
     if (reward == null) return const SizedBox.shrink();
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Row(
-          children: [
-            AppIcon.task(reward.iconKey, size: 26),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(reward.title, style: context.text.bodyLarge),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    '${widget.redemption.costSnapshot} xu',
-                    style: context.text.bodySmall?.copyWith(
-                      color: context.semantic.xuText,
-                      fontWeight: FontWeight.w700,
-                    ),
+    final memberDao = ref.watch(memberRepositoryProvider);
+
+    return StreamBuilder<Member>(
+      stream: memberDao.watchMember(widget.redemption.memberId),
+      builder: (context, memberSnap) {
+        final member = memberSnap.data;
+        final childName = member?.displayName ?? 'Bé';
+        final avatar = member?.avatarKey ?? '👶';
+        final childColor = member != null
+            ? AppColors.profileColor(member.colorIndex)
+            : AppColors.beOngHoney;
+
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: childColor.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
                   ),
-                ],
-              ),
+                  child: Text(avatar, style: const TextStyle(fontSize: 22)),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.xs,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: childColor.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(AppRadius.pill),
+                            ),
+                            child: Text(
+                              childName,
+                              style: context.text.labelSmall?.copyWith(
+                                color: childColor,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          const Text('xin đổi'),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          AppIcon.task(reward.iconKey, size: 20),
+                          const SizedBox(width: AppSpacing.xs),
+                          Expanded(
+                            child: Text(
+                              reward.title,
+                              style: context.text.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        '${widget.redemption.costSnapshot} xu',
+                        style: context.text.bodySmall?.copyWith(
+                          color: context.semantic.xuText,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => unawaited(_reject()),
+                  icon: Icon(Icons.close_rounded, color: context.semantic.danger),
+                  tooltip: 'Từ chối và hoàn xu',
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                IconButton.filled(
+                  onPressed: () => unawaited(_approve()),
+                  icon: const Icon(Icons.check_rounded),
+                  style: IconButton.styleFrom(
+                    backgroundColor: context.semantic.success,
+                    foregroundColor: Colors.white,
+                  ),
+                  tooltip: 'Duyệt',
+                ),
+              ],
             ),
-            IconButton(
-              onPressed: () => unawaited(_reject()),
-              icon: Icon(Icons.close_rounded, color: context.semantic.danger),
-              tooltip: 'Từ chối và hoàn xu',
-            ),
-            const SizedBox(width: AppSpacing.xs),
-            IconButton.filled(
-              onPressed: () => unawaited(_approve()),
-              icon: const Icon(Icons.check_rounded),
-              style: IconButton.styleFrom(
-                backgroundColor: context.semantic.success,
-                foregroundColor: Colors.white,
-              ),
-              tooltip: 'Duyệt',
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

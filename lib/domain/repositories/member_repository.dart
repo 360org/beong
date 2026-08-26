@@ -31,6 +31,7 @@ abstract interface class MemberRepository {
   Future<void> deleteMember(String memberId);
   Future<void> deleteFamily(String familyId);
   Future<void> updateMember(String id, MembersCompanion companion);
+  Future<Member?> getMember(String memberId);
   Stream<AllocationMode> watchAllocationMode(String familyId);
   Stream<int> watchDayRolloverHour(String familyId);
   Stream<MoneyExchange> watchExchangeRate(String familyId);
@@ -131,4 +132,7 @@ final class LocalMemberRepository implements MemberRepository {
   @override
   Future<void> updateMember(String id, MembersCompanion companion) =>
       _dao.updateMember(id, companion);
+
+  @override
+  Future<Member?> getMember(String memberId) => _dao.getMember(memberId);
 }

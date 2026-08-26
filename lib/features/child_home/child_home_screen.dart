@@ -21,6 +21,7 @@ import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/domain/services/family_clock.dart';
+import 'package:beong/features/child_home/child_task_sheet.dart';
 import 'package:beong/features/goals/goal_section.dart';
 import 'package:beong/features/goals/goal_sheet.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
@@ -587,39 +588,70 @@ class _ChildHeader extends ConsumerWidget {
     final color = member == null
         ? context.colors.primary
         : AppColors.profileColor(member.colorIndex);
+    final session = ref.watch(sessionProvider);
 
-    return GestureDetector(
-      onTap: () => unawaited(_switchProfile(context, ref)),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.18),
-              shape: BoxShape.circle,
-            ),
-            child: AppIcon(
-              iconKeyForEmoji(avatarForKey(member?.avatarKey)),
-              size: 30,
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: () => unawaited(_switchProfile(context, ref)),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: AppIcon(
+                    iconKeyForEmoji(avatarForKey(member?.avatarKey)),
+                    size: 30,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Flexible(
+                  child: Text(
+                    member?.displayName ?? '',
+                    style: context.text.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Icon(
+                  Icons.expand_more_rounded,
+                  size: 20,
+                  color: context.semantic.onSurfaceMuted,
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
-          Text(
-            member?.displayName ?? '',
-            style: context.text.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
+        ),
+        if (session != null)
+          IconButton(
+            onPressed: () => showChildTaskSheet(
+              context,
+              familyId: session.familyId,
+              memberId: session.activeMemberId,
+            ),
+            tooltip: 'Tự thêm việc',
+            icon: Container(
+              padding: const EdgeInsets.all(AppSpacing.xs),
+              decoration: BoxDecoration(
+                color: context.colors.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.add_rounded,
+                color: context.colors.primary,
+                size: 24,
+              ),
             ),
           ),
-          const SizedBox(width: AppSpacing.xs),
-          Icon(
-            Icons.expand_more_rounded,
-            size: 20,
-            color: context.semantic.onSurfaceMuted,
-          ),
-        ],
-      ),
+      ],
     );
   }
 }

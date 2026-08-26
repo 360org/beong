@@ -48,65 +48,73 @@
  <div class="wrap" style="max-width:760px">
   <span class="eyebrow">🛡️ Bảo vệ dữ liệu &amp; Minh bạch</span>
   <h1>Chính sách quyền riêng tư &amp; Xử lý dữ liệu</h1>
-  <p class="lede" style="margin-top:16px">360 CORP cam kết bảo vệ tối đa quyền riêng tư của gia đình và trẻ em. Dưới đây là quy định minh bạch về cách thức quản lý dữ liệu trên thiết bị và điều khoản thu thập, xử lý thông tin phụ huynh phục vụ chăm sóc khách hàng và nâng cao dịch vụ.</p>
+  <p class="lede" style="margin-top:16px">360 CORP cam kết bảo vệ tối đa quyền riêng tư của gia đình và trẻ em. Chính sách này áp dụng cho ứng dụng <b>Bé Ong</b> (Bundle ID: <code>net.beong.app</code>) trên cả hai nền tảng <b>iOS (Apple App Store)</b> và <b>Android (Google Play Store)</b>, tuân thủ nghiêm ngặt chuẩn mực bảo vệ trẻ em COPPA (Hoa Kỳ), GDPR-K (Châu Âu) và Nghị định 13/2023/NĐ-CP (Việt Nam).</p>
 
   <div class="card" style="margin-top:32px">
-   <h2 style="font-size:1.25rem">Tóm tắt nguyên tắc quản lý dữ liệu</h2>
+   <h2 style="font-size:1.25rem">Tóm tắt nguyên tắc quản lý dữ liệu cốt lõi</h2>
    <ul class="pts" style="margin-top:16px">
-    <li><span class="tick">✓</span><span><b>Dữ liệu sinh hoạt của con lưu cục bộ:</b> Toàn bộ việc nhà, hũ xu, thói quen lưu trực tiếp trên thiết bị (Offline-First).</span></li>
-    <li><span class="tick">✓</span><span><b>Tuyệt đối bảo vệ trẻ em (COPPA &amp; GDPR-K):</b> Không thu thập thông tin định danh cá nhân của trẻ nhỏ dưới mọi hình thức.</span></li>
-    <li><span class="tick">✓</span><span><b>Thu thập thông tin phụ huynh có sự đồng thuận:</b> Khi phụ huynh đăng ký nhận tin, đồng bộ thiết bị hoặc phản hồi dịch vụ.</span></li>
-    <li><span class="tick">✓</span><span><b>Mục đích sử dụng minh bạch:</b> Hỗ trợ kỹ thuật, cá nhân hoá trải nghiệm và thông tin các giải pháp giáo dục, dịch vụ giá trị gia tăng từ 360 CORP.</span></li>
+    <li><span class="tick">✓</span><span><b>Lưu trữ dữ liệu cục bộ (Offline-First):</b> Toàn bộ thông tin việc nhà, hũ xu, lịch sử, thói quen và mật khẩu PIN lưu trữ an toàn trên chính thiết bị gia đình (SQLite Database).</span></li>
+    <li><span class="tick">✓</span><span><b>Bảo vệ trẻ em tuyệt đối (Kids Category &amp; Families Policy):</b> Không thu thập thông tin định danh cá nhân của trẻ nhỏ, KHÔNG quảng cáo, KHÔNG mua hàng trong ứng dụng (In-App Purchases), KHÔNG gắn thư viện theo dõi (Tracking SDKs).</span></li>
+    <li><span class="tick">✓</span><span><b>Quyền riêng tư &amp; Xóa dữ liệu dễ dàng:</b> Người dùng toàn quyền xem, sửa, xuất và xóa vĩnh viễn toàn bộ dữ liệu bất kỳ lúc nào trực tiếp trong ứng dụng hoặc gỡ cài đặt.</span></li>
+    <li><span class="tick">✓</span><span><b>Mã hóa truyền tải (In-Transit Encryption):</b> Mọi kết nối gửi báo lỗi hoặc ghép cặp đều sử dụng giao thức bảo mật HTTPS/TLS tiêu chuẩn cao.</span></li>
    </ul>
   </div>
 
   <h2 style="margin-top:48px">1. Dữ liệu lưu trữ trên thiết bị cá nhân</h2>
-  <p class="lede" style="margin-top:12px">Trong quá trình sử dụng thường ngày, toàn bộ dữ liệu dưới đây nằm trọn vẹn trong bộ nhớ nội bộ của máy bạn:</p>
+  <p class="lede" style="margin-top:12px">Trong quá trình sử dụng thông thường, toàn bộ các dữ liệu sau đây được khởi tạo và lưu trữ độc quyền trên bộ nhớ cục bộ của thiết bị bạn:</p>
   <div class="tblwrap"><table>
-   <thead><tr><th>Hạng mục dữ liệu</th><th>Ví dụ</th><th>Mục đích sử dụng</th></tr></thead>
+   <thead><tr><th>Hạng mục dữ liệu</th><th>Ví dụ cụ thể</th><th>Mục đích sử dụng</th><th>Vị trí lưu trữ</th></tr></thead>
    <tbody>
-    <tr><td>Tên tổ ấm gia đình</td><td>“Nhà Bé Sóc”</td><td>Hiển thị trên giao diện ứng dụng</td></tr>
-    <tr><td>Tên gọi thân mật của trẻ</td><td>“Minh”, “Bé Bo”</td><td>Để trẻ phân biệt hồ sơ của mình</td></tr>
-    <tr><td>Độ tuổi <em>(tuỳ chọn)</em></td><td>7 tuổi</td><td>Tối ưu cỡ chữ và kích thước hình ảnh</td></tr>
-    <tr><td>Linh vật &amp; màu sắc đại diện</td><td>🐯, Màu vàng mật ong</td><td>Trẻ mầm non nhận diện trực quan</td></tr>
-    <tr><td>Nhiệm vụ, thói quen, xu &amp; quà</td><td>“Tưới cây”, 10 xu</td><td>Vận hành tính năng rèn luyện tự lập</td></tr>
-    <tr><td>Mã bảo vệ hồ sơ (PIN)</td><td>Băm SHA-256 một chiều</td><td>Ngăn trẻ tự đổi sang vai phụ huynh</td></tr>
+    <tr><td>Tên tổ ấm gia đình</td><td>“Nhà Bé Sóc”, “Tổ Ấm”</td><td>Hiển thị trên giao diện ứng dụng</td><td>Cục bộ trên máy</td></tr>
+    <tr><td>Tên gọi thân mật của trẻ</td><td>“Minh”, “Bé Bo”, “An”</td><td>Để trẻ và bố mẹ phân biệt hồ sơ</td><td>Cục bộ trên máy</td></tr>
+    <tr><td>Độ tuổi <em>(tuỳ chọn)</em></td><td>Từ 3 đến 15 tuổi</td><td>Gợi ý việc phù hợp và tự chỉnh cỡ chữ/hình ảnh</td><td>Cục bộ trên máy</td></tr>
+    <tr><td>Linh vật &amp; màu đại diện</td><td>🐯, Màu vàng mật ong</td><td>Trẻ nhỏ nhận diện trực quan nhanh chóng</td><td>Cục bộ trên máy</td></tr>
+    <tr><td>Nhiệm vụ, routine, hũ xu &amp; quà</td><td>“Đánh răng”, “Dọn phòng”, 10 xu</td><td>Vận hành tính năng rèn nề nếp &amp; giáo dục tài chính</td><td>Cục bộ trên máy</td></tr>
+    <tr><td>Mã bảo vệ hồ sơ (PIN)</td><td>Băm SHA-256 một chiều</td><td>Bảo vệ vai trò phụ huynh và hồ sơ riêng của con</td><td>Cục bộ trên máy</td></tr>
+    <tr><td>Ảnh chụp bằng chứng nhiệm vụ <em>(tuỳ chọn)</em></td><td>Ảnh con chụp góc học tập đã dọn</td><td>Phụ huynh xem xét duyệt hoàn thành việc</td><td>Cục bộ trên máy</td></tr>
    </tbody>
   </table></div>
-  <p style="margin-top:16px"><b>Cam kết:</b> Ứng dụng không yêu cầu và không lưu trữ thông tin nhạy cảm của trẻ: họ tên khai sinh đầy đủ, ngày tháng năm sinh chính xác, số định danh, trường lớp, vị trí địa lý GPS hay hình ảnh khuôn mặt của con.</p>
+  <p style="margin-top:16px"><b>Cam kết bảo vệ trẻ em:</b> Ứng dụng TUYỆT ĐỐI KHÔNG yêu cầu, không thu thập và không lưu trữ các thông tin nhạy cảm của trẻ: họ tên khai sinh đầy đủ, ngày tháng năm sinh chính xác, số căn cước/định danh, thông tin trường lớp, vị trí địa lý GPS, danh bạ hay dữ liệu sinh trắc học.</p>
 
-  <h2 style="margin-top:48px">2. Thu thập &amp; Xử lý thông tin phụ huynh</h2>
-  <p class="lede" style="margin-top:12px">Nhằm nâng cao chất lượng phục vụ, hỗ trợ vận hành và mang lại những giá trị thiết thực cho gia đình, 360 CORP có thể thu thập thông tin của phụ huynh (người giám hộ hợp pháp) trong các trường hợp sau:</p>
+  <h2 style="margin-top:48px">2. Quyền truy cập thiết bị (Device Permissions)</h2>
+  <p class="lede" style="margin-top:12px">Ứng dụng Bé Ong tôn trọng tối đa quyền riêng tư và chỉ yêu cầu quyền khi thực sự cần thiết cho tính năng người dùng chủ động sử dụng:</p>
   <ul class="pts" style="margin-top:16px">
-   <li><span class="tick">📌</span><span><b>Thông tin liên hệ của phụ huynh:</b> Họ tên phụ huynh, số điện thoại, địa chỉ email khi phụ huynh chủ động đăng ký tài khoản gia đình, kích hoạt tính năng đồng bộ đa thiết bị, đăng ký nhận bản tin hoặc liên hệ bộ phận hỗ trợ.</span></li>
-   <li><span class="tick">📌</span><span><b>Thông tin kỹ thuật thiết bị:</b> Phiên bản hệ điều hành, dòng máy, nhật ký lỗi kỹ thuật (crash logs) khi phụ huynh gửi phản hồi báo lỗi nhằm phục vụ khắc phục sự cố.</span></li>
-   <li><span class="tick">📌</span><span><b>Thông tin tương tác &amp; Khảo sát:</b> Ý kiến đóng góp, nhu cầu tính năng và các phản hồi nhằm cải tiến sản phẩm.</span></li>
+   <li><span class="tick">📷</span><span><b>Quyền Máy ảnh (Camera):</b> Chỉ kích hoạt khi phụ huynh/trẻ dùng tính năng <em>Quét mã QR để ghép cặp máy</em> hoặc <em>Chụp ảnh bằng chứng hoàn thành nhiệm vụ</em>. Hình ảnh chỉ lưu trên máy gia đình, không tự động gửi lên máy chủ công cộng.</span></li>
+   <li><span class="tick">🔔</span><span><b>Quyền Thông báo (Notifications):</b> Chỉ dùng để gửi lời nhắc cục bộ trên máy vào các khung giờ routine (Buổi sáng / Buổi tối) mà gia đình đã cài đặt.</span></li>
+   <li><span class="tick">🚫</span><span><b>Không truy cập:</b> Không truy cập Vị trí (GPS), Micro, Danh bạ, Bộ nhớ ngoài, Nhận dạng quảng cáo (IDFA/GAID) hay bất kỳ quyền nhạy cảm nào khác.</span></li>
   </ul>
 
-  <h2 style="margin-top:48px">3. Mục đích sử dụng thông tin của 360 CORP</h2>
-  <p class="lede" style="margin-top:12px">Thông tin phụ huynh cung cấp được 360 CORP quản lý và sử dụng hợp pháp cho các mục đích:</p>
+  <h2 style="margin-top:48px">3. Thu thập dữ liệu chẩn đoán &amp; Báo lỗi (Diagnostics &amp; Crash Reports)</h2>
+  <p class="lede" style="margin-top:12px">Ứng dụng KHÔNG tự động gửi dữ liệu ngầm. Dữ liệu chỉ rời khỏi thiết bị khi phụ huynh <b>chủ động bấm nút gửi</b> trong mục <em>Cài đặt → Báo lỗi</em>:</p>
   <ul class="pts" style="margin-top:16px">
-   <li><span class="tick">✓</span><span><b>Chăm sóc &amp; Hỗ trợ kỹ thuật:</b> Hướng dẫn sử dụng, giải đáp thắc mắc, xử lý sự cố và duy trì kết nối gia đình.</span></li>
-   <li><span class="tick">✓</span><span><b>Cập nhật sản phẩm &amp; Tính năng mới:</b> Thông báo về các bản nâng cấp, tài liệu nuôi dạy con, cẩm nang đồng hành cùng trẻ.</span></li>
-   <li><span class="tick">✓</span><span><b>Quảng bá sản phẩm &amp; Hệ sinh thái dịch vụ:</b> Giới thiệu các chương trình ưu đãi, ấn phẩm giáo dục, khoá học kỹ năng, ứng dụng giáo dục và các giải pháp công nghệ giá trị gia tăng do 360 CORP phát triển hoặc hợp tác phát triển.</span></li>
-   <li><span class="tick">✓</span><span><b>Nghiên cứu &amp; Cải tiến:</b> Phân tích xu hướng nhu cầu nhằm phát triển thêm các tính năng hữu ích cho cộng đồng phụ huynh.</span></li>
+   <li><span class="tick">📌</span><span><b>Thông tin kỹ thuật:</b> Phiên bản hệ điều hành (iOS/Android), dòng máy, kích thước màn hình, phiên bản app và nhật ký lỗi kỹ thuật tạm thời trong bộ nhớ RAM của phiên làm việc.</span></li>
+   <li><span class="tick">📌</span><span><b>Ảnh chụp màn hình (Tùy chọn):</b> App cung cấp chế độ xem trước ảnh và công tắc cho phép phụ huynh TẮT đính kèm ảnh trước khi gửi để đảm bảo quyền riêng tư.</span></li>
+   <li><span class="tick">📌</span><span><b>Mục đích sử dụng:</b> Duy nhất nhằm phân tích và khắc phục sự cố kỹ thuật (App Functionality), không liên kết với danh tính người dùng và không sử dụng cho mục đích quảng cáo/tiếp thị.</span></li>
   </ul>
 
-  <h2 style="margin-top:48px">4. Cam kết bảo mật &amp; Quyền kiểm soát của phụ huynh</h2>
-  <p class="lede" style="margin-top:12px">Phụ huynh luôn giữ toàn quyền chủ động đối với thông tin cá nhân của mình:</p>
+  <h2 style="margin-top:48px">4. Không giao dịch tài chính &amp; Không tiền thật (Virtual Currency Disclosure)</h2>
+  <p class="lede" style="margin-top:12px">Bé Ong là công cụ giáo dục phi thương mại:</p>
   <ul class="pts" style="margin-top:16px">
-   <li><span class="tick">🛡️</span><span><b>Bảo mật nhiều lớp:</b> Dữ liệu truyền tải được mã hoá an toàn theo tiêu chuẩn quốc tế.</span></li>
-   <li><span class="tick">🛡️</span><span><b>Không chia sẻ trái phép:</b> 360 CORP tuyệt đối không bán hoặc trao đổi dữ liệu cá nhân của phụ huynh cho các đơn vị tiếp thị bên thứ ba trái phép.</span></li>
-   <li><span class="tick">🛡️</span><span><b>Quyền từ chối nhận thông tin (Opt-out):</b> Phụ huynh có thể yêu cầu ngừng nhận email/tin nhắn giới thiệu sản phẩm bất kỳ lúc nào bằng cách bấm nút "Huỷ nhận tin" trong thư hoặc liên hệ email <a href="mailto:info@beong.net">info@beong.net</a>.</span></li>
-   <li><span class="tick">🛡️</span><span><b>Quyền chỉnh sửa &amp; Yêu cầu xoá dữ liệu:</b> Phụ huynh có quyền yêu cầu tra cứu, cập nhật hoặc xoá vĩnh viễn thông tin liên hệ của mình khỏi hệ thống cơ sở dữ liệu của 360 CORP.</span></li>
+   <li><span class="tick">✓</span><span><b>Đồng xu ảo phục vụ học tập:</b> Các đồng xu ong (xu tích lũy) trong ứng dụng là điểm số ảo mang tính chất khen thưởng nội bộ gia đình, không phải tiền tệ kỹ thuật số và không có giá trị quy đổi pháp lý bên ngoài.</span></li>
+   <li><span class="tick">✓</span><span><b>Không thanh toán trực tuyến:</b> Ứng dụng không liên kết với thẻ ngân hàng, ví điện tử, không thu phí dịch vụ và không chứa bất kỳ tính năng thanh toán hay giao dịch chuyển tiền nào.</span></li>
   </ul>
 
-  <h2 style="margin-top:48px">5. Thông tin liên hệ quản trị quyền riêng tư</h2>
-  <p class="lede" style="margin-top:12px">Mọi thắc mắc hoặc yêu cầu liên quan đến chính sách bảo vệ dữ liệu, xin vui lòng liên hệ:</p>
+  <h2 style="margin-top:48px">5. Quyền của người dùng &amp; Cơ chế xóa dữ liệu (Data Deletion)</h2>
+  <p class="lede" style="margin-top:12px">Người dùng có toàn quyền kiểm soát và xóa dữ liệu bất kỳ lúc nào:</p>
+  <ul class="pts" style="margin-top:16px">
+   <li><span class="tick">🗑️</span><span><b>Tự xóa trực tiếp trong ứng dụng:</b> Phụ huynh có thể xóa từng nhiệm vụ, xóa hồ sơ bé hoặc vào <em>Cài đặt → Xóa toàn bộ dữ liệu tổ ấm</em> để đặt lại ứng dụng về trạng thái ban đầu.</span></li>
+   <li><span class="tick">🗑️</span><span><b>Xóa khi gỡ ứng dụng:</b> Vì toàn bộ dữ liệu nằm trong cơ sở dữ liệu SQLite cục bộ, việc gỡ bỏ ứng dụng Bé Ong khỏi thiết bị sẽ tự động xóa sạch 100% dữ liệu liên quan.</span></li>
+   <li><span class="tick">📩</span><span><b>Yêu cầu hỗ trợ xóa dữ liệu:</b> Nếu phụ huynh từng gửi thông tin phản hồi báo lỗi hoặc liên hệ hỗ trợ và muốn xóa thông tin liên quan, có thể gửi yêu cầu trực tiếp đến email <a href="mailto:support@360.org.vn">support@360.org.vn</a> hoặc <a href="mailto:info@beong.net">info@beong.net</a>. Yêu cầu sẽ được xử lý trong vòng 24–48 giờ làm việc.</span></li>
+  </ul>
+
+  <h2 style="margin-top:48px">6. Thông tin liên hệ quản trị quyền riêng tư</h2>
+  <p class="lede" style="margin-top:12px">Mọi thắc mắc, phản ánh hoặc yêu cầu liên quan đến chính sách bảo vệ dữ liệu và quyền riêng tư trẻ em, xin vui lòng liên hệ trực tiếp với chúng tôi:</p>
   <div class="card" style="margin-top:20px">
-    <p><b>Đơn vị quản trị dữ liệu:</b> 360 CORP</p>
-    <p style="margin-top:8px"><b>Email chuyên trách:</b> <a href="mailto:info@beong.net">info@beong.net</a></p>
-    <p style="margin-top:8px"><b>Địa chỉ website:</b> <a href="https://beong.net">https://beong.net</a></p>
+    <p><b>Đơn vị quản trị &amp; phát triển:</b> 360 CORP (W360S JOINT STOCK COMPANY)</p>
+    <p style="margin-top:8px"><b>Email chuyên trách hỗ trợ &amp; quyền riêng tư:</b> <a href="mailto:support@360.org.vn">support@360.org.vn</a> / <a href="mailto:info@beong.net">info@beong.net</a></p>
+    <p style="margin-top:8px"><b>Đường dây nóng hỗ trợ:</b> <a href="tel:+84763360360">+84 763 360 360</a></p>
+    <p style="margin-top:8px"><b>Địa chỉ website chính thức:</b> <a href="https://beong.net">https://beong.net</a></p>
+    <p style="margin-top:8px"><b>Trang yêu cầu xóa dữ liệu &amp; hỗ trợ:</b> <a href="https://beong.net/gioi-thieu.html#cau-hoi">https://beong.net/gioi-thieu.html</a></p>
   </div>
  </div>
 </section>

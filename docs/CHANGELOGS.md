@@ -4,6 +4,29 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.2.12+20 (2026-08-26) — Tái Thiết Kế Toàn Diện UI Cho Bé Phong Cách Gamification & Benchmark Chore Rewards
+
+### [NEW]
+- **Tái Cấu Trúc Điều Hướng Chuẩn Hoá 4 Tab Phía Con (§14, §24)**:
+  - Tinh gọn menu vai con xuống đúng 4 tab: `Home` (Trang chính), `Rewards` (Phần thưởng), `Awards` (Huy hiệu), `Journey` (Hành trình).
+  - Ẩn hoàn toàn tab `Tasks` ở vai con vì màn hình Home đã thể hiện trực quan toàn bộ danh sách việc cần làm trong ngày.
+  - Bổ sung nút tròn `+` ở góc trên bên phải màn hình con (`_ChildHeader`) mở sheet `_ChildTaskSheet` cho phép trẻ tự ghi nhận việc tự giác đã làm kèm số xu đề xuất và icon, tự động sinh instance và gửi bố mẹ duyệt khen thưởng.
+- **Nâng Cấp Tab Rewards Vai Con Trực Quan Hoá Tài Chính**:
+  - Đưa thẻ tổng quan xu của con (`_ChildWalletJarsBanner`) lên trên cùng tab Rewards.
+  - Hiển thị danh sách các hũ xu con đang tích luỹ (`_JarItemCard`) dạng lưới thẻ ngang cuộn mượt mà trước khi đến danh mục phần thưởng đổi xu và điều ước, giúp trẻ nắm rõ số dư xu có thể chi tiêu.
+- **Tái Thiết Kế Tab Awards (Huy Hiệu) Phong Cách Gamification**:
+  - Loại bỏ danh sách chữ dài, chuyển đổi sang thẻ tổng kết "ĐÃ THU THẬP X / Y" cùng lưới icon huy hiệu 3 cột trực quan (`_BadgeGridTile`) kèm vòng cung tiến độ tròn (`ProgressRing`).
+  - Chạm vào từng ô huy hiệu để mở bảng bottom sheet chi tiết hiển thị trạng thái chinh phục và yêu cầu mở khoá.
+- **Tái Thiết Kế Tab Journey Dạng Bản Đồ Leo Núi Nấc Thang Phiêu Lưu (§13)**:
+  - Chuyển đổi toàn bộ màn hình thành bản đồ leo núi nấc thang zic-zac kết nối từ chân núi (0%) lên đỉnh vinh quang (100%).
+  - Tích hợp linh vật Bé Ong động đứng trực tiếp tại trạm dừng hiện tại theo tiến độ xu tích luỹ được của trẻ.
+
+### [FIX]
+- Sửa triệt để các cảnh báo linter analyzer: loại bỏ unused import `dart:async`, giải quyết lỗi `discarded_futures` cho hiệu ứng chạm nảy linh vật `BeeMascot`, làm sạch định dạng eol.
+- Đảm bảo 100% test suite (523 tests) vượt qua thành công với 0 diagnostic issues.
+
+---
+
 ## v0.2.11+19 (2026-08-26) — Triệt tiêu Lỗi Analyzer `discarded_futures` & Ổn định Hoàn toàn Pipeline CI
 
 ### [FIX]

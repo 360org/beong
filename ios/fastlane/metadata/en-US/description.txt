@@ -1,0 +1,32 @@
+"Kids Fly High, Parents Guide the Way."
+
+Bé Ong is a delightful, privacy-first family chore and habit tracking app designed to help children build healthy daily routines, foster independence, and learn essential financial literacy through hands-on positive reinforcement.
+
+KEY FEATURES:
+
+1. BUILD DAILY HABITS & INDEPENDENCE
+• 20+ age-appropriate chore presets designed for children ages 3 and up.
+• Create structured routines for Morning, After School, and Bedtime.
+• Kids actively complete tasks and earn honey coins with pride.
+
+2. FINANCIAL LITERACY WITH 3 SAVING JARS
+• Encourage kids to distribute their earned coins into 3 jars: Save, Spend, and Give.
+• Set goals for desired toys, books, or activities and watch savings grow.
+• Teach the value of effort and thoughtful budgeting early in life.
+
+3. 100% TRANSPARENT LEDGER
+• An append-only transaction history records every coin earned or spent with full details.
+• No silent score changes — building lasting trust between parents and children.
+
+4. PARENTAL COMPANIONSHIP & APPROVAL
+• Flexible review modes: Automatic or Parent Approved with optional photo evidence.
+• Send encouraging praise messages when approving completed tasks.
+• Beautiful stats and insights to understand your child's growth without pressure.
+
+5. ZERO ADS, ZERO TRACKING, 100% PRIVATE
+• Works fully offline on your device.
+• NO advertisements. NO in-app purchases.
+• NO third-party trackers or child data collection.
+• Individual profile PIN protection and fast QR code pairing between devices.
+
+Start building positive family routines and empowering your child's independence today with Bé Ong!

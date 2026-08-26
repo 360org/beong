@@ -1,10 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/domain/entities/presets.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
+import 'package:beong/domain/repositories/task_repository.dart';
+import 'package:beong/domain/services/family_clock.dart';
+import 'package:beong/domain/services/jar_splitter.dart';
 import 'package:beong/features/members/child_profile_form.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
 import 'package:drift/drift.dart' show Value;
@@ -42,6 +47,9 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
   late int _colorIndex;
   late String _avatar;
   late int? _birthYear;
+  late bool _hasPin;
+  JarSplit? _customJarSplit;
+  Set<String> _selectedPresets = <String>{};
   bool _busy = false;
 
   @override
@@ -52,6 +60,16 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
     _colorIndex = widget.child.colorIndex;
     _avatar = widget.child.avatarKey ?? kAvatarEmojis.first;
     _birthYear = widget.child.birthYear;
+    _hasPin = widget.child.pinHash != null && widget.child.pinHash!.isNotEmpty;
+
+    final override = widget.child.jarSplitOverride;
+    if (override != null && override.isNotEmpty) {
+      try {
+        _customJarSplit = JarSplit.fromJson(jsonDecode(override) as Map<String, dynamic>);
+      } on Object {
+        _customJarSplit = null;
+      }
+    }
   }
 
   void _onNameChanged() => setState(() {});
@@ -68,6 +86,10 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
     setState(() => _busy = true);
     final ten = _name.text.trim();
 
+    final jarSplitJson = _customJarSplit != null
+        ? jsonEncode(_customJarSplit!.toJson())
+        : null;
+
     await ref
         .read(memberRepositoryProvider)
         .updateMember(
@@ -77,9 +99,37 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
             colorIndex: Value(_colorIndex),
             avatarKey: Value(_avatar),
             birthYear: Value(_birthYear),
+            jarSplitOverride: Value(jarSplitJson),
             updatedAt: Value(DateTime.now()),
           ),
         );
+
+    // Gán thêm việc mẫu đã chọn nếu có
+    if (_selectedPresets.isNotEmpty) {
+      final taskDao = ref.read(taskRepositoryProvider);
+      for (final presetKey in _selectedPresets) {
+        final preset = kTaskPresets.firstWhere((p) => p.key == presetKey);
+        final taskId = 'task-preset-$presetKey-${widget.child.id}-${DateTime.now().millisecondsSinceEpoch}';
+        await taskDao.createTask(
+          TasksCompanion.insert(
+            id: taskId,
+            familyId: widget.child.familyId,
+            title: preset.titleVi,
+            iconKey: Value(preset.iconKey),
+            presetKey: Value(preset.key),
+            points: Value(preset.defaultPoints),
+            dayPart: Value(preset.dayPart),
+            repeatType: const Value('daily'),
+          ),
+          [widget.child.id],
+        );
+      }
+      final clock = FamilyClock(timeZoneOffset: DateTime.now().timeZoneOffset);
+      await taskDao.generateInstances(
+        familyId: widget.child.familyId,
+        today: clock.today(),
+      );
+    }
 
     if (mounted) Navigator.of(context).pop(true);
   }
@@ -115,15 +165,28 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
     if (mounted) Navigator.of(context).pop(true);
   }
 
-  Future<void> _changePassword() async {
-    await datMatKhauMoi(
-      context,
-      memberId: widget.child.id,
-      tenHienThi: widget.child.displayName,
-      service: ref.read(matKhauHoSoProvider),
-      moTa:
-          'Bốn chữ số mới cho hồ sơ của ${widget.child.displayName}. Bấm HUỶ nếu muốn bỏ mật khẩu.',
-    );
+  Future<void> _handleTogglePin(bool enable) async {
+    if (enable) {
+      final success = await datMatKhauMoi(
+        context,
+        memberId: widget.child.id,
+        tenHienThi: widget.child.displayName,
+        service: ref.read(matKhauHoSoProvider),
+        moTa:
+            'Bốn chữ số bảo vệ hồ sơ của ${widget.child.displayName}. Bé nhập nó để mở hồ sơ.',
+      );
+      if (success) {
+        setState(() => _hasPin = true);
+      }
+    } else {
+      await ref.read(matKhauHoSoProvider).boMatKhau(widget.child.id);
+      setState(() => _hasPin = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đã tắt mật khẩu hồ sơ của ${widget.child.displayName}')),
+        );
+      }
+    }
   }
 
   @override
@@ -144,18 +207,15 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
             birthYear: _birthYear,
             onBirthYearChanged: (y) => setState(() => _birthYear = y),
             autofocus: false,
+            onClose: () => Navigator.of(context).pop(false),
+            hasPin: _hasPin,
+            onTogglePin: _handleTogglePin,
+            customJarSplit: _customJarSplit,
+            onJarSplitChanged: (split) => setState(() => _customJarSplit = split),
+            selectedPresetKeys: _selectedPresets,
+            onPresetsChanged: (keys) => setState(() => _selectedPresets = keys),
           ),
-          const SizedBox(height: AppSpacing.lg),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.lock_reset_rounded),
-            title: const Text('Đổi hoặc bỏ mật khẩu bé'),
-            subtitle: const Text('Tuỳ chỉnh mã 4 số bảo vệ hồ sơ này'),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: _changePassword,
-          ),
-          const Divider(),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.xl),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(

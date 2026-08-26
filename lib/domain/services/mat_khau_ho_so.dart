@@ -55,6 +55,11 @@ class MatKhauHoSo {
     await _members.setPinHash(memberId: memberId, pinHash: bam(matKhau));
   }
 
+  /// Bỏ mật khẩu của một hồ sơ.
+  Future<void> boMatKhau(String memberId) async {
+    await _members.setPinHash(memberId: memberId, pinHash: null);
+  }
+
   /// Mật khẩu nhập vào có đúng của hồ sơ này không.
   ///
   /// Hồ sơ **chưa** đặt mật khẩu thì trả `true`: máy cài từ bản trước ADR-027
