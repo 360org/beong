@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:beong/core/theme/app_colors.dart';
@@ -95,7 +96,7 @@ class _ConfettiBurstState extends State<ConfettiBurst>
       ];
     });
     // Nổ hoa giấy rồi tự tắt — không ai chờ kết quả.
-    _controller.forward(from: 0);
+    unawaited(_controller.forward(from: 0));
   }
 
   @override

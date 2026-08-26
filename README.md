@@ -61,6 +61,7 @@ dựng môi trường chụp màn hình: `.claude/skills/flutter-8-buoc/SKILL.md
 | [`docs/11-bao-loi-endpoint.md`](docs/11-bao-loi-endpoint.md) | Dựng endpoint nhận báo lỗi (Cloudflare Worker) |
 | [`docs/12-huong-dan-su-dung.md`](docs/12-huong-dan-su-dung.md) | **Hướng dẫn cho bố mẹ** — 16 mục, kèm ảnh |
 | [`docs/13-audit-luong-vao-app.md`](docs/13-audit-luong-vao-app.md) | **Audit luồng vào app** — 2 lỗi nghiêm trọng, phương án, và bản sửa ở v0.2.3 |
+| [`docs/20-audit-dot-lam-lon.md`](docs/20-audit-dot-lam-lon.md) | **Audit đợt v0.2.9→v0.2.13** — 4 mục lớn đã đóng; 1 lỗi 🔴 điều ước nói sai với con |
 | [`docs/19-audit-hop-nhat.md`](docs/19-audit-hop-nhat.md) | **Audit hợp nhất** — mọi thứ còn nợ gom một chỗ: 16 mục mở, nguyên nhân CI đỏ, và hai chốt chặn nên dựng |
 | [`docs/18-audit-sau-ban-sua-17.md`](docs/18-audit-sau-ban-sua-17.md) | **Audit sau bản sửa 17** — 4/4 mục đã sửa; 4 phát hiện mới, nặng nhất là bé teen đạt huy hiệu mà app im lặng |
 | [`docs/17-audit-sau-dot-lam-roadmap.md`](docs/17-audit-sau-dot-lam-roadmap.md) | **Audit sau đợt làm roadmap** — 13/23 mục đã đóng, 1 lỗi 🔴 app nói sai, 9 mục chưa làm |
