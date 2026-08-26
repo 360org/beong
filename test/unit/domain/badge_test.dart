@@ -19,12 +19,12 @@ void main() {
   );
 
   group('danh mục huy hiệu', () {
-    // Con số cứng ở đây là **cố ý**: nó không canh "đúng 11" cho vui, nó canh
+    // Con số cứng ở đây là **cố ý**: nó không canh "đúng 16" cho vui, nó canh
     // việc không ai xoá nhầm một huy hiệu. Xoá huy hiệu là lấy lại thứ đã trao
     // cho một đứa trẻ — thêm thì cứ thêm và sửa số này, xoá thì phải dừng lại
-    // nghĩ. 8 -> 11 khi bổ sung bậc cho thói quen và đổi thưởng.
+    // nghĩ. 8 -> 11 -> 16 khi mở rộng hệ thống 16 huy hiệu 4 danh mục (§22).
     test('đủ số huy hiệu trong danh mục', () {
-      expect(kBadges.length, 11);
+      expect(kBadges.length, 16);
     });
 
     test('khoá không trùng nhau', () {

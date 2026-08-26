@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 ///
 /// Chép tay từ `pubspec.yaml`. Đọc tự động cần `package_info_plus` — một gói
 /// nữa cho đúng một chuỗi; test `bao_cao_loi_test.dart` canh hai chỗ không lệch.
-const kPhienBanApp = '0.2.9';
+const kPhienBanApp = '0.2.10';
 
 /// Màn báo lỗi: gom nhật ký + thiết bị + ảnh màn hình rồi **gửi thẳng** cho
 /// nhà phát triển.

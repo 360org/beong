@@ -72,7 +72,8 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'streak_7',
     title: 'Trọn một tuần',
-    description: 'Làm hết việc 7 ngày liên tiếp — một tuần trọn vẹn, con thật tuyệt vời!',
+    description:
+        'Làm hết việc 7 ngày liên tiếp — một tuần trọn vẹn, con thật tuyệt vời!',
     iconKey: 'star',
     kind: BadgeKind.streak,
     category: BadgeCategory.streak,
@@ -82,7 +83,7 @@ const List<BadgeDef> kBadges = [
     key: 'streak_14',
     title: 'Hai tuần bền bỉ',
     description: 'Làm hết việc 14 ngày liên tiếp — nỗ lực không ngừng nghỉ!',
-    iconKey: 'trophy',
+    iconKey: 'gem',
     kind: BadgeKind.streak,
     category: BadgeCategory.streak,
     threshold: 14,
@@ -90,7 +91,8 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'streak_30',
     title: 'Chiến binh bất bại',
-    description: 'Làm hết việc 30 ngày liên tiếp — con là chiến binh thực thụ rồi đó!',
+    description:
+        'Làm hết việc 30 ngày liên tiếp — con là chiến binh thực thụ rồi đó!',
     iconKey: 'jar_bank',
     kind: BadgeKind.streak,
     category: BadgeCategory.streak,
@@ -128,7 +130,8 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'tasks_100',
     title: 'Bậc thầy việc nhà',
-    description: 'Hoàn thành 100 việc nhà — con là bậc thầy việc nhà của cả nhà!',
+    description:
+        'Hoàn thành 100 việc nhà — con là bậc thầy việc nhà của cả nhà!',
     iconKey: 'jar_circus',
     kind: BadgeKind.tasksDone,
     category: BadgeCategory.tasksDone,
@@ -139,7 +142,8 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'routine_3',
     title: 'Bước đệm nề nếp',
-    description: 'Hoàn thành trọn bộ thói quen 3 ngày — con đang xây thói quen tốt đấy!',
+    description:
+        'Hoàn thành trọn bộ thói quen 3 ngày — con đang xây thói quen tốt đấy!',
     iconKey: 'sunrise',
     kind: BadgeKind.routinePerfectDays,
     category: BadgeCategory.routine,
@@ -148,7 +152,8 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'routine_7',
     title: 'Thói quen vững vàng',
-    description: 'Hoàn thành trọn bộ thói quen 7 ngày — nề nếp của con thật đáng nể!',
+    description:
+        'Hoàn thành trọn bộ thói quen 7 ngày — nề nếp của con thật đáng nể!',
     iconKey: 'sunrise',
     kind: BadgeKind.routinePerfectDays,
     category: BadgeCategory.routine,
@@ -157,7 +162,8 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'routine_14',
     title: 'Gia tài thói quen',
-    description: 'Hoàn thành trọn bộ thói quen 14 ngày — nề nếp đã thành tự nhiên!',
+    description:
+        'Hoàn thành trọn bộ thói quen 14 ngày — nề nếp đã thành tự nhiên!',
     iconKey: 'gem',
     kind: BadgeKind.routinePerfectDays,
     category: BadgeCategory.routine,
@@ -166,7 +172,8 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'routine_21',
     title: 'Kỷ luật thép',
-    description: 'Hoàn thành trọn bộ thói quen 21 ngày — con đã biến nó thành thói quen thật sự!',
+    description:
+        'Hoàn thành trọn bộ thói quen 21 ngày — con đã biến nó thành thói quen thật sự!',
     iconKey: 'party',
     kind: BadgeKind.routinePerfectDays,
     category: BadgeCategory.routine,
@@ -177,7 +184,8 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'first_reward',
     title: 'Trái ngọt đầu tiên',
-    description: 'Đổi phần thưởng lần đầu tiên — con đã biết tiết kiệm và hưởng thành quả!',
+    description:
+        'Đổi phần thưởng lần đầu tiên — con đã biết tiết kiệm và hưởng thành quả!',
     iconKey: 'jar_gift',
     kind: BadgeKind.redemptions,
     category: BadgeCategory.rewards,
@@ -186,7 +194,8 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'reward_3',
     title: 'Nhà tích luỹ tài ba',
-    description: 'Đổi thành công 3 phần thưởng — con biết cách quản lý mục tiêu rồi!',
+    description:
+        'Đổi thành công 3 phần thưởng — con biết cách quản lý mục tiêu rồi!',
     iconKey: 'jar_bank',
     kind: BadgeKind.redemptions,
     category: BadgeCategory.rewards,
@@ -195,7 +204,8 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'reward_5',
     title: 'Nhà sưu tầm quà',
-    description: 'Đổi thành công 5 phần thưởng — bộ sưu tập của con thật ấn tượng!',
+    description:
+        'Đổi thành công 5 phần thưởng — bộ sưu tập của con thật ấn tượng!',
     iconKey: 'gem',
     kind: BadgeKind.redemptions,
     category: BadgeCategory.rewards,
@@ -204,8 +214,9 @@ const List<BadgeDef> kBadges = [
   BadgeDef(
     key: 'reward_10',
     title: 'Chuyên gia đổi thưởng',
-    description: 'Đổi thành công 10 phần thưởng — thành quả xứng đáng cho sự nỗ lực!',
-    iconKey: 'trophy',
+    description:
+        'Đổi thành công 10 phần thưởng — thành quả xứng đáng cho sự nỗ lực!',
+    iconKey: 'star',
     kind: BadgeKind.redemptions,
     category: BadgeCategory.rewards,
     threshold: 10,

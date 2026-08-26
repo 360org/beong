@@ -4,6 +4,19 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.2.10+18 (2026-08-26) — Chuẩn hoá Ràng buộc Kiến trúc & Danh mục Icon Huy hiệu
+
+### [FIX]
+- **Chuẩn hoá Kiến trúc Tầng UI (`wish_sheet.dart`)**:
+  - Tuân thủ nghiêm ngặt ranh giới Clean Architecture, nhập `RewardsCompanion` và các kiểu dữ liệu liên quan qua `reward_repository.dart`, loại bỏ import trực tiếp từ `package:beong/data/`.
+- **Khớp Asset Icon Huy hiệu (`badge_def.dart`)**:
+  - Đồng bộ các icon huy hiệu `streak_14` (`gem`) và `reward_10` (`star`) với bộ asset PNG hiện có.
+  - Cập nhật số lượng kiểm thử 16 huy hiệu trong `test/unit/domain/badge_test.dart`.
+- **Cập nhật Cẩm nang Kỹ thuật (`flutter-8-buoc`)**:
+  - Bổ sung quy tắc phòng ngừa lỗi kiến trúc và kiểm tra asset icon vào `references/lint-thuong-gap.md`.
+
+---
+
 ## v0.2.9+17 (2026-08-26) — Hoàn thiện Toàn diện Trải nghiệm Gamification, Điều hướng theo Vai, Điều ước & Hành trình
 
 ### [NEW]

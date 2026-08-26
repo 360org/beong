@@ -70,6 +70,16 @@ Khai `String?` nhưng luôn có giá trị → bỏ `?`.
 Import `package:meta/meta.dart` khi đã import `package:flutter/material.dart`
 (material đã re-export `@immutable`). Bỏ dòng meta.
 
+### Ràng buộc kiến trúc — `lib/features` cấm import `lib/data` (`kien_truc_test.dart`)
+Tầng màn hình (`lib/features/...`) **tuyệt đối không import trực tiếp** bất kỳ file nào từ `package:beong/data/...`.
+- Phải import qua tầng domain repositories: `package:beong/domain/repositories/...`.
+- Kiểu dữ liệu nào UI cần (`RewardsCompanion`, `Task`, `Member`...) thì cho domain repository tương ứng `export show ...`.
+
+### Ràng buộc danh mục Huy hiệu & Asset icon (`badge_test.dart`)
+- Khi thêm huy hiệu mới vào `kBadges` trong `badge_def.dart`:
+  - `iconKey` **bắt buộc** phải có file icon PNG thật sự tồn tại trong `assets/icons/<iconKey>.png`.
+  - Cập nhật số lượng huy hiệu cứng `expect(kBadges.length, N)` trong `test/unit/domain/badge_test.dart`.
+
 ### `depend_on_referenced_packages`
 Dùng package chỉ có trong dependency gián tiếp. Sửa: thêm vào `pubspec.yaml`
 đúng mục (`dependencies` hoặc `dev_dependencies`).

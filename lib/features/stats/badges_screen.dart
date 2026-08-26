@@ -43,7 +43,9 @@ class BadgesScreen extends ConsumerWidget {
                   for (final category in BadgeCategory.values) ...[
                     _CategoryHeader(category: category),
                     const SizedBox(height: AppSpacing.sm),
-                    for (final badge in kBadges.where((b) => b.category == category))
+                    for (final badge in kBadges.where(
+                      (b) => b.category == category,
+                    ))
                       _BadgeTile(
                         badge: badge,
                         earned: earned.contains(badge.key),
@@ -177,7 +179,9 @@ class _BadgeTile extends StatelessWidget {
                         badge.title,
                         style: context.text.titleSmall?.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: earned ? null : context.semantic.onSurfaceMuted,
+                          color: earned
+                              ? null
+                              : context.semantic.onSurfaceMuted,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -245,8 +249,9 @@ class _BadgeTile extends StatelessWidget {
                   size: 80,
                   strokeWidth: 6,
                   trackColor: ctx.colors.surfaceContainerHighest,
-                  valueColor:
-                      earned ? ctx.semantic.success : ctx.colors.primary,
+                  valueColor: earned
+                      ? ctx.semantic.success
+                      : ctx.colors.primary,
                   child: Opacity(
                     opacity: earned ? 1.0 : 0.6,
                     child: AppIcon(badge.iconKey, size: 40),
@@ -255,8 +260,9 @@ class _BadgeTile extends StatelessWidget {
                 const SizedBox(height: AppSpacing.lg),
                 Text(
                   badge.title,
-                  style:
-                      ctx.text.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                  style: ctx.text.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.xs),
@@ -292,8 +298,9 @@ class _BadgeTile extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    color: ctx.colors.surfaceContainerHighest
-                        .withValues(alpha: 0.5),
+                    color: ctx.colors.surfaceContainerHighest.withValues(
+                      alpha: 0.5,
+                    ),
                     borderRadius: BorderRadius.circular(AppRadius.field),
                   ),
                   child: Row(

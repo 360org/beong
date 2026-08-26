@@ -669,7 +669,10 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  Text('Buổi trong ngày (tuỳ chọn)', style: context.text.titleSmall),
+                  Text(
+                    'Buổi trong ngày (tuỳ chọn)',
+                    style: context.text.titleSmall,
+                  ),
                   const SizedBox(height: AppSpacing.sm),
                   Wrap(
                     spacing: AppSpacing.sm,
@@ -784,7 +787,9 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                     ],
                   ),
                   StreamBuilder<bool>(
-                    stream: widget.memberDao.watchRequireApproval(widget.familyId),
+                    stream: widget.memberDao.watchRequireApproval(
+                      widget.familyId,
+                    ),
                     builder: (context, snap) {
                       if (snap.data ?? false) return const SizedBox.shrink();
                       return Padding(

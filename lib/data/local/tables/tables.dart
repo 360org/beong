@@ -204,6 +204,7 @@ class TaskInstances extends Table with FamilyScoped {
   DateTimeColumn get completedAt => dateTime().nullable()();
   DateTimeColumn get reviewedAt => dateTime().nullable()();
   TextColumn get reviewedBy => text().nullable()();
+
   /// **Chưa có ảnh thật** — thiếu `image_picker`. Hiện chỉ lưu ghi chú text
   /// qua [proofNote]. Nâng cấp: thêm image_picker, lưu đường dẫn file thật.
   TextColumn get proofUrl => text().nullable()();

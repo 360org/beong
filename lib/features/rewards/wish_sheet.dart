@@ -4,7 +4,6 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/icon_picker.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
-import 'package:beong/data/local/database.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/repositories/reward_repository.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -91,7 +90,9 @@ class _WishSheetState extends ConsumerState<_WishSheet> {
         costPoints: _suggestedCost,
         iconKey: Value(_iconKey),
         rewardType: Value(RewardType.custom.name),
-        metaJson: Value('{"proposerId":"${widget.memberId}","note":"${_noteController.text.trim()}"}'),
+        metaJson: Value(
+          '{"proposerId":"${widget.memberId}","note":"${_noteController.text.trim()}"}',
+        ),
       ),
     );
 
@@ -118,7 +119,11 @@ class _WishSheetState extends ConsumerState<_WishSheet> {
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome_rounded, color: Colors.amber, size: 28),
+              const Icon(
+                Icons.auto_awesome_rounded,
+                color: Colors.amber,
+                size: 28,
+              ),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 'Điều ước của con',

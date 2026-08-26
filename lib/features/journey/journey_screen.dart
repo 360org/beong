@@ -375,7 +375,8 @@ class _MilestoneTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reached = saved >= milestone.targetXu;
-    final isCurrent = !reached &&
+    final isCurrent =
+        !reached &&
         (milestone.targetXu == 0 ||
             saved >= (milestone.targetXu * 0.5).round());
 
@@ -391,14 +392,14 @@ class _MilestoneTile extends StatelessWidget {
             color: reached
                 ? context.semantic.success
                 : (isCurrent
-                    ? context.colors.primary
-                    : context.colors.surfaceContainerHighest),
+                      ? context.colors.primary
+                      : context.colors.surfaceContainerHighest),
             border: Border.all(
               color: reached
                   ? AppColors.brand360Green
                   : (isCurrent
-                      ? context.colors.primary
-                      : context.colors.outlineVariant),
+                        ? context.colors.primary
+                        : context.colors.outlineVariant),
               width: 3,
             ),
             boxShadow: isCurrent
@@ -440,8 +441,8 @@ class _MilestoneTile extends StatelessWidget {
                 reached
                     ? 'Đã vượt qua mốc này'
                     : (isCurrent
-                        ? 'Đang tiến về mốc này (còn ${milestone.targetXu - saved} xu)'
-                        : 'Mốc ${(milestone.percent * 100).toInt()}%'),
+                          ? 'Đang tiến về mốc này (còn ${milestone.targetXu - saved} xu)'
+                          : 'Mốc ${(milestone.percent * 100).toInt()}%'),
                 style: context.text.bodySmall?.copyWith(
                   color: context.semantic.onSurfaceMuted,
                 ),
