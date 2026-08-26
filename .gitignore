@@ -51,3 +51,4 @@ lib/core/l10n/gen/
 *.g.dart
 *.freezed.dart
 certs/
+build_artifacts/

@@ -4,6 +4,34 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.2.13+21 (2026-08-26) — Nâng Cấp Toàn Diện Màn Hình Parents, Quản Lý & Phân Tách Theo Từng Bé
+
+### [NEW]
+- **Quản Lý & Phân Định Phần Thưởng Theo Từng Bé**:
+  - Gán phần thưởng đích danh cho từng bé hoặc dùng chung cho tất cả các con qua `targetMemberId` lưu trong `metaJson`.
+  - Hiển thị badge avatar và tên bé kèm màu nhận diện trực quan trên thẻ phần thưởng `_RewardCard`.
+  - Bổ sung thanh cuộn `FilterChip` lọc danh sách phần thưởng theo từng bé trên màn hình Phần thưởng của phụ huynh.
+  - Phía con chỉ hiển thị các phần thưởng dùng chung hoặc được gán riêng cho chính bé đó.
+- **Tuỳ Biến Tỷ Lệ Hũ Xu Theo Từng Bé (`jarSplitOverride`)**:
+  - Hỗ trợ thiết lập tỷ lệ hũ riêng biệt phù hợp theo độ tuổi từng bé (bé nhỏ ưu tiên hũ Chi tiêu/Đồ chơi, bé lớn ưu tiên Tiết kiệm/Học tập).
+  - Tích hợp RadioGroup và bộ slider điều chỉnh tỷ lệ hũ linh hoạt trong biểu mẫu hồ sơ bé.
+- **Gán Việc Nhà Mẫu Hàng Loạt Khi Tạo / Sửa Hồ Sơ Con**:
+  - Tích hợp danh sách việc mẫu `kTaskPresets` dạng FilterChip cho phép phụ huynh tích chọn nhanh nhiều việc cùng lúc để tự động tạo và sinh instance việc cho bé ngay trong ngày.
+- **Bật / Tắt Mật Khẩu PIN Hồ Sơ Cho Từng Bé**:
+  - Bổ sung công tắc `SwitchListTile` bật/tắt mật khẩu 4 chữ số bảo vệ hồ sơ bé, tích hợp hàm `boMatKhau` trong `MatKhauHoSo`.
+- **Hiển Thị Rõ Ràng Danh Tính Bé Xin Đổi Thưởng**:
+  - Hiển thị avatar tròn, nhãn tên bé và màu nhận diện riêng biệt trên từng thẻ yêu cầu đổi thưởng trong `RedemptionQueue`.
+
+### [IMPROVE]
+- **Trải Nghiệm Thao Tác & Nút Đóng / Huỷ Biểu Mẫu**:
+  - Bổ sung nút `X` (Đóng/Huỷ) rõ ràng trên header của Form thêm/sửa phần thưởng (`_RewardEditorSheet`) và Form hồ sơ bé (`ChildProfileForm`).
+  - Nâng cấp hiển thị trung thực yêu cầu kiểm tra hình ảnh chứng thực từ phụ huynh khi nhiệm vụ yêu cầu chụp ảnh.
+
+### [FIX]
+- Đảm bảo 100% test suite (523 tests) vượt qua thành công với 0 diagnostic issues.
+
+---
+
 ## v0.2.12+20 (2026-08-26) — Tái Thiết Kế Toàn Diện UI Cho Bé Phong Cách Gamification & Benchmark Chore Rewards
 
 ### [NEW]
