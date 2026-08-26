@@ -79,6 +79,15 @@ const List<BadgeDef> kBadges = [
     threshold: 7,
   ),
   BadgeDef(
+    key: 'streak_14',
+    title: 'Hai tuần bền bỉ',
+    description: 'Làm hết việc 14 ngày liên tiếp — nỗ lực không ngừng nghỉ!',
+    iconKey: 'trophy',
+    kind: BadgeKind.streak,
+    category: BadgeCategory.streak,
+    threshold: 14,
+  ),
+  BadgeDef(
     key: 'streak_30',
     title: 'Chiến binh bất bại',
     description: 'Làm hết việc 30 ngày liên tiếp — con là chiến binh thực thụ rồi đó!',
@@ -97,6 +106,15 @@ const List<BadgeDef> kBadges = [
     kind: BadgeKind.tasksDone,
     category: BadgeCategory.tasksDone,
     threshold: 10,
+  ),
+  BadgeDef(
+    key: 'tasks_25',
+    title: 'Đôi tay chăm chỉ',
+    description: 'Hoàn thành 25 việc nhà — chăm chỉ từng ngày!',
+    iconKey: 'heart',
+    kind: BadgeKind.tasksDone,
+    category: BadgeCategory.tasksDone,
+    threshold: 25,
   ),
   BadgeDef(
     key: 'tasks_50',
@@ -137,6 +155,15 @@ const List<BadgeDef> kBadges = [
     threshold: 7,
   ),
   BadgeDef(
+    key: 'routine_14',
+    title: 'Gia tài thói quen',
+    description: 'Hoàn thành trọn bộ thói quen 14 ngày — nề nếp đã thành tự nhiên!',
+    iconKey: 'gem',
+    kind: BadgeKind.routinePerfectDays,
+    category: BadgeCategory.routine,
+    threshold: 14,
+  ),
+  BadgeDef(
     key: 'routine_21',
     title: 'Kỷ luật thép',
     description: 'Hoàn thành trọn bộ thói quen 21 ngày — con đã biến nó thành thói quen thật sự!',
@@ -157,6 +184,15 @@ const List<BadgeDef> kBadges = [
     threshold: 1,
   ),
   BadgeDef(
+    key: 'reward_3',
+    title: 'Nhà tích luỹ tài ba',
+    description: 'Đổi thành công 3 phần thưởng — con biết cách quản lý mục tiêu rồi!',
+    iconKey: 'jar_bank',
+    kind: BadgeKind.redemptions,
+    category: BadgeCategory.rewards,
+    threshold: 3,
+  ),
+  BadgeDef(
     key: 'reward_5',
     title: 'Nhà sưu tầm quà',
     description: 'Đổi thành công 5 phần thưởng — bộ sưu tập của con thật ấn tượng!',
@@ -164,6 +200,15 @@ const List<BadgeDef> kBadges = [
     kind: BadgeKind.redemptions,
     category: BadgeCategory.rewards,
     threshold: 5,
+  ),
+  BadgeDef(
+    key: 'reward_10',
+    title: 'Chuyên gia đổi thưởng',
+    description: 'Đổi thành công 10 phần thưởng — thành quả xứng đáng cho sự nỗ lực!',
+    iconKey: 'trophy',
+    kind: BadgeKind.redemptions,
+    category: BadgeCategory.rewards,
+    threshold: 10,
   ),
 ];
 

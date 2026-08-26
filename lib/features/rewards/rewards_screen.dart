@@ -16,6 +16,7 @@ import 'package:beong/domain/repositories/reward_repository.dart';
 import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/domain/services/redemption_service.dart';
 import 'package:beong/features/rewards/redemption_queue.dart';
+import 'package:beong/features/rewards/wish_sheet.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -108,7 +109,15 @@ class RewardsScreen extends ConsumerWidget {
                   _showRewardEditor(context, rewardDao, session.familyId),
               child: const Icon(Icons.add),
             )
-          : null,
+          : FloatingActionButton.extended(
+              onPressed: () => showWishSheet(
+                context,
+                familyId: session.familyId,
+                memberId: session.activeMemberId,
+              ),
+              icon: const Icon(Icons.auto_awesome_rounded),
+              label: const Text('ĐIỀU ƯỚC'),
+            ),
     );
   }
 

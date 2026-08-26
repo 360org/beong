@@ -20,6 +20,8 @@ void main() {
       vi.navHome,
       vi.navTasks,
       vi.navRewards,
+      vi.navBadges,
+      vi.navJourney,
       vi.navStats,
       vi.navSettings,
     ]) {

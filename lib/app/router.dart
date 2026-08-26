@@ -2,6 +2,7 @@ import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:beong/core/widgets/responsive_scaffold.dart';
 import 'package:beong/features/child_home/child_home_screen.dart';
+import 'package:beong/features/journey/journey_screen.dart';
 import 'package:beong/features/members/vao_app_screen.dart';
 import 'package:beong/features/onboarding/onboarding_screen.dart';
 import 'package:beong/features/parent_home/parent_home_screen.dart';
@@ -22,12 +23,13 @@ abstract final class Routes {
   static const tasks = '/tasks';
   static const rewards = '/rewards';
   static const stats = '/stats';
+  static const badges = '/badges';
+  static const journey = '/journey';
   static const settings = '/settings';
 
   /// Trang con của Cài đặt — cấu hình trừ xu (ADR-022).
   static const penaltySettings = '/settings/penalty';
   static const jarSettings = '/settings/jars';
-  static const badges = '/stats/badges';
 
   /// Sửa một thói quen. Nhận `routineId` qua đường dẫn.
   static String routineEditor(String routineId) => '/tasks/routine/$routineId';
@@ -52,24 +54,13 @@ abstract final class Routes {
     tasks,
     rewards,
     stats,
+    badges,
+    journey,
     settings,
   ];
 }
 
 /// Người mở app lúc này phải đi đâu — `null` là "cứ ở nguyên chỗ đang tới".
-///
-/// Tách khỏi [createRouter] để test được bằng bảng, không cần dựng cả cây
-/// widget. Ba trạng thái, không phải hai — đó chính là chỗ trước đây sai:
-///
-/// | Máy có dữ liệu | Có session | Đi đâu |
-/// |---|---|---|
-/// | không | không | onboarding |
-/// | **có** | **không** | **màn chọn người dùng** |
-/// | có | có | trang chính |
-///
-/// Gộp hai dòng đầu làm một (`session == null` → onboarding) là lỗi §2 trong
-/// `docs/13-audit-luong-vao-app.md`: bấm KHOÁ LẠI xong onboarding tạo thêm một
-/// gia đình nữa, còn gia đình cũ nằm lại trong DB không đường vào.
 String? diemDenDauTien({
   required AppSession? session,
   required bool mayDaCoDuLieu,
@@ -91,9 +82,14 @@ String? diemDenDauTien({
   // Đã chọn người dùng rồi thì hai màn "chưa vào được" kia không còn nghĩa.
   if (laOnboarding || laChonNguoiDung) return Routes.home;
 
-  // Vai con không có Cài đặt. Chặn cả ở router chứ không chỉ ẩn tab: link sâu
-  // hay `goBranch` gọi sai vẫn phải rơi về chỗ an toàn.
-  if (!session.isParent && viTri.startsWith(Routes.settings)) {
+  // Vai con không có Cài đặt và Thống kê phụ huynh.
+  if (!session.isParent &&
+      (viTri.startsWith(Routes.settings) || viTri.startsWith(Routes.stats))) {
+    return Routes.home;
+  }
+
+  // Vai phụ huynh không có tab Hành trình trẻ em.
+  if (session.isParent && viTri.startsWith(Routes.journey)) {
     return Routes.home;
   }
 
@@ -127,6 +123,7 @@ GoRouter createRouter({
         builder: (context, state, navigationShell) =>
             _AppShell(navigationShell: navigationShell),
         branches: [
+          // 0: Trang chính
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -142,6 +139,7 @@ GoRouter createRouter({
               ),
             ],
           ),
+          // 1: Nhiệm vụ
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -149,13 +147,7 @@ GoRouter createRouter({
                 builder: (context, state) => const TasksScreen(),
                 routes: [
                   GoRoute(
-                    // Đường dẫn con nên thanh điều hướng vẫn hiện và nút back
-                    // quay về đúng tab Nhiệm vụ.
                     path: 'routine/:routineId',
-                    // `redirect` chứ không phải `?? ''`: chuỗi rỗng lọt xuống
-                    // thì màn sửa thói quen mở ra **trống trơn**, không báo gì
-                    // — im lặng sai còn khó lần ra hơn một cú crash. Về thẳng
-                    // danh sách là thứ người dùng hiểu được ngay.
                     redirect: (context, state) =>
                         (state.pathParameters['routineId'] ?? '').isEmpty
                         ? Routes.tasks
@@ -168,6 +160,7 @@ GoRouter createRouter({
               ),
             ],
           ),
+          // 2: Phần thưởng
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -176,20 +169,34 @@ GoRouter createRouter({
               ),
             ],
           ),
+          // 3: Thống kê (Dành cho bố mẹ)
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: Routes.stats,
                 builder: (context, state) => const StatsScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'badges',
-                    builder: (context, state) => const BadgesScreen(),
-                  ),
-                ],
               ),
             ],
           ),
+          // 4: Huy hiệu
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.badges,
+                builder: (context, state) => const BadgesScreen(),
+              ),
+            ],
+          ),
+          // 5: Hành trình (Dành cho con)
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.journey,
+                builder: (context, state) => const JourneyScreen(),
+              ),
+            ],
+          ),
+          // 6: Cài đặt (Dành cho bố mẹ)
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -197,8 +204,6 @@ GoRouter createRouter({
                 builder: (context, state) => const SettingsScreen(),
                 routes: [
                   GoRoute(
-                    // Đường dẫn con nên thanh điều hướng vẫn hiện và nút back
-                    // quay về đúng tab Cài đặt.
                     path: 'penalty',
                     builder: (context, state) => const PenaltySettingsScreen(),
                   ),
@@ -218,6 +223,8 @@ GoRouter createRouter({
 
 typedef _Titled = String Function(BuildContext context);
 
+enum RoleAudience { parentOnly, childOnly, all }
+
 class _Branch {
   const _Branch({
     required this.path,
@@ -225,7 +232,7 @@ class _Branch {
     required this.label,
     required this.icon,
     required this.selectedIcon,
-    this.parentOnly = false,
+    this.audience = RoleAudience.all,
   });
 
   final String path;
@@ -233,16 +240,11 @@ class _Branch {
   final _Titled label;
   final IconData icon;
   final IconData selectedIcon;
-
-  /// Chỉ hiện với vai bố mẹ. Cài đặt là chỗ đổi cấu hình cả nhà — trừ xu, chế
-  /// độ duyệt, chia xu — nên không phải việc của con.
-  ///
-  /// Đây **chỉ là ẩn ở giao diện**, không phải cơ chế bảo vệ: vai lưu ở local
-  /// không cấp quyền (ADR-018). Chặn thật sẽ đến từ credential khi có backend.
-  final bool parentOnly;
+  final RoleAudience audience;
 }
 
 final _branches = <_Branch>[
+  // 0: Home
   _Branch(
     path: Routes.home,
     title: (c) => L10n.of(c).parentHomeTitle,
@@ -250,6 +252,7 @@ final _branches = <_Branch>[
     icon: Icons.home_outlined,
     selectedIcon: Icons.home_rounded,
   ),
+  // 1: Tasks
   _Branch(
     path: Routes.tasks,
     title: (c) => L10n.of(c).tasksTitle,
@@ -257,6 +260,7 @@ final _branches = <_Branch>[
     icon: Icons.fact_check_outlined,
     selectedIcon: Icons.fact_check_rounded,
   ),
+  // 2: Rewards
   _Branch(
     path: Routes.rewards,
     title: (c) => L10n.of(c).rewardsTitle,
@@ -264,20 +268,41 @@ final _branches = <_Branch>[
     icon: Icons.redeem_outlined,
     selectedIcon: Icons.redeem_rounded,
   ),
+  // 3: Stats (Bố mẹ)
   _Branch(
     path: Routes.stats,
     title: (c) => L10n.of(c).statsTitle,
     label: (c) => L10n.of(c).navStats,
     icon: Icons.bar_chart_outlined,
     selectedIcon: Icons.bar_chart_rounded,
+    audience: RoleAudience.parentOnly,
   ),
+  // 4: Badges (Cả hai xem được, đặc biệt là con)
+  _Branch(
+    path: Routes.badges,
+    title: (c) => 'Huy hiệu',
+    label: (c) => L10n.of(c).navBadges,
+    icon: Icons.military_tech_outlined,
+    selectedIcon: Icons.military_tech_rounded,
+    audience: RoleAudience.childOnly,
+  ),
+  // 5: Journey (Con)
+  _Branch(
+    path: Routes.journey,
+    title: (c) => 'Hành trình',
+    label: (c) => L10n.of(c).navJourney,
+    icon: Icons.explore_outlined,
+    selectedIcon: Icons.explore_rounded,
+    audience: RoleAudience.childOnly,
+  ),
+  // 6: Settings (Bố mẹ)
   _Branch(
     path: Routes.settings,
     title: (c) => L10n.of(c).settingsTitle,
     label: (c) => L10n.of(c).navSettings,
     icon: Icons.settings_outlined,
     selectedIcon: Icons.settings_rounded,
-    parentOnly: true,
+    audience: RoleAudience.parentOnly,
   ),
 ];
 
@@ -290,19 +315,20 @@ class _AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isParent = ref.watch(sessionProvider)?.isParent ?? false;
 
-    // Số nhánh của `StatefulShellRoute` là **cố định**; chỉ danh sách hiện ra là
-    // lọc. Vì vậy phải giữ bảng ánh xạ: chỉ số trong thanh nav ≠ chỉ số nhánh.
-    // Không có bảng này thì ẩn một tab làm mọi tab sau nó nhảy sang nhánh khác.
+    // Lọc danh sách tab nhìn thấy theo vai trò:
+    // - Bố mẹ (isParent = true): Home (0), Tasks (1), Rewards (2), Stats (3), Settings (6) -> 5 tabs
+    // - Con (isParent = false): Home (0), Tasks (1), Rewards (2), Badges (4), Journey (5) -> 5 tabs
     final visible = <int>[
       for (var i = 0; i < _branches.length; i++)
-        if (isParent || !_branches[i].parentOnly) i,
+        if (_branches[i].audience == RoleAudience.all ||
+            (isParent && _branches[i].audience == RoleAudience.parentOnly) ||
+            (!isParent && _branches[i].audience == RoleAudience.childOnly))
+          i,
     ];
 
     final selected = visible.indexOf(navigationShell.currentIndex);
 
     return ResponsiveScaffold(
-      // Nhánh hiện tại không nằm trong danh sách hiện ra (ví dụ vừa đổi vai
-      // trong lúc đang ở Cài đặt) thì chọn tab đầu — router sẽ đẩy về đúng chỗ.
       selectedIndex: selected < 0 ? 0 : selected,
       onDestinationSelected: (index) {
         final branch = visible[index];

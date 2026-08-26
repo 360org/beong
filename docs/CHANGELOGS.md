@@ -4,9 +4,20 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
-## v0.2.8+16 (2026-08-25) — Hoàn thiện Toàn diện Trải nghiệm Gamification, Mục tiêu & Huy hiệu (Roadmap docs/16)
+## v0.2.9+17 (2026-08-26) — Hoàn thiện Toàn diện Trải nghiệm Gamification, Điều hướng theo Vai, Điều ước & Hành trình
 
 ### [NEW]
+- **Điều hướng Chuẩn hoá theo Vai trò (§14, §24)**:
+  - Phân tách thanh điều hướng độc lập dựa trên vai trò:
+    - **Bố mẹ (5 tabs)**: Trang chính (`Home`), Nhiệm vụ (`Tasks`), Phần thưởng (`Rewards`), Thống kê (`Stats`), Cài đặt (`Settings`).
+    - **Con (5 tabs)**: Trang chính (`Home`), Nhiệm vụ (`Tasks`), Phần thưởng (`Rewards`), Huy hiệu (`Badges`), Hành trình (`Journey`).
+  - Trẻ có tab **Huy hiệu** và **Hành trình** riêng biệt, loại bỏ tình trạng bị redirect chặn khi truy cập nhầm Cài đặt.
+- **Màn hình Bản đồ Hành trình Mục tiêu (§13)**:
+  - Màn hình `JourneyScreen` trực quan hoá con đường chinh phục mục tiêu tiết kiệm dài hạn của con qua các cột mốc tiến độ dọc (25%, 50%, 75%, 100%) kết nối linh hoạt với hũ Để dành.
+- **Tính năng Điều ước do Con Tự Đề Xuất (§11)**:
+  - Cho phép trẻ tự đề xuất mong muốn phần thưởng (`_WishSheet` / `showWishSheet`) kèm số xu gợi ý để bố mẹ xem xét, phê duyệt và định giá chính thức.
+- **Mở rộng Hệ thống Huy hiệu & Cột mốc Đa tầng (§22)**:
+  - Mở rộng bộ huy hiệu lên 16 huy hiệu chia đều trên 4 danh mục (`streak`, `tasksDone`, `routinePerfectDays`, `redemptions`), bổ sung các mốc 14 ngày, 25 việc, 3 phần thưởng và 10 phần thưởng.
 - **Bộ Nhận diện & App Icon Chính thức**:
   - Cập nhật đồng bộ bộ App Icon hoàn toàn mới từ `docs/icons/app-icon.png` cho toàn bộ các nền tảng: iOS (AppIcon xcassets 20x20..1024x1024), Android (mipmap mdpi..xxxhdpi), macOS (16x16..1024x1024), Web (favicon, apple-touch-icon, logo) và tài liệu.
 - **Hệ thống Ăn mừng & Vinh danh Huy hiệu Đa tầng (§18, §20)**:
@@ -21,13 +32,13 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
   - Tích hợp thoại tương tác cho `BeeMascot` tại Dashboard vai con, phản hồi trực tiếp theo tiến độ hoàn thành công việc trong ngày.
 
 ### [FIX]
+- **Tối ưu Trải nghiệm Tuổi Teen & Hoạt ảnh (Audit 18 C-1)**:
+  - Nhóm trẻ teen (13–15) nhận thông báo huy hiệu mới qua SnackBar kèm biểu tượng và tên huy hiệu rõ ràng, tôn trọng sở thích không bị chen ngang bởi dialog pop-up.
 - **Sửa Lỗi Bằng chứng Ảnh & Trung thực Trạng thái (Audit 15 §1, Audit 17 §1)**:
   - Loại bỏ chuỗi giả `local_captured_...` khi con hoàn thành việc yêu cầu ảnh. Đổi thông điệp thoại thành trung thực ("Cần bố mẹ xem").
   - Màn hình duyệt của bố mẹ hiển thị đúng yêu cầu kiểm tra trực tiếp thay vì ghi đã có ảnh chụp giả.
-- **Tôn trọng Trải nghiệm Tuổi Teen (Audit 17 §2)**:
-  - Dialog ăn mừng huy hiệu chặn màn hình tôn trọng cờ `celebrateOnTap` — không bật lên quấy rầy đối với nhóm tuổi 13–15.
 - **Hoàn thiện Câu Động viên Huy hiệu (Roadmap §21, Audit 17 §3)**:
-  - Bổ sung đầy đủ vế thứ hai — lời động viên xưng "con" cho toàn bộ 11 huy hiệu.
+  - Bổ sung đầy đủ vế thứ hai — lời động viên xưng "con" cho toàn bộ huy hiệu.
 - **Loại bỏ Emoji Người trong Preset (Audit 15 §8)**:
   - Đổi icon preset `exercise` từ `run` (🏃) sang `soccer` (⚽) để đảm bảo tính trung tính cho mọi bé.
 - **Bổ sung Chú thích 5 Cột Schema Chưa Nối (Audit 15 §6)**:

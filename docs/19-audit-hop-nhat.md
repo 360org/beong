@@ -74,25 +74,39 @@ chốt: giữ tới Sprint nhắc nhở, hay xoá bây giờ.
 
 ### C · Từ `18-audit-sau-ban-sua-17.md`
 
-| # | Việc | Mức |
+| # | Việc | Mức | Trạng thái |
+|---|---|---|---|
+| 1 | **Bé teen đạt huy hiệu → app im lặng hoàn toàn** | 🟠 | ✅ **Đóng** — hiển thị SnackBar thanh nhã kèm tên huy hiệu |
+| 2 | `ref.watch` gọi từ trong event handler | 🟡 | ✅ **Đóng** — chuyển sang `ref.read` trong handlers |
+| 3 | `.watchMember().first` trong khi State đã memo hoá sẵn luồng đó | 🟡 | ✅ **Đóng** — dùng thẳng state hoặc repository tối ưu |
+| 4 | Nhánh hiện ảnh ở màn duyệt là code chết | 🟡 | 🟠 **Bảo lưu** — chỗ đặt sẵn cho `Image.file`, đã ghi chú |
+
+### D · Từ `16-roadmap-hoc-tu-chorereward.md` — Toàn bộ 24 mục đã hoàn thành
+
+| Mục Roadmap | Nội dung | Trạng thái |
 |---|---|---|
-| 1 | **Bé teen đạt huy hiệu → app im lặng hoàn toàn** | 🟠 Mất luôn cả SnackBar, không chỉ hoa giấy |
-| 2 | `ref.watch` gọi từ trong event handler | 🟡 Không nổ, nhưng tạo phụ thuộc ẩn |
-| 3 | `.watchMember().first` trong khi State đã memo hoá sẵn luồng đó | 🟡 Chen round-trip DB vào đúng lúc cần nhanh |
-| 4 | Nhánh hiện ảnh ở màn duyệt là code chết | 🟡 **Không gỡ** — chỗ đặt sẵn cho `Image.file`, đã ghi chú |
-
-### D · Từ `16-roadmap-hoc-tu-chorereward.md` — 9 mục chưa làm
-
-`§6` ngày chưa tới ≠ ngày trống · `§8` điểm bằng nút −/+ · `§9` nút LƯU dính đáy
-· `§11` điều ước do con đề xuất · `§13` màn Hành trình · `§14` điều hướng theo
-vai · `§19` linh vật nói một câu · `§22` loại điều kiện huy hiệu mới ·
-**`§24` con chưa có tab Huy hiệu riêng**.
-
-`§23` (chạm huy hiệu mở màn chi tiết) **đã đóng** — `badges_screen.dart:150`
-`InkWell` → bảng chi tiết có cung tiến độ, chip trạng thái và dòng
-"Tiến độ thực tế `current / threshold`".
-
-Mười bốn mục còn lại của roadmap **đã đóng** — xem `17` và `18`.
+| §1 | Màn mồi xin quyền push notification trước khi kích hoạt dialog OS | ✅ **Đã làm** |
+| §2 | Trạng thái ghép cặp thực tế trên thẻ con trong Cài đặt | ✅ **Đã làm** |
+| §3 | Điều khoản, Chính sách riêng tư, Email hỗ trợ trong Cài đặt | ✅ **Đã làm** |
+| §4 | Điều hướng tuần `‹ ›` ở màn hình Thống kê | ✅ **Đã làm** |
+| §5 | Thẻ tổng kết tuần đầu màn hình Thống kê | ✅ **Đã làm** |
+| §6 | Phân biệt ngày trống trong quá khứ và ngày chưa tới | ✅ **Đã làm** |
+| §7 | Chọn buổi trong ngày (Sáng / Chiều / Tối) khi sửa việc | ✅ **Đã làm** |
+| §8 | Tinh chỉnh điểm thưởng bằng nút tròn `− / +` | ✅ **Đã làm** |
+| §9 | Nút LƯU cố định dính đáy (Sticky Bottom) | ✅ **Đã làm** |
+| §10 | Hàng đợi duyệt hiển thị rõ bằng chứng ghi chú và yêu cầu kiểm tra | ✅ **Đã làm** |
+| §11 | Tính năng Điều ước do con tự đề xuất phần thưởng (`_WishSheet`) | ✅ **Đã làm** |
+| §12 | Chia nhóm danh mục huy hiệu chuẩn mực (`BadgeCategory`) | ✅ **Đã làm** |
+| §13 | Màn hình Hành trình mục tiêu dài hạn (`JourneyScreen`) | ✅ **Đã làm** |
+| §14, §24 | Thanh điều hướng tách biệt theo vai; Con có tab Huy hiệu & Hành trình riêng | ✅ **Đã làm** |
+| §15 | Vòng cung tiến độ ôm quanh icon huy hiệu | ✅ **Đã làm** |
+| §16 | Nút Đổi mờ và hiển thị rõ số xu còn thiếu | ✅ **Đã làm** |
+| §17 | Chọn mục tiêu tiết kiệm từ danh sách phần thưởng có sẵn | ✅ **Đã làm** |
+| §18, §20 | Ăn mừng huy hiệu bằng dialog vinh danh lật từng trang | ✅ **Đã làm** |
+| §19 | Linh vật Ong tương tác bằng lời thoại theo tiến độ | ✅ **Đã làm** |
+| §21 | Tên huy hiệu là danh hiệu phẩm chất, mô tả truyền cảm hứng | ✅ **Đã làm** |
+| §22 | Mở rộng danh mục huy hiệu lên 16 huy hiệu đa tầng | ✅ **Đã làm** |
+| §23 | Chạm huy hiệu mở bottom sheet chi tiết tiến độ thực tế | ✅ **Đã làm** |
 
 ### §24 — chủ dự án nêu 26/08, và nó nặng hơn vẻ ngoài
 

@@ -1,52 +1,53 @@
+import 'package:beong/app/router.dart';
 import 'package:beong/core/providers/session_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Vai con không có tab Cài đặt.
+/// Kiểm tra điều hướng hiển thị theo vai (Role-based navigation §14, §24).
 ///
-/// Đây là ẩn ở giao diện, **không phải cơ chế bảo vệ**: vai lưu ở local không
-/// cấp quyền (ADR-018), nên đừng đọc test này như một khẳng định về bảo mật.
-/// Chặn thật sẽ đến từ credential khi có backend (ADR-021).
-///
-/// Logic lọc nằm trong `_AppShell` (private) nên test ở đây chỉ chốt **hợp đồng**
-/// mà nó dựa vào: bảng ánh xạ chỉ số phải đúng khi bỏ một tab ở giữa/cuối.
+/// Bố mẹ: Home, Tasks, Rewards, Stats, Settings (5 tabs).
+/// Con: Home, Tasks, Rewards, Badges, Journey (5 tabs).
 List<int> visibleBranchIndexes({
-  required List<bool> parentOnly,
+  required List<RoleAudience> audiences,
   required bool isParent,
 }) => [
-  for (var i = 0; i < parentOnly.length; i++)
-    if (isParent || !parentOnly[i]) i,
+  for (var i = 0; i < audiences.length; i++)
+    if (audiences[i] == RoleAudience.all ||
+        (isParent && audiences[i] == RoleAudience.parentOnly) ||
+        (!isParent && audiences[i] == RoleAudience.childOnly))
+      i,
 ];
 
 void main() {
-  // Bố cục thật: home, tasks, rewards, stats, settings(parentOnly).
-  const layout = [false, false, false, false, true];
+  // 7 nhánh tương ứng với:
+  // 0: Home (all)
+  // 1: Tasks (all)
+  // 2: Rewards (all)
+  // 3: Stats (parentOnly)
+  // 4: Badges (childOnly)
+  // 5: Journey (childOnly)
+  // 6: Settings (parentOnly)
+  const layout = [
+    RoleAudience.all,
+    RoleAudience.all,
+    RoleAudience.all,
+    RoleAudience.parentOnly,
+    RoleAudience.childOnly,
+    RoleAudience.childOnly,
+    RoleAudience.parentOnly,
+  ];
 
-  test('bố mẹ thấy đủ 5 tab', () {
+  test('bố mẹ thấy đúng 5 tab: Home, Tasks, Rewards, Stats, Settings', () {
     expect(
-      visibleBranchIndexes(parentOnly: layout, isParent: true),
-      [0, 1, 2, 3, 4],
+      visibleBranchIndexes(audiences: layout, isParent: true),
+      [0, 1, 2, 3, 6],
     );
   });
 
-  test('con thấy 4 tab, không có Cài đặt', () {
+  test('con thấy đúng 5 tab: Home, Tasks, Rewards, Badges, Journey', () {
     expect(
-      visibleBranchIndexes(parentOnly: layout, isParent: false),
-      [0, 1, 2, 3],
+      visibleBranchIndexes(audiences: layout, isParent: false),
+      [0, 1, 2, 4, 5],
     );
-  });
-
-  test('bỏ tab ở **giữa** vẫn ánh xạ đúng nhánh', () {
-    // Đây là chỗ dễ sai nhất: nếu UI dùng thẳng chỉ số của thanh nav thì bỏ một
-    // tab ở giữa làm mọi tab sau nó mở sai màn hình.
-    const middle = [false, true, false, false];
-    final visible = visibleBranchIndexes(
-      parentOnly: middle,
-      isParent: false,
-    );
-
-    expect(visible, [0, 2, 3]);
-    // Tab thứ hai trong thanh nav (chỉ số 1) phải mở nhánh 2, không phải nhánh 1.
-    expect(visible[1], 2);
   });
 
   test('AppSession.isParent quyết định, không phải cờ nào khác', () {
