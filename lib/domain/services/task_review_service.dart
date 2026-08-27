@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:beong/data/local/badge_dao.dart';
 import 'package:beong/data/local/database.dart';
 import 'package:beong/data/local/member_dao.dart';
@@ -142,9 +144,25 @@ class TaskReviewService {
     final nhomXu = 'task-approved:${instance.id}';
     if (instance.pointsSnapshot > 0 && !await _wallet.daGhiNhom(nhomXu)) {
       final family = await _members.getFamily(instance.familyId);
-      final mode = allocationModeFromDb(family.allocationMode);
+      final member = await _members.getMember(instance.memberId);
 
-      if (mode == AllocationMode.manual) {
+      var isManual = false;
+      if (member.jarSplitOverride != null && member.jarSplitOverride!.isNotEmpty) {
+        try {
+          final map = jsonDecode(member.jarSplitOverride!) as Map<String, dynamic>;
+          if (map.containsKey('manualAllocation')) {
+            isManual = map['manualAllocation'] == true;
+          } else {
+            isManual = allocationModeFromDb(family.allocationMode) == AllocationMode.manual;
+          }
+        } on FormatException {
+          isManual = allocationModeFromDb(family.allocationMode) == AllocationMode.manual;
+        }
+      } else {
+        isManual = allocationModeFromDb(family.allocationMode) == AllocationMode.manual;
+      }
+
+      if (isManual) {
         // Con tự chia: xu vào **hũ chờ**, chưa thuộc hũ nào (ADR-024). Vẫn tính
         // vào tổng điểm của con — xu là của con ngay khi làm xong việc, việc
         // chia là chuyện sau.

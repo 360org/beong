@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/family_clock_provider.dart';
@@ -28,6 +29,7 @@ import 'package:beong/features/members/mat_khau_sheet.dart';
 import 'package:beong/features/rewards/allocate_xu_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ChildHomeScreen extends ConsumerStatefulWidget {
   const ChildHomeScreen({super.key});
@@ -133,30 +135,80 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
         if (ok != true || !mounted) return;
         proofNote = noteController.text.trim();
       } else if (task.proofMode == ProofMode.photo.name) {
-        // ponytail: chụp ảnh thật chưa có (thiếu image_picker). Chỉ nhắc con
-        // đưa bố mẹ xem — không ghi proofUrl giả, không nói "đã chụp ảnh".
-        // Nâng cấp: thêm image_picker, lưu file local, ghi đường dẫn thật.
-        final ok = await showDialog<bool>(
+        final picker = ImagePicker();
+        final source = await showModalBottomSheet<ImageSource>(
           context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Cần bố mẹ xem'),
-            content: const Text(
-              'Việc này cần bố mẹ kiểm tra. Nhớ đưa bố mẹ xem kết quả nhé!',
+          builder: (ctx) => SafeArea(
+            child: Wrap(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.camera_alt_rounded),
+                  title: const Text('Chụp ảnh ngay'),
+                  onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_library_rounded),
+                  title: const Text('Chọn ảnh từ thư viện'),
+                  onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
+                ),
+              ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Để sau'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text('Đã xong'),
-              ),
-            ],
           ),
         );
-        if (ok != true || !mounted) return;
-        // Không ghi proofUrl — chưa có ảnh thật thì không nói có.
+        if (source == null || !mounted) return;
+
+        try {
+          final picked = await picker.pickImage(
+            source: source,
+            maxWidth: 1200,
+            maxHeight: 1200,
+            imageQuality: 85,
+          );
+          if (picked == null || !mounted) return;
+
+          // Hiển thị xem trước trước khi gửi
+          final confirmed = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Gửi ảnh cho bố mẹ?'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadius.card),
+                    child: SizedBox(
+                      height: 220,
+                      child: Image.file(
+                        File(picked.path),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  const Text('Bố mẹ sẽ nhìn thấy ảnh này khi duyệt việc.'),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(false),
+                  child: const Text('Chụp lại'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(ctx).pop(true),
+                  child: const Text('Gửi duyệt'),
+                ),
+              ],
+            ),
+          );
+          if (confirmed != true || !mounted) return;
+          proofUrl = picked.path;
+        } on Exception {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Không thể chụp ảnh, vui lòng thử lại')),
+          );
+          return;
+        }
       }
     }
 

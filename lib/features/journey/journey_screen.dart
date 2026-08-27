@@ -16,9 +16,7 @@ import 'package:beong/features/goals/goal_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Màn hình Hành trình — Bản đồ leo núi nấc thang phiêu lưu chinh phục mục tiêu tiết kiệm (§13).
-///
-/// Thể hiện các mốc chinh phục từ chân núi lên đỉnh núi (tương tự benchmark Chore Rewards).
+/// Màn hình Hành trình — Bản đồ leo núi chinh phục đỉnh cao (Mountain Climbing Summit Adventure).
 class JourneyScreen extends ConsumerWidget {
   const JourneyScreen({super.key});
 
@@ -38,7 +36,7 @@ class JourneyScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bản đồ hành trình'),
+        title: const Text('Bản đồ leo núi chinh phục'),
       ),
       body: StreamBuilder<SavingsGoal?>(
         stream: goalDao.watchActiveGoal(memberId),
@@ -114,7 +112,7 @@ class JourneyScreen extends ConsumerWidget {
                                       const AppIcon('compass', size: 20),
                                       const SizedBox(width: AppSpacing.xs),
                                       Text(
-                                        'CON ĐƯỜNG CHINH PHỤC ĐỈNH CAO',
+                                        '5 TRẠM CHINH PHỤC ĐỈNH CAO',
                                         style:
                                             context.text.labelMedium?.copyWith(
                                           color: context.semantic.onSurfaceMuted,
@@ -124,11 +122,18 @@ class JourneyScreen extends ConsumerWidget {
                                       ),
                                     ],
                                   ),
-                                  Text(
-                                    '${(progress * 100).toInt()}%',
-                                    style: context.text.labelSmall?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      color: context.colors.primary,
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: context.colors.primaryContainer,
+                                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                                    ),
+                                    child: Text(
+                                      '${(progress * 100).toInt()}% độ cao',
+                                      style: context.text.labelSmall?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        color: context.colors.primary,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -181,7 +186,7 @@ class _NoGoalJourneyView extends StatelessWidget {
             const BeeMascot(mood: BeeMood.happy, size: 96),
             const SizedBox(height: AppSpacing.xl),
             Text(
-              'Chưa có hành trình nào',
+              'Chưa có hành trình leo núi nào',
               style: context.text.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -189,7 +194,7 @@ class _NoGoalJourneyView extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Hãy đặt một mục tiêu để cùng Bé Ong leo núi phiêu lưu và chinh phục phần thưởng nhé!',
+              'Hãy đặt một mục tiêu để cùng Bé Ong bắt đầu cuộc phiêu lưu chinh phục đỉnh núi và nhận phần thưởng nhé!',
               style: context.text.bodyMedium?.copyWith(
                 color: context.semantic.onSurfaceMuted,
               ),
@@ -239,6 +244,13 @@ class _PeakGoalCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: context.dashboardGradient,
         borderRadius: BorderRadius.circular(AppRadius.card),
+        boxShadow: [
+          BoxShadow(
+            color: context.colors.primary.withValues(alpha: 0.25),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,14 +258,14 @@ class _PeakGoalCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 56,
-                height: 56,
+                width: 58,
+                height: 58,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.22),
+                  color: Colors.white.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(AppRadius.field),
                 ),
-                child: AppIcon.task(iconKey, size: 34),
+                child: AppIcon.task(iconKey, size: 36),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -261,18 +273,18 @@ class _PeakGoalCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'ĐÍCH ĐẾN: ${goal.title.toUpperCase()}',
+                      '🏔️ ĐỈNH NÚI MỤC TIÊU: ${goal.title.toUpperCase()}',
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: Colors.white.withValues(alpha: 0.85),
+                        color: Colors.white.withValues(alpha: 0.9),
                         letterSpacing: 0.8,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       reached
-                          ? '🎉 ĐÃ CHINH PHỤC ĐỈNH CAO!'
+                          ? '🎉 ĐÃ CHINH PHỤC ĐỈNH NÚI!'
                           : '$saved / $target xu',
                       style: const TextStyle(
                         fontSize: 22,
@@ -330,7 +342,7 @@ class _AdventureMountainMap extends StatelessWidget {
         level: 4,
         percent: 1,
         targetXu: target,
-        title: 'ĐỈNH VINH QUANG: ${goal.title}',
+        title: '👑 ĐỈNH VINH QUANG: ${goal.title}',
         subtitle: 'Chạm tay vào phần thưởng mơ ước!',
         iconKey: goal.iconKey ?? 'trophy',
         isSummit: true,
@@ -339,39 +351,39 @@ class _AdventureMountainMap extends StatelessWidget {
         level: 3,
         percent: 0.75,
         targetXu: (target * 0.75).round(),
-        title: 'Trạm Cao Nguyên (75%)',
-        subtitle: 'Sắp tới đỉnh rồi, cố thêm chút nữa!',
-        iconKey: 'fire',
+        title: '🏔️ Trạm Băng Tuyết (75%)',
+        subtitle: 'Sắp tới đỉnh núi rồi, cố thêm một chút nữa!',
+        iconKey: 'sparkles',
       ),
       _AdventureMilestone(
         level: 2,
         percent: 0.50,
         targetXu: (target * 0.50).round(),
-        title: 'Lưng Chừng Núi (50%)',
-        subtitle: 'Đã hoàn thành nửa chặng đường!',
+        title: '🏕️ Lưng Chừng Núi (50%)',
+        subtitle: 'Đã hoàn thành xuất sắc nửa chặng đường!',
         iconKey: 'compass',
       ),
       _AdventureMilestone(
         level: 1,
         percent: 0.25,
         targetXu: (target * 0.25).round(),
-        title: 'Trạm Nghỉ Đầu Tiên (25%)',
-        subtitle: 'Khởi động vững vàng, tự tin tiến bước!',
-        iconKey: 'sparkles',
+        title: '🌲 Trạm Rừng Thông (25%)',
+        subtitle: 'Khởi động vững vàng, tự tin sải bước!',
+        iconKey: 'tree',
       ),
       const _AdventureMilestone(
         level: 0,
         percent: 0,
         targetXu: 0,
-        title: 'Chân Núi Khởi Đầu',
-        subtitle: 'Bắt đầu tích luỹ xu từ việc nhà!',
+        title: '⛺ Chân Núi Khởi Đầu',
+        subtitle: 'Bắt đầu tích luỹ xu chăm chỉ từ việc nhà!',
         iconKey: 'sunrise',
         isBase: true,
       ),
     ];
 
     // Xác định mốc hiện tại bé đang đứng
-    var currentStepIndex = 0;
+    var currentStepIndex = milestones.length - 1;
     for (var i = 0; i < milestones.length; i++) {
       if (saved >= milestones[i].targetXu) {
         currentStepIndex = i;
@@ -396,8 +408,7 @@ class _AdventureMountainMap extends StatelessWidget {
               ),
               if (i < milestones.length - 1)
                 _SteppedClimbingPath(
-                  isPassed: saved >= milestones[i].targetXu,
-                  curveToRight: i.isEven,
+                  isPassed: saved >= milestones[i + 1].targetXu,
                 ),
             ],
           ],
@@ -455,8 +466,8 @@ class _AdventureMilestoneStep extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             Container(
-              width: milestone.isSummit ? 64 : 54,
-              height: milestone.isSummit ? 64 : 54,
+              width: milestone.isSummit ? 64 : 52,
+              height: milestone.isSummit ? 64 : 52,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
@@ -487,8 +498,8 @@ class _AdventureMilestoneStep extends StatelessWidget {
                       ]
                     : null,
               ),
-              child: reached && !milestone.isSummit
-                  ? const Icon(Icons.check_rounded, color: Colors.white, size: 30)
+              child: reached && !milestone.isSummit && !milestone.isBase
+                  ? const Icon(Icons.check_rounded, color: Colors.white, size: 28)
                   : AppIcon(
                       milestone.iconKey,
                       size: milestone.isSummit ? 34 : 26,
@@ -545,20 +556,18 @@ class _AdventureMilestoneStep extends StatelessWidget {
   }
 }
 
-/// Nối các bậc thang leo núi dạng zic-zac
+/// Nối các bậc thang leo núi
 class _SteppedClimbingPath extends StatelessWidget {
   const _SteppedClimbingPath({
     required this.isPassed,
-    required this.curveToRight,
   });
 
   final bool isPassed;
-  final bool curveToRight;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(left: 26, top: 4, bottom: 4),
+      margin: const EdgeInsets.only(left: 25, top: 4, bottom: 4),
       alignment: Alignment.centerLeft,
       child: Container(
         width: 4,

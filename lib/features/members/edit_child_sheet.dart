@@ -49,7 +49,9 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
   late int? _birthYear;
   late bool _hasPin;
   JarSplit? _customJarSplit;
+  bool _allowSelfAllocation = false;
   Set<String> _selectedPresets = <String>{};
+  Map<String, int> _presetPoints = <String, int>{};
   bool _busy = false;
 
   @override
@@ -65,9 +67,14 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
     final override = widget.child.jarSplitOverride;
     if (override != null && override.isNotEmpty) {
       try {
-        _customJarSplit = JarSplit.fromJson(jsonDecode(override) as Map<String, dynamic>);
+        final map = jsonDecode(override) as Map<String, dynamic>;
+        _allowSelfAllocation = map['manualAllocation'] == true;
+        if (map.containsKey('spend') || map.containsKey('save') || map.containsKey('give')) {
+          _customJarSplit = JarSplit.fromJson(map);
+        }
       } on Object {
         _customJarSplit = null;
+        _allowSelfAllocation = false;
       }
     }
   }
@@ -86,9 +93,15 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
     setState(() => _busy = true);
     final ten = _name.text.trim();
 
-    final jarSplitJson = _customJarSplit != null
-        ? jsonEncode(_customJarSplit!.toJson())
-        : null;
+    Map<String, dynamic>? overrideMap;
+    if (_customJarSplit != null) {
+      overrideMap = _customJarSplit!.toJson();
+    }
+    if (_allowSelfAllocation) {
+      overrideMap ??= <String, dynamic>{};
+      overrideMap['manualAllocation'] = true;
+    }
+    final jarSplitJson = overrideMap != null ? jsonEncode(overrideMap) : null;
 
     await ref
         .read(memberRepositoryProvider)
@@ -109,6 +122,7 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
       final taskDao = ref.read(taskRepositoryProvider);
       for (final presetKey in _selectedPresets) {
         final preset = kTaskPresets.firstWhere((p) => p.key == presetKey);
+        final points = _presetPoints[presetKey] ?? preset.defaultPoints;
         final taskId = 'task-preset-$presetKey-${widget.child.id}-${DateTime.now().millisecondsSinceEpoch}';
         await taskDao.createTask(
           TasksCompanion.insert(
@@ -117,7 +131,7 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
             title: preset.titleVi,
             iconKey: Value(preset.iconKey),
             presetKey: Value(preset.key),
-            points: Value(preset.defaultPoints),
+            points: Value(points),
             dayPart: Value(preset.dayPart),
             repeatType: const Value('daily'),
           ),
@@ -212,8 +226,12 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
             onTogglePin: _handleTogglePin,
             customJarSplit: _customJarSplit,
             onJarSplitChanged: (split) => setState(() => _customJarSplit = split),
+            allowSelfAllocation: _allowSelfAllocation,
+            onToggleSelfAllocation: (val) => setState(() => _allowSelfAllocation = val),
             selectedPresetKeys: _selectedPresets,
             onPresetsChanged: (keys) => setState(() => _selectedPresets = keys),
+            presetPoints: _presetPoints,
+            onPresetPointsChanged: (pts) => setState(() => _presetPoints = pts),
           ),
           const SizedBox(height: AppSpacing.xl),
           SizedBox(

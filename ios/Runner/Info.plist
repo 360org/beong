@@ -46,7 +46,9 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Bé Ong cần quyền truy cập camera để quét mã QR ghép cặp thiết bị giữa máy phụ huynh và máy con.</string>
+	<string>Bé Ong cần quyền truy cập camera để chụp ảnh chứng thực khi hoàn thành nhiệm vụ và quét mã QR ghép cặp thiết bị.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Bé Ong cần quyền chọn ảnh từ thư viện để gửi bằng chứng hoàn thành nhiệm vụ cho bố mẹ xem.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

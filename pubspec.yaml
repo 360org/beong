@@ -3,7 +3,7 @@ description: "Ứng dụng việc nhà và phần thưởng hằng ngày cho gia
 publish_to: "none"
 
 # <phiên bản hiển thị>+<build number>
-version: 0.2.13+21
+version: 0.3.0+22
 
 environment:
   sdk: ^3.12.0
@@ -24,6 +24,7 @@ dependencies:
   flutter_riverpod: ^3.3.2 # state management — ADR-003
   go_router: ^17.3.0
   http: ^1.6.0
+  image_picker: ^1.1.2
   intl: ^0.20.2
   meta: ^1.16.0
   mobile_scanner: ^6.0.4

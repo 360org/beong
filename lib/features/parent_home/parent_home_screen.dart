@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:beong/app/router.dart';
 import 'package:beong/core/providers/database_provider.dart';
@@ -19,6 +20,7 @@ import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/task_review_service.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
+import 'package:beong/features/parent_home/child_history_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -500,30 +502,86 @@ class _PendingCardState extends State<_PendingCard> {
                 ),
               ),
             ],
-            // ponytail: proofUrl chưa chứa ảnh thật (thiếu image_picker).
-            // Khi có ảnh thật, hiện Image.file ở đây thay vì chuỗi text.
             if (proofUrl != null && proofUrl.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.sm),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: context.colors.primaryContainer.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(AppRadius.field),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.info_outline_rounded, size: 18),
-                    const SizedBox(width: AppSpacing.xs),
-                    Expanded(
-                      child: Text(
-                        'Việc này yêu cầu bố mẹ kiểm tra trực tiếp',
-                        style: context.text.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+              GestureDetector(
+                onTap: () async {
+                  final file = File(proofUrl);
+                  if (file.existsSync()) {
+                    await showDialog<void>(
+                      context: context,
+                      builder: (ctx) => Dialog(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AppBar(
+                              title: const Text('Ảnh chứng thực'),
+                              leading: IconButton(
+                                icon: const Icon(Icons.close_rounded),
+                                onPressed: () => Navigator.of(ctx).pop(),
+                              ),
+                            ),
+                            InteractiveViewer(
+                              child: Image.file(
+                                file,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+                    );
+                  }
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: context.colors.primaryContainer.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(AppRadius.field),
+                    border: Border.all(color: context.colors.primary.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: File(proofUrl).existsSync()
+                            ? Image.file(
+                                File(proofUrl),
+                                width: 52,
+                                height: 52,
+                                fit: BoxFit.cover,
+                              )
+                            : Container(
+                                width: 52,
+                                height: 52,
+                                color: context.colors.surfaceContainerHighest,
+                                child: const Icon(Icons.broken_image_rounded),
+                              ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Ảnh kết quả làm việc',
+                              style: context.text.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text(
+                              'Chạm để xem ảnh phóng to',
+                              style: context.text.bodySmall?.copyWith(
+                                color: context.colors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.fullscreen_rounded, size: 24),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -566,12 +624,12 @@ class _ChildSummaryCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            InkWell(
-              onTap: onTapProfile,
-              borderRadius: BorderRadius.circular(AppRadius.card),
-              child: Row(
-                children: [
-                  Container(
+            Row(
+              children: [
+                // Bấm avatar: chuyển hẳn sang màn hình của con
+                GestureDetector(
+                  onTap: onTapProfile,
+                  child: Container(
                     width: 48,
                     height: 48,
                     alignment: Alignment.center,
@@ -584,8 +642,18 @@ class _ChildSummaryCard extends ConsumerWidget {
                       size: 28,
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.lg),
-                  Expanded(
+                ),
+                const SizedBox(width: AppSpacing.lg),
+                // Bấm tên/header: mở popup thống kê & lịch sử chi tiết
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => ChildHistoryModal.show(
+                      context,
+                      child: child,
+                      taskDao: taskDao,
+                      walletDao: walletDao,
+                      initialDate: today,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -593,13 +661,15 @@ class _ChildSummaryCard extends ConsumerWidget {
                           children: [
                             Text(
                               child.displayName,
-                              style: context.text.titleMedium,
+                              style: context.text.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                             const SizedBox(width: AppSpacing.xs),
-                            Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              size: 12,
-                              color: context.semantic.onSurfaceMuted,
+                            const Icon(
+                              Icons.calendar_today_rounded,
+                              size: 14,
+                              color: Colors.blueAccent,
                             ),
                           ],
                         ),
@@ -621,7 +691,7 @@ class _ChildSummaryCard extends ConsumerWidget {
                                 )
                                 .length;
                             return Text(
-                              '$done / ${instances.length} việc hôm nay · Chạm để vào hồ sơ',
+                              '$done / ${instances.length} việc hôm nay · Bấm xem lịch sử',
                               style: context.text.bodySmall?.copyWith(
                                 color: context.semantic.onSurfaceMuted,
                               ),
@@ -631,15 +701,15 @@ class _ChildSummaryCard extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  StreamBuilder<WalletBalance>(
-                    stream: walletDao.watchBalance(child.id),
-                    builder: (context, snap) {
-                      final balance = snap.data ?? WalletBalance.zero;
-                      return XuBadge(amount: balance.total);
-                    },
-                  ),
-                ],
-              ),
+                ),
+                StreamBuilder<WalletBalance>(
+                  stream: walletDao.watchBalance(child.id),
+                  builder: (context, snap) {
+                    final balance = snap.data ?? WalletBalance.zero;
+                    return XuBadge(amount: balance.total);
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: AppSpacing.xs),
             _IncompleteTodayList(

@@ -4,6 +4,45 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.3.0+22 (2026-08-27) — Nâng Cấp Toàn Diện Trải Nghiệm Profile Bé, Kho Icon 110+, Hũ Xu Cá Nhân Hoá, Chứng Thực Hình Ảnh & Journey Leo Núi
+
+### [NEW]
+- **Tái Cấu Trúc Biểu Mẫu Cấu Hình Profile Bé (`ChildProfileForm`)**:
+  - Phân nhóm danh sách việc mẫu theo 4 buổi rõ ràng: `🌅 Sáng`, `☀️ Trưa / Chiều`, `🌙 Tối`, `🔄 Thói quen / Cả ngày`.
+  - Tích hợp nút `Xem thêm / Thu gọn` thông minh cho từng buổi giúp màn hình gọn gàng.
+  - Bộ điều khiển `[-] [Số xu] [+]` tuỳ chỉnh điểm thưởng xu riêng cho từng đầu việc mẫu đã chọn.
+  - Lưu và nhớ chính xác trạng thái các việc đã chọn trước đó khi mở lại hoặc chỉnh sửa hồ sơ.
+- **Mở Rộng Kho Icon Chuẩn 110+ Fluent 3D Emoji & Phân Loại 6 Tabs**:
+  - Mở rộng toàn diện bộ icon việc nhà, danh hiệu và phần thưởng lên hơn 110 icon 3D sinh động.
+  - Phân loại trực quan thành 6 danh mục: `🧹 Việc nhà`, `📚 Học tập`, `🏃 Sức khoẻ`, `☀️ Buổi & Lịch`, `⭐ Động lực`, `❤️ Thói quen & Chia sẻ`.
+  - Hỗ trợ tìm kiếm icon theo tên tiếng Anh / từ khoá thời gian thực và modal chọn icon toàn màn hình.
+- **Tuỳ Chỉnh Hũ Xu Riêng & Thanh Slider Thông Minh Có Chốt Khoá**:
+  - Bố mẹ có thể chọn số lượng hũ áp dụng riêng cho từng bé và cấu hình tỷ lệ hũ riêng biệt (`jarSplitOverride`).
+  - Thanh slider thông minh có chốt khoá (Lock toggle): khi người dùng khoá một hoặc hai hũ và điều chỉnh hũ còn lại, hệ thống tự động cân bằng các hũ chưa khoá để tổng luôn đúng 100%.
+  - Đưa tuỳ chọn "Con tự chia xu" vào cấu hình riêng của từng bé thay vì áp dụng chung cả nhà.
+  - Minh bạch số dư hiện tại và số xu cộng dồn `+X xu → tổng mới` trong modal chia xu của con (`AllocateXuSheet`).
+- **Chứng Thực Hình Ảnh Khi Hoàn Thành Nhiệm Vụ**:
+  - Tích hợp chọn chụp ảnh trực tiếp từ Camera hoặc chọn từ thư viện ảnh (`image_picker`) khi con bấm hoàn thành nhiệm vụ có yêu cầu hình ảnh chứng thực.
+  - Bố mẹ có thể xem ảnh bằng chứng phóng to, tương tác zoom (`InteractiveViewer`) trong hàng đợi duyệt việc.
+- **Thống Kê (Stats) & Lịch Sử Vuốt Ngang Theo Ngày/Tuần Tại Home Bố Mẹ**:
+  - Phân định rõ ràng: bấm Avatar con để chuyển đổi vai xem của bé, bấm Tên/Header để mở modal `ChildHistoryModal`.
+  - Hỗ trợ thanh điều hướng chọn ngày vuốt ngang `[<] [Hôm nay/Ngày...] [>]`, tóm tắt tỷ lệ hoàn thành và phân nhóm chi tiết công việc theo 4 buổi trong ngày.
+- **Tái Thiết Kế Tab Journey Phong Cách "Bản Đồ Leo Núi Chinh Phục Đỉnh Cao"**:
+  - Trực quan hoá lộ trình rèn luyện thành bản đồ leo núi 5 trạm thử thách (Xuất phát, Vượt dốc, Lưng chừng núi, Chạm mây, Đỉnh vinh quang).
+  - Tích hợp thanh tiến độ, đếm streak ngày liên tiếp, linh vật Bé Ong động và phần thưởng mốc trạm.
+- **Tinh Gọn Màn Hình Tasks Bố Mẹ**:
+  - Khối chọn việc mẫu nhanh (`_QuickPresetPicker`) được rút gọn còn 8 việc kèm nút `Xem thêm` mở rộng mượt mà.
+
+### [IMPROVE]
+- Khai báo đầy đủ các quyền `NSCameraUsageDescription` và `NSPhotoLibraryUsageDescription` trong `ios/Runner/Info.plist`.
+- Chuẩn hoá màu sắc ngữ nghĩa và Material 3 tokens, tương thích hoàn toàn với nền tảng iOS và Android.
+
+### [FIX]
+- Vượt qua 100% kiểm tra phân tích tĩnh `flutter analyze` với 0 lỗi / cảnh báo.
+- Đảm bảo toàn bộ test suites vượt qua thành công.
+
+---
+
 ## v0.2.13+21 (2026-08-26) — Nâng Cấp Toàn Diện Màn Hình Parents, Quản Lý & Phân Tách Theo Từng Bé
 
 ### [NEW]

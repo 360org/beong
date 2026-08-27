@@ -23,6 +23,7 @@ abstract interface class WalletRepository {
     required int amount,
     required String clientOpId,
   });
+  Future<WalletBalance> balanceOf(String memberId);
   Stream<WalletBalance> watchBalance(String memberId);
   Stream<List<LedgerEntry>> watchGroupedHistory(String memberId);
   Future<void> manualAdjustToJarKey({
@@ -59,6 +60,10 @@ final class LocalWalletRepository implements WalletRepository {
     amount: amount,
     clientOpId: clientOpId,
   );
+
+  @override
+  Future<WalletBalance> balanceOf(String memberId) =>
+      _dao.balanceOf(memberId);
 
   @override
   Stream<WalletBalance> watchBalance(String memberId) =>

@@ -356,8 +356,43 @@ theo vai) xếp sau, thứ tự đề nghị ghi trong chính tài liệu đó.
 
 ## Sau v1.0
 
+## Kế hoạch Nâng cấp Toàn diện (v0.3.0) — Gamification & Trải nghiệm Bé / Phụ Huynh
+
+*Ngày cập nhật: 27/08/2026.*
+
+### 1. Cấu hình Profile Bé & Quản lý Việc theo Buổi
+- [ ] Phân nhóm việc mẫu thành 4 buổi/loại (Sáng, Trưa/Chiều, Tối, Thói quen & Giúp đỡ) trong `ChildProfileForm`.
+- [ ] Nút `+ Xem thêm (X việc)` cho từng buổi để form ngắn gọn, không tràn màn hình.
+- [ ] Nhớ trạng thái đã chọn khi mở lại chỉnh sửa hồ sơ con và đổi style chip nổi bật.
+- [ ] Cho phép tuỳ chỉnh `[-] [Số xu] [+]` trực tiếp cho từng việc mẫu đã chọn.
+- [ ] Màn hình Tasks của bố mẹ: nhóm template theo buổi, gọn khối chọn nhanh + nút mở rộng.
+
+### 2. Thư viện Icon Đạt chuẩn 100+ Icons (`IconPicker`)
+- [ ] Bổ sung kho 100+ Fluent 3D Emoji Icons chất lượng cao.
+- [ ] Phân loại 6 Danh mục (Tabs): Việc nhà, Học tập, Ăn uống/Sức khoẻ, Thể thao/Vui chơi, Thú cưng/Thiên nhiên, Cảm xúc/Thói quen tốt.
+
+### 3. Hệ thống Hũ Xu Riêng, Slider Thông minh & Con Tự Chia Xu
+- [ ] Chọn danh mục hũ riêng theo từng bé (Bé nhỏ 2–3 hũ, bé lớn 5–6 hũ).
+- [ ] Slider tỷ lệ thông minh có chốt khoá: thanh đã chỉnh đứng yên, các thanh còn lại tự bù trừ để tổng luôn = 100%.
+- [ ] Option "Cho phép con tự chia xu" đưa vào từng Profile bé riêng biệt.
+- [ ] Giao diện chia xu minh bạch số dư hiện tại và luỹ kế (`Đang có X xu + Y xu = Z xu`).
+- [ ] Quy tắc trừ/rút xu từ các hũ chuyên biệt (Học tập, Từ thiện, Tiết kiệm) kèm giao diện ghi nhận chi ở vai Bố Mẹ.
+
+### 4. Chứng thực Hình ảnh (Photo Proof)
+- [ ] Màn hình con: Hiển thị nút "📷 Chụp ảnh xong việc" khi việc yêu cầu ảnh (`requiresPhoto == true`), chụp ảnh thực tế gửi kèm.
+- [ ] Màn hình bố mẹ: Xem ảnh thumbnail trên hàng đợi duyệt và bấm xem toàn màn hình trước khi duyệt.
+
+### 5. Profile Con tại Home & Thống kê Vuốt theo Ngày/Tuần
+- [ ] Bấm Avatar bé tại Home bố mẹ ➔ Mở màn hình của con.
+- [ ] Bấm Tên / Header bé ➔ Mở chi tiết việc hôm nay theo buổi + Vuốt ngang xem lịch sử theo Ngày / Tuần (Biểu đồ cột 7 ngày, tổng việc, tổng xu).
+
+### 6. Tab Journey Bản đồ Leo Núi (Mountain Climbing Gamification)
+- [ ] Thiết kế bản đồ leo núi uốn lượn từ Chân Núi lên Đỉnh Vinh Quang (5 trạm dừng chân tương ứng các mốc xu).
+- [ ] Linh vật Bé Ong leo núi cắm cờ và đường mòn phát sáng tiến độ theo số xu thực tế của con.
+
 | Phiên bản | Nội dung |
 |---|---|
+| v0.3.0 | Nâng cấp toàn diện 6 trụ cột UX/UI Profile, Hũ xu, Photo Proof, Stats & Journey Leo núi |
 | v1.1 | Level, thêm huy hiệu; bằng chứng ảnh/ghi chú; weekly goals; **lãi tượng trưng cho hũ Để dành** |
 | v1.2 | Thống kê tuần/tháng, xuất CSV/PDF; bảng thành tích in được |
 | v1.3 | Desktop 3 cột tối ưu, phím tắt; widget màn hình chính iOS/Android |

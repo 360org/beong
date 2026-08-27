@@ -62,9 +62,11 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
 
   // Tuỳ chỉnh hũ riêng
   JarSplit? _customJarSplit;
+  bool _allowSelfAllocation = false;
 
-  // Gán việc mẫu hàng loạt
+  // Gán việc mẫu hàng loạt kèm điểm xu tuỳ chỉnh
   Set<String> _selectedPresets = <String>{};
+  Map<String, int> _presetPoints = <String, int>{};
 
   @override
   void initState() {
@@ -87,9 +89,15 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
     final childId = const Uuid().v4();
     final ten = _name.text.trim();
 
-    final jarSplitJson = _customJarSplit != null
-        ? jsonEncode(_customJarSplit!.toJson())
-        : null;
+    Map<String, dynamic>? overrideMap;
+    if (_customJarSplit != null) {
+      overrideMap = _customJarSplit!.toJson();
+    }
+    if (_allowSelfAllocation) {
+      overrideMap ??= <String, dynamic>{};
+      overrideMap['manualAllocation'] = true;
+    }
+    final jarSplitJson = overrideMap != null ? jsonEncode(overrideMap) : null;
 
     await ref
         .read(memberRepositoryProvider)
@@ -106,11 +114,12 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
           ),
         );
 
-    // Tự động tạo và gán các việc mẫu đã chọn cho bé
+    // Tự động tạo và gán các việc mẫu đã chọn cho bé kèm số xu tuỳ chỉnh
     if (_selectedPresets.isNotEmpty) {
       final taskDao = ref.read(taskRepositoryProvider);
       for (final presetKey in _selectedPresets) {
         final preset = kTaskPresets.firstWhere((p) => p.key == presetKey);
+        final points = _presetPoints[presetKey] ?? preset.defaultPoints;
         final taskId = 'task-preset-$presetKey-$childId-${DateTime.now().millisecondsSinceEpoch}';
         await taskDao.createTask(
           TasksCompanion.insert(
@@ -119,7 +128,7 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
             title: preset.titleVi,
             iconKey: Value(preset.iconKey),
             presetKey: Value(preset.key),
-            points: Value(preset.defaultPoints),
+            points: Value(points),
             dayPart: Value(preset.dayPart),
             repeatType: const Value('daily'),
           ),
@@ -173,8 +182,12 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
             onTogglePin: (val) => setState(() => _enablePin = val),
             customJarSplit: _customJarSplit,
             onJarSplitChanged: (split) => setState(() => _customJarSplit = split),
+            allowSelfAllocation: _allowSelfAllocation,
+            onToggleSelfAllocation: (val) => setState(() => _allowSelfAllocation = val),
             selectedPresetKeys: _selectedPresets,
             onPresetsChanged: (keys) => setState(() => _selectedPresets = keys),
+            presetPoints: _presetPoints,
+            onPresetPointsChanged: (pts) => setState(() => _presetPoints = pts),
           ),
           const SizedBox(height: AppSpacing.xxl),
           SizedBox(

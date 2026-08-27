@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -81,7 +80,7 @@ class _BeeMascotState extends State<BeeMascot>
   void _syncAnimation() {
     if (widget.mood == BeeMood.celebrating) {
       // Hoạt ảnh chạy mãi cho tới khi `stop()` — không có gì để chờ.
-      unawaited(_controller.repeat(reverse: true));
+      _controller.repeat(reverse: true);
     } else {
       _controller
         ..stop()
@@ -106,7 +105,7 @@ class _BeeMascotState extends State<BeeMascot>
           // Nảy một lượt khi chạm vào linh vật
           await _controller.forward(from: 0);
           if (widget.mood == BeeMood.celebrating) {
-            unawaited(_controller.repeat(reverse: true));
+            _controller.repeat(reverse: true);
           } else {
             _controller.value = 0;
           }

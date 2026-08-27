@@ -10,12 +10,7 @@ import 'package:flutter/material.dart';
 
 /// Con tự chia xu từ hũ chờ vào các hũ — ADR-024, chế độ `manual`.
 ///
-/// Đây là **bài học chính** của ba hũ: bản thân việc quyết định chia bao nhiêu
-/// vào đâu mới dạy được cách phân bổ giá trị. App chia hộ thì đứa trẻ không bao
-/// giờ phải quyết định gì.
-///
-/// Vì vậy màn này cố ý **không** có nút "chia giúp con theo tỷ lệ": nhà nào muốn
-/// vậy thì đã có chế độ `auto`.
+/// Thể hiện rõ số dư hiện tại và số xu cộng thêm (+X xu) sau khi chia.
 class AllocateXuSheet extends StatefulWidget {
   const AllocateXuSheet({
     required this.familyId,
@@ -35,10 +30,6 @@ class AllocateXuSheet extends StatefulWidget {
   final WalletRepository walletDao;
 
   /// Hũ đang dùng của gia đình, đọc từ bảng `jars` (ADR-024).
-  ///
-  /// Trước đây chỗ này trả hằng `kDefaultJars`, nên bố mẹ lập hũ mới xong con
-  /// vẫn chỉ chia được vào ba hũ cũ — hũ mới hiện ở màn Cài đặt mà không hiện ở
-  /// đúng chỗ cần dùng nó.
   final List<JarDef> jars;
 
   @override
@@ -48,9 +39,23 @@ class AllocateXuSheet extends StatefulWidget {
 class _AllocateXuSheetState extends State<AllocateXuSheet> {
   /// Số xu con đã đặt vào từng hũ, chưa lưu.
   final _draft = <String, int>{};
+  WalletBalance _currentBalance = WalletBalance.zero;
 
   int get _placed => _draft.values.fold(0, (a, b) => a + b);
   int get _left => widget.inbox - _placed;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadCurrentBalance());
+  }
+
+  Future<void> _loadCurrentBalance() async {
+    final balance = await widget.walletDao.balanceOf(widget.memberId);
+    if (mounted) {
+      setState(() => _currentBalance = balance);
+    }
+  }
 
   void _add(String jarKey, int amount) {
     if (amount > _left) return;
@@ -60,8 +65,6 @@ class _AllocateXuSheetState extends State<AllocateXuSheet> {
   void _clear(String jarKey) => setState(() => _draft.remove(jarKey));
 
   Future<void> _save() async {
-    // Một `clientOpId` gốc cho cả lần chia, mỗi hũ một hậu tố: bấm Xong hai lần
-    // không chia hai lần.
     final opBase =
         'allocate:${widget.memberId}:${DateTime.now().millisecondsSinceEpoch}';
 
@@ -123,20 +126,17 @@ class _AllocateXuSheetState extends State<AllocateXuSheet> {
           for (final jar in widget.jars)
             _JarRow(
               jar: jar,
+              currentAmount: _currentBalance.ofKey(jar.key),
               placed: _draft[jar.key] ?? 0,
               canAdd: _left > 0,
               onAdd: (amount) => _add(jar.key, amount),
               onClear: () => _clear(jar.key),
-              // Bấm "tất cả" là đường nhanh nhất cho bé nhỏ: đặt hết phần còn
-              // lại vào một hũ mà không phải bấm +1 mười lần.
               remaining: _left,
             ),
           const SizedBox(height: AppSpacing.xl),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              // Cho phép lưu khi đã đặt xu (_placed > 0), không bắt buộc phải chia hết
-              // một lần để bé có thể chia nhiều lần tuỳ ý.
               onPressed: _placed > 0 ? () => unawaited(_save()) : null,
               child: Text(
                 _left == 0 ? 'XONG' : 'LƯU ($_placed XU)',
@@ -152,6 +152,7 @@ class _AllocateXuSheetState extends State<AllocateXuSheet> {
 class _JarRow extends StatelessWidget {
   const _JarRow({
     required this.jar,
+    required this.currentAmount,
     required this.placed,
     required this.canAdd,
     required this.remaining,
@@ -160,6 +161,7 @@ class _JarRow extends StatelessWidget {
   });
 
   final JarDef jar;
+  final int currentAmount;
   final int placed;
   final bool canAdd;
   final int remaining;
@@ -179,14 +181,32 @@ class _JarRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(jar.title, style: context.text.bodyLarge),
-                Text(
-                  placed > 0 ? '$placed xu' : 'chưa có',
-                  style: context.text.bodySmall?.copyWith(
-                    color: placed > 0
-                        ? context.semantic.xuText
-                        : context.semantic.onSurfaceMuted,
-                    fontWeight: placed > 0 ? FontWeight.w800 : null,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      'Hiện có $currentAmount xu',
+                      style: context.text.bodySmall?.copyWith(
+                        color: context.semantic.onSurfaceMuted,
+                      ),
+                    ),
+                    if (placed > 0) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: context.semantic.success.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                        ),
+                        child: Text(
+                          '+$placed xu → ${currentAmount + placed}',
+                          style: context.text.labelSmall?.copyWith(
+                            color: context.semantic.success,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),

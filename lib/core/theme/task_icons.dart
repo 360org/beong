@@ -21,11 +21,6 @@ String assetPathForIcon(String iconKey) => '$kIconAssetDir/$iconKey.png';
 
 /// Emoji -> khoá asset, cho hai chỗ **đã lưu ký tự emoji vào DB**: `jars.emoji`
 /// và `members.avatar_key`.
-///
-/// Đổi hai cột đó sang khoá sẽ cần một migration cho dữ liệu người dùng, mà giá
-/// trị trong đó luôn đến từ hai danh sách cố định (`kJarEmojis`,
-/// `kAvatarEmojis`) nên tra ngược là đủ và không rủi ro. Nếu về sau cần thêm
-/// emoji ngoài hai danh sách đó thì lúc ấy mới phải migrate.
 const Map<String, String> kEmojiIconKeys = {
   // Hũ — `kJarEmojis` trong `lib/domain/entities/jar_def.dart`.
   '🛍️': 'jar_spend',
@@ -62,13 +57,11 @@ const Map<String, String> kEmojiIconKeys = {
 };
 
 /// Khoá asset cho một emoji đã lưu trong DB.
-///
-/// Không tra được thì trả về [kDefaultTaskIconKey] chứ không trả chuỗi rỗng: ô
-/// icon trống giữa một danh sách đọc ra như dữ liệu bị hỏng.
 String iconKeyForEmoji(String? emoji) =>
     kEmojiIconKeys[emoji] ?? kDefaultTaskIconKey;
 
 const Map<String, String> taskIcons = {
+  // Nhóm cơ bản
   'tooth': '🪥',
   'bed': '🛏️',
   'shirt': '👕',
@@ -93,9 +86,6 @@ const Map<String, String> taskIcons = {
   'eye_off': '📵',
   'sunrise': '🌅',
   'wb_cloudy': '☁️',
-
-  // Thêm cho nhiệm vụ ngoài việc nhà: app dùng cho cả học bài, đi chơi, thể dục
-  // (đó là lý do tab được đổi tên thành "Nhiệm vụ").
   'books': '📚',
   'abacus': '🧮',
   'palette': '🎨',
@@ -111,7 +101,108 @@ const Map<String, String> taskIcons = {
   'warning': '⚠️',
   'bee': '🐝',
 
-  // Phần thưởng — `lib/domain/entities/reward_presets.dart`.
+  // 1. Việc nhà & Vệ sinh (Chores & Cleaning)
+  'sponge': '🧽',
+  'bucket': '🪣',
+  'soap': '🧼',
+  'plunger': '🪠',
+  'window': '🪟',
+  'door': '🚪',
+  'toolbox': '🧰',
+  'hammer': '🔨',
+  'wrench': '🔧',
+  'iron': '👞',
+
+  // 2. Học tập & Kỹ năng (Study & Skills)
+  'microscope': '🔬',
+  'telescope': '🔭',
+  'calendar': '📅',
+  'artist_palette': '🎨',
+  'paintbrush': '🖌️',
+  'crayon': '🖍️',
+  'fountain_pen': '🖋️',
+  'notebook': '📓',
+  'graduation_cap': '🎓',
+  'magnifying_glass': '🔍',
+  'test_tube': '🧪',
+  'bookmark': '🔖',
+  'ruler': '📏',
+  'trophy': '🏆',
+  'medal_1st': '🥇',
+  'medal_2nd': '🥈',
+  'medal_3rd': '🥉',
+  'crown': '👑',
+
+  // 3. Ăn uống, Vệ sinh & Sức khoẻ (Food & Health)
+  'apple': '🍎',
+  'banana': '🍌',
+  'carrot': '🥕',
+  'broccoli': '🥦',
+  'milk': '🥛',
+  'water_drop': '💧',
+  'water_bottle': '🥤',
+  'sandwich': '🥪',
+  'bowl_with_spoon': '🥣',
+  'fork_and_knife': '🍽️',
+  'bath': '🛁',
+  'bandage': '🩹',
+  'pill': '💊',
+  'stethoscope': '🩺',
+  'sun': '☀️',
+  'rainbow': '🌈',
+
+  // 4. Thể thao & Vui chơi (Sports & Play)
+  'basketball': '🏀',
+  'badminton': '🏸',
+  'tennis': '🎾',
+  'ping_pong': '🏓',
+  'volleyball': '🏐',
+  'skateboard': '🛹',
+  'roller_skate': '🛼',
+  'kite': '🪁',
+  'balloon': '🎈',
+  'yo_yo': '🪀',
+  'teddy_bear': '🧸',
+  'bowling': '🎳',
+  'guitar': '🎸',
+  'violin': '🎻',
+  'drum': '🥁',
+  'trumpet': '🎺',
+  'headphones': '🎧',
+  'camera': '📷',
+  'sparkles': '✨',
+  'fireworks': '🎆',
+  'gift': '🎁',
+
+  // 5. Thú cưng, Cây cối & Thiên nhiên (Pets & Nature)
+  'tree': '🌳',
+  'seedling': '🌱',
+  'blossom': '🌸',
+  'sunflower': '🌻',
+  'butterfly': '🦋',
+  'ladybug': '🐞',
+  'fish': '🐠',
+  'cat_face': '🐱',
+  'dog_face': '🐶',
+  'rabbit_face': '🐰',
+  'hamster': '🐹',
+  'bird': '🐦',
+  'turtle': '🐢',
+
+  // 6. Cảm xúc & Thói quen tốt (Emotions & Habits)
+  'glowing_star': '🌟',
+  'shooting_star': '🌠',
+  'target': '🎯',
+  'alarm_clock': '⏰',
+  'hourglass': '⏳',
+  'light_bulb': '💡',
+  'puzzle_piece': '🧩',
+  'battery_full': '🔋',
+  'recycle': '♻️',
+  'smiling_face': '😄',
+  'partying_face': '🥳',
+
+  // Phần thưởng
   'phone': '📱',
   'money': '💰',
   'ice_cream': '🍦',
@@ -121,17 +212,227 @@ const Map<String, String> taskIcons = {
   'console': '🕹️',
   'ticket': '🎫',
   'suitcase': '🧳',
+  'jar_gift': '🎁',
+  'jar_circus': '🎪',
+  'jar_plane': '✈️',
+  'jar_guitar': '🎸',
 };
 
 const String taskIconFallback = '⭐';
 
+/// Danh mục icon để nhóm và lọc.
+class IconCategoryDef {
+  const IconCategoryDef({
+    required this.id,
+    required this.nameVi,
+    required this.nameEn,
+    required this.iconKey,
+    required this.keys,
+  });
+
+  final String id;
+  final String nameVi;
+  final String nameEn;
+  final String iconKey;
+  final List<String> keys;
+}
+
+/// 6 Danh mục icon chuẩn hoá toàn diện cho hệ thống Bé Ong.
+const List<IconCategoryDef> kIconCategories = [
+  IconCategoryDef(
+    id: 'chores',
+    nameVi: 'Việc nhà',
+    nameEn: 'Chores',
+    iconKey: 'broom',
+    keys: [
+      'broom',
+      'sponge',
+      'bucket',
+      'soap',
+      'plunger',
+      'trash',
+      'laundry',
+      'dish',
+      'table',
+      'bed',
+      'hanger',
+      'window',
+      'door',
+      'toolbox',
+      'hammer',
+      'wrench',
+      'iron',
+      'tooth',
+      'shower',
+    ],
+  ),
+  IconCategoryDef(
+    id: 'study',
+    nameVi: 'Học tập',
+    nameEn: 'Study',
+    iconKey: 'books',
+    keys: [
+      'book',
+      'books',
+      'pencil',
+      'notebook',
+      'abacus',
+      'microscope',
+      'telescope',
+      'calendar',
+      'artist_palette',
+      'paintbrush',
+      'crayon',
+      'fountain_pen',
+      'graduation_cap',
+      'magnifying_glass',
+      'test_tube',
+      'bookmark',
+      'ruler',
+      'backpack',
+      'trophy',
+      'crown',
+    ],
+  ),
+  IconCategoryDef(
+    id: 'health',
+    nameVi: 'Ăn uống & Sức khoẻ',
+    nameEn: 'Food & Health',
+    iconKey: 'apple',
+    keys: [
+      'apple',
+      'banana',
+      'carrot',
+      'broccoli',
+      'food',
+      'milk',
+      'water_drop',
+      'water_bottle',
+      'sandwich',
+      'bowl_with_spoon',
+      'fork_and_knife',
+      'bath',
+      'bandage',
+      'pill',
+      'stethoscope',
+      'shirt',
+      'sun',
+      'moon',
+    ],
+  ),
+  IconCategoryDef(
+    id: 'sports_play',
+    nameVi: 'Vui chơi & Thể thao',
+    nameEn: 'Sports & Play',
+    iconKey: 'soccer',
+    keys: [
+      'soccer',
+      'basketball',
+      'badminton',
+      'tennis',
+      'ping_pong',
+      'volleyball',
+      'skateboard',
+      'roller_skate',
+      'bike',
+      'bowling',
+      'kite',
+      'balloon',
+      'yo_yo',
+      'toy',
+      'teddy_bear',
+      'game',
+      'console',
+      'park',
+      'camera',
+      'guitar',
+      'violin',
+      'drum',
+      'trumpet',
+      'headphones',
+    ],
+  ),
+  IconCategoryDef(
+    id: 'pets_nature',
+    nameVi: 'Thú cưng & Tự nhiên',
+    nameEn: 'Pets & Nature',
+    iconKey: 'paw',
+    keys: [
+      'paw',
+      'cat_face',
+      'dog_face',
+      'rabbit_face',
+      'hamster',
+      'bird',
+      'turtle',
+      'fish',
+      'butterfly',
+      'ladybug',
+      'plant',
+      'tree',
+      'seedling',
+      'blossom',
+      'sunflower',
+      'rainbow',
+      'wb_cloudy',
+      'sunrise',
+    ],
+  ),
+  IconCategoryDef(
+    id: 'habits_rewards',
+    nameVi: 'Cảm xúc & Phần thưởng',
+    nameEn: 'Emotions & Rewards',
+    iconKey: 'heart',
+    keys: [
+      'heart',
+      'smiling_face',
+      'partying_face',
+      'sparkles',
+      'fireworks',
+      'gift',
+      'medal_1st',
+      'medal_2nd',
+      'medal_3rd',
+      'gem',
+      'party',
+      'glowing_star',
+      'shooting_star',
+      'target',
+      'alarm_clock',
+      'clock',
+      'hourglass',
+      'light_bulb',
+      'puzzle_piece',
+      'battery_full',
+      'recycle',
+      'eye_off',
+      'phone_off',
+      'clipboard',
+      'warning',
+      'bee',
+      'ice_cream',
+      'pizza',
+      'popcorn',
+      'phone',
+      'money',
+      'ticket',
+      'suitcase',
+      'jar_gift',
+      'jar_circus',
+      'jar_plane',
+      'jar_guitar',
+    ],
+  ),
+];
+
 /// Icon chọn được khi bố mẹ tự tạo **phần thưởng**.
-///
-/// Tách khỏi [kTaskIconKeys] chứ không dùng chung một bộ: chọn 🧹 cho một phần
-/// thưởng thì cũng vô nghĩa như chọn 🍦 cho một việc nhà. Hai danh sách này cố ý
-/// **không giao nhau nhiều** — chỉ trùng ở những hình đúng cho cả hai vai
-/// (`books`, `soccer`, `bike`, `park`, `palette`, `music`, `toy`).
 const List<String> kRewardIconKeys = [
+  'gift',
+  'medal_1st',
+  'medal_2nd',
+  'medal_3rd',
+  'trophy',
+  'crown',
   'ice_cream',
   'pizza',
   'popcorn',
@@ -141,104 +442,184 @@ const List<String> kRewardIconKeys = [
   'money',
   'ticket',
   'suitcase',
-  'jar_gift',
-  'jar_circus',
-  'jar_plane',
+  'sparkles',
+  'fireworks',
+  'party',
+  'gem',
+  'balloon',
+  'toy',
+  'teddy_bear',
   'park',
   'soccer',
   'bike',
+  'skateboard',
   'books',
   'palette',
-  'music',
-  'toy',
-  'jar_guitar',
-  'clock',
+  'guitar',
+  'headphones',
+  'camera',
   'heart',
+  'jar_gift',
+  'jar_circus',
+  'jar_plane',
+  'jar_guitar',
 ];
 
-/// Icon mặc định của phần thưởng khi bố mẹ chưa chọn gì.
-///
-/// 🎁 đọc ra "phần thưởng" ngay, khác với ✏️ của nhiệm vụ — dùng chung một mặc
-/// định thì mọi phần thưởng tự nhập trông như một việc phải làm.
+/// Icon mặc định của phần thưởng.
 const String kDefaultRewardIconKey = 'jar_gift';
 
 /// Icon chọn được cho **mục tiêu tiết kiệm**.
-///
-/// Dùng lại bộ phần thưởng, thêm con heo đất lên đầu: mục tiêu tiết kiệm cũng
-/// là một món con muốn, chỉ khác ở chỗ con để dành nhiều ngày mới có. Một bộ
-/// icon riêng chỉ để lặp lại gần đúng danh sách kia thì thêm việc phải giữ đồng
-/// bộ mà không thêm gì.
 const List<String> kGoalIconKeys = [kDefaultGoalIconKey, ...kRewardIconKeys];
 
-/// Icon mặc định của mục tiêu: con heo đất — đúng nghĩa "để dành", và cũng là
-/// hình của hũ Để dành mà thanh tiến độ đang đo.
+/// Icon mặc định của mục tiêu tiết kiệm: con heo đất.
 const String kDefaultGoalIconKey = 'jar_save';
 
-/// Icon mặc định khi bố mẹ chưa chọn gì, và khi bù icon cho dữ liệu cũ.
-///
-/// ✏️ đọc ra "có việc cần làm" và đúng với hầu hết nhiệm vụ. Không dùng `star`:
-/// ⭐ là dấu hiệu **thiếu** icon, không phải một lựa chọn.
+/// Icon mặc định khi tạo việc mới.
 const String kDefaultTaskIconKey = 'pencil';
 
 String iconForKey(String? iconKey) => taskIcons[iconKey] ?? taskIconFallback;
 
-/// Icon chọn được khi bố mẹ tự tạo nhiệm vụ.
-///
-/// Chỉ gồm khoá phù hợp với **việc cần làm** — cố ý bỏ nhóm khoá của phần thưởng
-/// (`phone`, `money`, `ice_cream`…): chọn 🍦 cho một việc nhà thì thẻ việc trông
-/// như một phần thưởng, và trẻ đọc icon nhanh hơn đọc chữ.
-///
-/// Không có emoji người: giới tính và màu da của một hình người luôn nói điều gì
-/// đó về ai làm việc đó, mà đây là icon dùng chung cho mọi bé.
-///
-/// Cũng không có `star`: emoji của nó đúng bằng [taskIconFallback], nên một việc
-/// chọn hình đó trông **giống hệt** một việc có khoá icon sai. Giữ ⭐ chỉ cho
-/// đường rơi, để thấy ⭐ là biết có gì chưa đúng.
+/// Danh sách toàn bộ icon hợp lệ cho nhiệm vụ (110+ icons).
 const List<String> kTaskIconKeys = [
+  // 1. Chores & Cleaning
   'tooth',
   'bed',
   'shirt',
-  'food',
-  'backpack',
+  'broom',
+  'sponge',
+  'bucket',
+  'soap',
+  'plunger',
+  'trash',
+  'laundry',
+  'dish',
+  'table',
+  'hanger',
+  'shower',
+  'window',
+  'door',
+  'toolbox',
+  'hammer',
+  'wrench',
+  'iron',
+
+  // 2. Study & Skills
   'pencil',
   'book',
   'books',
+  'notebook',
+  'backpack',
   'abacus',
-  'music',
+  'microscope',
+  'telescope',
+  'calendar',
+  'artist_palette',
   'palette',
-  'soccer',
-  'bike',
-  'park',
-  'broom',
-  'shower',
+  'paintbrush',
+  'crayon',
+  'fountain_pen',
+  'graduation_cap',
+  'magnifying_glass',
+  'test_tube',
+  'bookmark',
+  'ruler',
+  'trophy',
+  'crown',
+
+  // 3. Food & Health
+  'food',
+  'apple',
+  'banana',
+  'carrot',
+  'broccoli',
+  'milk',
+  'water_drop',
+  'water_bottle',
+  'sandwich',
+  'bowl_with_spoon',
+  'fork_and_knife',
+  'bath',
+  'bandage',
+  'pill',
+  'stethoscope',
+  'sun',
   'moon',
-  'hanger',
-  'dish',
-  'table',
-  'trash',
-  'laundry',
+
+  // 4. Sports & Play
+  'soccer',
+  'basketball',
+  'badminton',
+  'tennis',
+  'ping_pong',
+  'volleyball',
+  'skateboard',
+  'roller_skate',
+  'bike',
+  'bowling',
+  'kite',
+  'balloon',
+  'yo_yo',
+  'toy',
+  'teddy_bear',
+  'park',
+  'camera',
+  'music',
+  'guitar',
+  'violin',
+  'drum',
+  'trumpet',
+  'headphones',
+
+  // 5. Pets & Nature
   'plant',
   'paw',
-  'toy',
-  'heart',
-  'clipboard',
-  'gem',
-  'party',
-  'warning',
-  // Cố ý **không** có 'run' (🏃) ở đây: đó là emoji người, mà bộ hình này bố mẹ
-  // chọn cho mọi bé — hình người luôn mang theo giới tính và màu da. Việc vận
-  // động đã có 'soccer' ⚽ và 'bike' 🚲. Xem `test/unit/task_icons_test.dart`.
-  'eye_off',
-  'phone_off',
-  'clock',
-  // Hai hình của routine dựng sẵn ("Buổi sáng", "Sau giờ học"). Thiếu chúng thì
-  // mở màn sửa thói quen ra, lưới không ô nào sáng và bố mẹ đổi hình xong không
-  // lấy lại được hình cũ.
+  'cat_face',
+  'dog_face',
+  'rabbit_face',
+  'hamster',
+  'bird',
+  'turtle',
+  'fish',
+  'butterfly',
+  'ladybug',
+  'tree',
+  'seedling',
+  'blossom',
+  'sunflower',
+  'rainbow',
   'sunrise',
   'wb_cloudy',
+
+  // 6. Habits & Rewards
+  'heart',
+  'smiling_face',
+  'partying_face',
+  'medal_1st',
+  'medal_2nd',
+  'medal_3rd',
+  'gem',
+  'party',
+  'sparkles',
+  'fireworks',
+  'gift',
+  'glowing_star',
+  'shooting_star',
+  'target',
+  'alarm_clock',
+  'clock',
+  'hourglass',
+  'light_bulb',
+  'puzzle_piece',
+  'battery_full',
+  'recycle',
+  'eye_off',
+  'phone_off',
+  'clipboard',
+  'warning',
+  'bee',
 ];
 
-/// Avatar mặt con vật — chọn lúc thêm bé, lưu vào `members.avatarKey`.
+/// Avatar mặt con vật.
 const List<String> kAvatarEmojis = [
   '🦁',
   '🐱',

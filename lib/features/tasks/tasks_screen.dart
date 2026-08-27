@@ -606,30 +606,28 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Chọn nhanh', style: context.text.titleSmall),
+                  Text('Chọn nhanh mẫu việc', style: context.text.titleSmall),
                   const SizedBox(height: AppSpacing.sm),
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
-                    children: kTaskPresets.map((preset) {
-                      final selected = _selectedPreset == preset.key;
-                      return PresetChip(
-                        iconKey: preset.iconKey,
-                        label: preset.titleVi,
-                        selected: selected,
-                        onTap: () {
-                          setState(() {
-                            _selectedPreset = selected ? null : preset.key;
-                            if (!selected) {
-                              _titleController.text = preset.titleVi;
-                              _pointsController.text = preset.defaultPoints
-                                  .toString();
-                              _iconKey = preset.iconKey;
-                            }
-                          });
-                        },
-                      );
-                    }).toList(),
+                  _QuickPresetPicker(
+                    selectedPreset: _selectedPreset,
+                    onSelectPreset: (preset) {
+                      setState(() {
+                        if (_selectedPreset == preset.key) {
+                          _selectedPreset = null;
+                        } else {
+                          _selectedPreset = preset.key;
+                          _titleController.text = preset.titleVi;
+                          _pointsController.text = preset.defaultPoints.toString();
+                          _iconKey = preset.iconKey;
+                          _dayPart = preset.dayPart != null
+                              ? DayPart.values.firstWhere(
+                                  (d) => d.name == preset.dayPart,
+                                  orElse: () => DayPart.morning,
+                                )
+                              : null;
+                        }
+                      });
+                    },
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   TextField(
@@ -985,6 +983,74 @@ class _PenaltyOverrideBlock extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _QuickPresetPicker extends StatefulWidget {
+  const _QuickPresetPicker({
+    required this.selectedPreset,
+    required this.onSelectPreset,
+  });
+
+  final String? selectedPreset;
+  final ValueChanged<TaskPreset> onSelectPreset;
+
+  @override
+  State<_QuickPresetPicker> createState() => _QuickPresetPickerState();
+}
+
+class _QuickPresetPickerState extends State<_QuickPresetPicker> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    const presets = kTaskPresets;
+    final visible = _expanded ? presets : presets.take(8).toList();
+
+    if (widget.selectedPreset != null &&
+        !visible.any((p) => p.key == widget.selectedPreset)) {
+      final selectedObj = presets.firstWhere((p) => p.key == widget.selectedPreset);
+      visible.add(selectedObj);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: visible.map((preset) {
+            final selected = widget.selectedPreset == preset.key;
+            return PresetChip(
+              iconKey: preset.iconKey,
+              label: preset.titleVi,
+              selected: selected,
+              onTap: () => widget.onSelectPreset(preset),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        TextButton.icon(
+          onPressed: () => setState(() => _expanded = !_expanded),
+          icon: Icon(
+            _expanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+            size: 18,
+          ),
+          label: Text(
+            _expanded ? 'Thu gọn' : 'Xem thêm mẫu việc (${presets.length - 8}+)',
+            style: context.text.bodySmall?.copyWith(
+              color: context.colors.primary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ),
+      ],
     );
   }
 }

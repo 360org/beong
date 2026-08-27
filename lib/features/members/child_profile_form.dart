@@ -9,7 +9,8 @@ import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/jar_splitter.dart';
 import 'package:flutter/material.dart';
 
-/// Form hồ sơ một bé: tên, tuổi, con vật, màu, gán việc mẫu, hũ riêng và PIN.
+/// Form cấu hình hồ sơ bé toàn diện: thông tin cá nhân, PIN, danh mục hũ riêng,
+/// slider tỷ lệ có chốt khoá, option con tự chia xu và danh sách việc mẫu theo buổi kèm +- xu.
 class ChildProfileForm extends StatefulWidget {
   const ChildProfileForm({
     required this.controller,
@@ -24,10 +25,14 @@ class ChildProfileForm extends StatefulWidget {
     this.onClose,
     this.selectedPresetKeys = const <String>{},
     this.onPresetsChanged,
+    this.presetPoints = const <String, int>{},
+    this.onPresetPointsChanged,
     this.hasPin = false,
     this.onTogglePin,
     this.customJarSplit,
     this.onJarSplitChanged,
+    this.allowSelfAllocation = false,
+    this.onToggleSelfAllocation,
     this.showPresets = true,
     this.showJars = true,
     super.key,
@@ -54,6 +59,10 @@ class ChildProfileForm extends StatefulWidget {
   final Set<String> selectedPresetKeys;
   final ValueChanged<Set<String>>? onPresetsChanged;
 
+  /// Điểm xu tuỳ chỉnh cho từng việc mẫu (key -> points).
+  final Map<String, int> presetPoints;
+  final ValueChanged<Map<String, int>>? onPresetPointsChanged;
+
   /// Trạng thái bật/tắt mã PIN hồ sơ.
   final bool hasPin;
   final ValueChanged<bool>? onTogglePin;
@@ -61,6 +70,10 @@ class ChildProfileForm extends StatefulWidget {
   /// Tỷ lệ hũ riêng cho bé.
   final JarSplit? customJarSplit;
   final ValueChanged<JarSplit?>? onJarSplitChanged;
+
+  /// Tuỳ chọn con tự chia xu riêng cho bé này.
+  final bool allowSelfAllocation;
+  final ValueChanged<bool>? onToggleSelfAllocation;
 
   /// Ẩn/hiện mục việc mẫu và hũ.
   final bool showPresets;
@@ -76,6 +89,19 @@ class _ChildProfileFormState extends State<ChildProfileForm> {
   late int _savePct;
   late int _givePct;
 
+  // Trạng thái khoá từng hũ khi chỉnh slider
+  bool _lockSpend = false;
+  bool _lockSave = false;
+  bool _lockGive = false;
+
+  // Trạng thái mở rộng "Xem thêm" cho từng buổi
+  bool _expandMorning = false;
+  bool _expandAfternoon = false;
+  bool _expandEvening = false;
+  bool _expandHabits = false;
+
+  late Map<String, int> _pointsMap;
+
   @override
   void initState() {
     super.initState();
@@ -84,6 +110,11 @@ class _ChildProfileFormState extends State<ChildProfileForm> {
     _spendPct = split.spend;
     _savePct = split.save;
     _givePct = split.give;
+
+    _pointsMap = Map<String, int>.from(widget.presetPoints);
+    for (final p in kTaskPresets) {
+      _pointsMap.putIfAbsent(p.key, () => p.defaultPoints);
+    }
   }
 
   void _updateSplit() {
@@ -96,9 +127,74 @@ class _ChildProfileFormState extends State<ChildProfileForm> {
     }
   }
 
+  void _adjustSpend(int newSpend) {
+    final clamped = newSpend.clamp(0, 100);
+    setState(() {
+      _spendPct = clamped;
+      final remaining = 100 - _spendPct;
+      if (_lockSave && !_lockGive) {
+        _givePct = (remaining - _savePct).clamp(0, 100);
+      } else if (_lockGive && !_lockSave) {
+        _savePct = (remaining - _givePct).clamp(0, 100);
+      } else {
+        _savePct = (remaining * 0.8).round().clamp(0, remaining);
+        _givePct = remaining - _savePct;
+      }
+    });
+    _updateSplit();
+  }
+
+  void _adjustSave(int newSave) {
+    final clamped = newSave.clamp(0, 100);
+    setState(() {
+      _savePct = clamped;
+      final remaining = 100 - _savePct;
+      if (_lockSpend && !_lockGive) {
+        _givePct = (remaining - _spendPct).clamp(0, 100);
+      } else if (_lockGive && !_lockSpend) {
+        _spendPct = (remaining - _givePct).clamp(0, 100);
+      } else {
+        _spendPct = (remaining * 0.8).round().clamp(0, remaining);
+        _givePct = remaining - _spendPct;
+      }
+    });
+    _updateSplit();
+  }
+
+  void _adjustGive(int newGive) {
+    final clamped = newGive.clamp(0, 100);
+    setState(() {
+      _givePct = clamped;
+      final remaining = 100 - _givePct;
+      if (_lockSpend && !_lockSave) {
+        _savePct = (remaining - _spendPct).clamp(0, 100);
+      } else if (_lockSave && !_lockSpend) {
+        _spendPct = (remaining - _savePct).clamp(0, 100);
+      } else {
+        _spendPct = (remaining * 0.6).round().clamp(0, remaining);
+        _savePct = remaining - _spendPct;
+      }
+    });
+    _updateSplit();
+  }
+
+  void _changePresetPoint(String key, int delta) {
+    setState(() {
+      final current = _pointsMap[key] ?? 10;
+      final next = (current + delta).clamp(1, 500);
+      _pointsMap[key] = next;
+    });
+    widget.onPresetPointsChanged?.call(_pointsMap);
+  }
+
   @override
   Widget build(BuildContext context) {
     final color = AppColors.profileColor(widget.colorIndex);
+
+    final morningTasks = kTaskPresets.where((p) => p.dayPart == 'morning').toList();
+    final afternoonTasks = kTaskPresets.where((p) => p.dayPart == 'afternoon').toList();
+    final eveningTasks = kTaskPresets.where((p) => p.dayPart == 'evening').toList();
+    final habitTasks = kTaskPresets.where((p) => p.dayPart == null).toList();
 
     return SingleChildScrollView(
       child: Column(
@@ -118,7 +214,7 @@ class _ChildProfileFormState extends State<ChildProfileForm> {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Nhập tên, tuổi, chọn màu, con vật và thiết lập riêng cho bé.',
+            'Nhập tên, tuổi, chọn màu, con vật và cấu hình riêng cho bé.',
             style: context.text.bodyMedium?.copyWith(
               color: context.semantic.onSurfaceMuted,
             ),
@@ -199,7 +295,7 @@ class _ChildProfileFormState extends State<ChildProfileForm> {
           ),
           const SizedBox(height: AppSpacing.xl),
           Text(
-            'MÀU',
+            'MÀU ĐẠI DIỆN',
             style: context.text.labelSmall?.copyWith(
               color: context.semantic.onSurfaceMuted,
             ),
@@ -235,7 +331,7 @@ class _ChildProfileFormState extends State<ChildProfileForm> {
           ),
           const SizedBox(height: AppSpacing.xl),
 
-          // --- 5. Bật/Tắt mật khẩu PIN ---
+          // --- 1. Mật khẩu PIN ---
           if (widget.onTogglePin != null) ...[
             const Divider(),
             SwitchListTile(
@@ -257,7 +353,29 @@ class _ChildProfileFormState extends State<ChildProfileForm> {
             ),
           ],
 
-          // --- 7. Tuỳ chỉnh hũ xu riêng theo bé ---
+          // --- 2. Tuỳ chọn con tự chia xu theo từng bé ---
+          if (widget.onToggleSelfAllocation != null) ...[
+            const Divider(),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text(
+                'Cho phép bé tự chia xu vào hũ',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              subtitle: Text(
+                widget.allowSelfAllocation
+                    ? 'Xu kiếm được vào hũ chờ, bé tự kéo chia vào các hũ'
+                    : 'Xu tự động phân bổ vào các hũ theo tỷ lệ định sẵn',
+                style: context.text.bodySmall?.copyWith(
+                  color: context.semantic.onSurfaceMuted,
+                ),
+              ),
+              value: widget.allowSelfAllocation,
+              onChanged: widget.onToggleSelfAllocation,
+            ),
+          ],
+
+          // --- 3. Cấu hình hũ xu riêng & Slider có chốt khoá ---
           if (widget.showJars && widget.onJarSplitChanged != null) ...[
             const Divider(),
             const SizedBox(height: AppSpacing.sm),
@@ -269,7 +387,7 @@ class _ChildProfileFormState extends State<ChildProfileForm> {
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'Tuỳ biến tỷ lệ hũ theo độ tuổi: bé nhỏ có thể tăng hũ Chi tiêu/Đồ chơi, '
+              'Tuỳ biến tỷ lệ hũ theo độ tuổi: bé nhỏ tăng hũ Chi tiêu/Đồ chơi, '
               'bé lớn tăng hũ Tiết kiệm/Học tập.',
               style: context.text.bodySmall?.copyWith(
                 color: context.semantic.onSurfaceMuted,
@@ -308,49 +426,52 @@ class _ChildProfileFormState extends State<ChildProfileForm> {
                 ),
                 child: Column(
                   children: [
-                    _JarSlider(
+                    _SmartJarSlider(
                       label: 'Tiêu / Đồ chơi',
                       emoji: '🛍️',
                       value: _spendPct,
-                      onChanged: (val) {
-                        setState(() {
-                          _spendPct = val;
-                          final rest = 100 - _spendPct;
-                          _savePct = (rest * 0.8).round();
-                          _givePct = rest - _savePct;
-                        });
-                        _updateSplit();
-                      },
+                      locked: _lockSpend,
+                      onToggleLock: () => setState(() => _lockSpend = !_lockSpend),
+                      onChanged: _adjustSpend,
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    _JarSlider(
+                    _SmartJarSlider(
                       label: 'Để dành / Học tập',
                       emoji: '🐷',
                       value: _savePct,
-                      onChanged: (val) {
-                        setState(() {
-                          _savePct = val;
-                          final rest = 100 - _savePct;
-                          _spendPct = (rest * 0.8).round();
-                          _givePct = rest - _spendPct;
-                        });
-                        _updateSplit();
-                      },
+                      locked: _lockSave,
+                      onToggleLock: () => setState(() => _lockSave = !_lockSave),
+                      onChanged: _adjustSave,
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    _JarSlider(
+                    _SmartJarSlider(
                       label: 'Cho đi / Chia sẻ',
                       emoji: '💝',
                       value: _givePct,
-                      onChanged: (val) {
-                        setState(() {
-                          _givePct = val;
-                          final rest = 100 - _givePct;
-                          _spendPct = (rest * 0.6).round();
-                          _savePct = rest - _spendPct;
-                        });
-                        _updateSplit();
-                      },
+                      locked: _lockGive,
+                      onToggleLock: () => setState(() => _lockGive = !_lockGive),
+                      onChanged: _adjustGive,
+                    ),
+                    const Divider(height: AppSpacing.lg),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Tổng tỷ lệ: ${_spendPct + _savePct + _givePct}%',
+                          style: context.text.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: (_spendPct + _savePct + _givePct) == 100
+                                ? context.semantic.success
+                                : context.semantic.danger,
+                          ),
+                        ),
+                        Text(
+                          'Tự động cân bằng = 100%',
+                          style: context.text.bodySmall?.copyWith(
+                            color: context.semantic.onSurfaceMuted,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -358,7 +479,7 @@ class _ChildProfileFormState extends State<ChildProfileForm> {
             ],
           ],
 
-          // --- 4. Gán việc nhà mẫu hàng loạt ---
+          // --- 4. Gán việc nhà mẫu phân theo 4 Buổi & Chỉnh +- Xu ---
           if (widget.showPresets && widget.onPresetsChanged != null) ...[
             const Divider(),
             const SizedBox(height: AppSpacing.sm),
@@ -366,7 +487,7 @@ class _ChildProfileFormState extends State<ChildProfileForm> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'GÁN VIỆC NHÀ MẪU CHO BÉ',
+                  'GÁN VIỆC MẪU CHO BÉ',
                   style: context.text.labelSmall?.copyWith(
                     color: context.semantic.onSurfaceMuted,
                   ),
@@ -387,51 +508,237 @@ class _ChildProfileFormState extends State<ChildProfileForm> {
               ],
             ),
             Text(
-              'Tích chọn các việc hàng ngày để tự động tạo và giao sẵn cho bé.',
+              'Tích chọn việc nhà hàng ngày để tự động tạo và giao sẵn cho bé.',
               style: context.text.bodySmall?.copyWith(
                 color: context.semantic.onSurfaceMuted,
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.xs,
-              runSpacing: AppSpacing.xs,
-              children: kTaskPresets.map((preset) {
-                final isSelected = widget.selectedPresetKeys.contains(preset.key);
-                return FilterChip(
-                  avatar: AppIcon.task(preset.iconKey, size: 18),
-                  label: Text(preset.titleVi),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    final current = Set<String>.from(widget.selectedPresetKeys);
-                    if (selected) {
-                      current.add(preset.key);
-                    } else {
-                      current.remove(preset.key);
-                    }
-                    widget.onPresetsChanged?.call(current);
-                  },
-                );
-              }).toList(),
+            const SizedBox(height: AppSpacing.md),
+
+            // Nhóm 1: Buổi sáng
+            _buildSessionGroup(
+              title: '🌅 Buổi Sáng',
+              presets: morningTasks,
+              expanded: _expandMorning,
+              onToggleExpand: () => setState(() => _expandMorning = !_expandMorning),
+            ),
+
+            // Nhóm 2: Buổi trưa / chiều
+            _buildSessionGroup(
+              title: '☀️ Buổi Trưa / Chiều',
+              presets: afternoonTasks,
+              expanded: _expandAfternoon,
+              onToggleExpand: () => setState(() => _expandAfternoon = !_expandAfternoon),
+            ),
+
+            // Nhóm 3: Buổi tối
+            _buildSessionGroup(
+              title: '🌙 Buổi Tối',
+              presets: eveningTasks,
+              expanded: _expandEvening,
+              onToggleExpand: () => setState(() => _expandEvening = !_expandEvening),
+            ),
+
+            // Nhóm 4: Thói quen & Giúp đỡ
+            _buildSessionGroup(
+              title: '🔄 Thói Quen & Giúp Đỡ',
+              presets: habitTasks,
+              expanded: _expandHabits,
+              onToggleExpand: () => setState(() => _expandHabits = !_expandHabits),
             ),
           ],
         ],
       ),
     );
   }
+
+  Widget _buildSessionGroup({
+    required String title,
+    required List<TaskPreset> presets,
+    required bool expanded,
+    required VoidCallback onToggleExpand,
+  }) {
+    final visible = expanded ? presets : presets.take(3).toList();
+    final hiddenCount = presets.length - visible.length;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: context.colors.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(AppRadius.field),
+        border: Border.all(color: context.colors.outlineVariant.withValues(alpha: 0.4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                title,
+                style: context.text.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const Spacer(),
+              Text(
+                '${presets.where((p) => widget.selectedPresetKeys.contains(p.key)).length}/${presets.length} đã chọn',
+                style: context.text.bodySmall?.copyWith(
+                  color: context.colors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          for (final preset in visible) ...[
+            _PresetItemTile(
+              preset: preset,
+              points: _pointsMap[preset.key] ?? preset.defaultPoints,
+              selected: widget.selectedPresetKeys.contains(preset.key),
+              onSelected: (selected) {
+                final current = Set<String>.from(widget.selectedPresetKeys);
+                if (selected) {
+                  current.add(preset.key);
+                } else {
+                  current.remove(preset.key);
+                }
+                widget.onPresetsChanged?.call(current);
+              },
+              onDecrease: () => _changePresetPoint(preset.key, -5),
+              onIncrease: () => _changePresetPoint(preset.key, 5),
+            ),
+            const SizedBox(height: 4),
+          ],
+          if (presets.length > 3)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: onToggleExpand,
+                icon: Icon(
+                  expanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                  size: 18,
+                ),
+                label: Text(
+                  expanded ? 'Thu gọn' : '+ Xem thêm ($hiddenCount việc)',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
-class _JarSlider extends StatelessWidget {
-  const _JarSlider({
+class _PresetItemTile extends StatelessWidget {
+  const _PresetItemTile({
+    required this.preset,
+    required this.points,
+    required this.selected,
+    required this.onSelected,
+    required this.onDecrease,
+    required this.onIncrease,
+  });
+
+  final TaskPreset preset;
+  final int points;
+  final bool selected;
+  final ValueChanged<bool> onSelected;
+  final VoidCallback onDecrease;
+  final VoidCallback onIncrease;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = context.colors.primary;
+    return Container(
+      decoration: BoxDecoration(
+        color: selected ? primary.withValues(alpha: 0.12) : context.colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.field),
+        border: Border.all(
+          color: selected ? primary : context.colors.outlineVariant.withValues(alpha: 0.5),
+          width: selected ? 1.5 : 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
+        child: Row(
+          children: [
+            Checkbox(
+              value: selected,
+              onChanged: (val) => onSelected(val ?? false),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            ),
+            AppIcon.task(preset.iconKey, size: 22),
+            const SizedBox(width: AppSpacing.xs),
+            Expanded(
+              child: Text(
+                preset.titleVi,
+                style: context.text.bodyMedium?.copyWith(
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected ? primary : context.colors.onSurface,
+                ),
+              ),
+            ),
+            if (selected) ...[
+              IconButton(
+                onPressed: points > 5 ? onDecrease : null,
+                icon: const Icon(Icons.remove_circle_outline_rounded, size: 20),
+                visualDensity: VisualDensity.compact,
+                tooltip: 'Giảm 5 xu',
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: context.colors.primaryContainer,
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                ),
+                child: Text(
+                  '$points xu',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: primary,
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: onIncrease,
+                icon: const Icon(Icons.add_circle_outline_rounded, size: 20),
+                visualDensity: VisualDensity.compact,
+                tooltip: 'Tăng 5 xu',
+              ),
+            ] else ...[
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Text(
+                  '${preset.defaultPoints} xu',
+                  style: context.text.bodySmall?.copyWith(
+                    color: context.semantic.onSurfaceMuted,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SmartJarSlider extends StatelessWidget {
+  const _SmartJarSlider({
     required this.label,
     required this.emoji,
     required this.value,
+    required this.locked,
+    required this.onToggleLock,
     required this.onChanged,
   });
 
   final String label;
   final String emoji;
   final int value;
+  final bool locked;
+  final VoidCallback onToggleLock;
   final ValueChanged<int> onChanged;
 
   @override
@@ -449,6 +756,16 @@ class _JarSlider extends StatelessWidget {
             ),
           ),
         ),
+        IconButton(
+          onPressed: onToggleLock,
+          icon: Icon(
+            locked ? Icons.lock_rounded : Icons.lock_open_rounded,
+            size: 18,
+            color: locked ? context.colors.primary : context.semantic.onSurfaceMuted,
+          ),
+          tooltip: locked ? 'Đã chốt khoá tỷ lệ' : 'Khoá cố định tỷ lệ này',
+          visualDensity: VisualDensity.compact,
+        ),
         Expanded(
           flex: 4,
           child: Slider(
@@ -465,7 +782,7 @@ class _JarSlider extends StatelessWidget {
             textAlign: TextAlign.end,
             style: context.text.bodyMedium?.copyWith(
               fontWeight: FontWeight.w800,
-              color: context.semantic.xuText,
+              color: context.colors.primary,
             ),
           ),
         ),
@@ -474,7 +791,6 @@ class _JarSlider extends StatelessWidget {
   }
 }
 
-/// Hàng chip chọn tuổi, cuộn ngang. Lưu **năm sinh** chứ không lưu tuổi.
 class _AgePicker extends StatelessWidget {
   const _AgePicker({
     required this.birthYear,
@@ -488,57 +804,47 @@ class _AgePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentYear = FamilyClock(
-      timeZoneOffset: DateTime.now().timeZoneOffset,
-    ).today().year;
-    final years = birthYearOptions(currentYear: currentYear);
+    final now = DateTime.now();
+    final clock = FamilyClock(timeZoneOffset: now.timeZoneOffset);
+    final currentYear = clock.today().year;
 
-    return SizedBox(
-      height: 72,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: years.length,
-        separatorBuilder: (context, index) =>
-            const SizedBox(width: AppSpacing.sm),
-        itemBuilder: (context, index) {
-          final year = years[index];
-          final selected = year == birthYear;
+    final selectedAge = birthYear != null ? currentYear - birthYear! : null;
 
-          return GestureDetector(
-            onTap: () => onChanged(selected ? null : year),
+    final ages = [
+      for (var a = kMinSupportedAge; a <= kMaxSupportedAge; a++) a,
+    ];
+
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: [
+        for (final age in ages) ...[
+          GestureDetector(
+            onTap: () => onChanged(currentYear - age),
             child: Container(
-              width: 60,
+              width: 48,
+              height: 48,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: selected
+                color: age == selectedAge
                     ? color.withValues(alpha: 0.25)
                     : context.colors.primaryContainer,
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(AppRadius.field),
-                ),
-                border: selected ? Border.all(color: color, width: 2.5) : null,
+                shape: BoxShape.circle,
+                border: age == selectedAge
+                    ? Border.all(color: color, width: 2.5)
+                    : null,
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '${currentYear - year}',
-                    style: context.text.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  Text(
-                    'tuổi',
-                    style: context.text.labelSmall?.copyWith(
-                      color: context.semantic.onSurfaceMuted,
-                    ),
-                  ),
-                ],
+              child: Text(
+                '$age',
+                style: context.text.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: age == selectedAge ? color : context.colors.onSurface,
+                ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        ],
+      ],
     );
   }
 }
