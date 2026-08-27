@@ -144,6 +144,7 @@ class _ChildHistoryModalState extends State<ChildHistoryModal> {
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close_rounded),
+                  tooltip: 'Đóng',
                 ),
               ],
             ),

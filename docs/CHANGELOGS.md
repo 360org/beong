@@ -4,6 +4,17 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.3.1+23 (2026-08-27) — Hotfix Audit Release v0.3.0
+
+### [FIX]
+- Đồng bộ phiên bản báo lỗi trong `BaoLoiScreen` lên `0.3.1` để khớp `pubspec.yaml`.
+- Bổ sung `tooltip: 'Đóng'` cho các nút đóng còn thiếu trong modal chọn icon, lịch sử con và xem ảnh chứng thực để đạt checklist accessibility.
+
+### [IMPROVE]
+- Bổ sung báo cáo audit release tại `/Volumes/DATA/DEV/MOBILES/beong/docs/AUDIT_RELEASE_V0.3.0_FIX_REPORT.md`.
+
+---
+
 ## v0.3.0+22 (2026-08-27) — Nâng Cấp Toàn Diện Trải Nghiệm Profile Bé, Kho Icon 110+, Hũ Xu Cá Nhân Hoá, Chứng Thực Hình Ảnh & Journey Leo Núi
 
 ### [NEW]

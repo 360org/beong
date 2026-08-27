@@ -153,6 +153,7 @@ class _FullIconPickerModalState extends State<_FullIconPickerModal>
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close_rounded),
+                  tooltip: 'Đóng',
                 ),
               ],
             ),

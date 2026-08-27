@@ -519,6 +519,7 @@ class _PendingCardState extends State<_PendingCard> {
                               leading: IconButton(
                                 icon: const Icon(Icons.close_rounded),
                                 onPressed: () => Navigator.of(ctx).pop(),
+                                tooltip: 'Đóng',
                               ),
                             ),
                             InteractiveViewer(
