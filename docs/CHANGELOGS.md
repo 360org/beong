@@ -4,6 +4,61 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.4.0+24 (2026-08-29) — Việc nhà về đúng một chỗ
+
+Bản này sửa gốc một chuyện đã âm thầm làm hỏng trải nghiệm: **cùng một việc bị
+tạo hai lần**. Trên máy thử, một bé có 36 việc trong ngày, "Đánh răng buổi
+sáng" hiện hai lần, và xu cộng gấp đôi cho cùng một hành động.
+
+### Nguyên nhân
+
+Việc nhà sinh ra từ hai đường không biết nhau: onboarding tạo buổi thói quen
+kèm việc bên trong, còn *Cài đặt → hồ sơ bé → gán việc mẫu* tạo việc rời. Không
+ai kiểm trùng. Và sau onboarding thì **không có đường nào tạo thêm buổi**, nên
+bố mẹ buộc phải dùng đường thứ hai.
+
+### ✨ Mới
+
+- **Tạo buổi thói quen ngay ở tab Nhiệm vụ** (Buổi sáng, Sau giờ học, Buổi
+  tối...), chọn được **nhiều bé** cùng lúc. Gán cho bé nào thì bé đó thấy.
+- **Sửa việc đã tạo**: tên, hình, xu, và đổi buổi. Trước đây việc tạo xong là
+  không sửa được gì.
+- **Chỉnh xu ngay tại dòng việc** bằng nút −/+, bước 5.
+- **Nút thêm hũ** ở màn Thống kê, với hai cách chia lại tỷ lệ: trừ đều các hũ
+  khác theo tỷ lệ hiện có, hoặc tự chỉnh. Luôn về đúng 100%.
+- **Vuốt ngang trên thẻ của con** để xem lịch sử ngày/tuần.
+
+### 🔧 Đổi
+
+- **Mọi việc đều thuộc một buổi.** Khái niệm "việc lẻ" bỏ đi; bảng thêm việc nay
+  hỏi "Xếp vào buổi" thay cho "Giao cho" — người nhận lấy từ buổi.
+- **Thẻ con trên Trang chính nhóm theo buổi**, mỗi nhóm hiện *đã xong / tổng*,
+  liệt kê cả việc đã xong lẫn chưa xong. Buổi xong hết thì tự gập lại.
+- Bỏ phần gán việc mẫu khỏi hồ sơ bé — đó chính là đường sinh ra việc trùng.
+- Việc và buổi giờ đọc **một lần cho cả danh sách** thay vì mỗi dòng một truy
+  vấn.
+
+### 🩹 Sửa
+
+- Dọn tự động việc bị tạo hai lần khi mở app: giữ bản trong buổi, **tắt** bản
+  trùng chứ không xoá — sổ cái trỏ tới việc, xoá đi là "Sổ của con" mất tên.
+- Bốn cảnh báo `discarded_futures` ở hoạt ảnh quay lại lần thứ ba, sửa dứt điểm.
+
+### 🛡️ Chốt chặn
+
+- **Hook pre-commit** chạy `flutter analyze --fatal-infos`, chặn commit khi đỏ.
+  Cài: `git config core.hooksPath .githooks`.
+- Test canh icon iOS không có kênh alpha (Apple từ chối lỗi 90717).
+- Test canh chính hook: còn tồn tại, còn đúng lệnh, còn quyền chạy.
+
+### ⚠️ Còn lại
+
+Hũ tuỳ chỉnh **chưa gán riêng cho từng bé được**: mô hình hũ đang có hai cách
+biểu diễn song song, và bé có tỷ lệ riêng thì mọi hũ tuỳ chỉnh biến mất với bé
+đó. Chi tiết ở `docs/22`.
+
+---
+
 ## v0.3.1+23 (2026-08-27) — Hotfix Audit Release v0.3.0
 
 ### [FIX]
