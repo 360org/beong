@@ -19,6 +19,7 @@ import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
+import 'package:beong/features/tasks/routine_create_sheet.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,9 +51,28 @@ class TasksScreen extends ConsumerWidget {
       ),
       floatingActionButton: session.isParent
           ? FloatingActionButton(
+              tooltip: 'Thêm việc hoặc buổi thói quen',
               onPressed: () async {
                 final children = await memberDao.children(session.familyId);
                 if (!context.mounted) return;
+                // Hai thứ tạo được từ đây, nên phải hỏi trước chứ không đoán:
+                // một **việc**, hay một **buổi** để gom việc vào.
+                final chon = await showModalBottomSheet<_ThemGi>(
+                  context: context,
+                  builder: (context) => const _ThemGiSheet(),
+                );
+                if (chon == null || !context.mounted) return;
+
+                if (chon == _ThemGi.buoi) {
+                  await showRoutineCreateSheet(
+                    context,
+                    taskDao: taskDao,
+                    familyId: session.familyId,
+                    children: children,
+                  );
+                  return;
+                }
+
                 await showModalBottomSheet<void>(
                   context: context,
                   isScrollControlled: true,
@@ -67,6 +87,41 @@ class TasksScreen extends ConsumerWidget {
               child: const Icon(Icons.add),
             )
           : null,
+    );
+  }
+}
+
+enum _ThemGi { viec, buoi }
+
+/// Hỏi bố mẹ muốn thêm **việc** hay thêm **buổi**.
+///
+/// Trước đây nút "+" chỉ làm được một việc, nên không phải hỏi. Nay nó làm được
+/// hai, và đoán hộ người dùng thì một trong hai đường sẽ không ai tìm ra.
+class _ThemGiSheet extends StatelessWidget {
+  const _ThemGiSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: AppSpacing.sm),
+          ListTile(
+            leading: const Icon(Icons.check_circle_outline_rounded),
+            title: Text('Thêm việc', style: context.text.titleSmall),
+            subtitle: const Text('Một việc nhà, xếp vào một buổi'),
+            onTap: () => Navigator.of(context).pop(_ThemGi.viec),
+          ),
+          ListTile(
+            leading: const Icon(Icons.schedule_rounded),
+            title: Text('Thêm buổi thói quen', style: context.text.titleSmall),
+            subtitle: const Text('Buổi sáng, sau giờ học, buổi tối...'),
+            onTap: () => Navigator.of(context).pop(_ThemGi.buoi),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+      ),
     );
   }
 }
@@ -617,7 +672,8 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                         } else {
                           _selectedPreset = preset.key;
                           _titleController.text = preset.titleVi;
-                          _pointsController.text = preset.defaultPoints.toString();
+                          _pointsController.text = preset.defaultPoints
+                              .toString();
                           _iconKey = preset.iconKey;
                           _dayPart = preset.dayPart != null
                               ? DayPart.values.firstWhere(
@@ -1010,7 +1066,9 @@ class _QuickPresetPickerState extends State<_QuickPresetPicker> {
 
     if (widget.selectedPreset != null &&
         !visible.any((p) => p.key == widget.selectedPreset)) {
-      final selectedObj = presets.firstWhere((p) => p.key == widget.selectedPreset);
+      final selectedObj = presets.firstWhere(
+        (p) => p.key == widget.selectedPreset,
+      );
       visible.add(selectedObj);
     }
 
@@ -1038,7 +1096,9 @@ class _QuickPresetPickerState extends State<_QuickPresetPicker> {
             size: 18,
           ),
           label: Text(
-            _expanded ? 'Thu gọn' : 'Xem thêm mẫu việc (${presets.length - 8}+)',
+            _expanded
+                ? 'Thu gọn'
+                : 'Xem thêm mẫu việc (${presets.length - 8}+)',
             style: context.text.bodySmall?.copyWith(
               color: context.colors.primary,
               fontWeight: FontWeight.w700,

@@ -432,6 +432,34 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
     });
   }
 
+  /// Đặt lại danh sách bé được gán cho một buổi thói quen.
+  ///
+  /// Ghi đè cả bộ chứ không cộng dồn: bỏ chọn một bé ở giao diện thì bé đó
+  /// phải thật sự rời khỏi buổi, không phải chỉ biến mất khỏi màn hình.
+  ///
+  /// Danh sách rỗng là **hợp lệ** và có nghĩa rõ ràng: buổi này chưa gán cho
+  /// ai, nên `schedulableTasks` bỏ qua mọi việc trong đó
+  /// (`schedule.dart:148`). Giao diện phải nói rõ điều đó thay vì để bố mẹ
+  /// tưởng đã gán xong.
+  Future<void> setRoutineAssignees({
+    required String routineId,
+    required List<String> memberIds,
+  }) {
+    return transaction(() async {
+      await (delete(
+        routineAssignees,
+      )..where((a) => a.routineId.equals(routineId))).go();
+      for (final memberId in memberIds) {
+        await into(routineAssignees).insert(
+          RoutineAssigneesCompanion.insert(
+            routineId: routineId,
+            memberId: memberId,
+          ),
+        );
+      }
+    });
+  }
+
   /// Sửa thông tin của một routine.
   Future<void> updateRoutine({
     required String routineId,

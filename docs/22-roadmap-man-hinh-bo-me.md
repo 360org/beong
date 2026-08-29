@@ -214,11 +214,35 @@ bỏ nó **sau** khi tab Nhiệm vụ làm được cả hai việc đó.
 | 5 | 2.1 + 2.2 + 2.3 thẻ con | Cùng đụng `parent_home_screen` |
 | 6 | 4.1 nút thêm hũ | Độc lập, nhưng cần chốt chuyện tỷ lệ chia |
 
-## Chỗ cần anh chốt trước khi em code
+## Chủ dự án đã chốt (26/08/2026)
 
-1. **Thói quen gán cho bé kiểu nào** — cách (a) không đụng lược đồ, hay cách (b)
-   thêm cột `memberId` vào `Routines`?
-2. **Việc trùng đang có trên máy anh xử sao** — tự gộp khi mở app lên (giữ bản
-   trong thói quen, bỏ bản lẻ), hay hiện danh sách cho bố mẹ tự chọn?
-3. **Thêm hũ mới thì tỷ lệ chia lấy từ đâu** — trừ đều các hũ cũ, hay bắt bố mẹ
-   chỉnh lại tay cho đủ 100%?
+1. **Buổi thói quen là của chung, gán cho hồ sơ nào thì hồ sơ đó thấy.** Chọn
+   được nhiều bé cùng lúc (Neo *và* Simba). → quan hệ **nhiều–nhiều**.
+2. **Việc tạo ra là gán thẳng vào một buổi, không để lẻ.** Khái niệm "việc lẻ"
+   biến mất.
+3. **Thêm hũ mới thì cho chọn cách chỉnh** — chỉnh riêng từng hũ, hoặc theo một
+   nguyên tắc chung — miễn tổng các hũ trong một hồ sơ bằng **100%**.
+
+### Hệ quả của quyết định 1: không cần đổi lược đồ
+
+Soát lại thì bảng nối **đã có sẵn**: `RoutineAssignees`
+(`tables.dart:134`), khoá chính `{routineId, memberId}` — đúng nhiều–nhiều.
+`createRoutine` cũng đã ghi vào đó (`task_dao.dart:421`), và `schedulableTasks`
+đã đọc ra (`:151`).
+
+Vấn đề không phải thiếu lược đồ, mà là **chỉ onboarding gọi `createRoutine`**
+(`onboarding_screen.dart:153`). Xong onboarding là không tạo được buổi nào nữa
+— nên bố mẹ buộc phải đi đường Cài đặt → hồ sơ bé → gán việc mẫu, và đường đó
+sinh ra việc **nằm ngoài mọi buổi**. Hai đường song song chính là gốc của việc
+bị nhân đôi.
+
+Nên quyết định 1 và 2 gặp nhau ở cùng một chỗ: **mở đường tạo buổi trong tab
+Nhiệm vụ, rồi bỏ đường gán việc mẫu.**
+
+### Hệ quả của quyết định 2: một ràng buộc phải giữ
+
+`schedule.dart:148` bỏ qua mọi việc có `assigneeIds` rỗng. Với việc trong buổi,
+danh sách đó lấy từ `RoutineAssignees`. Nên **buổi không gán cho bé nào thì
+không đứa trẻ nào nhìn thấy việc trong đó** — mà trên màn quản lý thì buổi vẫn
+trông bình thường. Bảng tạo buổi phải chặn nút lưu khi chưa chọn bé, và có test
+canh đúng hệ quả này.

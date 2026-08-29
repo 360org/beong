@@ -22,6 +22,11 @@ abstract interface class TaskRepository {
     required List<TasksCompanion> routineTasks,
   });
   Future<void> createTask(TasksCompanion task, List<String> assigneeIds);
+  Future<List<String>> routineAssigneesOf(String routineId);
+  Future<void> setRoutineAssignees({
+    required String routineId,
+    required List<String> memberIds,
+  });
   Future<void> detachTaskFromRoutine(String taskId);
   Future<int> generateInstances({
     required String familyId,
@@ -93,6 +98,16 @@ final class LocalTaskRepository implements TaskRepository {
   @override
   Future<void> createTask(TasksCompanion task, List<String> assigneeIds) =>
       _dao.createTask(task, assigneeIds);
+
+  @override
+  Future<List<String>> routineAssigneesOf(String routineId) =>
+      _dao.routineAssigneesOf(routineId);
+
+  @override
+  Future<void> setRoutineAssignees({
+    required String routineId,
+    required List<String> memberIds,
+  }) => _dao.setRoutineAssignees(routineId: routineId, memberIds: memberIds);
 
   @override
   Future<void> detachTaskFromRoutine(String taskId) =>
