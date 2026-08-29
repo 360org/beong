@@ -1,0 +1,224 @@
+# 22 — Lộ trình sửa màn hình bố mẹ
+
+*Chủ dự án nêu ngày 26/08/2026 kèm 5 ảnh chụp trên máy thật. Soát lại từng mục
+bằng code trước khi ghi — `file:dòng` để kiểm lại.*
+
+## Việc phải làm trước tất cả: **việc bị nhân đôi**
+
+Ảnh 2 và ảnh 3 cho thấy một chuyện không nằm trong danh sách anh nêu, nhưng nó
+là **gốc** của mục 1.2 và làm hỏng cả trải nghiệm:
+
+> NEO: **0 / 36 việc hôm nay** · Simba: **0 / 23 việc hôm nay**
+
+Mở danh sách của Simba ra thì thấy rõ: **"Đánh răng buổi sáng" hiện hai lần**
+(+10 xu, rồi lại +10 xu), **"Tắm rửa" hai lần**, "Đọc sách 15 phút" vừa nằm
+trong thói quen *Sau giờ học* vừa đứng riêng.
+
+Không đứa trẻ nào có 36 việc một ngày. Con số đó là **cùng một việc được tạo
+hai lần** từ hai đường khác nhau:
+
+- đường **Cài đặt → hồ sơ bé → gán việc mẫu** (ảnh 5), và
+- đường **thói quen** trong tab Nhiệm vụ (ảnh 1).
+
+Hai đường cùng sinh ra bản ghi `Task` riêng biệt, không ai kiểm trùng. Nên bé
+mở app ra thấy một danh sách dài vô lý, phải đánh răng hai lần mới hết việc, và
+xu cộng gấp đôi cho cùng một hành động.
+
+**Đây là việc số 0 — làm trước mọi thứ khác trong tài liệu này.** Sửa giao diện
+mà dữ liệu vẫn nhân đôi thì chỉ là làm đẹp một danh sách sai.
+
+Cần: dọn trùng cho dữ liệu đang có, và chặn sinh trùng về sau (một việc chỉ tồn
+tại một bản ghi, thuộc về một thói quen **hoặc** đứng lẻ, không cả hai).
+
+---
+
+## Hình 1 — Tab Nhiệm vụ
+
+### 1.0 · Việc lẻ và việc trong thói quen phải cùng một kiểu thẻ
+
+**Anh nêu:** *"task lẻ đang có layout khác với task thói quen, làm giống nhau
+hết."*
+
+**Hiện tại:** hai widget khác hẳn nhau — `_RoutineGroupCard`
+(`tasks_screen.dart:256`) vẽ một thẻ nhóm có tiêu đề, đếm số việc, và các dòng
+việc bên trong; `_TaskTile` (`:348`) vẽ một thẻ độc lập có avatar tròn và nhãn
+"Hằng ngày". Cùng một thứ — một việc nhà — mà hai hình thức, nên mắt phải học
+hai lần.
+
+**Làm:** một `TaskRow` dùng chung cho cả hai chỗ. Thẻ nhóm chỉ còn khác ở phần
+**vỏ** (tiêu đề buổi + số việc), còn từng dòng việc bên trong thì giống hệt dòng
+việc lẻ.
+
+### 1.1 · 🔴 Trong thói quen chưa thấy +/− xu
+
+**Anh nêu:** *"trong màn hình task thói quen chưa thấy +- số xu khi đưa vào task
+thói quen."*
+
+**Hiện tại:** `child_profile_form.dart:13` ghi rõ màn gán việc mẫu **đã có**
+"+- xu" cho từng việc. Nhưng ở thói quen thì không: `routine_editor_screen.dart`
+chỉ có thanh trượt **thưởng trọn bộ** (`:495` — *"Thưởng khi làm trọn bộ: N
+xu"*), không có chỗ chỉnh xu của từng việc trong đó.
+
+Nên cùng một việc, chỉnh xu được ở màn này mà không chỉnh được ở màn kia — bố mẹ
+phải nhớ đi đường nào mới sửa được.
+
+**Làm:** mỗi dòng việc trong thói quen có nút −/+ chỉnh xu tại chỗ, đúng như màn
+gán việc mẫu. Giữ nguyên thưởng trọn bộ, đó là thứ khác.
+
+### 1.2 · 🔴 Việc đã vào thói quen phải biến mất khỏi danh sách việc lẻ
+
+**Anh nêu:** *"mỗi task từ task lẻ đã thêm vào thói quen rồi thì phải mất luôn
+để không chọn phải 2 lần."*
+
+**Hiện tại — và đây là chỗ cần nói rõ.** Tab Nhiệm vụ **đã** tách đúng:
+`tasks_screen.dart:198–206` chia theo `task.routineId != null`, nên một việc đã
+vào thói quen thì không hiện lại ở mục "Việc lẻ". Trong màn sửa thói quen cũng
+vậy — danh sách `outside` (`routine_editor_screen.dart:184`) chỉ đưa ra việc
+chưa thuộc thói quen nào.
+
+Nghĩa là **giao diện không sai**. Thứ sai là **dữ liệu**: có hai bản ghi `Task`
+riêng cho cùng một việc, một cái `routineId = null` và một cái có `routineId`.
+Cả hai đều đúng luật lọc, nên cả hai cùng hiện — một ở "Thói quen", một ở "Việc
+lẻ" — và bố mẹ thấy như bị chọn hai lần.
+
+**Làm:** đây chính là **việc số 0** ở đầu tài liệu. Sửa ở tầng dữ liệu, không
+phải ở bộ lọc.
+
+### 1.3 · 🟠 Tạo buổi thói quen ngay trong tab Nhiệm vụ, và gán cho bé tại chỗ
+
+**Anh nêu:** *"trong tab tasks phải tạo thêm được session thói quen ví dụ: buổi
+sáng, buổi trưa, buổi xế > và gán cho profile của bé ngay ở đây thay vì đưa vào
+setting > profile > config (bỏ phần task trong profile config)."*
+
+**Hiện tại:** nút "+" ở tab Nhiệm vụ (`tasks_screen.dart:52`) chỉ mở
+`_AddTaskSheet` — **thêm một việc**, không tạo được thói quen mới. Muốn có thói
+quen mới thì không có đường nào từ đây.
+
+**Và một điều phải chốt trước khi code:** bảng `Routines`
+(`tables.dart:108–124`) **không có cột nào gán cho thành viên**. Nó có `title`,
+`iconKey`, `dayPart`, `repeatType`, `repeatDays` — hết. Việc mới được gán cho
+bé, thói quen thì không.
+
+Nên "gán thói quen cho hồ sơ bé" có hai cách làm, và **cần anh chốt**:
+
+- **(a) Gán gián tiếp** — chọn bé ở màn tạo thói quen, rồi mọi việc sinh ra
+  trong thói quen đó gán cho bé ấy. Không đụng lược đồ. Nhược: hai bé dùng chung
+  một "Buổi sáng" thì phải tạo hai thói quen trùng tên.
+- **(b) Thêm cột `memberId` vào `Routines`** — một thói quen thuộc về một bé.
+  Sạch hơn, nhưng cần migration và phải quyết dữ liệu cũ đi về đâu.
+
+**Làm:** nút "+" ở tab Nhiệm vụ cho chọn **Thêm việc** hay **Thêm buổi thói
+quen**; màn tạo thói quen có tên, hình, buổi, và chọn bé. Sau đó **bỏ hẳn phần
+việc mẫu khỏi `child_profile_form.dart`** — đó cũng là nội dung ảnh 5.
+
+Lưu ý thứ tự: **bỏ đường cũ sau khi đường mới chạy được**, không phải trước.
+Bỏ trước thì có một khoảng không ai gán việc được.
+
+### 1.4 · 🟠 Việc lẻ đã tạo phải sửa được
+
+**Anh nêu:** *"task lẻ đã tạo ra rồi thì cũng phải sửa được, hiện tại không sửa
+được."*
+
+**Hiện tại:** đúng như anh nói. `_RoutineGroupCard` có `InkWell` +
+`onTap: onEdit` (`tasks_screen.dart:277–278`), còn `_TaskTile` (`:348`) **không
+có `onTap`, không `InkWell`, không vuốt xoá** — một thẻ trơ. Việc lẻ tạo xong là
+không sửa được tên, xu, hình, hay lịch lặp.
+
+**Làm:** `_TaskTile` mở lại `_AddTaskSheet` ở chế độ sửa (sheet đã có sẵn mọi
+trường cần). Kèm đường xoá, có bước xác nhận.
+
+---
+
+## Hình 2 & 3 — Trang chính, thẻ của con
+
+### 2.1 · 🟠 Xổ ra phải nhóm theo buổi, không phải một danh sách phẳng
+
+**Anh nêu:** *"click chọn profile của con > xổ ra list task theo thói quen
+(sáng/trưa/chiều...) hoàn thành/chưa hoàn thành."*
+
+**Hiện tại:** `parent_home_screen.dart:764` xổ ra đúng một khối *"Chưa hoàn
+thành (23)"* — danh sách **phẳng**, không nhóm. Grep cả file không có chỗ nào
+dùng `routineId` hay `dayPart` để nhóm.
+
+Ảnh 2 cho thấy hậu quả: 23 dòng liền nhau, "Đánh răng buổi sáng" nằm cạnh "Làm
+bài tập" nằm cạnh "Tắm rửa", không thứ tự nào theo thời gian trong ngày.
+
+**Làm:** nhóm theo thói quen / buổi, mỗi nhóm có tiêu đề và số **đã xong /
+tổng**. Việc không thuộc thói quen nào gom vào một nhóm "Việc lẻ" ở cuối.
+
+### 2.2 · 🟠 Vuốt ngang để xem lịch sử, thay cho biểu tượng lịch
+
+**Anh nêu:** *"vuốt ngang sang thì phải quay về lịch sử ngày/tuần chứ không phải
+click vào biểu tượng lịch như hiện tại."*
+
+**Hiện tại:** phải bấm biểu tượng lịch (`:671` `Icons.calendar_today_rounded`),
+và dòng phụ đang phải đi giải thích chính nó: *"0 / 23 việc hôm nay · **Bấm xem
+lịch sử**"* (`:695`). Một giao diện phải dặn người dùng cách bấm là một giao diện
+chưa nói được bằng hình.
+
+Cả file **không có** `PageView`, `Dismissible`, hay `onHorizontalDrag` — chưa có
+cử chỉ vuốt nào.
+
+**Làm:** thẻ của con thành `PageView` ngang: hôm nay ở giữa, vuốt phải về hôm
+qua / tuần trước. Giữ biểu tượng lịch làm đường đi nhanh (vuốt là cử chỉ không
+nhìn thấy được, người mới cần một nút), nhưng **bỏ chữ "Bấm xem lịch sử"** —
+thay bằng chỉ báo trang.
+
+### 2.3 · Áp cho **mọi** hồ sơ con
+
+**Anh nêu ở hình 3.** Ảnh cho thấy NEO và Simba nằm cạnh nhau, nên 2.1 và 2.2
+phải dựng ở **thẻ con dùng chung**, không phải chỉ cho bé đầu tiên. Không có
+việc riêng ở đây — chỉ là ràng buộc khi làm 2.1/2.2.
+
+---
+
+## Hình 4 — Màn Thống kê
+
+### 4.1 · 🟠 Nút "+" tạo hũ mới và gán cho bé
+
+**Anh nêu:** *"màn hình stats có thêm + button để tạo thêm hũ & add vào profile
+cho trẻ."*
+
+**Hiện tại:** `stats_screen.dart` không có `FloatingActionButton`, không có nút
+thêm hũ nào. Bộ hũ hiện ra trong ảnh (Tiêu · Để dành · Cho đi · Học tập · Mua đồ
+chơi) là danh sách cố định — bố mẹ không tự thêm được hũ mới.
+
+**Làm:** nút "+" ở màn Thống kê mở bảng tạo hũ: tên, hình, và chọn bé được dùng
+hũ đó.
+
+**Một chuyện phải cẩn thận:** hũ dính tới việc chia xu. Thêm hũ giữa chừng thì
+tỷ lệ chia của bé phải cộng lại đủ 100%. Bảng tạo hũ phải nói rõ tỷ lệ mới lấy
+từ đâu ra, không được tự lặng lẽ chia lại phần của các hũ cũ.
+
+---
+
+## Hình 5 — Cài đặt → gán việc mẫu
+
+Anh đã nói: **bỏ đi**, gộp vào 1.3. Không có việc riêng.
+
+Nhắc lại ràng buộc thứ tự: `child_profile_form.dart` hiện là **đường duy nhất**
+gán việc mẫu cho bé, và nó cũng là nơi có sẵn phần +/− xu mà 1.1 đang thiếu. Nên
+bỏ nó **sau** khi tab Nhiệm vụ làm được cả hai việc đó.
+
+---
+
+## Thứ tự đề nghị
+
+| # | Việc | Vì sao đứng ở đây |
+|---|---|---|
+| 0 | **Dọn việc trùng + chặn sinh trùng** | Gốc của 1.2; sửa giao diện trước là làm đẹp một danh sách sai |
+| 1 | 1.4 việc lẻ sửa được | Nhỏ, độc lập, dùng lại sheet đã có |
+| 2 | 1.0 + 1.1 thẻ dùng chung + −/+ xu | Cùng đụng `tasks_screen`, làm một lượt |
+| 3 | 1.3 tạo buổi thói quen & gán bé | Cần anh chốt (a) hay (b) trước khi viết code |
+| 4 | Bỏ việc mẫu khỏi hồ sơ (ảnh 5) | **Sau** khi 1.3 chạy được |
+| 5 | 2.1 + 2.2 + 2.3 thẻ con | Cùng đụng `parent_home_screen` |
+| 6 | 4.1 nút thêm hũ | Độc lập, nhưng cần chốt chuyện tỷ lệ chia |
+
+## Chỗ cần anh chốt trước khi em code
+
+1. **Thói quen gán cho bé kiểu nào** — cách (a) không đụng lược đồ, hay cách (b)
+   thêm cột `memberId` vào `Routines`?
+2. **Việc trùng đang có trên máy anh xử sao** — tự gộp khi mở app lên (giữ bản
+   trong thói quen, bỏ bản lẻ), hay hiện danh sách cho bố mẹ tự chọn?
+3. **Thêm hũ mới thì tỷ lệ chia lấy từ đâu** — trừ đều các hũ cũ, hay bắt bố mẹ
+   chỉnh lại tay cho đủ 100%?

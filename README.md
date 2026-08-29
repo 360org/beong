@@ -61,6 +61,7 @@ dựng môi trường chụp màn hình: `.claude/skills/flutter-8-buoc/SKILL.md
 | [`docs/11-bao-loi-endpoint.md`](docs/11-bao-loi-endpoint.md) | Dựng endpoint nhận báo lỗi (Cloudflare Worker) |
 | [`docs/12-huong-dan-su-dung.md`](docs/12-huong-dan-su-dung.md) | **Hướng dẫn cho bố mẹ** — 16 mục, kèm ảnh |
 | [`docs/13-audit-luong-vao-app.md`](docs/13-audit-luong-vao-app.md) | **Audit luồng vào app** — 2 lỗi nghiêm trọng, phương án, và bản sửa ở v0.2.3 |
+| [`docs/22-roadmap-man-hinh-bo-me.md`](docs/22-roadmap-man-hinh-bo-me.md) | **Lộ trình sửa màn hình bố mẹ** — 8 việc chủ dự án nêu, kèm gốc chung: việc đang bị nhân đôi |
 | [`docs/21-audit-v0.3.md`](docs/21-audit-v0.3.md) | **Audit v0.3.0→v0.3.1** — lỗi analyzer bị revert lần thứ ba, và chốt chặn pre-commit đã dựng |
 | [`docs/20-audit-dot-lam-lon.md`](docs/20-audit-dot-lam-lon.md) | **Audit đợt v0.2.9→v0.2.13** — 4 mục lớn đã đóng; 1 lỗi 🔴 điều ước nói sai với con |
 | [`docs/19-audit-hop-nhat.md`](docs/19-audit-hop-nhat.md) | **Audit hợp nhất** — mọi thứ còn nợ gom một chỗ: 16 mục mở, nguyên nhân CI đỏ, và hai chốt chặn nên dựng |
