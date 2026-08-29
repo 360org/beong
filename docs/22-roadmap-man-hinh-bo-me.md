@@ -202,6 +202,46 @@ bỏ nó **sau** khi tab Nhiệm vụ làm được cả hai việc đó.
 
 ---
 
+## Trạng thái — làm xong 26/08/2026
+
+| Mục | Xong | Ghi chú |
+|---|---|---|
+| 0 · Dọn việc trùng | ✅ | `DonViecLe`, chạy một lần mỗi nhà trong `DayStartService` |
+| 1.0 · Thẻ dùng chung | ✅ | `TaskRow`; `_TaskTile` gỡ hẳn |
+| 1.1 · −/+ xu trong buổi | ✅ | Bước 5, không xuống dưới 0 |
+| 1.2 · Việc vào buổi thì mất khỏi việc lẻ | ✅ | Giải ở tầng dữ liệu, không phải bộ lọc |
+| 1.3 · Tạo buổi & gán hồ sơ ở tab Nhiệm vụ | ✅ | `routine_create_sheet.dart` |
+| 1.4 · Sửa việc | ✅ | `task_edit_sheet.dart`, kèm đường ngừng dùng |
+| Ảnh 5 · Bỏ việc mẫu khỏi hồ sơ | ✅ | Gỡ cả giao diện lẫn đoạn tạo việc |
+| 2.1 · Nhóm theo buổi | ✅ | `ChildDayGroups`, có đã xong/tổng |
+| 2.2 · Vuốt ngang xem lịch sử | ✅ | Giữ cả nút lịch — vuốt là cử chỉ không nhìn thấy được |
+| 2.3 · Áp cho mọi hồ sơ | ✅ | Dùng chung thẻ con |
+| 4.1 · Nút thêm hũ | ⚠️ | Xong phần cả nhà — xem giới hạn bên dưới |
+
+### ⚠️ Giới hạn của 4.1: chưa gán hũ riêng cho từng bé được
+
+Nút "+" tạo hũ và chia lại tỷ lệ cho **cả nhà**, đúng hai cách chủ dự án chốt
+(trừ đều hũ khác, hoặc tự chỉnh), và luôn về đúng 100% — có test canh với mọi
+tỷ lệ từ 0 tới 90.
+
+Phần *"add vào profile cho trẻ"* thì **chưa làm được**, và lý do đáng biết: hệ
+thống hũ đang có **hai cách biểu diễn song song**, đúng kiểu vấn đề vừa gặp với
+việc nhà.
+
+- Bảng `jars` — **n hũ**, tỷ lệ theo gia đình. Đây là thứ nút "+" ghi vào.
+- `JarSplit` (`jar_splitter.dart:10`) — **cố định ba hũ** `spend/save/give`, là
+  thứ `members.jar_split_override` lưu.
+
+`wallet_dao.dart:217` cho thấy hệ quả: bé nào có `jarSplitOverride` thì
+`planFor` trả về kế hoạch dựng **chỉ từ ba hũ cũ** — mọi hũ tuỳ chỉnh của gia
+đình **biến mất với riêng bé đó**. Nên gán hũ mới cho một bé bằng cơ chế
+override hiện tại là gán vào một mô hình không chứa nổi nó.
+
+Sửa cho đúng thì `JarSplit` phải thôi cố định ba hũ và chuyển sang map
+`jarKey -> pct` như bảng `jars`, kèm migration cho các override đang có. Đó là
+quyết định về mô hình dữ liệu, không phải chuyện giao diện — nên để chủ dự án
+chốt thay vì đoán.
+
 ## Thứ tự đề nghị
 
 | # | Việc | Vì sao đứng ở đây |

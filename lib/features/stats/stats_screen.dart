@@ -24,6 +24,7 @@ import 'package:beong/features/goals/goal_section.dart';
 import 'package:beong/features/goals/goal_sheet.dart';
 import 'package:beong/features/rewards/allocate_xu_sheet.dart';
 import 'package:beong/features/stats/adjust_xu_sheet.dart';
+import 'package:beong/features/stats/jar_add_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -245,7 +246,7 @@ class _WeeklyOverviewCard extends StatelessWidget {
   }
 }
 
-class _ParentStats extends StatelessWidget {
+class _ParentStats extends ConsumerWidget {
   const _ParentStats({
     required this.session,
     required this.memberDao,
@@ -257,10 +258,23 @@ class _ParentStats extends StatelessWidget {
   final WalletRepository walletDao;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Thống kê', style: context.text.titleLarge),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        tooltip: 'Thêm hũ cho cả nhà',
+        icon: const Icon(Icons.add),
+        label: const Text('THÊM HŨ'),
+        onPressed: () => unawaited(
+          showJarAddSheet(
+            context,
+            jarDao: ref.read(jarRepositoryProvider),
+            familyId: session.familyId,
+            onMoQuanLyHu: () => context.go(Routes.jarSettings),
+          ),
+        ),
       ),
       body: StreamBuilder<List<Member>>(
         stream: memberDao.watchMembers(session.familyId),
