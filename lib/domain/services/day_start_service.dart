@@ -5,6 +5,7 @@ import 'package:beong/data/local/reward_dao.dart';
 import 'package:beong/data/local/settings_dao.dart';
 import 'package:beong/data/local/task_dao.dart';
 import 'package:beong/domain/entities/jar_def.dart';
+import 'package:beong/domain/services/don_viec_le.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/goal_service.dart';
 import 'package:beong/domain/services/penalty_service.dart';
@@ -83,6 +84,16 @@ class DayStartService {
     // thứ tư bên cạnh ba hũ vô hình. Có hàng thật thì cả hai màn đọc cùng một
     // nguồn.
     await _jars.seedDefaults(familyId);
+
+    // Dọn hậu quả của hai đường tạo việc song song, một lần cho mỗi nhà.
+    //
+    // Đặt ở đây, ngoài khoá một-lần-mỗi-ngày, vì đây cũng là đường nâng cấp:
+    // nhà cài từ bản trước v0.3.2 đang có việc bị tạo hai lần và việc đứng
+    // ngoài mọi buổi. `DonViecLe` tự giữ cờ riêng nên chạy đúng một lần.
+    await DonViecLe(
+      taskDao: _tasks,
+      settingsDao: _settings,
+    ).chayNeuCan(familyId);
 
     // Bù icon cho việc tạo bằng sheet cũ (chưa có ô chọn hình). Cùng lý do với
     // gieo hũ ở trên: sửa dữ liệu một lần thay vì vá chỗ hiển thị.

@@ -545,6 +545,20 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
     );
   }
 
+  /// Bật/tắt một việc.
+  ///
+  /// **Tắt chứ không xoá** — ADR-005: lượt việc và các dòng sổ cái đều trỏ tới
+  /// `task_id`, nên xoá đi là "Sổ của con" mất tên việc, con nhìn lại chỉ thấy
+  /// một dòng cộng xu không rõ từ đâu.
+  Future<void> setTaskActive({
+    required String taskId,
+    required bool active,
+  }) {
+    return (update(tasks)..where((t) => t.id.equals(taskId))).write(
+      TasksCompanion(active: Value(active), updatedAt: Value(DateTime.now())),
+    );
+  }
+
   /// Ngừng dùng một routine. Việc bên trong tách ra thành việc lẻ, không mất.
   Future<void> archiveRoutine(String routineId) {
     return transaction(() async {

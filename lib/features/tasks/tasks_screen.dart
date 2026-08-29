@@ -73,6 +73,10 @@ class TasksScreen extends ConsumerWidget {
                   return;
                 }
 
+                final routines = await taskDao.activeRoutines(
+                  session.familyId,
+                );
+                if (!context.mounted) return;
                 await showModalBottomSheet<void>(
                   context: context,
                   isScrollControlled: true,
@@ -81,6 +85,7 @@ class TasksScreen extends ConsumerWidget {
                     memberDao: memberDao,
                     familyId: session.familyId,
                     children: children,
+                    routines: routines,
                   ),
                 );
               },
@@ -483,6 +488,7 @@ class _AddTaskSheet extends StatefulWidget {
     required this.memberDao,
     required this.familyId,
     required this.children,
+    required this.routines,
   });
 
   final TaskRepository taskDao;
@@ -490,11 +496,16 @@ class _AddTaskSheet extends StatefulWidget {
   final String familyId;
   final List<Member> children;
 
+  /// Các buổi thói quen đang có. Việc mới **phải** vào một buổi (chủ dự án
+  /// chốt 26/08/2026), nên danh sách rỗng nghĩa là chưa tạo được việc.
+  final List<Routine> routines;
+
   @override
   State<_AddTaskSheet> createState() => _AddTaskSheetState();
 }
 
 class _AddTaskSheetState extends State<_AddTaskSheet> {
+  String? _routineId;
   final _titleController = TextEditingController();
   final _pointsController = TextEditingController(text: '10');
   final _selectedChildren = <String>{};
@@ -575,7 +586,10 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
   Future<void> _save() async {
     final title = _titleController.text.trim();
     final points = int.tryParse(_pointsController.text.trim()) ?? 10;
-    if (title.isEmpty || _selectedChildren.isEmpty) return;
+    final routineId = _routineId;
+    // Việc không thuộc buổi nào thì không bé nào nhìn thấy nó
+    // (`schedule.dart:148`) — chặn ở đây thay vì tạo ra một việc im lặng.
+    if (title.isEmpty || routineId == null) return;
 
     final id = 'task-${DateTime.now().millisecondsSinceEpoch}';
     // `custom` mà không chọn thứ nào thì không sinh được lượt nào — việc tạo ra
@@ -607,8 +621,13 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
               ? DateTime.now().toIso8601String().substring(0, 10)
               : null,
         ),
+        routineId: Value(routineId),
       ),
-      _selectedChildren.toList(),
+      // Người nhận lấy từ buổi, không truyền ở đây: với việc trong buổi,
+      // `schedulableTasks` đọc `RoutineAssignees` chứ không đọc `TaskAssignees`
+      // (`task_dao.dart:151`). Ghi vào đây chỉ tạo ra một danh sách không ai
+      // đọc — đúng loại dữ liệu chết dự án đã dọn nhiều lần.
+      const [],
     );
 
     // Sinh ngay instance cho hôm nay để việc mới phản ánh ngay trên hồ sơ con
@@ -799,24 +818,34 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
                     ],
                   ],
                   const SizedBox(height: AppSpacing.lg),
-                  Text('Giao cho', style: context.text.titleSmall),
+                  // Không còn ô "Giao cho" ở đây: việc thuộc về một **buổi**,
+                  // và buổi mới là thứ gán cho bé. Hỏi cả hai chỗ thì hai câu
+                  // trả lời mâu thuẫn nhau được, mà chỉ một câu có tác dụng
+                  // thật (`schedule.dart:151` đọc người nhận của buổi).
+                  Text('Xếp vào buổi', style: context.text.titleSmall),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    widget.routines.isEmpty
+                        ? 'Chưa có buổi nào. Tạo một buổi trước rồi thêm việc vào.'
+                        : 'Việc sẽ hiện với những bé đã được gán vào buổi này.',
+                    style: context.text.bodySmall?.copyWith(
+                      color: widget.routines.isEmpty
+                          ? context.semantic.danger
+                          : context.semantic.onSurfaceMuted,
+                    ),
+                  ),
                   const SizedBox(height: AppSpacing.sm),
                   Wrap(
                     spacing: AppSpacing.sm,
-                    children: widget.children.map((child) {
-                      final selected = _selectedChildren.contains(child.id);
-                      return FilterChip(
-                        label: Text(child.displayName),
-                        selected: selected,
-                        onSelected: (v) {
-                          setState(() {
-                            if (v) {
-                              _selectedChildren.add(child.id);
-                            } else {
-                              _selectedChildren.remove(child.id);
-                            }
-                          });
-                        },
+                    runSpacing: AppSpacing.sm,
+                    children: widget.routines.map((routine) {
+                      return ChoiceChip(
+                        avatar: AppIcon.task(routine.iconKey, size: 20),
+                        label: Text(routine.title),
+                        selected: _routineId == routine.id,
+                        onSelected: (chon) => setState(
+                          () => _routineId = chon ? routine.id : null,
+                        ),
                       );
                     }).toList(),
                   ),
@@ -898,7 +927,12 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _save,
+                // Mờ đi khi chưa đủ điều kiện: nói trước còn hơn cho bấm rồi
+                // im lặng không tạo ra gì.
+                onPressed:
+                    _routineId == null || _titleController.text.trim().isEmpty
+                    ? null
+                    : _save,
                 child: const Text('LƯU'),
               ),
             ),
