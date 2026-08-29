@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+#
+# Chặn commit khi analyzer còn phàn nàn.
+#
+# Vì sao có file này: tính tới 26/08/2026, `main` đã **năm lần** được đẩy lên
+# trong trạng thái `flutter analyze --fatal-infos` đỏ, và riêng bốn lỗi
+# `discarded_futures` ở bee_mascot/celebration/onboarding đã bị sửa rồi mất lại
+# **ba lần**. Cả năm lần đều phát hiện được trong ~20 giây bằng đúng lệnh dưới
+# đây, trong khi một vòng CI mất 4–5 phút và một vòng release còn tốn thêm một
+# build number.
+#
+# `--fatal-infos` là chủ ý của dự án: ở đây **info cũng là đỏ**.
+#
+# Cài (mỗi máy làm một lần):
+#     git config core.hooksPath .githooks
+#
+# Bỏ qua khi thật sự cần (hiếm, và phải có lý do):
+#     git commit --no-verify
+
+set -euo pipefail
+
+if ! command -v flutter >/dev/null 2>&1; then
+  echo "pre-commit: không thấy lệnh 'flutter' trong PATH — bỏ qua bước kiểm."
+  echo "            Nhớ tự chạy: flutter analyze --fatal-infos"
+  exit 0
+fi
+
+echo "pre-commit: flutter analyze --fatal-infos ..."
+if ! flutter analyze --fatal-infos; then
+  cat <<'MSG'
+
+pre-commit: analyzer còn lỗi — commit bị chặn.
+
+  Sửa xong rồi commit lại. Nếu thiếu file sinh tự động thì chạy trước:
+      dart run build_runner build --delete-conflicting-outputs
+      flutter gen-l10n
+
+  Thật sự cần bỏ qua: git commit --no-verify
+
+MSG
+  exit 1
+fi

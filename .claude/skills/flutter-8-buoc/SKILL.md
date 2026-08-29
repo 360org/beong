@@ -323,6 +323,23 @@ lib/features/settings/bao_loi_screen.dart   kPhienBanApp = 'X.Y.Z'
 Test `test/unit/core/bao_cao_loi_test.dart` canh đúng cặp này: báo cáo lỗi ghi
 sai phiên bản thì mọi kết luận rút ra từ nó sai theo.
 
+#### Chốt chặn đã dựng — cài một lần mỗi máy
+
+```bash
+git config core.hooksPath .githooks
+```
+
+`.githooks/pre-commit` chạy `flutter analyze --fatal-infos` và chặn commit nếu
+đỏ. Có nó vì `main` đã **năm lần** bị đẩy lên trong trạng thái analyzer đỏ, và
+riêng bốn lỗi `discarded_futures` ở `bee_mascot`/`celebration`/`onboarding` bị
+sửa rồi mất lại **ba lần** — mỗi lần một agent khác dựng lại file mà không giữ
+`unawaited(...)` và `import 'dart:async'`.
+
+Nếu đang sửa đúng bốn chỗ đó lần thứ tư: **đừng chỉ sửa**, kiểm xem hook đã bật
+chưa (`git config core.hooksPath`). `test/unit/pre_commit_hook_test.dart` canh
+hook còn tồn tại, còn `--fatal-infos`, và còn quyền thực thi — mất bit `+x` thì
+git bỏ qua hook **trong im lặng**.
+
 #### Trước khi tag phát hành, kiểm thêm
 
 - **Build number**: đã tự động, đừng tăng tay nữa. CI cấp
