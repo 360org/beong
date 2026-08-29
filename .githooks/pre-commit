@@ -11,6 +11,14 @@
 #
 # `--fatal-infos` là chủ ý của dự án: ở đây **info cũng là đỏ**.
 #
+# Hook chạy `dart format` TRƯỚC rồi mới `analyze`, đúng thứ tự của CI
+# (.github/workflows/ci.yml, job "Phân tích tĩnh & định dạng"). Thứ tự này quan
+# trọng: ngày 29/08/2026 CI đỏ bảy lần liền vì một dòng `if (sel) setState(...);`
+# ở rewards_screen.dart dài quá 80 cột — máy mình analyze sạch, nhưng `dart format`
+# trên CI bẻ nó thành `if` hai dòng không ngoặc, và `curly_braces_in_flow_control_
+# structures` bắt ngay. Analyze mà không format trước thì không nhìn thấy được lỗi
+# đó, nên hook phải format trước.
+#
 # Cài (mỗi máy làm một lần):
 #     git config core.hooksPath .githooks
 #
@@ -23,6 +31,22 @@ if ! command -v flutter >/dev/null 2>&1; then
   echo "pre-commit: không thấy lệnh 'flutter' trong PATH — bỏ qua bước kiểm."
   echo "            Nhớ tự chạy: flutter analyze --fatal-infos"
   exit 0
+fi
+
+echo "pre-commit: dart format lib test integration_test ..."
+dart format lib test integration_test
+
+if ! git diff --quiet -- lib test integration_test; then
+  cat <<'MSG'
+
+pre-commit: dart format vừa sửa lại một số file — commit bị chặn.
+
+  CI cũng format y hệt rồi mới analyze, nên bản chưa format có thể xanh ở máy
+  mình mà đỏ trên CI. Xem lại thay đổi, `git add` rồi commit lại:
+      git add -u && git commit
+
+MSG
+  exit 1
 fi
 
 echo "pre-commit: flutter analyze --fatal-infos ..."

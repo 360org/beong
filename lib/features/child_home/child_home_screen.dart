@@ -205,7 +205,9 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
         } on Exception {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Không thể chụp ảnh, vui lòng thử lại')),
+            const SnackBar(
+              content: Text('Không thể chụp ảnh, vui lòng thử lại'),
+            ),
           );
           return;
         }

@@ -148,8 +148,7 @@ class _CategorySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final earnedInCategory =
-        badges.where((b) => earned.contains(b.key)).length;
+    final earnedInCategory = badges.where((b) => earned.contains(b.key)).length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

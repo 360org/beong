@@ -121,7 +121,9 @@ class _ChildTaskSheetState extends ConsumerState<_ChildTaskSheet> {
     );
 
     final note = _noteController.text.trim();
-    await ref.read(taskReviewServiceProvider).complete(
+    await ref
+        .read(taskReviewServiceProvider)
+        .complete(
           createdInstance.id,
           proofNote: note.isEmpty ? 'Con tự làm việc này' : note,
         );
@@ -224,7 +226,10 @@ class _ChildTaskSheetState extends ConsumerState<_ChildTaskSheet> {
             onSelected: (key) => setState(() => _iconKey = key),
           ),
           const SizedBox(height: AppSpacing.xl),
-          Text('Con đề xuất nhận bao nhiêu xu?', style: context.text.titleSmall),
+          Text(
+            'Con đề xuất nhận bao nhiêu xu?',
+            style: context.text.titleSmall,
+          ),
           const SizedBox(height: AppSpacing.sm),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

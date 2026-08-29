@@ -113,20 +113,27 @@ class JourneyScreen extends ConsumerWidget {
                                       const SizedBox(width: AppSpacing.xs),
                                       Text(
                                         '5 TRẠM CHINH PHỤC ĐỈNH CAO',
-                                        style:
-                                            context.text.labelMedium?.copyWith(
-                                          color: context.semantic.onSurfaceMuted,
-                                          fontWeight: FontWeight.w800,
-                                          letterSpacing: 0.5,
-                                        ),
+                                        style: context.text.labelMedium
+                                            ?.copyWith(
+                                              color: context
+                                                  .semantic
+                                                  .onSurfaceMuted,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: 0.5,
+                                            ),
                                       ),
                                     ],
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: context.colors.primaryContainer,
-                                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                                      borderRadius: BorderRadius.circular(
+                                        AppRadius.pill,
+                                      ),
                                     ),
                                     child: Text(
                                       '${(progress * 100).toInt()}% độ cao',
@@ -296,7 +303,11 @@ class _PeakGoalCard extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.edit_rounded, color: Colors.white, size: 20),
+                icon: const Icon(
+                  Icons.edit_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
                 tooltip: 'Đổi mục tiêu',
                 onPressed: onEdit,
               ),
@@ -473,19 +484,21 @@ class _AdventureMilestoneStep extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: reached
                     ? (milestone.isSummit
-                        ? AppColors.beOngHoney
-                        : context.semantic.success)
+                          ? AppColors.beOngHoney
+                          : context.semantic.success)
                     : (isCurrentPosition
-                        ? context.colors.primaryContainer
-                        : context.colors.surfaceContainerHighest.withValues(alpha: 0.6)),
+                          ? context.colors.primaryContainer
+                          : context.colors.surfaceContainerHighest.withValues(
+                              alpha: 0.6,
+                            )),
                 border: Border.all(
                   color: reached
                       ? (milestone.isSummit
-                          ? AppColors.brand360Blue
-                          : AppColors.brand360Green)
+                            ? AppColors.brand360Blue
+                            : AppColors.brand360Green)
                       : (isCurrentPosition
-                          ? context.colors.primary
-                          : context.colors.outlineVariant),
+                            ? context.colors.primary
+                            : context.colors.outlineVariant),
                   width: milestone.isSummit ? 4 : 3,
                 ),
                 boxShadow: isCurrentPosition
@@ -499,7 +512,11 @@ class _AdventureMilestoneStep extends StatelessWidget {
                     : null,
               ),
               child: reached && !milestone.isSummit && !milestone.isBase
-                  ? const Icon(Icons.check_rounded, color: Colors.white, size: 28)
+                  ? const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    )
                   : AppIcon(
                       milestone.iconKey,
                       size: milestone.isSummit ? 34 : 26,
@@ -531,7 +548,9 @@ class _AdventureMilestoneStep extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                         color: reached
                             ? context.semantic.success
-                            : (isCurrentPosition ? context.colors.primary : null),
+                            : (isCurrentPosition
+                                  ? context.colors.primary
+                                  : null),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

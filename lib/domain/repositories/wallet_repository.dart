@@ -62,8 +62,7 @@ final class LocalWalletRepository implements WalletRepository {
   );
 
   @override
-  Future<WalletBalance> balanceOf(String memberId) =>
-      _dao.balanceOf(memberId);
+  Future<WalletBalance> balanceOf(String memberId) => _dao.balanceOf(memberId);
 
   @override
   Stream<WalletBalance> watchBalance(String memberId) =>

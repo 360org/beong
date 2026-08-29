@@ -192,9 +192,14 @@ class _JarRow extends StatelessWidget {
                     if (placed > 0) ...[
                       const SizedBox(width: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 1,
+                        ),
                         decoration: BoxDecoration(
-                          color: context.semantic.success.withValues(alpha: 0.15),
+                          color: context.semantic.success.withValues(
+                            alpha: 0.15,
+                          ),
                           borderRadius: BorderRadius.circular(AppRadius.pill),
                         ),
                         child: Text(

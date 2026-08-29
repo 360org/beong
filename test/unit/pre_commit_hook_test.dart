@@ -37,6 +37,31 @@ void main() {
       );
     });
 
+    test('format trước, rồi mới analyze — đúng thứ tự của CI', () {
+      final noiDung = hook.readAsStringSync();
+      final viTriFormat = noiDung.indexOf('dart format lib test');
+      final viTriAnalyze = noiDung.indexOf(
+        'if ! flutter analyze --fatal-infos',
+      );
+
+      expect(
+        viTriFormat,
+        isNot(-1),
+        reason:
+            'CI format rồi mới analyze. Thiếu bước format ở hook thì lỗi do '
+            'format sinh ra chỉ lộ ra trên CI — như dòng `if (sel) '
+            'setState(...);` ở rewards_screen.dart ngày 29/08/2026: máy mình '
+            'analyze sạch, CI đỏ bảy lần liền',
+      );
+      expect(
+        viTriFormat,
+        lessThan(viTriAnalyze),
+        reason:
+            'Analyze trước format thì analyze nhìn vào bản CI không dùng — '
+            'vô nghĩa',
+      );
+    });
+
     test('chạy được (có quyền thực thi)', () {
       // Bit thực thi nằm trong 3 chữ số cuối của mode; 0x40 = chủ sở hữu chạy
       // được. Hook không có quyền chạy thì git bỏ qua **trong im lặng** —

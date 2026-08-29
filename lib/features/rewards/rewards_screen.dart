@@ -168,23 +168,35 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
                         child: Row(
                           children: [
                             Padding(
-                              padding: const EdgeInsets.only(right: AppSpacing.xs),
+                              padding: const EdgeInsets.only(
+                                right: AppSpacing.xs,
+                              ),
                               child: FilterChip(
                                 label: const Text('Tất cả'),
                                 selected: _selectedMemberFilter == null,
                                 onSelected: (sel) {
-                                  if (sel) setState(() => _selectedMemberFilter = null);
+                                  if (sel) {
+                                    setState(
+                                      () => _selectedMemberFilter = null,
+                                    );
+                                  }
                                 },
                               ),
                             ),
                             ...children.map((child) {
                               final isSel = _selectedMemberFilter == child.id;
-                              final childColor = AppColors.profileColor(child.colorIndex);
+                              final childColor = AppColors.profileColor(
+                                child.colorIndex,
+                              );
                               return Padding(
-                                padding: const EdgeInsets.only(right: AppSpacing.xs),
+                                padding: const EdgeInsets.only(
+                                  right: AppSpacing.xs,
+                                ),
                                 child: FilterChip(
                                   avatar: CircleAvatar(
-                                    backgroundColor: childColor.withValues(alpha: 0.25),
+                                    backgroundColor: childColor.withValues(
+                                      alpha: 0.25,
+                                    ),
                                     child: Text(
                                       child.avatarKey ?? '👶',
                                       style: const TextStyle(fontSize: 12),
@@ -194,7 +206,9 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
                                   selected: isSel,
                                   onSelected: (sel) {
                                     setState(() {
-                                      _selectedMemberFilter = sel ? child.id : null;
+                                      _selectedMemberFilter = sel
+                                          ? child.id
+                                          : null;
                                     });
                                   },
                                 ),
@@ -455,7 +469,8 @@ class _ChildWalletJarsBanner extends StatelessWidget {
               final jarBalance = balance.ofKey(j.key);
               final isSpendable = j.key == kJarSpend;
               return SizedBox(
-                width: (MediaQuery.of(context).size.width -
+                width:
+                    (MediaQuery.of(context).size.width -
                         AppSpacing.screenPaddingMobile * 2 -
                         AppSpacing.sm * 2) /
                     (jars.length <= 3 ? jars.length : 3),
@@ -639,13 +654,17 @@ class _RewardCard extends StatelessWidget {
                       if (targetMemberId != null && session.isParent)
                         Consumer(
                           builder: (context, ref, _) {
-                            final memberDao = ref.watch(memberRepositoryProvider);
+                            final memberDao = ref.watch(
+                              memberRepositoryProvider,
+                            );
                             return StreamBuilder<Member>(
                               stream: memberDao.watchMember(targetMemberId!),
                               builder: (context, snap) {
                                 final m = snap.data;
                                 if (m == null) return const SizedBox.shrink();
-                                final childColor = AppColors.profileColor(m.colorIndex);
+                                final childColor = AppColors.profileColor(
+                                  m.colorIndex,
+                                );
                                 return Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: AppSpacing.xs,
@@ -653,7 +672,9 @@ class _RewardCard extends StatelessWidget {
                                   ),
                                   decoration: BoxDecoration(
                                     color: childColor.withValues(alpha: 0.18),
-                                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.pill,
+                                    ),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -665,10 +686,11 @@ class _RewardCard extends StatelessWidget {
                                       const SizedBox(width: 3),
                                       Text(
                                         m.displayName,
-                                        style: context.text.labelSmall?.copyWith(
-                                          color: childColor,
-                                          fontWeight: FontWeight.w800,
-                                        ),
+                                        style: context.text.labelSmall
+                                            ?.copyWith(
+                                              color: childColor,
+                                              fontWeight: FontWeight.w800,
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -1045,9 +1067,12 @@ class _RewardEditorSheetState extends State<_RewardEditorSheet> {
         : null;
 
     final meta = <String, dynamic>{};
-    if (widget.reward?.metaJson != null && widget.reward!.metaJson!.isNotEmpty) {
+    if (widget.reward?.metaJson != null &&
+        widget.reward!.metaJson!.isNotEmpty) {
       try {
-        meta.addAll(jsonDecode(widget.reward!.metaJson!) as Map<String, dynamic>);
+        meta.addAll(
+          jsonDecode(widget.reward!.metaJson!) as Map<String, dynamic>,
+        );
       } on Object {
         // Bỏ qua nếu json lỗi
       }
@@ -1193,7 +1218,9 @@ class _RewardEditorSheetState extends State<_RewardEditorSheet> {
                             label: Text(c.displayName),
                             selected: isSel,
                             onSelected: (sel) {
-                              setState(() => _targetMemberId = sel ? c.id : null);
+                              setState(
+                                () => _targetMemberId = sel ? c.id : null,
+                              );
                             },
                           );
                         }),

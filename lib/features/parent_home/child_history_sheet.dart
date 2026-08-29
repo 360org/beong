@@ -153,11 +153,19 @@ class _ChildHistoryModalState extends State<ChildHistoryModal> {
 
           // Thanh chọn ngày vuốt ngang
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: 4,
+              ),
               decoration: BoxDecoration(
-                color: context.colors.surfaceContainerHighest.withValues(alpha: 0.5),
+                color: context.colors.surfaceContainerHighest.withValues(
+                  alpha: 0.5,
+                ),
                 borderRadius: BorderRadius.circular(AppRadius.pill),
               ),
               child: Row(
@@ -209,7 +217,9 @@ class _ChildHistoryModalState extends State<ChildHistoryModal> {
                 }
 
                 return StreamBuilder<List<Task>>(
-                  stream: widget.taskDao.watchActiveTasks(widget.child.familyId),
+                  stream: widget.taskDao.watchActiveTasks(
+                    widget.child.familyId,
+                  ),
                   builder: (context, taskSnap) {
                     final allTasks = taskSnap.data ?? [];
                     final taskMap = {for (final t in allTasks) t.id: t};
@@ -234,9 +244,13 @@ class _ChildHistoryModalState extends State<ChildHistoryModal> {
                       }
                     }
 
-                    final doneCount = instances.where((i) =>
-                        i.status == InstanceStatus.approved.name ||
-                        i.status == InstanceStatus.pendingReview.name).length;
+                    final doneCount = instances
+                        .where(
+                          (i) =>
+                              i.status == InstanceStatus.approved.name ||
+                              i.status == InstanceStatus.pendingReview.name,
+                        )
+                        .length;
 
                     return ListView(
                       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -245,7 +259,9 @@ class _ChildHistoryModalState extends State<ChildHistoryModal> {
                         Container(
                           padding: const EdgeInsets.all(AppSpacing.md),
                           decoration: BoxDecoration(
-                            color: context.colors.primaryContainer.withValues(alpha: 0.4),
+                            color: context.colors.primaryContainer.withValues(
+                              alpha: 0.4,
+                            ),
                             borderRadius: BorderRadius.circular(AppRadius.card),
                           ),
                           child: Row(
@@ -263,7 +279,8 @@ class _ChildHistoryModalState extends State<ChildHistoryModal> {
                               ),
                               _SummaryStat(
                                 label: 'Tỷ lệ',
-                                value: '${instances.isNotEmpty ? (doneCount * 100 ~/ instances.length) : 0}%',
+                                value:
+                                    '${instances.isNotEmpty ? (doneCount * 100 ~/ instances.length) : 0}%',
                                 color: context.colors.secondary,
                               ),
                             ],
@@ -366,7 +383,9 @@ class _SessionSection extends StatelessWidget {
         children: [
           Text(
             title,
-            style: context.text.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+            style: context.text.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           for (final inst in instances) ...[
@@ -397,7 +416,10 @@ class _TaskInstanceRow extends StatelessWidget {
     final isPending = instance.status == InstanceStatus.pendingReview.name;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: isDone
             ? context.semantic.success.withValues(alpha: 0.15)
@@ -418,7 +440,11 @@ class _TaskInstanceRow extends StatelessWidget {
             ),
           ),
           if (isDone)
-            const Icon(Icons.check_circle_rounded, color: Colors.green, size: 20)
+            const Icon(
+              Icons.check_circle_rounded,
+              color: Colors.green,
+              size: 20,
+            )
           else if (isPending)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -426,7 +452,10 @@ class _TaskInstanceRow extends StatelessWidget {
                 color: Colors.amber.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: const Text('Chờ duyệt', style: TextStyle(fontSize: 11, color: Colors.amber)),
+              child: const Text(
+                'Chờ duyệt',
+                style: TextStyle(fontSize: 11, color: Colors.amber),
+              ),
             )
           else
             XuBadge(amount: instance.pointsSnapshot, pill: true),

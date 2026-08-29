@@ -142,12 +142,19 @@ class _FullIconPickerModalState extends State<_FullIconPickerModal>
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.sm),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+              AppSpacing.sm,
+            ),
             child: Row(
               children: [
                 Text(
                   'Chọn Biểu Tượng (100+)',
-                  style: context.text.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                  style: context.text.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 const Spacer(),
                 IconButton(
@@ -159,7 +166,10 @@ class _FullIconPickerModalState extends State<_FullIconPickerModal>
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.xs,
+            ),
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
@@ -167,13 +177,16 @@ class _FullIconPickerModalState extends State<_FullIconPickerModal>
                 prefixIcon: const Icon(Icons.search_rounded, size: 20),
                 filled: true,
                 fillColor: context.colors.surfaceContainerHighest,
-                contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide.none,
                 ),
               ),
-              onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
+              onChanged: (val) =>
+                  setState(() => _searchQuery = val.trim().toLowerCase()),
             ),
           ),
           if (_searchQuery.isEmpty)
@@ -192,7 +205,10 @@ class _FullIconPickerModalState extends State<_FullIconPickerModal>
                       children: [
                         AppIcon(cat.iconKey, size: 16),
                         const SizedBox(width: 6),
-                        Text(cat.nameVi, style: const TextStyle(fontWeight: FontWeight.w700)),
+                        Text(
+                          cat.nameVi,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
                       ],
                     ),
                   ),
@@ -216,12 +232,16 @@ class _FullIconPickerModalState extends State<_FullIconPickerModal>
   }
 
   Widget _buildSearchResults() {
-    final matches = taskIcons.keys.where((k) => k.toLowerCase().contains(_searchQuery)).toList();
+    final matches = taskIcons.keys
+        .where((k) => k.toLowerCase().contains(_searchQuery))
+        .toList();
     if (matches.isEmpty) {
       return Center(
         child: Text(
           'Không tìm thấy icon phù hợp',
-          style: context.text.bodyMedium?.copyWith(color: context.semantic.onSurfaceMuted),
+          style: context.text.bodyMedium?.copyWith(
+            color: context.semantic.onSurfaceMuted,
+          ),
         ),
       );
     }
@@ -264,7 +284,9 @@ class _IconChoice extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = context.colors.primary;
     return Material(
-      color: selected ? primary.withValues(alpha: 0.15) : context.colors.surfaceContainerHighest,
+      color: selected
+          ? primary.withValues(alpha: 0.15)
+          : context.colors.surfaceContainerHighest,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
         side: BorderSide(

@@ -147,19 +147,27 @@ class TaskReviewService {
       final member = await _members.getMember(instance.memberId);
 
       var isManual = false;
-      if (member.jarSplitOverride != null && member.jarSplitOverride!.isNotEmpty) {
+      if (member.jarSplitOverride != null &&
+          member.jarSplitOverride!.isNotEmpty) {
         try {
-          final map = jsonDecode(member.jarSplitOverride!) as Map<String, dynamic>;
+          final map =
+              jsonDecode(member.jarSplitOverride!) as Map<String, dynamic>;
           if (map.containsKey('manualAllocation')) {
             isManual = map['manualAllocation'] == true;
           } else {
-            isManual = allocationModeFromDb(family.allocationMode) == AllocationMode.manual;
+            isManual =
+                allocationModeFromDb(family.allocationMode) ==
+                AllocationMode.manual;
           }
         } on FormatException {
-          isManual = allocationModeFromDb(family.allocationMode) == AllocationMode.manual;
+          isManual =
+              allocationModeFromDb(family.allocationMode) ==
+              AllocationMode.manual;
         }
       } else {
-        isManual = allocationModeFromDb(family.allocationMode) == AllocationMode.manual;
+        isManual =
+            allocationModeFromDb(family.allocationMode) ==
+            AllocationMode.manual;
       }
 
       if (isManual) {

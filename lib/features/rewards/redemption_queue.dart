@@ -196,7 +196,9 @@ class _RedemptionCardState extends ConsumerState<_RedemptionCard> {
                             ),
                             decoration: BoxDecoration(
                               color: childColor.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(AppRadius.pill),
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.pill,
+                              ),
                             ),
                             child: Text(
                               childName,
@@ -239,7 +241,10 @@ class _RedemptionCardState extends ConsumerState<_RedemptionCard> {
                 ),
                 IconButton(
                   onPressed: () => unawaited(_reject()),
-                  icon: Icon(Icons.close_rounded, color: context.semantic.danger),
+                  icon: Icon(
+                    Icons.close_rounded,
+                    color: context.semantic.danger,
+                  ),
                   tooltip: 'Từ chối và hoàn xu',
                 ),
                 const SizedBox(width: AppSpacing.xs),
