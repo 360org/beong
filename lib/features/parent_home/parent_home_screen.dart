@@ -20,6 +20,7 @@ import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/task_review_service.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
+import 'package:beong/features/parent_home/child_day_groups.dart';
 import 'package:beong/features/parent_home/child_history_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -538,9 +539,13 @@ class _PendingCardState extends State<_PendingCard> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: context.colors.primaryContainer.withValues(alpha: 0.3),
+                    color: context.colors.primaryContainer.withValues(
+                      alpha: 0.3,
+                    ),
                     borderRadius: BorderRadius.circular(AppRadius.field),
-                    border: Border.all(color: context.colors.primary.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: context.colors.primary.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -655,6 +660,24 @@ class _ChildSummaryCard extends ConsumerWidget {
                       walletDao: walletDao,
                       initialDate: today,
                     ),
+                    // Vuốt ngang mở lịch sử — cử chỉ chủ dự án yêu cầu
+                    // (docs/22 mục 2.2). Giữ cả `onTap` và biểu tượng lịch:
+                    // vuốt là cử chỉ **không nhìn thấy được**, ai chưa biết thì
+                    // không có cách nào đoán ra nó tồn tại.
+                    onHorizontalDragEnd: (chiTiet) {
+                      // Chỉ nhận cú vuốt dứt khoát. Ngưỡng thấp quá thì cuộn
+                      // danh sách hơi chéo tay cũng bật modal lên.
+                      if ((chiTiet.primaryVelocity ?? 0).abs() < 200) return;
+                      unawaited(
+                        ChildHistoryModal.show(
+                          context,
+                          child: child,
+                          taskDao: taskDao,
+                          walletDao: walletDao,
+                          initialDate: today,
+                        ),
+                      );
+                    },
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -692,7 +715,7 @@ class _ChildSummaryCard extends ConsumerWidget {
                                 )
                                 .length;
                             return Text(
-                              '$done / ${instances.length} việc hôm nay · Bấm xem lịch sử',
+                              '$done / ${instances.length} việc hôm nay',
                               style: context.text.bodySmall?.copyWith(
                                 color: context.semantic.onSurfaceMuted,
                               ),
@@ -713,8 +736,9 @@ class _ChildSummaryCard extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.xs),
-            _IncompleteTodayList(
+            ChildDayGroups(
               memberId: child.id,
+              familyId: child.familyId,
               date: today,
               taskDao: taskDao,
             ),
@@ -727,117 +751,6 @@ class _ChildSummaryCard extends ConsumerWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Việc con chưa xong hôm nay, mở ra xem chi tiết.
-class _IncompleteTodayList extends StatelessWidget {
-  const _IncompleteTodayList({
-    required this.memberId,
-    required this.date,
-    required this.taskDao,
-  });
-
-  final String memberId;
-  final CalendarDate date;
-  final TaskRepository taskDao;
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<List<TaskInstance>>(
-      stream: taskDao.watchInstancesForMember(memberId: memberId, date: date),
-      builder: (context, snap) {
-        final all = snap.data ?? const <TaskInstance>[];
-        final pending = all
-            .where((i) => i.status == InstanceStatus.scheduled.name)
-            .toList();
-        if (pending.isEmpty) return const SizedBox.shrink();
-
-        return Theme(
-          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-          child: ExpansionTile(
-            tilePadding: EdgeInsets.zero,
-            childrenPadding: EdgeInsets.zero,
-            title: Text(
-              'Chưa hoàn thành (${pending.length})',
-              style: context.text.bodySmall?.copyWith(
-                color: context.semantic.onSurfaceMuted,
-              ),
-            ),
-            children: pending
-                .map(
-                  (instance) => _IncompleteRow(
-                    key: ValueKey(instance.id),
-                    instance: instance,
-                    taskDao: taskDao,
-                  ),
-                )
-                .toList(),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _IncompleteRow extends StatefulWidget {
-  const _IncompleteRow({
-    required this.instance,
-    required this.taskDao,
-    super.key,
-  });
-
-  final TaskInstance instance;
-  final TaskRepository taskDao;
-
-  @override
-  State<_IncompleteRow> createState() => _IncompleteRowState();
-}
-
-class _IncompleteRowState extends State<_IncompleteRow> {
-  Task? _task;
-
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_loadTask());
-  }
-
-  @override
-  void didUpdateWidget(_IncompleteRow oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.instance.taskId != widget.instance.taskId) {
-      unawaited(_loadTask());
-    }
-  }
-
-  Future<void> _loadTask() async {
-    final task = await widget.taskDao.getTaskById(widget.instance.taskId);
-    if (mounted) setState(() => _task = task);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final task = _task;
-    if (task == null) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-      child: Row(
-        children: [
-          AppIcon.task(task.iconKey, size: 20),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(child: Text(task.title, style: context.text.bodyMedium)),
-          Text(
-            '+${task.points} xu',
-            style: context.text.bodySmall?.copyWith(
-              color: context.semantic.xuText,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
       ),
     );
   }

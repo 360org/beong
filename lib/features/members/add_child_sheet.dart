@@ -5,10 +5,7 @@ import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/domain/entities/enums.dart';
-import 'package:beong/domain/entities/presets.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
-import 'package:beong/domain/repositories/task_repository.dart';
-import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/jar_splitter.dart';
 import 'package:beong/features/members/child_profile_form.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
@@ -114,35 +111,6 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
           ),
         );
 
-    // Tự động tạo và gán các việc mẫu đã chọn cho bé kèm số xu tuỳ chỉnh
-    if (_selectedPresets.isNotEmpty) {
-      final taskDao = ref.read(taskRepositoryProvider);
-      for (final presetKey in _selectedPresets) {
-        final preset = kTaskPresets.firstWhere((p) => p.key == presetKey);
-        final points = _presetPoints[presetKey] ?? preset.defaultPoints;
-        final taskId = 'task-preset-$presetKey-$childId-${DateTime.now().millisecondsSinceEpoch}';
-        await taskDao.createTask(
-          TasksCompanion.insert(
-            id: taskId,
-            familyId: widget.familyId,
-            title: preset.titleVi,
-            iconKey: Value(preset.iconKey),
-            presetKey: Value(preset.key),
-            points: Value(points),
-            dayPart: Value(preset.dayPart),
-            repeatType: const Value('daily'),
-          ),
-          [childId],
-        );
-      }
-      // Tự động sinh luôn instance hôm nay cho bé
-      final clock = FamilyClock(timeZoneOffset: DateTime.now().timeZoneOffset);
-      await taskDao.generateInstances(
-        familyId: widget.familyId,
-        today: clock.today(),
-      );
-    }
-
     if (!mounted) return;
 
     if (_enablePin) {
@@ -169,6 +137,10 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ChildProfileForm(
+            // Việc mẫu không còn gán từ hồ sơ bé nữa (docs/22 mục 1.3): việc
+            // phải thuộc một buổi, mà buổi thì tạo và gán ở tab Nhiệm vụ. Giữ
+            // cả hai đường là giữ đúng cái đã làm việc bị tạo hai lần.
+            showPresets: false,
             controller: _name,
             colorIndex: _colorIndex,
             onColorChanged: (i) => setState(() => _colorIndex = i),
@@ -181,9 +153,11 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
             hasPin: _enablePin,
             onTogglePin: (val) => setState(() => _enablePin = val),
             customJarSplit: _customJarSplit,
-            onJarSplitChanged: (split) => setState(() => _customJarSplit = split),
+            onJarSplitChanged: (split) =>
+                setState(() => _customJarSplit = split),
             allowSelfAllocation: _allowSelfAllocation,
-            onToggleSelfAllocation: (val) => setState(() => _allowSelfAllocation = val),
+            onToggleSelfAllocation: (val) =>
+                setState(() => _allowSelfAllocation = val),
             selectedPresetKeys: _selectedPresets,
             onPresetsChanged: (keys) => setState(() => _selectedPresets = keys),
             presetPoints: _presetPoints,

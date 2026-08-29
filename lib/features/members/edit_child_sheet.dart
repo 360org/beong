@@ -5,10 +5,7 @@ import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
-import 'package:beong/domain/entities/presets.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
-import 'package:beong/domain/repositories/task_repository.dart';
-import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/jar_splitter.dart';
 import 'package:beong/features/members/child_profile_form.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
@@ -69,7 +66,9 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
       try {
         final map = jsonDecode(override) as Map<String, dynamic>;
         _allowSelfAllocation = map['manualAllocation'] == true;
-        if (map.containsKey('spend') || map.containsKey('save') || map.containsKey('give')) {
+        if (map.containsKey('spend') ||
+            map.containsKey('save') ||
+            map.containsKey('give')) {
           _customJarSplit = JarSplit.fromJson(map);
         }
       } on Object {
@@ -116,34 +115,6 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
             updatedAt: Value(DateTime.now()),
           ),
         );
-
-    // Gán thêm việc mẫu đã chọn nếu có
-    if (_selectedPresets.isNotEmpty) {
-      final taskDao = ref.read(taskRepositoryProvider);
-      for (final presetKey in _selectedPresets) {
-        final preset = kTaskPresets.firstWhere((p) => p.key == presetKey);
-        final points = _presetPoints[presetKey] ?? preset.defaultPoints;
-        final taskId = 'task-preset-$presetKey-${widget.child.id}-${DateTime.now().millisecondsSinceEpoch}';
-        await taskDao.createTask(
-          TasksCompanion.insert(
-            id: taskId,
-            familyId: widget.child.familyId,
-            title: preset.titleVi,
-            iconKey: Value(preset.iconKey),
-            presetKey: Value(preset.key),
-            points: Value(points),
-            dayPart: Value(preset.dayPart),
-            repeatType: const Value('daily'),
-          ),
-          [widget.child.id],
-        );
-      }
-      final clock = FamilyClock(timeZoneOffset: DateTime.now().timeZoneOffset);
-      await taskDao.generateInstances(
-        familyId: widget.child.familyId,
-        today: clock.today(),
-      );
-    }
 
     if (mounted) Navigator.of(context).pop(true);
   }
@@ -197,7 +168,11 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
       setState(() => _hasPin = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đã tắt mật khẩu hồ sơ của ${widget.child.displayName}')),
+          SnackBar(
+            content: Text(
+              'Đã tắt mật khẩu hồ sơ của ${widget.child.displayName}',
+            ),
+          ),
         );
       }
     }
@@ -212,6 +187,10 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ChildProfileForm(
+            // Việc mẫu không còn gán từ hồ sơ bé nữa (docs/22 mục 1.3): việc
+            // phải thuộc một buổi, mà buổi thì tạo và gán ở tab Nhiệm vụ. Giữ
+            // cả hai đường là giữ đúng cái đã làm việc bị tạo hai lần.
+            showPresets: false,
             title: 'Hồ sơ của bé',
             controller: _name,
             colorIndex: _colorIndex,
@@ -225,9 +204,11 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
             hasPin: _hasPin,
             onTogglePin: _handleTogglePin,
             customJarSplit: _customJarSplit,
-            onJarSplitChanged: (split) => setState(() => _customJarSplit = split),
+            onJarSplitChanged: (split) =>
+                setState(() => _customJarSplit = split),
             allowSelfAllocation: _allowSelfAllocation,
-            onToggleSelfAllocation: (val) => setState(() => _allowSelfAllocation = val),
+            onToggleSelfAllocation: (val) =>
+                setState(() => _allowSelfAllocation = val),
             selectedPresetKeys: _selectedPresets,
             onPresetsChanged: (keys) => setState(() => _selectedPresets = keys),
             presetPoints: _presetPoints,
