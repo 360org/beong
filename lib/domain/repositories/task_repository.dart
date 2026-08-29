@@ -28,6 +28,15 @@ abstract interface class TaskRepository {
     required List<String> memberIds,
   });
   Future<void> setTaskActive({required String taskId, required bool active});
+  Future<void> updateTask({
+    required String taskId,
+    String? title,
+    String? iconKey,
+    int? points,
+    String? routineId,
+    String? approvalMode,
+    String? proofMode,
+  });
   Future<void> detachTaskFromRoutine(String taskId);
   Future<int> generateInstances({
     required String familyId,
@@ -115,6 +124,25 @@ final class LocalTaskRepository implements TaskRepository {
     required String taskId,
     required bool active,
   }) => _dao.setTaskActive(taskId: taskId, active: active);
+
+  @override
+  Future<void> updateTask({
+    required String taskId,
+    String? title,
+    String? iconKey,
+    int? points,
+    String? routineId,
+    String? approvalMode,
+    String? proofMode,
+  }) => _dao.updateTask(
+    taskId: taskId,
+    title: title,
+    iconKey: iconKey,
+    points: points,
+    routineId: routineId,
+    approvalMode: approvalMode,
+    proofMode: proofMode,
+  );
 
   @override
   Future<void> detachTaskFromRoutine(String taskId) =>

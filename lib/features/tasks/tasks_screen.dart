@@ -12,7 +12,6 @@ import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/icon_picker.dart';
 import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
-import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/presets.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
@@ -20,6 +19,8 @@ import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:beong/features/tasks/routine_create_sheet.dart';
+import 'package:beong/features/tasks/task_edit_sheet.dart';
+import 'package:beong/features/tasks/task_row.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -158,6 +159,26 @@ class _TaskListState extends State<_TaskList> {
   late final Stream<List<Routine>> _routineStream = widget.taskDao
       .watchActiveRoutines(widget.familyId);
 
+  /// Chỉnh xu ngay tại dòng việc.
+  ///
+  /// Ghi thẳng chứ không mở hộp thoại xác nhận: sai một bước 5 xu thì bấm nút
+  /// bên cạnh là về, còn một hộp thoại cho mỗi lần bấm thì chỉnh từ 10 lên 25
+  /// mất ba lần xác nhận.
+  Future<void> _doiXu(Task task, int xuMoi) =>
+      widget.taskDao.updateTask(taskId: task.id, points: xuMoi);
+
+  /// Sửa một việc đã tạo: tên, hình, xu, và buổi nó thuộc về.
+  Future<void> _suaViec(Task task) async {
+    final routines = await widget.taskDao.activeRoutines(widget.familyId);
+    if (!mounted) return;
+    await showTaskEditSheet(
+      context,
+      taskDao: widget.taskDao,
+      task: task,
+      routines: routines,
+    );
+  }
+
   /// Tạo nhiệm vụ ngay từ template, gán cho mọi bé trong nhà.
   ///
   /// Gán cho tất cả là mặc định đúng ở đây: bố mẹ đang ở trang trống, chưa nghĩ
@@ -293,18 +314,47 @@ class _TaskListState extends State<_TaskList> {
                 onEdit: widget.isParent
                     ? () => context.go(Routes.routineEditor(entry.key))
                     : null,
+                onEditTask: widget.isParent ? _suaViec : null,
+                onPointsChanged: widget.isParent ? _doiXu : null,
               ),
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
         ],
+        // Lưới an toàn, không phải một mục bình thường của màn hình.
+        //
+        // Từ v0.3.2 mọi việc đều thuộc một buổi, và `DonViecLe` đã gom hết việc
+        // cũ vào buổi khi nâng cấp. Khối này chỉ hiện nếu vẫn còn sót — và nói
+        // thẳng ra là còn sót, thay vì bày nó ra như một cách dùng bình thường.
         if (standaloneTasks.isNotEmpty) ...[
-          Text('Việc lẻ', style: context.text.titleMedium),
+          Text('Chưa xếp buổi', style: context.text.titleMedium),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Những việc này chưa thuộc buổi nào nên chưa bé nào nhìn thấy. '
+            'Bấm vào để xếp vào một buổi.',
+            style: context.text.bodySmall?.copyWith(
+              color: context.semantic.danger,
+            ),
+          ),
           const SizedBox(height: AppSpacing.md),
           ...standaloneTasks.map(
             (task) => Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: _TaskTile(task: task),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.xs,
+                  ),
+                  child: TaskRow(
+                    task: task,
+                    onTap: widget.isParent ? () => _suaViec(task) : null,
+                    onPointsChanged: widget.isParent
+                        ? (xu) => _doiXu(task, xu)
+                        : null,
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -319,6 +369,8 @@ class _RoutineGroupCard extends StatelessWidget {
     required this.tasks,
     required this.iconKey,
     required this.onEdit,
+    required this.onEditTask,
+    required this.onPointsChanged,
   });
 
   final String title;
@@ -328,21 +380,30 @@ class _RoutineGroupCard extends StatelessWidget {
   /// `null` với vai con — thẻ vẫn hiện nhưng không bấm vào sửa được.
   final VoidCallback? onEdit;
 
+  /// Sửa một việc bên trong buổi. `null` với vai con.
+  final void Function(Task task)? onEditTask;
+
+  /// Chỉnh xu ngay tại dòng. `null` với vai con.
+  final void Function(Task task, int xuMoi)? onPointsChanged;
+
   @override
   Widget build(BuildContext context) {
     final sorted = List.of(tasks)
       ..sort((a, b) => (a.orderIndex ?? 0).compareTo(b.orderIndex ?? 0));
 
     return Card(
-      child: InkWell(
-        onTap: onEdit,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Chỉ phần tiêu đề mở màn sửa buổi. Bọc `InkWell` quanh cả thẻ như
+            // trước thì chạm vào một dòng việc lại nhảy sang sửa buổi — và tệ
+            // hơn, hai nút −/+ nằm trong vùng chạm của nó.
+            InkWell(
+              onTap: onEdit,
+              borderRadius: BorderRadius.circular(AppRadius.field),
+              child: Row(
                 children: [
                   Container(
                     width: 36,
@@ -381,107 +442,27 @@ class _RoutineGroupCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.md),
-              ...sorted.map(
-                (task) => Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                  child: Row(
-                    children: [
-                      AppIcon.task(task.iconKey, size: 18),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: Text(task.title, style: context.text.bodyMedium),
-                      ),
-                      XuBadge(amount: task.points, pill: true),
-                    ],
-                  ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            ...sorted.map(
+              (task) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                child: TaskRow(
+                  task: task,
+                  onTap: onEditTask == null ? null : () => onEditTask!(task),
+                  onPointsChanged: onPointsChanged == null
+                      ? null
+                      : (xu) => onPointsChanged!(task, xu),
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TaskTile extends StatelessWidget {
-  const _TaskTile({required this.task});
-
-  final Task task;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: context.colors.primaryContainer,
-                borderRadius: BorderRadius.circular(AppRadius.field),
-              ),
-              child: AppIcon.task(task.iconKey),
             ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    task.title,
-                    style: context.text.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    _repeatLabel(task),
-                    style: context.text.bodySmall?.copyWith(
-                      color: context.semantic.onSurfaceMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            XuBadge(amount: task.points, pill: true),
           ],
         ),
       ),
     );
   }
-
-  String _repeatLabel(Task task) {
-    final type = RepeatType.values.firstWhere((e) => e.name == task.repeatType);
-    return switch (type) {
-      RepeatType.daily => 'Hằng ngày',
-      // "Tuỳ chọn" không trả lời được câu bố mẹ đang hỏi — *thứ nào?* — nên liệt
-      // kê thẳng các thứ đã chọn.
-      RepeatType.custom => _weekdaysLabel(task.repeatDays),
-      // Ngày hiện dạng 10/08/2026 chứ không phải 2026-08-10: dạng ISO là dạng
-      // lưu trong DB, không phải dạng người Việt đọc.
-      RepeatType.once =>
-        task.onceDate == null
-            ? 'Một lần'
-            : 'Một lần · ${ngayDayDu(CalendarDate.parse(task.onceDate!))}',
-    };
-  }
-
-  /// `'1,3,5'` -> `'T2, T4, T6'`. Dùng helper chung ở `core/utils/ngay_viet.dart`
-  /// để màn này và sheet thêm việc không lệch cách viết thứ.
-  String _weekdaysLabel(String repeatDays) =>
-      thuTuChuoi(repeatDays) ?? 'Chưa chọn thứ';
 }
 
-/// Một hình để chọn. Vùng chạm đủ 48dp theo `AppSpacing.minTouchTarget` — ô nhỏ
-/// hơn thì ngón tay trẻ bấm trượt sang hình bên cạnh.
 class _AddTaskSheet extends StatefulWidget {
   const _AddTaskSheet({
     required this.taskDao,

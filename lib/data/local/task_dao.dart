@@ -545,6 +545,38 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
     );
   }
 
+  /// Sửa một việc đã tạo.
+  ///
+  /// Chỉ ghi những trường được truyền vào — `null` nghĩa là "để nguyên", không
+  /// phải "xoá đi". Trước v0.3.2 việc tạo xong là không sửa được gì cả.
+  ///
+  /// **Không đụng `points` của lượt đã sinh**: `task_instances.points_snapshot`
+  /// chốt số xu tại lúc giao việc (ADR-005). Bố mẹ hạ xu hôm nay thì việc con
+  /// đã làm hôm qua vẫn giữ nguyên giá cũ — đúng như đã hứa với con.
+  Future<void> updateTask({
+    required String taskId,
+    String? title,
+    String? iconKey,
+    int? points,
+    String? routineId,
+    String? approvalMode,
+    String? proofMode,
+  }) {
+    return (update(tasks)..where((t) => t.id.equals(taskId))).write(
+      TasksCompanion(
+        title: title == null ? const Value.absent() : Value(title),
+        iconKey: iconKey == null ? const Value.absent() : Value(iconKey),
+        points: points == null ? const Value.absent() : Value(points),
+        routineId: routineId == null ? const Value.absent() : Value(routineId),
+        approvalMode: approvalMode == null
+            ? const Value.absent()
+            : Value(approvalMode),
+        proofMode: proofMode == null ? const Value.absent() : Value(proofMode),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   /// Bật/tắt một việc.
   ///
   /// **Tắt chứ không xoá** — ADR-005: lượt việc và các dòng sổ cái đều trỏ tới
