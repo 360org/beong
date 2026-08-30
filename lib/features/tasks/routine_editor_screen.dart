@@ -12,6 +12,7 @@ import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/core/widgets/thong_bao.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -244,7 +245,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
         // trong, và nỗi sợ đó là hợp lý nếu không ai nói gì.
         content: Text(
           '"${routine.title}" sẽ không hiện nữa. '
-          'Các việc bên trong vẫn còn, chuyển thành việc lẻ.',
+          'Các việc bên trong vẫn còn, chuyển sang buổi "Việc khác".',
         ),
         actions: [
           TextButton(
@@ -265,6 +266,13 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
   }
 
   Future<void> _editInfo(Routine routine) async {
+    final session = ref.read(sessionProvider);
+    if (session == null) return;
+    final children = await ref
+        .read(memberRepositoryProvider)
+        .children(session.familyId);
+    if (!mounted) return;
+
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -275,6 +283,8 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
         child: _RoutineInfoSheet(
           routine: routine,
           taskDao: ref.read(taskRepositoryProvider),
+          children: children,
+          onNgungDung: () => unawaited(_confirmArchive(routine)),
         ),
       ),
     );
@@ -405,10 +415,20 @@ class _RoutineTaskTile extends StatelessWidget {
 }
 
 class _RoutineInfoSheet extends StatefulWidget {
-  const _RoutineInfoSheet({required this.routine, required this.taskDao});
+  const _RoutineInfoSheet({
+    required this.routine,
+    required this.taskDao,
+    required this.children,
+    required this.onNgungDung,
+  });
 
   final Routine routine;
   final TaskRepository taskDao;
+  final List<Member> children;
+
+  /// Mở hộp xác nhận ngừng dùng. Nằm ở màn cha vì sau khi ngừng dùng thì phải
+  /// **thoát cả màn**, không chỉ đóng bảng này.
+  final VoidCallback onNgungDung;
 
   @override
   State<_RoutineInfoSheet> createState() => _RoutineInfoSheetState();
@@ -421,13 +441,35 @@ class _RoutineInfoSheetState extends State<_RoutineInfoSheet> {
   late String _iconKey = widget.routine.iconKey ?? kDefaultTaskIconKey;
   late int _bonus = widget.routine.completionBonus;
 
+  /// Bé nào đang được giao buổi này. Nạp sau, nên khởi đầu là rỗng và ô chọn
+  /// bị khoá cho tới khi biết — chứ không hiện "chưa chọn bé nào" khi chưa đọc
+  /// xong, vì đó là lời nói dối gây hoảng.
+  Set<String>? _nguoiNhan;
+
   @override
   void initState() {
     super.initState();
     _title.addListener(_onChanged);
+    unawaited(_napNguoiNhan());
+  }
+
+  Future<void> _napNguoiNhan() async {
+    final ids = await widget.taskDao.routineAssigneesOf(widget.routine.id);
+    if (mounted) setState(() => _nguoiNhan = ids.toSet());
   }
 
   void _onChanged() => setState(() {});
+
+  String _moTaNguoiNhan() {
+    final nguoiNhan = _nguoiNhan;
+    if (nguoiNhan == null) return 'Đang đọc...';
+    if (nguoiNhan.isEmpty) {
+      // Buổi không giao cho ai thì `schedulableTasks` bỏ qua **toàn bộ** việc
+      // trong đó (`schedule.dart:148`): buổi có mà không bé nào thấy việc.
+      return 'Chưa chọn bé nào — buổi này sẽ không hiện với ai cả.';
+    }
+    return 'Buổi này chỉ hiện với bé đã chọn.';
+  }
 
   @override
   void dispose() {
@@ -444,6 +486,13 @@ class _RoutineInfoSheetState extends State<_RoutineInfoSheet> {
       iconKey: _iconKey,
       completionBonus: _bonus,
     );
+    final nguoiNhan = _nguoiNhan;
+    if (nguoiNhan != null) {
+      await widget.taskDao.setRoutineAssignees(
+        routineId: widget.routine.id,
+        memberIds: nguoiNhan.toList(),
+      );
+    }
     if (mounted) Navigator.of(context).pop();
   }
 
@@ -493,6 +542,42 @@ class _RoutineInfoSheetState extends State<_RoutineInfoSheet> {
                     onSelected: (key) => setState(() => _iconKey = key),
                   ),
                   const SizedBox(height: AppSpacing.xl),
+                  Text('Giao cho bé nào', style: context.text.titleSmall),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    _moTaNguoiNhan(),
+                    style: context.text.bodySmall?.copyWith(
+                      color: (_nguoiNhan?.isEmpty ?? false)
+                          ? context.semantic.danger
+                          : context.semantic.onSurfaceMuted,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      for (final child in widget.children)
+                        FilterChip(
+                          label: Text(child.displayName),
+                          selected: _nguoiNhan?.contains(child.id) ?? false,
+                          // Chưa nạp xong thì khoá: cho bấm lúc này là bấm vào
+                          // một danh sách rỗng giả, và cú bấm đó sẽ ghi đè
+                          // người nhận thật khi bấm LƯU.
+                          onSelected: _nguoiNhan == null
+                              ? null
+                              : (chon) => setState(() {
+                                  if (chon) {
+                                    _nguoiNhan!.add(child.id);
+                                  } else {
+                                    _nguoiNhan!.remove(child.id);
+                                  }
+                                }),
+                        ),
+                    ],
+                  ),
+
+                  const SizedBox(height: AppSpacing.xl),
                   Text(
                     'Thưởng khi làm trọn bộ: $_bonus xu',
                     style: context.text.titleSmall,
@@ -524,14 +609,34 @@ class _RoutineInfoSheetState extends State<_RoutineInfoSheet> {
               AppSpacing.xl,
               AppSpacing.xl,
             ),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _title.text.trim().isEmpty
-                    ? null
-                    : () => unawaited(_save()),
-                child: const Text('LƯU'),
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _title.text.trim().isEmpty
+                        ? null
+                        : () => unawaited(_save()),
+                    child: const Text('LƯU'),
+                  ),
+                ),
+                // Đường ngừng dùng cũng có ở nút trên thanh tiêu đề, nhưng ở
+                // đó nó là một biểu tượng không nhãn — chủ dự án tìm không ra
+                // (30/08/2026). Ở đây nó có chữ, và nằm đúng chỗ người ta đang
+                // sửa buổi.
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    widget.onNgungDung();
+                  },
+                  icon: const Icon(Icons.archive_outlined),
+                  label: const Text('Ngừng dùng buổi này'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.semantic.danger,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

@@ -4,6 +4,24 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.5.3+28 (2026-08-30) — Sửa buổi thói quen: giao cho bé, và ngừng dùng
+
+Bảng "Sửa thói quen" trước đây chỉ đổi được tên, hình và mức thưởng trọn bộ.
+Hai việc bố mẹ cần nhất lại không có:
+
+- **Giao buổi cho bé nào.** Buổi tạo xong là cố định người nhận; muốn đổi thì
+  không có đường nào. Nay chọn ngay trong bảng, và có cảnh báo rõ khi bỏ chọn
+  hết: buổi không giao cho ai thì **không bé nào nhìn thấy việc trong đó**.
+- **Ngừng dùng buổi.** Đường này vốn đã có, nhưng nằm ở một biểu tượng không
+  nhãn trên thanh tiêu đề — không ai tìm ra. Nay có thêm nút chữ rõ ràng ngay
+  dưới nút LƯU.
+
+Câu xác nhận khi ngừng dùng cũng được sửa cho đúng hành vi hiện tại: việc bên
+trong chuyển sang buổi "Việc khác", chứ không còn thành việc lẻ trôi nổi như
+mô tả cũ.
+
+---
+
 ## v0.5.2+27 (2026-08-30) — Vuốt ngang xem lịch sử, lần này vuốt thật sự ăn
 
 Tính năng "vuốt ngang trên thẻ con để xem lịch sử" đã được báo là làm xong ở
