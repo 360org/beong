@@ -164,6 +164,27 @@ qua / tuần trước. Giữ biểu tượng lịch làm đường đi nhanh (vu
 nhìn thấy được, người mới cần một nút), nhưng **bỏ chữ "Bấm xem lịch sử"** —
 thay bằng chỉ báo trang.
 
+> **Chủ dự án chốt lại ngày 30/08/2026: bỏ hẳn biểu tượng lịch.** Vuốt ngang là
+> đường duy nhất tới lịch sử, còn cú chạm vào header chuyển sang gập/mở danh
+> sách việc (mục 2.4). Lý do giữ nút lịch ở trên vẫn đúng về nguyên tắc — cử chỉ
+> vuốt không nhìn thấy được — nên phần khả kiến chuyển sang **mũi tên gập/mở**:
+> nó cho thấy header bấm được, và ai đã bấm thử một lần thì tìm ra cú vuốt.
+
+### 2.4 · 🟠 Chạm header để gập / mở danh sách việc
+
+**Anh nêu ngày 30/08/2026 kèm ảnh chụp:** *"Click vào header expand/collapse
+details tasks."*
+
+**Vì sao:** ảnh cho thấy thẻ của NEO có **37 việc trong một ngày**. Nhân với số
+con trong nhà thì màn hình chính cuộn mãi không tới đáy, và phần "chờ duyệt" ở
+trên — thứ bố mẹ vào đây để làm — bị đẩy đi mất khi có nhiều con.
+
+**Làm:** `_ChildSummaryCard` giữ trạng thái `_moRong`, mặc định **mở**. Gập hết
+sẵn thì mở app lên không thấy việc nào của con — mất đúng thứ màn hình này sinh
+ra để cho xem. Thẻ có State thì bắt buộc có `key: ValueKey(child.id)`: thiếu key
+thì Flutter tái dùng State theo vị trí, gập thẻ NEO rồi danh sách đổi thứ tự là
+thẻ Simba gập theo.
+
 ### 2.3 · Áp cho **mọi** hồ sơ con
 
 **Anh nêu ở hình 3.** Ảnh cho thấy NEO và Simba nằm cạnh nhau, nên 2.1 và 2.2
@@ -214,7 +235,8 @@ bỏ nó **sau** khi tab Nhiệm vụ làm được cả hai việc đó.
 | 1.4 · Sửa việc | ✅ | `task_edit_sheet.dart`, kèm đường ngừng dùng |
 | Ảnh 5 · Bỏ việc mẫu khỏi hồ sơ | ✅ | Gỡ cả giao diện lẫn đoạn tạo việc |
 | 2.1 · Nhóm theo buổi | ✅ | `ChildDayGroups`, có đã xong/tổng |
-| 2.2 · Vuốt ngang xem lịch sử | ✅ | Giữ cả nút lịch — vuốt là cử chỉ không nhìn thấy được |
+| 2.2 · Vuốt ngang xem lịch sử | ✅ | Bỏ nút lịch ngày 30/08 theo yêu cầu; vuốt là đường duy nhất |
+| 2.4 · Chạm header gập/mở | ✅ | Mặc định mở; mũi tên là chỉ dấu bấm được |
 | 2.3 · Áp cho mọi hồ sơ | ✅ | Dùng chung thẻ con |
 | 4.1 · Nút thêm hũ | ⚠️ | Xong phần cả nhà — xem giới hạn bên dưới |
 

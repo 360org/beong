@@ -96,6 +96,10 @@ class ParentHomeScreen extends ConsumerWidget {
                 (child) => Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.md),
                   child: _ChildSummaryCard(
+                    // Thẻ giữ trạng thái mở/gập, nên phải có key: thiếu key thì
+                    // Flutter tái dùng State theo **vị trí**, gập thẻ của NEO
+                    // rồi danh sách đổi thứ tự là thẻ của Simba gập theo.
+                    key: ValueKey(child.id),
                     child: child,
                     taskDao: taskDao,
                     walletDao: walletDao,
@@ -598,7 +602,7 @@ class _PendingCardState extends State<_PendingCard> {
   }
 }
 
-class _ChildSummaryCard extends ConsumerWidget {
+class _ChildSummaryCard extends ConsumerStatefulWidget {
   const _ChildSummaryCard({
     required this.child,
     required this.taskDao,
@@ -606,6 +610,7 @@ class _ChildSummaryCard extends ConsumerWidget {
     required this.reviewService,
     required this.reviewerId,
     required this.onTapProfile,
+    super.key,
   });
 
   final Member child;
@@ -616,7 +621,19 @@ class _ChildSummaryCard extends ConsumerWidget {
   final VoidCallback onTapProfile;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_ChildSummaryCard> createState() => _ChildSummaryCardState();
+}
+
+class _ChildSummaryCardState extends ConsumerState<_ChildSummaryCard> {
+  /// Mở sẵn: gập hết ngay từ đầu thì bố mẹ mở app lên không thấy việc nào của
+  /// con cả — mất đúng thứ màn hình này sinh ra để cho xem.
+  bool _moRong = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final child = widget.child;
+    final taskDao = widget.taskDao;
+    final walletDao = widget.walletDao;
     final color = AppColors.profileColor(child.colorIndex);
 
     final today =
@@ -634,7 +651,7 @@ class _ChildSummaryCard extends ConsumerWidget {
               children: [
                 // Bấm avatar: chuyển hẳn sang màn hình của con
                 GestureDetector(
-                  onTap: onTapProfile,
+                  onTap: widget.onTapProfile,
                   child: Container(
                     width: 48,
                     height: 48,
@@ -650,20 +667,17 @@ class _ChildSummaryCard extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.lg),
-                // Bấm tên/header: mở popup thống kê & lịch sử chi tiết
+                // Bấm tên/header: gập hoặc mở danh sách việc của con.
+                // Trước đây cú bấm này mở luôn lịch sử; chủ dự án đổi ngày
+                // 30/08/2026 sau khi thấy thẻ của NEO dài 37 việc — màn hình
+                // nhiều con thì cuộn mãi không hết.
                 Expanded(
                   child: GestureDetector(
-                    onTap: () => ChildHistoryModal.show(
-                      context,
-                      child: child,
-                      taskDao: taskDao,
-                      walletDao: walletDao,
-                      initialDate: today,
-                    ),
+                    onTap: () => setState(() => _moRong = !_moRong),
                     // Vuốt ngang mở lịch sử — cử chỉ chủ dự án yêu cầu
-                    // (docs/22 mục 2.2). Giữ cả `onTap` và biểu tượng lịch:
-                    // vuốt là cử chỉ **không nhìn thấy được**, ai chưa biết thì
-                    // không có cách nào đoán ra nó tồn tại.
+                    // (docs/22 mục 2.2). Giờ đây đó là **đường duy nhất** tới
+                    // lịch sử từ thẻ này: biểu tượng lịch đã bỏ theo yêu cầu
+                    // ngày 30/08/2026.
                     onHorizontalDragEnd: (chiTiet) {
                       // Chỉ nhận cú vuốt dứt khoát. Ngưỡng thấp quá thì cuộn
                       // danh sách hơi chéo tay cũng bật modal lên.
@@ -690,10 +704,18 @@ class _ChildSummaryCard extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(width: AppSpacing.xs),
-                            const Icon(
-                              Icons.calendar_today_rounded,
-                              size: 14,
-                              color: Colors.blueAccent,
+                            // Mũi tên là thứ duy nhất trên thẻ cho thấy nó
+                            // bấm được. Bỏ nốt thì cú chạm gập/mở cũng thành
+                            // cử chỉ vô hình y như cú vuốt.
+                            Icon(
+                              _moRong
+                                  ? Icons.expand_less_rounded
+                                  : Icons.expand_more_rounded,
+                              size: 20,
+                              color: context.semantic.onSurfaceMuted,
+                              semanticLabel: _moRong
+                                  ? 'Thu gọn danh sách việc'
+                                  : 'Mở danh sách việc',
                             ),
                           ],
                         ),
@@ -735,20 +757,22 @@ class _ChildSummaryCard extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.xs),
-            ChildDayGroups(
-              memberId: child.id,
-              familyId: child.familyId,
-              date: today,
-              taskDao: taskDao,
-            ),
-            _DoneTodayList(
-              memberId: child.id,
-              date: today,
-              taskDao: taskDao,
-              reviewService: reviewService,
-              reviewerId: reviewerId,
-            ),
+            if (_moRong) ...[
+              const SizedBox(height: AppSpacing.xs),
+              ChildDayGroups(
+                memberId: child.id,
+                familyId: child.familyId,
+                date: today,
+                taskDao: taskDao,
+              ),
+              _DoneTodayList(
+                memberId: child.id,
+                date: today,
+                taskDao: taskDao,
+                reviewService: widget.reviewService,
+                reviewerId: widget.reviewerId,
+              ),
+            ],
           ],
         ),
       ),
