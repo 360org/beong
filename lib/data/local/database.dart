@@ -38,7 +38,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -51,6 +51,30 @@ class AppDatabase extends _$AppDatabase {
       await customStatement('PRAGMA foreign_keys = ON');
     },
     onUpgrade: (m, from, to) async {
+      // v9 -> v10: thứ tự buổi do bố mẹ kéo thả.
+      //
+      // Cột có default 0, nên nếu chỉ thêm cột thì **mọi buổi cùng hạng 0** và
+      // thứ tự lại rơi về thứ tự bản ghi — đúng thứ cột này sinh ra để thay.
+      // Nên backfill ngay: xếp theo giờ trong ngày, buổi không đặt giờ xuống
+      // cuối, cùng hạng thì theo tên. Đó là thứ tự bố mẹ **mong đợi** thấy lần
+      // đầu mở app sau khi nâng cấp; kéo lại được ngay nếu không ưng.
+      if (from < 10) {
+        await m.addColumn(routines, routines.orderIndex);
+        await customStatement('''
+UPDATE routines SET order_index = (
+  SELECT COUNT(*) FROM routines AS r2
+  WHERE r2.family_id = routines.family_id
+    AND (
+      CASE r2.day_part WHEN 'morning' THEN 0 WHEN 'afternoon' THEN 1
+                       WHEN 'evening' THEN 2 ELSE 3 END,
+      r2.title
+    ) < (
+      CASE routines.day_part WHEN 'morning' THEN 0 WHEN 'afternoon' THEN 1
+                             WHEN 'evening' THEN 2 ELSE 3 END,
+      routines.title
+    )
+)''');
+      }
       // v8 -> v9: hũ riêng cho từng bé. Cột `member_id` nullable, NULL = hũ
       // chung của cả nhà — nhà đang dùng bản cũ nâng lên **không đổi gì**: mọi
       // hàng sẵn có thành hũ chung, đúng ý nghĩa chúng vẫn đang mang.

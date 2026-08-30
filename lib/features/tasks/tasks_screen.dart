@@ -123,6 +123,28 @@ class _TaskListState extends State<_TaskList> {
   Future<void> _doiXu(Task task, int xuMoi) =>
       widget.taskDao.updateTask(taskId: task.id, points: xuMoi);
 
+  /// Thứ tự buổi đang kéo dở, chưa ghi xuống DB.
+  ///
+  /// Giữ riêng thay vì ghi ngay: `ReorderableListView` gọi `onReorder` giữa
+  /// lúc hoạt ảnh chạy, và ghi DB ngay thì stream phát lại làm danh sách nhảy
+  /// về giữa chừng — đúng lỗi đã gặp ở màn sửa thói quen.
+  List<String>? _thuTuNhap;
+
+  Future<void> _xepLaiBuoi(List<Routine> hienTai, int tu, int den) async {
+    // `onReorderItem` đã trả chỉ số **sau khi** gỡ phần tử ra — khác
+    // `onReorder` cũ, nơi chỗ gọi phải tự trừ đi một khi kéo xuống.
+    final ids = [for (final r in hienTai) r.id];
+    ids.insert(den, ids.removeAt(tu));
+
+    setState(() => _thuTuNhap = ids);
+    await widget.taskDao.reorderRoutines(
+      familyId: widget.familyId,
+      routineIds: ids,
+    );
+    // Thả bản nháp ra sau khi đã ghi: từ đây stream là nguồn sự thật.
+    if (mounted) setState(() => _thuTuNhap = null);
+  }
+
   /// Mở bảng tạo buổi thói quen mới.
   Future<void> _taoThoiQuen() async {
     final children = await widget.memberDao.children(widget.familyId);
@@ -189,9 +211,7 @@ class _TaskListState extends State<_TaskList> {
           builder: (context, routineSnap) => _buildList(
             context,
             taskSnap.data!,
-            {
-              for (final r in routineSnap.data ?? const <Routine>[]) r.id: r,
-            },
+            routineSnap.data ?? const <Routine>[],
           ),
         );
       },
@@ -201,7 +221,7 @@ class _TaskListState extends State<_TaskList> {
   Widget _buildList(
     BuildContext context,
     List<Task> allTasks,
-    Map<String, Routine> routinesById,
+    List<Routine> buoi,
   ) {
     if (allTasks.isEmpty) {
       return Center(
@@ -253,6 +273,19 @@ class _TaskListState extends State<_TaskList> {
       routineTasks.putIfAbsent(task.routineId!, () => []).add(task);
     }
 
+    // Thứ tự lấy từ **danh sách buổi**, không từ thứ tự việc xuất hiện trong
+    // `allTasks` — thứ tự đó là thứ tự bản ghi trong DB, gần như ngẫu nhiên
+    // với người dùng. Chủ dự án thấy "Trước khi ngủ" đứng trên "Sau giờ học"
+    // (30/08/2026).
+    final theoThuTu = _thuTuNhap == null
+        ? buoi.where((r) => routineTasks.containsKey(r.id)).toList()
+        : [
+            for (final id in _thuTuNhap!)
+              if (buoi.any((r) => r.id == id))
+                buoi.firstWhere((r) => r.id == id),
+          ];
+    final buoiTheoId = {for (final r in buoi) r.id: r};
+
     return ListView(
       // Đệm đáy dư ra một khoảng: nút "+" nổi ở góc phải dưới **che mất thẻ việc
       // cuối cùng** nếu danh sách chỉ đệm bằng khoảng thường.
@@ -267,23 +300,51 @@ class _TaskListState extends State<_TaskList> {
           // "Routine" là chữ tiếng Anh duy nhất còn lọt vào UI. App cho gia đình
           // Việt thì nhãn phải là tiếng Việt, và onboarding đã gọi đây là "thói
           // quen" — hai chỗ phải dùng cùng một từ.
-          Text('Thói quen', style: context.text.titleMedium),
-          const SizedBox(height: AppSpacing.md),
-          ...routineTasks.entries.map(
-            (entry) => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: _RoutineGroupCard(
-                title: routinesById[entry.key]?.title ?? entry.key,
-                iconKey: routinesById[entry.key]?.iconKey,
-                tasks: entry.value,
-                // Chỉ bố mẹ sửa được thói quen; con chỉ xem.
-                onEdit: widget.isParent
-                    ? () => context.go(Routes.routineEditor(entry.key))
-                    : null,
-                onEditTask: widget.isParent ? _suaViec : null,
-                onPointsChanged: widget.isParent ? _doiXu : null,
+          Row(
+            children: [
+              Expanded(
+                child: Text('Thói quen', style: context.text.titleMedium),
               ),
+              if (widget.isParent && theoThuTu.length > 1)
+                Text(
+                  'Giữ và kéo để sắp xếp',
+                  style: context.text.bodySmall?.copyWith(
+                    color: context.semantic.onSurfaceMuted,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          // Danh sách trong danh sách: `shrinkWrap` + không tự cuộn, để cuộn
+          // vẫn thuộc về `ListView` bên ngoài. Hai vùng cuộn lồng nhau thì
+          // ngón tay không biết mình đang cuộn cái nào.
+          ReorderableListView(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            buildDefaultDragHandles: widget.isParent,
+            onReorderItem: (tu, den) => unawaited(
+              _xepLaiBuoi(theoThuTu, tu, den),
             ),
+            children: [
+              for (final r in theoThuTu)
+                Padding(
+                  // Key theo id buổi: `ReorderableListView` bắt buộc, và cũng
+                  // là thứ giữ cho thẻ không đội tên nhau khi đổi chỗ.
+                  key: ValueKey(r.id),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  child: _RoutineGroupCard(
+                    title: buoiTheoId[r.id]?.title ?? r.id,
+                    iconKey: buoiTheoId[r.id]?.iconKey,
+                    tasks: routineTasks[r.id] ?? const [],
+                    // Chỉ bố mẹ sửa được thói quen; con chỉ xem.
+                    onEdit: widget.isParent
+                        ? () => context.go(Routes.routineEditor(r.id))
+                        : null,
+                    onEditTask: widget.isParent ? _suaViec : null,
+                    onPointsChanged: widget.isParent ? _doiXu : null,
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: AppSpacing.md),
         ],

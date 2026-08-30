@@ -40,6 +40,11 @@ abstract interface class TaskRepository {
     String? proofMode,
   });
   Future<void> detachTaskFromRoutine(String taskId);
+  Future<int> hangBuoiKeTiep(String familyId);
+  Future<void> reorderRoutines({
+    required String familyId,
+    required List<String> routineIds,
+  });
   Future<int> generateInstances({
     required String familyId,
     required CalendarDate today,
@@ -149,6 +154,15 @@ final class LocalTaskRepository implements TaskRepository {
   @override
   Future<void> detachTaskFromRoutine(String taskId) =>
       _dao.detachTaskFromRoutine(taskId);
+
+  @override
+  Future<int> hangBuoiKeTiep(String familyId) => _dao.hangBuoiKeTiep(familyId);
+
+  @override
+  Future<void> reorderRoutines({
+    required String familyId,
+    required List<String> routineIds,
+  }) => _dao.reorderRoutines(familyId: familyId, routineIds: routineIds);
 
   @override
   Future<int> generateInstances({

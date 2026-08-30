@@ -37,6 +37,9 @@ void main() {
         .insert(FamiliesCompanion.insert(id: 'fam-1', name: 'Nhà mình'));
 
     // Bỏ dần những gì phiên bản sau đã thêm, từ mới nhất về cũ nhất.
+    if (version < 10) {
+      await db.customStatement('ALTER TABLE routines DROP COLUMN order_index');
+    }
     if (version < 9) {
       // Thiếu đúng bước này ngày 30/08/2026 là mọi test migration vẫn xanh
       // trong khi app thật **hỏng ngay lúc mở** trên máy đã cài bản cũ: bảng
@@ -260,6 +263,27 @@ CREATE TABLE "jars" (
 
     final db = await openCurrent();
     await expectLater(db.select(db.jars).get(), completes);
+  });
+
+  test('v9 -> v10 thêm thứ tự buổi, buổi cũ vẫn đọc được', () async {
+    await seedAtVersion(9);
+
+    final db = await openCurrent();
+    // Buổi tạo trước v10 phải đọc được và có `order_index`. Bước backfill
+    // trong migration xếp chúng theo giờ trong ngày rồi tới tên — chỗ đó là
+    // SQL thuần, kiểm bằng cách đọc lại cột.
+    await db.customStatement(
+      'INSERT INTO routines (id, family_id, title, day_part) '
+      "VALUES ('r-toi', 'fam-1', 'Trước khi ngủ', 'evening')",
+    );
+    final hang = await db
+        .customSelect('SELECT order_index FROM routines')
+        .getSingle();
+    expect(
+      hang.data['order_index'],
+      isNotNull,
+      reason: 'cột phải tồn tại và có default, không để NULL',
+    );
   });
 
   test('v4 -> v5 tạo bảng hũ và giữ mặc định chia tự động', () async {

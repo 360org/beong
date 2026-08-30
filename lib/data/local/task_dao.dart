@@ -48,12 +48,19 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
 
   /// Tất cả routine active của một gia đình.
   Future<List<Routine>> activeRoutines(String familyId) {
-    return (select(routines)..where(
-          (r) =>
-              r.familyId.equals(familyId) &
-              r.active.equals(true) &
-              r.deletedAt.isNull(),
-        ))
+    return (select(routines)
+          ..where(
+            (r) =>
+                r.familyId.equals(familyId) &
+                r.active.equals(true) &
+                r.deletedAt.isNull(),
+          )
+          ..orderBy([
+            (r) => OrderingTerm(expression: r.orderIndex),
+            // Buổi cùng hạng thì theo tên, để thứ tự không đổi giữa hai lần
+            // đọc — danh sách nhảy chỗ giữa hai lần mở app là lỗi khó lần.
+            (r) => OrderingTerm(expression: r.title),
+          ]))
         .get();
   }
 
@@ -113,13 +120,52 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
 
   /// Như [activeRoutines] nhưng phát lại mỗi khi bảng đổi.
   Stream<List<Routine>> watchActiveRoutines(String familyId) {
-    return (select(routines)..where(
-          (r) =>
-              r.familyId.equals(familyId) &
-              r.active.equals(true) &
-              r.deletedAt.isNull(),
-        ))
+    return (select(routines)
+          ..where(
+            (r) =>
+                r.familyId.equals(familyId) &
+                r.active.equals(true) &
+                r.deletedAt.isNull(),
+          )
+          ..orderBy([
+            (r) => OrderingTerm(expression: r.orderIndex),
+            (r) => OrderingTerm(expression: r.title),
+          ]))
         .watch();
+  }
+
+  /// Ghi lại thứ tự buổi theo danh sách id truyền vào.
+  ///
+  /// Buổi mới tạo nhận `orderIndex` lớn hơn mọi buổi đang có, nên nó xuống
+  /// cuối chứ không chen lên đầu — chen lên đầu thì mỗi lần thêm một buổi là
+  /// thứ tự bố mẹ vừa xếp bị xáo.
+  Future<void> reorderRoutines({
+    required String familyId,
+    required List<String> routineIds,
+  }) {
+    return batch((b) {
+      for (var i = 0; i < routineIds.length; i++) {
+        b.update(
+          routines,
+          RoutinesCompanion(
+            orderIndex: Value(i),
+            updatedAt: Value(DateTime.now()),
+          ),
+          where: (r) =>
+              r.familyId.equals(familyId) & r.id.equals(routineIds[i]),
+        );
+      }
+    });
+  }
+
+  /// Hạng kế tiếp cho một buổi mới.
+  Future<int> hangBuoiKeTiep(String familyId) async {
+    final all = await activeRoutines(familyId);
+    var hang = 0;
+    for (final r in all) {
+      if (r.orderIndex >= hang) hang = r.orderIndex + 1;
+    }
+    return hang;
   }
 
   /// Danh sách người được giao cho một task lẻ.

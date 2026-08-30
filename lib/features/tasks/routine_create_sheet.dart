@@ -122,6 +122,9 @@ class _RoutineCreateSheetState extends State<_RoutineCreateSheet> {
 
     setState(() => _busy = true);
     final routineId = 'routine-${DateTime.now().millisecondsSinceEpoch}';
+    // Xuống cuối danh sách, không chen lên đầu: chen lên đầu thì mỗi lần thêm
+    // một buổi là thứ tự bố mẹ vừa kéo bị xáo.
+    final hang = await widget.taskDao.hangBuoiKeTiep(widget.familyId);
     await widget.taskDao.createRoutine(
       routine: RoutinesCompanion.insert(
         id: routineId,
@@ -129,6 +132,7 @@ class _RoutineCreateSheetState extends State<_RoutineCreateSheet> {
         title: title,
         iconKey: Value(_iconKey),
         dayPart: Value(_dayPart?.name),
+        orderIndex: Value(hang),
       ),
       assigneeIds: _selectedChildren.toList(),
       routineTasks: [

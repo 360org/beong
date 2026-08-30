@@ -125,6 +125,15 @@ class Routines extends Table with FamilyScoped, Syncable {
 
   /// Xu thưởng khi làm trọn bộ trong ngày. 0 = tắt.
   IntColumn get completionBonus => integer().withDefault(const Constant(10))();
+
+  /// Thứ tự buổi hiện trên màn Nhiệm vụ, do bố mẹ kéo thả (v10).
+  ///
+  /// Trước v10 thứ tự là **thứ tự bản ghi trong DB** — tức là thứ tự tạo, gần
+  /// như ngẫu nhiên với người dùng: chủ dự án thấy "Trước khi ngủ" đứng trên
+  /// "Sau giờ học". `dayPart` không thay được cho cột này: buổi tự đặt tên như
+  /// "Đi học về" hay "Việc khác" không thuộc sáng/trưa/tối nào cả.
+  IntColumn get orderIndex => integer().withDefault(const Constant(0))();
+
   BoolColumn get active => boolean().withDefault(const Constant(true))();
 
   @override

@@ -4,6 +4,25 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.7.1+35 (2026-08-30) — Kéo thả để sắp xếp buổi thói quen
+
+Ở tab Nhiệm vụ, giữ và kéo một buổi để đổi chỗ. Thứ tự được ghi lại và giữ
+nguyên qua những lần mở app sau.
+
+Trước đây thứ tự là thứ tự bản ghi trong cơ sở dữ liệu — tức thứ tự tạo, gần
+như ngẫu nhiên với người dùng: chủ dự án thấy *"Trước khi ngủ"* đứng trên
+*"Sau giờ học"*.
+
+Nhà đang dùng bản cũ nâng lên **không thấy một mớ lộn xộn**: các buổi được xếp
+sẵn theo giờ trong ngày (sáng → trưa/chiều → tối → buổi không đặt giờ), cùng
+hạng thì theo tên. Đó là thứ tự người ta mong đợi thấy lần đầu; kéo lại được
+ngay nếu không ưng.
+
+Buổi tạo mới xuống **cuối** danh sách, không chen lên đầu — chen lên đầu thì
+mỗi lần thêm một buổi là thứ tự vừa xếp bị xáo.
+
+---
+
 ## v0.7.0+34 (2026-08-30) — Thẻ con ở Trang chính chính là màn lịch sử
 
 Mở một thẻ con ở Trang chính, bố mẹ nay thấy **đúng thứ** màn lịch sử chi tiết
