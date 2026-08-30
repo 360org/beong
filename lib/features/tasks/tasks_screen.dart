@@ -12,6 +12,7 @@ import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/icon_picker.dart';
 import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/presets.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
@@ -112,7 +113,15 @@ class _ThemGiSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: AppSpacing.sm),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.sm,
+              0,
+            ),
+            child: SheetHeader(title: 'Thêm gì?'),
+          ),
           ListTile(
             leading: const Icon(Icons.check_circle_outline_rounded),
             title: Text('Thêm việc', style: context.text.titleSmall),
@@ -632,24 +641,14 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(
+          const Padding(
+            padding: EdgeInsets.only(
               left: AppSpacing.screenPaddingMobile,
               right: AppSpacing.screenPaddingMobile,
               top: AppSpacing.xl,
               bottom: AppSpacing.md,
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Thêm việc mới', style: context.text.titleLarge),
-                IconButton(
-                  icon: const Icon(Icons.close_rounded),
-                  tooltip: 'Đóng',
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
+            child: SheetHeader(title: 'Thêm việc mới'),
           ),
           const Divider(height: 1),
           Expanded(

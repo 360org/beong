@@ -2,6 +2,7 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/icon_picker.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/repositories/task_repository.dart';
@@ -121,13 +122,10 @@ class _RoutineCreateSheetState extends State<_RoutineCreateSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Thêm buổi thói quen', style: context.text.titleLarge),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Gom các việc làm cùng một lúc trong ngày vào một buổi.',
-              style: context.text.bodySmall?.copyWith(
-                color: context.semantic.onSurfaceMuted,
-              ),
+            const SheetHeader(
+              title: 'Thêm buổi thói quen',
+              subtitle:
+                  'Gom các việc làm cùng một lúc trong ngày vào một buổi.',
             ),
             const SizedBox(height: AppSpacing.lg),
 

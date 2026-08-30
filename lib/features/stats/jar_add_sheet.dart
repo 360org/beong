@@ -4,6 +4,7 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/repositories/jar_repository.dart';
 import 'package:flutter/material.dart';
@@ -159,7 +160,7 @@ class _JarAddSheetState extends State<_JarAddSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Thêm hũ mới', style: context.text.titleLarge),
+            const SheetHeader(title: 'Thêm hũ mới'),
             const SizedBox(height: AppSpacing.lg),
 
             Text('Tên hũ', style: context.text.titleSmall),

@@ -6,6 +6,7 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/progress_ring.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/domain/entities/badge_def.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -305,15 +306,8 @@ class _BadgeGridTile extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: ctx.colors.outlineVariant,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
+                SheetHeader(title: badge.title),
+                const SizedBox(height: AppSpacing.md),
                 ProgressRing(
                   progress: earned ? 1.0 : ratio,
                   size: 80,
@@ -328,13 +322,6 @@ class _BadgeGridTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                Text(
-                  badge.title,
-                  style: ctx.text.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
                 const SizedBox(height: AppSpacing.xs),
                 Container(
                   padding: const EdgeInsets.symmetric(

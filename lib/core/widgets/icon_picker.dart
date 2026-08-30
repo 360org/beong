@@ -2,6 +2,7 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:flutter/material.dart';
 
 /// Lưới chọn icon chuyên nghiệp phân theo danh mục (6 Tabs), hỗ trợ tìm kiếm và mở rộng.
@@ -141,29 +142,14 @@ class _FullIconPickerModalState extends State<_FullIconPickerModal>
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
+          const Padding(
+            padding: EdgeInsets.fromLTRB(
               AppSpacing.lg,
               AppSpacing.md,
               AppSpacing.lg,
               AppSpacing.sm,
             ),
-            child: Row(
-              children: [
-                Text(
-                  'Chọn Biểu Tượng (100+)',
-                  style: context.text.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close_rounded),
-                  tooltip: 'Đóng',
-                ),
-              ],
-            ),
+            child: SheetHeader(title: 'Chọn biểu tượng (100+)'),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(

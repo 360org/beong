@@ -103,6 +103,26 @@ Không lục giác hoá nút bấm, avatar hay ô nhập — vùng chạm phải
 - Đổ bóng: chỉ 1 mức, `0 4 16 rgba(27,16,70,0.08)`. Không dùng bóng đậm.
 - Vùng chạm tối thiểu 48×48.
 
+### Mọi bảng trượt lên đều phải có nút đóng
+
+Chủ dự án nêu 30/08/2026. Flutter đã cho vuốt xuống và bấm ra ngoài, nhưng cả
+hai đều không đủ:
+
+- Bảng có `TextField` `autofocus` thì bàn phím che gần nửa màn hình — vùng
+  trống để bấm-ra-ngoài gần như không còn, mà vuốt xuống thì nhiều bảng cuộn
+  nội dung trước khi bảng chịu đóng.
+- Bảng `isDismissible: false` thì hai cách kia **không tồn tại**.
+- Vuốt và bấm-ra-ngoài đều là cử chỉ không nhìn thấy được. Một nút thì thấy.
+
+Cách giữ: dùng `SheetHeader` (`lib/core/widgets/sheet_header.dart`).
+`test/unit/sheet_co_nut_dong_test.dart` canh mọi file có
+`showModalBottomSheet` đều đi qua nó.
+
+**Ngoại lệ duy nhất:** đặt mật khẩu lần đầu ở onboarding (`anNutDong: true`) —
+ADR-027 nói không hồ sơ nào được để trống mật khẩu, và bảng đó đã cố ý tắt cả
+vuốt lẫn bấm-ra-ngoài. Test đếm luôn số chỗ dùng `anNutDong`, nên mở rộng
+ngoại lệ này là phải sửa test một cách tường minh.
+
 ## 4. Component chuẩn
 
 | Component | Mô tả |
@@ -110,6 +130,7 @@ Không lục giác hoá nút bấm, avatar hay ô nhập — vùng chạm phải
 | `PresetChip` | Icon + nhãn, viên thuốc, nền `primaryContainer`; khi chọn → nền `primary`, chữ trắng |
 | `PointStepper` | `−` / gem + số / `+`; nhấn giữ để tăng nhanh; bước 5; kèm nút `i` mở giải thích |
 | `SegmentedPills` | Hàng 2–3 lựa chọn (Once/Daily/Custom, Morning/Afternoon/Evening) |
+| `SheetHeader` | Đầu mọi bảng trượt lên: tiêu đề, mô tả phụ, **nút đóng góc phải** |
 | `PrimaryButton` | Full-width, cao 56, bo tròn, chữ VIẾT HOA 16/800 |
 | `TaskCard` | Icon tròn màu · tên · điểm · checkbox lớn; vuốt trái = sửa, phải = xong |
 | `KidHeader` | Avatar + tên + số dư gem + vòng tiến độ ngày |

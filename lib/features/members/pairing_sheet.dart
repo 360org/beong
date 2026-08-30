@@ -1,7 +1,9 @@
 import 'dart:async';
+
 import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/domain/services/pairing_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -103,28 +105,11 @@ class _PairingCodeSheetState extends State<_PairingCodeSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Ghép cặp máy của ${widget.childName}',
-                  style: context.text.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  tooltip: 'Đóng',
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Mở ứng dụng Bé Ong trên máy của bé, chọn vai "Con" rồi quét mã này để hoàn tất kết nối.',
-              style: context.text.bodyMedium?.copyWith(
-                color: context.semantic.onSurfaceMuted,
-              ),
+            SheetHeader(
+              title: 'Ghép cặp máy của ${widget.childName}',
+              subtitle:
+                  'Mở ứng dụng Bé Ong trên máy của bé, chọn vai "Con" rồi quét '
+                  'mã này để hoàn tất kết nối.',
             ),
             const SizedBox(height: AppSpacing.lg),
             Center(

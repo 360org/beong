@@ -3,6 +3,7 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/icon_picker.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/repositories/reward_repository.dart';
@@ -117,28 +118,11 @@ class _WishSheetState extends ConsumerState<_WishSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.auto_awesome_rounded,
-                color: Colors.amber,
-                size: 28,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                'Điều ước của con',
-                style: context.text.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Con muốn có phần thưởng gì? Hãy gửi đề xuất để bố mẹ duyệt nhé!',
-            style: context.text.bodySmall?.copyWith(
-              color: context.semantic.onSurfaceMuted,
-            ),
+          const SheetHeader(
+            title: '✨ Điều ước của con',
+            subtitle:
+                'Con muốn có phần thưởng gì? Hãy gửi đề xuất để bố mẹ duyệt '
+                'nhé!',
           ),
           const SizedBox(height: AppSpacing.xl),
           Text('Chọn hình', style: context.text.titleSmall),

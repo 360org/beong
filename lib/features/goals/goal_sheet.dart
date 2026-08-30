@@ -4,6 +4,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/icon_picker.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/repositories/goal_repository.dart';
 import 'package:beong/domain/repositories/reward_repository.dart';
@@ -124,17 +125,11 @@ class _GoalSheetState extends ConsumerState<_GoalSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            widget.current == null ? 'Mục tiêu để dành' : 'Đổi mục tiêu',
-            style: context.text.titleLarge,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            '${widget.childName} để dành đủ số xu này là tới đích. '
-            'Xu vẫn nằm trong hũ Để dành, app không trừ đi.',
-            style: context.text.bodySmall?.copyWith(
-              color: context.semantic.onSurfaceMuted,
-            ),
+          SheetHeader(
+            title: widget.current == null ? 'Mục tiêu để dành' : 'Đổi mục tiêu',
+            subtitle:
+                '${widget.childName} để dành đủ số xu này là tới đích. '
+                'Xu vẫn nằm trong hũ Để dành, app không trừ đi.',
           ),
           const SizedBox(height: AppSpacing.xl),
 

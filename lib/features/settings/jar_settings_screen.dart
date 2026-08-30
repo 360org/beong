@@ -6,6 +6,7 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/repositories/jar_repository.dart';
 import 'package:flutter/material.dart';
@@ -310,10 +311,7 @@ class _JarEditorState extends State<_JarEditor> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            widget.existing == null ? 'Thêm hũ' : 'Sửa hũ',
-            style: context.text.titleLarge,
-          ),
+          SheetHeader(title: widget.existing == null ? 'Thêm hũ' : 'Sửa hũ'),
           const SizedBox(height: AppSpacing.xl),
           TextField(
             controller: _title,

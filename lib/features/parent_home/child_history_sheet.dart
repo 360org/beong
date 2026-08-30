@@ -4,6 +4,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/utils/ngay_viet.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
@@ -123,28 +124,10 @@ class _ChildHistoryModalState extends State<ChildHistoryModal> {
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Lịch sử: ${widget.child.displayName}',
-                        style: context.text.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      Text(
-                        'Thống kê công việc và tiến độ',
-                        style: context.text.bodySmall?.copyWith(
-                          color: context.semantic.onSurfaceMuted,
-                        ),
-                      ),
-                    ],
+                  child: SheetHeader(
+                    title: 'Lịch sử: ${widget.child.displayName}',
+                    subtitle: 'Thống kê công việc và tiến độ',
                   ),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close_rounded),
-                  tooltip: 'Đóng',
                 ),
               ],
             ),

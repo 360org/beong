@@ -3,6 +3,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/icon_picker.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -117,11 +118,9 @@ class _TaskEditSheetState extends State<_TaskEditSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text('Sửa việc', style: context.text.titleLarge),
-                ),
+            SheetHeader(
+              title: 'Sửa việc',
+              actions: [
                 IconButton(
                   icon: const Icon(Icons.delete_outline_rounded),
                   tooltip: 'Ngừng dùng việc này',

@@ -3,6 +3,7 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/domain/entities/presets.dart';
 import 'package:beong/domain/services/age_band.dart';
 import 'package:beong/domain/services/family_clock.dart';
@@ -206,24 +207,11 @@ class _ChildProfileFormState extends State<ChildProfileForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(widget.title, style: context.text.titleLarge),
-              if (widget.onClose != null)
-                IconButton(
-                  onPressed: widget.onClose,
-                  icon: const Icon(Icons.close_rounded),
-                  tooltip: 'Đóng',
-                ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Nhập tên, tuổi, chọn màu, con vật và cấu hình riêng cho bé.',
-            style: context.text.bodyMedium?.copyWith(
-              color: context.semantic.onSurfaceMuted,
-            ),
+          SheetHeader(
+            title: widget.title,
+            subtitle:
+                'Nhập tên, tuổi, chọn màu, con vật và cấu hình riêng cho bé.',
+            onClose: widget.onClose,
           ),
           const SizedBox(height: AppSpacing.xl),
           Center(

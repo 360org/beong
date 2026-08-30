@@ -5,6 +5,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/icon_picker.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/presets.dart';
@@ -166,20 +167,15 @@ class _ChildTaskSheetState extends ConsumerState<_ChildTaskSheet> {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              Text(
-                'Con tự thêm việc',
-                style: context.text.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+              const Expanded(
+                child: SheetHeader(
+                  title: 'Con tự thêm việc',
+                  subtitle:
+                      'Con vừa tự giác làm việc gì? Hãy thêm để bố mẹ biết và '
+                      'thưởng xu nhé!',
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Con vừa tự giác làm việc gì? Hãy thêm để bố mẹ biết và thưởng xu nhé!',
-            style: context.text.bodySmall?.copyWith(
-              color: context.semantic.onSurfaceMuted,
-            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           Text('Chọn nhanh việc con đã làm', style: context.text.titleSmall),

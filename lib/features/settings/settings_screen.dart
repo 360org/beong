@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:beong/app/router.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/du_lieu_may_provider.dart';
@@ -9,6 +10,7 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
@@ -579,6 +581,15 @@ class _ThemeTile extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.lg,
+                AppSpacing.sm,
+                0,
+              ),
+              child: SheetHeader(title: 'Giao diện'),
+            ),
             for (final mode in ThemeMode.values)
               ListTile(
                 leading: Icon(
@@ -652,14 +663,19 @@ class _ExchangeRateTile extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Text(
-                  'Bật thì con thấy số xu của mình đáng bao nhiêu tiền. Xu vẫn '
-                  'là xu — app không trả tiền hộ, bố mẹ tự quy đổi ngoài đời.',
-                  style: context.text.bodySmall?.copyWith(
-                    color: context.semantic.onSurfaceMuted,
-                  ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                  AppSpacing.sm,
+                  AppSpacing.lg,
+                ),
+                child: SheetHeader(
+                  title: 'Quy đổi xu ra tiền',
+                  subtitle:
+                      'Bật thì con thấy số xu của mình đáng bao nhiêu tiền. '
+                      'Xu vẫn là xu — app không trả tiền hộ, bố mẹ tự quy đổi '
+                      'ngoài đời.',
                 ),
               ),
               ListTile(
@@ -741,13 +757,18 @@ class _TimezoneTile extends ConsumerWidget {
           height: 400,
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Text(
-                  'Chọn múi giờ để tính ngày và thời hạn nhiệm vụ chính xác.',
-                  style: context.text.bodySmall?.copyWith(
-                    color: context.semantic.onSurfaceMuted,
-                  ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                  AppSpacing.sm,
+                  AppSpacing.lg,
+                ),
+                child: SheetHeader(
+                  title: 'Múi giờ',
+                  subtitle:
+                      'Chọn múi giờ để tính ngày và thời hạn nhiệm vụ chính '
+                      'xác.',
                 ),
               ),
               Expanded(
@@ -823,13 +844,18 @@ class _RolloverTile extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Text(
-                'Việc chưa làm xong trước giờ này tính là bỏ lỡ của hôm trước.',
-                style: context.text.bodySmall?.copyWith(
-                  color: context.semantic.onSurfaceMuted,
-                ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.lg,
+              ),
+              child: SheetHeader(
+                title: 'Giờ đổi ngày',
+                subtitle:
+                    'Việc chưa làm xong trước giờ này tính là bỏ lỡ của hôm '
+                    'trước.',
               ),
             ),
             for (final entry in _choices.entries)
@@ -909,6 +935,15 @@ class _MatKhauTile extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.lg,
+                AppSpacing.sm,
+                0,
+              ),
+              child: SheetHeader(title: 'Chọn hồ sơ'),
+            ),
             for (final member in members)
               ListTile(
                 leading: Icon(

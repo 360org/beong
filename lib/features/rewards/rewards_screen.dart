@@ -11,6 +11,7 @@ import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/icon_picker.dart';
 import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
@@ -1129,19 +1130,8 @@ class _RewardEditorSheetState extends State<_RewardEditorSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  _isEditing ? 'Sửa phần thưởng' : 'Thêm phần thưởng',
-                  style: context.text.titleLarge,
-                ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close_rounded),
-                  tooltip: 'Đóng',
-                ),
-              ],
+            SheetHeader(
+              title: _isEditing ? 'Sửa phần thưởng' : 'Thêm phần thưởng',
             ),
             const SizedBox(height: AppSpacing.sm),
             if (!_isEditing) ...[

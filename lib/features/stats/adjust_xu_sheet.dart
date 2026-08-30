@@ -3,6 +3,7 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/repositories/wallet_repository.dart';
@@ -126,17 +127,11 @@ class _AdjustSheetState extends ConsumerState<_AdjustSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Sửa xu của ${widget.childName}',
-            style: context.text.titleLarge,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Lý do sẽ hiện trong Sổ của con. Không có con số nào rơi từ trên '
-            'trời xuống.',
-            style: context.text.bodySmall?.copyWith(
-              color: context.semantic.onSurfaceMuted,
-            ),
+          SheetHeader(
+            title: 'Sửa xu của ${widget.childName}',
+            subtitle:
+                'Lý do sẽ hiện trong Sổ của con. Không có con số nào rơi từ '
+                'trên trời xuống.',
           ),
           const SizedBox(height: AppSpacing.xl),
           SegmentedButton<bool>(

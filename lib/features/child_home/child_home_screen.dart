@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:beong/core/l10n/gen/app_localizations.dart';
 import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/providers/family_clock_provider.dart';
@@ -14,6 +15,7 @@ import 'package:beong/core/widgets/bee_mascot.dart';
 import 'package:beong/core/widgets/celebration.dart';
 import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/progress_ring.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/core/widgets/task_card.dart';
 import 'package:beong/domain/entities/badge_def.dart';
 import 'package:beong/domain/entities/enums.dart';
@@ -141,6 +143,15 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
           builder: (ctx) => SafeArea(
             child: Wrap(
               children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                    AppSpacing.sm,
+                    0,
+                  ),
+                  child: SheetHeader(title: 'Ảnh chứng minh'),
+                ),
                 ListTile(
                   leading: const Icon(Icons.camera_alt_rounded),
                   title: const Text('Chụp ảnh ngay'),
@@ -603,9 +614,14 @@ class _ChildHeader extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Text('Đổi người dùng', style: context.text.titleMedium),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.lg,
+              ),
+              child: SheetHeader(title: 'Đổi người dùng'),
             ),
             for (final m in members)
               ListTile(

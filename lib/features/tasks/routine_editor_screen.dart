@@ -7,6 +7,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/utils/ngay_viet.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/repositories/task_repository.dart';
@@ -453,7 +454,7 @@ class _RoutineInfoSheetState extends State<_RoutineInfoSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Sửa thói quen', style: context.text.titleLarge),
+          const SheetHeader(title: 'Sửa thói quen'),
           const SizedBox(height: AppSpacing.xl),
           TextField(
             controller: _title,

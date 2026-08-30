@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/domain/services/mat_khau_ho_so.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -228,13 +229,18 @@ class _MatKhauSheetState extends State<_MatKhauSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(widget.tieuDe, style: context.text.titleLarge),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            widget.moTa,
-            style: context.text.bodySmall?.copyWith(
-              color: context.semantic.onSurfaceMuted,
-            ),
+          // `batBuoc` = onboarding đang đặt mật khẩu lần đầu: ADR-027 nói
+          // không hồ sơ nào được để trống mật khẩu, và sheet đã tắt cả vuốt
+          // lẫn bấm-ra-ngoài. Thêm nút đóng ở đây là mở lại đúng lối thoát mà
+          // ADR đó cố ý bịt — nên đây là ngoại lệ duy nhất của quy tắc "mọi
+          // bảng trượt đều có nút đóng".
+          SheetHeader(
+            title: widget.tieuDe,
+            subtitle: widget.moTa,
+            onClose: widget.batBuoc
+                ? null
+                : () => Navigator.of(context).pop(false),
+            anNutDong: widget.batBuoc,
           ),
           const SizedBox(height: AppSpacing.xl),
           TextField(

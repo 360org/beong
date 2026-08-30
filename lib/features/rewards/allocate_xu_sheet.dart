@@ -4,6 +4,7 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:flutter/material.dart';
@@ -90,13 +91,9 @@ class _AllocateXuSheetState extends State<AllocateXuSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Chia xu vào hũ', style: context.text.titleLarge),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Con quyết định để bao nhiêu vào hũ nào.',
-            style: context.text.bodySmall?.copyWith(
-              color: context.semantic.onSurfaceMuted,
-            ),
+          const SheetHeader(
+            title: 'Chia xu vào hũ',
+            subtitle: 'Con quyết định để bao nhiêu vào hũ nào.',
           ),
           const SizedBox(height: AppSpacing.xl),
           Container(
