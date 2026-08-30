@@ -173,4 +173,71 @@ void main() {
     expect(ketQua.coThayDoi, isFalse);
     expect(ketQua.buoiMoiTao, 0);
   });
+
+  group('nhận nuôi việc lẻ sinh ra SAU khi đã dọn', () {
+    // Từ 30/08/2026 màn Nhiệm vụ không còn mục "Chưa xếp buổi". Việc rơi ra
+    // khỏi buổi mà không ai nhận nuôi là **biến mất khỏi mọi màn hình** trong
+    // khi vẫn nằm trong DB: bố mẹ không thấy để sửa, con không thấy để làm.
+
+    test('bỏ một việc khỏi thói quen thì nó được nhận về buổi khác', () async {
+      await don.chayNeuCan(familyId);
+
+      // Bố mẹ bỏ "Đánh răng buổi sáng" khỏi buổi sáng.
+      await taskDao.detachTaskFromRoutine('viec-trong-buoi');
+      final truoc = await taskDao.activeTasks(familyId);
+      expect(
+        truoc.where((t) => t.routineId == null),
+        hasLength(1),
+        reason: 'dựng sai tình huống: chưa có việc lẻ nào để nhận nuôi',
+      );
+
+      await don.nhanNuoi(familyId);
+
+      final sau = await taskDao.activeTasks(familyId);
+      expect(
+        sau.where((t) => t.routineId == null),
+        isEmpty,
+        reason: 'việc lẻ còn sót là việc không màn hình nào hiện ra nữa',
+      );
+    });
+
+    test('ngừng dùng cả thói quen thì việc bên trong vẫn có chỗ ở', () async {
+      await don.chayNeuCan(familyId);
+      await taskDao.archiveRoutine(routineId);
+
+      await don.nhanNuoi(familyId);
+
+      final sau = await taskDao.activeTasks(familyId);
+      expect(sau.where((t) => t.routineId == null), isEmpty);
+      expect(sau, isNotEmpty, reason: 'không được tắt việc, chỉ chuyển buổi');
+    });
+
+    test('không có việc lẻ thì không tạo thêm buổi nào', () async {
+      await don.chayNeuCan(familyId);
+      final truoc = await taskDao.activeRoutines(familyId);
+
+      final ketQua = await don.nhanNuoi(familyId);
+
+      expect(ketQua.buoiMoiTao, 0);
+      expect(await taskDao.activeRoutines(familyId), hasLength(truoc.length));
+    });
+
+    test('chạy được nhiều lần, không đẻ thêm buổi mỗi lần', () async {
+      await don.chayNeuCan(familyId);
+      await taskDao.detachTaskFromRoutine('viec-trong-buoi');
+
+      await don.nhanNuoi(familyId);
+      final sauLan1 = await taskDao.activeRoutines(familyId);
+      await don.nhanNuoi(familyId);
+      final sauLan2 = await taskDao.activeRoutines(familyId);
+
+      expect(
+        sauLan2,
+        hasLength(sauLan1.length),
+        reason:
+            'nhanNuoi chạy mỗi lần mở app — đẻ thêm một buổi "Việc khác" mỗi '
+            'lần là sau một tuần màn hình đầy buổi rác',
+      );
+    });
+  });
 }

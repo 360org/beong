@@ -7,6 +7,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/utils/ngay_viet.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/icon_picker.dart';
 import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/core/widgets/thong_bao.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
@@ -448,77 +449,89 @@ class _RoutineInfoSheetState extends State<_RoutineInfoSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+    return SafeArea(
+      // Cuộn được + nút LƯU dính đáy.
+      //
+      // Bản cũ là một `Column` không cuộn, và `kTaskIconKeys` có **125 hình**.
+      // Lưới hình đẩy nút LƯU xuống dưới mép màn hình, không cuộn tới được:
+      // ảnh chủ dự án gửi 30/08/2026 thấy đúng cảnh đó — sửa xong không có
+      // cách nào lưu. Nút phải nằm ngoài vùng cuộn thì mới luôn với tới được,
+      // dù nội dung dài bao nhiêu.
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SheetHeader(title: 'Sửa thói quen'),
-          const SizedBox(height: AppSpacing.xl),
-          TextField(
-            controller: _title,
-            textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(labelText: 'Tên thói quen'),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          Text('Chọn hình', style: context.text.titleSmall),
-          const SizedBox(height: AppSpacing.sm),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: [
-              for (final key in kTaskIconKeys)
-                GestureDetector(
-                  onTap: () => setState(() => _iconKey = key),
-                  child: Container(
-                    width: AppSpacing.minTouchTarget,
-                    height: AppSpacing.minTouchTarget,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: key == _iconKey
-                          ? context.colors.primaryContainer
-                          : context.colors.surfaceContainerHighest,
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(AppRadius.field),
-                      ),
-                      border: key == _iconKey
-                          ? Border.all(color: context.colors.primary, width: 2)
-                          : null,
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.xl,
+                AppSpacing.xl,
+                AppSpacing.xl,
+                AppSpacing.md,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SheetHeader(title: 'Sửa thói quen'),
+                  const SizedBox(height: AppSpacing.xl),
+                  TextField(
+                    controller: _title,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: const InputDecoration(
+                      labelText: 'Tên thói quen',
                     ),
-                    child: AppIcon(key, size: 26),
                   ),
-                ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          Text(
-            'Thưởng khi làm trọn bộ: $_bonus xu',
-            style: context.text.titleSmall,
-          ),
-          Slider(
-            value: _bonus.toDouble(),
-            max: 50,
-            divisions: 10,
-            label: '$_bonus xu',
-            onChanged: (v) => setState(() => _bonus = v.round()),
-          ),
-          Text(
-            _bonus == 0
-                ? 'Đang tắt — con không được thưởng thêm khi xong cả bộ.'
-                : 'Con làm xong hết việc trong thói quen thì được thêm $_bonus xu.',
-            style: context.text.bodySmall?.copyWith(
-              color: context.semantic.onSurfaceMuted,
+                  const SizedBox(height: AppSpacing.xl),
+                  Text('Chọn hình', style: context.text.titleSmall),
+                  const SizedBox(height: AppSpacing.sm),
+                  // Lưới rút gọn kèm đường mở kho đầy đủ, giống bảng tạo buổi.
+                  // Đổ thẳng 125 hình ra đây là bắt bố mẹ cuộn qua chúng mỗi
+                  // lần chỉ muốn sửa cái tên.
+                  IconPickerGrid(
+                    iconKeys: kTaskIconKeys,
+                    selected: _iconKey,
+                    onSelected: (key) => setState(() => _iconKey = key),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  Text(
+                    'Thưởng khi làm trọn bộ: $_bonus xu',
+                    style: context.text.titleSmall,
+                  ),
+                  Slider(
+                    value: _bonus.toDouble(),
+                    max: 50,
+                    divisions: 10,
+                    label: '$_bonus xu',
+                    onChanged: (v) => setState(() => _bonus = v.round()),
+                  ),
+                  Text(
+                    _bonus == 0
+                        ? 'Đang tắt — con không được thưởng thêm khi xong cả bộ.'
+                        : 'Con làm xong hết việc trong thói quen thì được thêm '
+                              '$_bonus xu.',
+                    style: context.text.bodySmall?.copyWith(
+                      color: context.semantic.onSurfaceMuted,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: AppSpacing.xl),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _title.text.trim().isEmpty
-                  ? null
-                  : () => unawaited(_save()),
-              child: const Text('LƯU'),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              0,
+              AppSpacing.xl,
+              AppSpacing.xl,
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _title.text.trim().isEmpty
+                    ? null
+                    : () => unawaited(_save()),
+                child: const Text('LƯU'),
+              ),
             ),
           ),
         ],

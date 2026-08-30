@@ -176,6 +176,18 @@ class _TaskListState extends State<_TaskList> {
   Future<void> _doiXu(Task task, int xuMoi) =>
       widget.taskDao.updateTask(taskId: task.id, points: xuMoi);
 
+  /// Mở bảng tạo buổi thói quen mới.
+  Future<void> _taoThoiQuen() async {
+    final children = await widget.memberDao.children(widget.familyId);
+    if (!mounted) return;
+    await showRoutineCreateSheet(
+      context,
+      taskDao: widget.taskDao,
+      familyId: widget.familyId,
+      children: children,
+    );
+  }
+
   /// Sửa một việc đã tạo: tên, hình, xu, và buổi nó thuộc về.
   Future<void> _suaViec(Task task) async {
     final routines = await widget.taskDao.activeRoutines(widget.familyId);
@@ -286,14 +298,12 @@ class _TaskListState extends State<_TaskList> {
     }
 
     final routineTasks = <String, List<Task>>{};
-    final standaloneTasks = <Task>[];
-
     for (final task in allTasks) {
-      if (task.routineId != null) {
-        routineTasks.putIfAbsent(task.routineId!, () => []).add(task);
-      } else {
-        standaloneTasks.add(task);
-      }
+      // Việc lẻ không hiện ở đây nữa (30/08/2026). `DonViecLe.nhanNuoi` chạy
+      // mỗi lần mở app và đưa chúng về buổi "Việc khác", nên chỗ này chỉ bỏ
+      // qua phần còn sót giữa hai lần chạy — không phải giấu chúng đi.
+      if (task.routineId == null) continue;
+      routineTasks.putIfAbsent(task.routineId!, () => []).add(task);
     }
 
     return ListView(
@@ -328,46 +338,58 @@ class _TaskListState extends State<_TaskList> {
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.xl),
-        ],
-        // Lưới an toàn, không phải một mục bình thường của màn hình.
-        //
-        // Từ v0.3.2 mọi việc đều thuộc một buổi, và `DonViecLe` đã gom hết việc
-        // cũ vào buổi khi nâng cấp. Khối này chỉ hiện nếu vẫn còn sót — và nói
-        // thẳng ra là còn sót, thay vì bày nó ra như một cách dùng bình thường.
-        if (standaloneTasks.isNotEmpty) ...[
-          Text('Chưa xếp buổi', style: context.text.titleMedium),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Những việc này chưa thuộc buổi nào nên chưa bé nào nhìn thấy. '
-            'Bấm vào để xếp vào một buổi.',
-            style: context.text.bodySmall?.copyWith(
-              color: context.semantic.danger,
-            ),
-          ),
           const SizedBox(height: AppSpacing.md),
-          ...standaloneTasks.map(
-            (task) => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.xs,
-                  ),
-                  child: TaskRow(
-                    task: task,
-                    onTap: widget.isParent ? () => _suaViec(task) : null,
-                    onPointsChanged: widget.isParent
-                        ? (xu) => _doiXu(task, xu)
-                        : null,
+        ],
+        // Đường tạo buổi mới nằm ngay dưới danh sách buổi, không chỉ trong nút
+        // "+" nổi: chủ dự án nêu 30/08/2026. Đứng ở đây thì nó nói được nó tạo
+        // ra cái gì — một dòng nữa cùng loại với những thẻ ngay trên.
+        if (widget.isParent)
+          _ThemThoiQuenRow(onTap: () => unawaited(_taoThoiQuen())),
+      ],
+    );
+  }
+}
+
+/// Dòng "Tạo thêm thói quen" đóng danh sách buổi.
+class _ThemThoiQuenRow extends StatelessWidget {
+  const _ThemThoiQuenRow({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      // Viền đứt: phân biệt "chỗ để thêm" với "thứ đã có". Cùng khối đặc như
+      // thẻ buổi thì mắt đọc nó thành một buổi tên là "Tạo thêm thói quen".
+      color: context.colors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: const BorderRadius.all(Radius.circular(AppRadius.card)),
+        side: BorderSide(color: context.colors.outlineVariant),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: const BorderRadius.all(Radius.circular(AppRadius.card)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.lg,
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.add_rounded, color: context.colors.primary),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  'Tạo thêm thói quen',
+                  style: context.text.titleSmall?.copyWith(
+                    color: context.colors.primary,
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ],
+        ),
+      ),
     );
   }
 }

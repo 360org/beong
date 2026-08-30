@@ -104,6 +104,35 @@ class DonViecLe {
     }
 
     // --- Bước 2: gom việc lẻ còn lại vào buổi, nhóm theo tập người nhận ---
+    final ketQuaGom = await _gomVaoBuoi(familyId, conLai);
+
+    return KetQuaDon(
+      daChay: true,
+      daTatTrung: daTat,
+      daGomVaoBuoi: ketQuaGom.daGomVaoBuoi,
+      buoiMoiTao: ketQuaGom.buoiMoiTao,
+    );
+  }
+
+  /// Nhận nuôi mọi việc lẻ còn sót về buổi "Việc khác". Chạy **mỗi lần mở app**,
+  /// không có cờ chặn.
+  ///
+  /// Vì sao cần dù [chay] đã dọn một lần: từ 30/08/2026 màn Nhiệm vụ **không
+  /// còn mục "Chưa xếp buổi"** nữa. Mà app vẫn có hai đường sinh việc lẻ sau
+  /// khi đã dọn — bỏ một việc khỏi thói quen (`detachTaskFromRoutine`) và ngừng
+  /// dùng cả một thói quen (`archiveRoutine`, việc bên trong tách ra). Không có
+  /// lưới này thì việc rơi ra khỏi buổi là **biến mất khỏi mọi màn hình** mà
+  /// vẫn nằm trong DB: bố mẹ không thấy để sửa, con không thấy để làm.
+  ///
+  /// Rẻ khi không có gì để làm: một truy vấn, thấy rỗng là thoát.
+  Future<KetQuaDon> nhanNuoi(String familyId) async {
+    final tatCa = await taskDao.activeTasks(familyId);
+    final vietLe = tatCa.where((t) => t.routineId == null).toList();
+    if (vietLe.isEmpty) return const KetQuaDon(daChay: true);
+    return _gomVaoBuoi(familyId, vietLe);
+  }
+
+  Future<KetQuaDon> _gomVaoBuoi(String familyId, List<Task> conLai) async {
     final theoNhom = <String, List<Task>>{};
     final nguoiNhanCuaNhom = <String, List<String>>{};
     for (final task in conLai) {
@@ -147,7 +176,6 @@ class DonViecLe {
 
     return KetQuaDon(
       daChay: true,
-      daTatTrung: daTat,
       daGomVaoBuoi: daGom,
       buoiMoiTao: buoiMoi,
     );

@@ -514,14 +514,47 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
   ///
   /// Không xoá hẳn: lượt đã sinh và các dòng sổ cái vẫn trỏ tới `task_id` này
   /// (ADR-005 append-only). Xoá đi thì "Sổ của con" mất tên việc.
+  ///
+  /// **Chép người nhận của buổi sang việc trước khi tách.** Việc nằm trong buổi
+  /// lấy người nhận từ `RoutineAssignees`, không có dòng nào trong
+  /// `TaskAssignees` (`task_dao.dart:151`). Tách ra mà không chép thì việc
+  /// thành "không giao cho ai": nó không sinh lượt cho bé nào
+  /// (`schedule.dart:148`), và `DonViecLe` cũng bỏ qua không nhận nuôi vì
+  /// không biết xếp nó vào buổi của ai — việc kẹt lại ngoài mọi màn hình.
   Future<void> detachTaskFromRoutine(String taskId) {
-    return (update(tasks)..where((t) => t.id.equals(taskId))).write(
-      TasksCompanion(
-        routineId: const Value(null),
-        orderIndex: const Value(null),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    return transaction(() async {
+      final task = await (select(
+        tasks,
+      )..where((t) => t.id.equals(taskId))).getSingleOrNull();
+      final routineId = task?.routineId;
+
+      if (routineId != null) {
+        final daCo = await (select(
+          taskAssignees,
+        )..where((a) => a.taskId.equals(taskId))).get();
+        if (daCo.isEmpty) {
+          final nguoiNhan = await (select(
+            routineAssignees,
+          )..where((a) => a.routineId.equals(routineId))).get();
+          for (final a in nguoiNhan) {
+            await into(taskAssignees).insert(
+              TaskAssigneesCompanion.insert(
+                taskId: taskId,
+                memberId: a.memberId,
+              ),
+            );
+          }
+        }
+      }
+
+      await (update(tasks)..where((t) => t.id.equals(taskId))).write(
+        TasksCompanion(
+          routineId: const Value(null),
+          orderIndex: const Value(null),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    });
   }
 
   /// Đưa một việc lẻ vào cuối một routine.

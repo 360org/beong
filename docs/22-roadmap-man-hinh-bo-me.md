@@ -237,6 +237,9 @@ bỏ nó **sau** khi tab Nhiệm vụ làm được cả hai việc đó.
 | 2.1 · Nhóm theo buổi | ✅ | `ChildDayGroups`, có đã xong/tổng |
 | 2.2 · Vuốt ngang xem lịch sử | ✅ | Bỏ nút lịch ngày 30/08 theo yêu cầu; vuốt là đường duy nhất |
 | 2.4 · Chạm header gập/mở | ✅ | Mặc định mở; mũi tên là chỉ dấu bấm được |
+| 2.5 · Bỏ mục "Chưa xếp buổi" | ✅ | `DonViecLe.nhanNuoi` chạy mỗi lần mở app thay cho nó |
+| 2.6 · Dòng "Tạo thêm thói quen" | ✅ | Cuối danh sách buổi; popup thêm được việc luôn |
+| 2.7 · Nút LƯU ở Sửa thói quen | ✅ | Bảng cuộn được, nút dính đáy — trước bị 125 hình đẩy khỏi màn hình |
 | 2.3 · Áp cho mọi hồ sơ | ✅ | Dùng chung thẻ con |
 | 4.1 · Nút thêm hũ | ⚠️ | Xong phần cả nhà — xem giới hạn bên dưới |
 

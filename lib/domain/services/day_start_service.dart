@@ -90,10 +90,14 @@ class DayStartService {
     // Đặt ở đây, ngoài khoá một-lần-mỗi-ngày, vì đây cũng là đường nâng cấp:
     // nhà cài từ bản trước v0.3.2 đang có việc bị tạo hai lần và việc đứng
     // ngoài mọi buổi. `DonViecLe` tự giữ cờ riêng nên chạy đúng một lần.
-    await DonViecLe(
-      taskDao: _tasks,
-      settingsDao: _settings,
-    ).chayNeuCan(familyId);
+    final donViecLe = DonViecLe(taskDao: _tasks, settingsDao: _settings);
+    await donViecLe.chayNeuCan(familyId);
+
+    // Và nhận nuôi việc lẻ **mỗi lần**, không chỉ lần đầu. Màn Nhiệm vụ không
+    // còn mục "Chưa xếp buổi" nữa (30/08/2026), mà bỏ việc khỏi thói quen hay
+    // ngừng dùng cả thói quen thì vẫn sinh ra việc lẻ. Thiếu bước này là việc
+    // đó biến mất khỏi mọi màn hình trong khi vẫn nằm trong DB.
+    await donViecLe.nhanNuoi(familyId);
 
     // Bù icon cho việc tạo bằng sheet cũ (chưa có ô chọn hình). Cùng lý do với
     // gieo hũ ở trên: sửa dữ liệu một lần thay vì vá chỗ hiển thị.
