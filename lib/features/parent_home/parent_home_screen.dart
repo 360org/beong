@@ -618,6 +618,21 @@ const kVanTocVuot = 200.0;
 bool laVuotNgangThatSu({required double quangDuong, required double vanToc}) =>
     quangDuong.abs() >= kQuangDuongVuot || vanToc.abs() >= kVanTocVuot;
 
+/// Số ngày lùi mới sau một cú vuốt.
+///
+/// Vuốt sang **phải** (dx dương) = lùi về quá khứ, giống lật ngược một cuốn
+/// sổ; vuốt trái quay lại phía hôm nay. Kẹp trong `[0, toiDa]`: không có
+/// tương lai để xem, và lùi quá xa thì chỉ còn khoảng trắng.
+int luiNgaySauVuot({
+  required int hienTai,
+  required double quangDuong,
+  required double vanToc,
+  required int toiDa,
+}) {
+  final sangPhai = (quangDuong != 0 ? quangDuong : vanToc) > 0;
+  return (sangPhai ? hienTai + 1 : hienTai - 1).clamp(0, toiDa);
+}
+
 class _ChildSummaryCard extends ConsumerStatefulWidget {
   const _ChildSummaryCard({
     required this.child,
@@ -648,17 +663,38 @@ class _ChildSummaryCardState extends ConsumerState<_ChildSummaryCard> {
   /// Tổng quãng đường ngón tay đã đi ngang trong cú kéo đang diễn ra.
   double _keoNgang = 0;
 
-  void _moLichSu(CalendarDate today) {
-    unawaited(
-      ChildHistoryModal.show(
-        context,
-        child: widget.child,
-        taskDao: widget.taskDao,
-        walletDao: widget.walletDao,
-        initialDate: today,
-      ),
-    );
+  /// Đang xem lùi bao nhiêu ngày. 0 = hôm nay.
+  ///
+  /// Vuốt ngang **đổi thẳng nội dung thẻ**, không mở hộp thoại: chủ dự án nêu
+  /// 30/08/2026 — *"vuốt ngang sang là quay về lịch sử chứ không phải vuốt qua
+  /// rồi mới popup lên"*. Một cú vuốt mà kết quả là một lớp phủ mới thì vẫn là
+  /// rời khỏi màn hình đang xem, chỉ khác cách mở.
+  int _luiNgay = 0;
+
+  /// Giới hạn lùi. Xa hơn nữa thì `watchInstancesForMember` trả rỗng và thẻ
+  /// chỉ còn một khoảng trắng — vuốt mãi không tới đâu còn khó hiểu hơn là có
+  /// điểm dừng.
+  static const _luiToiDa = 30;
+
+  void _vuot(double vanToc) {
+    if (!laVuotNgangThatSu(quangDuong: _keoNgang, vanToc: vanToc)) return;
+    // Vuốt sang **phải** (dx dương) = lùi về quá khứ, giống lật ngược một cuốn
+    // sổ. Vuốt trái quay lại phía hôm nay.
+    setState(() {
+      _luiNgay = luiNgaySauVuot(
+        hienTai: _luiNgay,
+        quangDuong: _keoNgang,
+        vanToc: vanToc,
+        toiDa: _luiToiDa,
+      );
+    });
   }
+
+  String _nhanNgay(CalendarDate ngay) => switch (_luiNgay) {
+    0 => 'Hôm nay',
+    1 => 'Hôm qua',
+    _ => '$_luiNgay ngày trước · ${ngay.day}/${ngay.month}',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -671,6 +707,7 @@ class _ChildSummaryCardState extends ConsumerState<_ChildSummaryCard> {
         (ref.watch(familyClockProvider(child.familyId)).value ??
                 fallbackFamilyClock())
             .today();
+    final ngayXem = today.addDays(-_luiNgay);
 
     return Card(
       // Cử chỉ vuốt đặt ở **cả thẻ**, không chỉ ở dải chữ tên con.
@@ -684,14 +721,7 @@ class _ChildSummaryCardState extends ConsumerState<_ChildSummaryCard> {
         behavior: HitTestBehavior.opaque,
         onHorizontalDragStart: (_) => _keoNgang = 0,
         onHorizontalDragUpdate: (chiTiet) => _keoNgang += chiTiet.delta.dx,
-        onHorizontalDragEnd: (chiTiet) {
-          if (laVuotNgangThatSu(
-            quangDuong: _keoNgang,
-            vanToc: chiTiet.primaryVelocity ?? 0,
-          )) {
-            _moLichSu(today);
-          }
-        },
+        onHorizontalDragEnd: (chiTiet) => _vuot(chiTiet.primaryVelocity ?? 0),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
@@ -755,7 +785,7 @@ class _ChildSummaryCardState extends ConsumerState<_ChildSummaryCard> {
                           StreamBuilder<List<TaskInstance>>(
                             stream: taskDao.watchInstancesForMember(
                               memberId: child.id,
-                              date: today,
+                              date: ngayXem,
                             ),
                             builder: (context, snap) {
                               final instances = snap.data ?? [];
@@ -769,7 +799,8 @@ class _ChildSummaryCardState extends ConsumerState<_ChildSummaryCard> {
                                   )
                                   .length;
                               return Text(
-                                '$done / ${instances.length} việc hôm nay',
+                                '$done / ${instances.length} việc '
+                                '${_luiNgay == 0 ? "hôm nay" : _nhanNgay(ngayXem).toLowerCase()}',
                                 style: context.text.bodySmall?.copyWith(
                                   color: context.semantic.onSurfaceMuted,
                                 ),
@@ -790,25 +821,130 @@ class _ChildSummaryCardState extends ConsumerState<_ChildSummaryCard> {
                 ],
               ),
               if (_moRong) ...[
+                if (_luiNgay > 0)
+                  _ThanhNgayLui(
+                    nhan: _nhanNgay(ngayXem),
+                    onVeHomNay: () => setState(() => _luiNgay = 0),
+                    onChiTiet: () => unawaited(
+                      ChildHistoryModal.show(
+                        context,
+                        child: child,
+                        taskDao: taskDao,
+                        walletDao: walletDao,
+                        initialDate: ngayXem,
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: AppSpacing.xs),
                 ChildDayGroups(
                   memberId: child.id,
                   familyId: child.familyId,
-                  date: today,
+                  date: ngayXem,
                   taskDao: taskDao,
                 ),
                 _DoneTodayList(
                   memberId: child.id,
-                  date: today,
+                  date: ngayXem,
                   taskDao: taskDao,
                   reviewService: widget.reviewService,
                   reviewerId: widget.reviewerId,
                 ),
+                if (_luiNgay > 0)
+                  _KhongCoViec(
+                    memberId: child.id,
+                    date: ngayXem,
+                    taskDao: taskDao,
+                  ),
               ],
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Thanh nhỏ hiện khi thẻ đang xem một ngày trong quá khứ.
+///
+/// Có mặt vì cú vuốt là cử chỉ không nhìn thấy được: vuốt nhầm mà không có
+/// dòng nào nói "đây là hôm qua" thì bố mẹ đọc số liệu cũ tưởng là hôm nay.
+class _ThanhNgayLui extends StatelessWidget {
+  const _ThanhNgayLui({
+    required this.nhan,
+    required this.onVeHomNay,
+    required this.onChiTiet,
+  });
+
+  final String nhan;
+  final VoidCallback onVeHomNay;
+
+  /// Mở bảng lịch sử đầy đủ — nơi duy nhất có thống kê theo **tuần**. Vuốt
+  /// ngang chỉ đi từng ngày một; bỏ hẳn đường này là mất luôn phần tuần.
+  final VoidCallback onChiTiet;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Row(
+        children: [
+          Icon(
+            Icons.history_rounded,
+            size: 18,
+            color: context.colors.primary,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Expanded(
+            child: Text(
+              nhan,
+              style: context.text.titleSmall?.copyWith(
+                color: context.colors.primary,
+              ),
+            ),
+          ),
+          TextButton(onPressed: onChiTiet, child: const Text('Chi tiết')),
+          // Vuốt ngược lại cũng về được, nhưng ai vuốt lỡ mười ngày thì phải
+          // vuốt lại mười lần. Một nút là đủ.
+          TextButton(onPressed: onVeHomNay, child: const Text('Về hôm nay')),
+        ],
+      ),
+    );
+  }
+}
+
+/// Câu thay cho khoảng trắng khi ngày đang xem không có việc nào.
+///
+/// Thẻ rỗng trơn thì không phân biệt được "hôm đó con không có việc" với "app
+/// chưa tải xong".
+class _KhongCoViec extends StatelessWidget {
+  const _KhongCoViec({
+    required this.memberId,
+    required this.date,
+    required this.taskDao,
+  });
+
+  final String memberId;
+  final CalendarDate date;
+  final TaskRepository taskDao;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<TaskInstance>>(
+      stream: taskDao.watchInstancesForMember(memberId: memberId, date: date),
+      builder: (context, snap) {
+        if (snap.data == null || snap.data!.isNotEmpty) {
+          return const SizedBox.shrink();
+        }
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+          child: Text(
+            'Ngày này chưa có việc nào.',
+            style: context.text.bodySmall?.copyWith(
+              color: context.semantic.onSurfaceMuted,
+            ),
+          ),
+        );
+      },
     );
   }
 }

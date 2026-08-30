@@ -61,4 +61,46 @@ void main() {
       );
     });
   });
+
+  group('vuốt đổi ngày ngay trên thẻ, không mở hộp thoại', () {
+    // Chủ dự án 30/08/2026: "vuốt ngang sang là quay về lịch sử chứ không phải
+    // vuốt qua rồi mới popup lên". Một cú vuốt mà kết quả là một lớp phủ mới
+    // thì vẫn là rời khỏi màn hình đang xem, chỉ khác cách mở.
+
+    int vuot(int hienTai, double quangDuong) => luiNgaySauVuot(
+      hienTai: hienTai,
+      quangDuong: quangDuong,
+      vanToc: 0,
+      toiDa: 30,
+    );
+
+    test('vuốt phải lùi về quá khứ', () {
+      expect(vuot(0, 120), 1);
+      expect(vuot(1, 120), 2);
+    });
+
+    test('vuốt trái quay lại phía hôm nay', () {
+      expect(vuot(2, -120), 1);
+      expect(vuot(1, -120), 0);
+    });
+
+    test('không đi quá hôm nay — không có tương lai để xem', () {
+      expect(vuot(0, -120), 0);
+    });
+
+    test('không lùi quá giới hạn — xa hơn chỉ còn khoảng trắng', () {
+      expect(vuot(30, 120), 30);
+    });
+
+    test('cú vẩy nhanh không kéo cũng biết hướng từ vận tốc', () {
+      expect(
+        luiNgaySauVuot(hienTai: 0, quangDuong: 0, vanToc: 900, toiDa: 30),
+        1,
+      );
+      expect(
+        luiNgaySauVuot(hienTai: 3, quangDuong: 0, vanToc: -900, toiDa: 30),
+        2,
+      );
+    });
+  });
 }

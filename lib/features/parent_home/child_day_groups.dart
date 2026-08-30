@@ -140,9 +140,25 @@ class _Nhom {
   final int thuTu;
   final List<TaskInstance> luot;
 
-  int get daXong =>
-      luot.where((i) => i.status != InstanceStatus.scheduled.name).length;
+  int get daXong => luot.where((i) => daLamXong(i.status)).length;
 }
+
+/// Lượt việc này có thật sự **đã làm xong** không.
+///
+/// Chỉ `approved` và `pendingReview` mới tính. Bản trước lấy "khác
+/// `scheduled`" là xong, nên `missed` và `rejected` cũng được đếm là xong —
+/// lỗi này không ai thấy chừng nào thẻ chỉ hiện hôm nay, vì việc hôm nay chưa
+/// kịp bị đánh dấu bỏ lỡ. Vuốt ngang xem ngày cũ (30/08/2026) là nó lộ ra
+/// ngay: một ngày con **không làm gì cả** hiện "5/5" với dấu tích xanh, trong
+/// khi dòng đầu thẻ ghi "0/12 việc".
+bool daLamXong(String status) =>
+    status == InstanceStatus.approved.name ||
+    status == InstanceStatus.pendingReview.name;
+
+/// Bỏ lỡ hoặc bị từ chối — đã qua, nhưng **không phải** đã xong.
+bool daHongViec(String status) =>
+    status == InstanceStatus.missed.name ||
+    status == InstanceStatus.rejected.name;
 
 class _NhomBuoi extends StatelessWidget {
   const _NhomBuoi({required this.nhom, required this.tenViec});
@@ -204,7 +220,8 @@ class _DongViec extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final xong = luot.status != InstanceStatus.scheduled.name;
+    final xong = daLamXong(luot.status);
+    final hong = daHongViec(luot.status);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
@@ -213,13 +230,17 @@ class _DongViec extends StatelessWidget {
           // Trạng thái nói bằng **hình lẫn chữ**, không chỉ bằng màu — WCAG
           // 1.4.1, và bố mẹ hay liếc màn hình dưới nắng.
           Icon(
-            xong
-                ? Icons.check_circle_rounded
-                : Icons.radio_button_unchecked_rounded,
+            switch ((xong, hong)) {
+              (true, _) => Icons.check_circle_rounded,
+              (_, true) => Icons.cancel_rounded,
+              _ => Icons.radio_button_unchecked_rounded,
+            },
             size: 18,
-            color: xong
-                ? context.semantic.success
-                : context.semantic.onSurfaceMuted,
+            color: switch ((xong, hong)) {
+              (true, _) => context.semantic.success,
+              (_, true) => context.semantic.danger,
+              _ => context.semantic.onSurfaceMuted,
+            },
           ),
           const SizedBox(width: AppSpacing.sm),
           AppIcon.task(viec?.iconKey, size: 20),
@@ -228,8 +249,8 @@ class _DongViec extends StatelessWidget {
             child: Text(
               viec?.title ?? 'Việc đã gỡ',
               style: context.text.bodyMedium?.copyWith(
-                decoration: xong ? TextDecoration.lineThrough : null,
-                color: xong ? context.semantic.onSurfaceMuted : null,
+                decoration: xong || hong ? TextDecoration.lineThrough : null,
+                color: xong || hong ? context.semantic.onSurfaceMuted : null,
               ),
             ),
           ),

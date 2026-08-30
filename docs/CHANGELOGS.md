@@ -4,6 +4,32 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.6.1+31 (2026-08-30) — Vuốt ngang đổi ngày ngay trên thẻ
+
+Vuốt ngang trên thẻ con ở Trang chính trước đây mở một **hộp thoại** phủ lên
+màn hình. Đó vẫn là rời khỏi màn hình đang xem, chỉ khác cách mở.
+
+Nay vuốt sang phải là thẻ **đổi ngay nội dung** sang hôm qua, vuốt tiếp là lùi
+thêm một ngày, vuốt trái quay lại. Có một dòng nhỏ ghi rõ đang xem ngày nào —
+cú vuốt là cử chỉ không nhìn thấy được, vuốt nhầm mà không có dòng đó thì bố
+mẹ đọc số liệu cũ tưởng là hôm nay. Kèm nút "Về hôm nay" cho ai lỡ vuốt xa, và
+nút "Chi tiết" mở bảng thống kê theo tuần — phần đó chỉ có ở bảng đầy đủ.
+
+### 🐛 Sửa: việc bỏ lỡ bị đếm là đã xong
+
+Lỗi này lộ ra ngay khi xem được ngày cũ: một ngày con **không làm gì cả** hiện
+"5/5" kèm dấu tích xanh, trong khi dòng đầu thẻ ghi "0/12 việc" — hai con số
+mâu thuẫn trên cùng một thẻ.
+
+Thẻ đang lấy "khác *chưa tới lượt*" làm "đã xong", nên việc **bỏ lỡ** và việc
+**bị từ chối** cũng được tính là xong. Lỗi nằm im chừng nào thẻ chỉ hiện hôm
+nay, vì việc hôm nay chưa kịp bị đánh dấu bỏ lỡ.
+
+Nay chỉ việc đã duyệt hoặc đang chờ duyệt mới tính là xong. Việc bỏ lỡ mang
+dấu ✗ đỏ, không phải dấu tích xanh.
+
+---
+
 ## v0.6.0+30 (2026-08-30) — Không còn việc trùng tên trong một buổi
 
 Buổi "nữa đêm" của một bé đang có **"Mặc đồ ngủ" hai lần**: hai việc y hệt,
