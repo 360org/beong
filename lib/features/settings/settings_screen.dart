@@ -21,6 +21,7 @@ import 'package:beong/features/members/edit_child_sheet.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
 import 'package:beong/features/members/pairing_sheet.dart';
 import 'package:beong/features/settings/bao_loi_screen.dart';
+import 'package:beong/features/settings/ty_gia_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -625,7 +626,11 @@ class _ExchangeRateTile extends ConsumerWidget {
 
   final String familyId;
 
-  /// Các mức cho chọn, tính bằng **xu đổi được 1.000 đ**.
+  /// Các mức bấm một cái là xong, tính bằng **xu đổi được 1.000 đ**.
+  ///
+  /// Không phải danh sách đóng: dòng "Tự nhập số khác" ở cuối bảng nhận mọi
+  /// con số khác (chủ dự án nêu 30/08/2026). Sáu mức này chỉ là lối tắt cho
+  /// các nhà rơi đúng vào chúng.
   static const _choices = <int>[1, 2, 5, 10, 20, 50];
 
   @override
@@ -655,6 +660,10 @@ class _ExchangeRateTile extends ConsumerWidget {
   ) async {
     // `-1` là "tắt": `null` đã mang nghĩa "bố mẹ đóng sheet, không chọn gì".
     const off = -1;
+    // `-2` là "mở bảng tự nhập". Bảng nhập phải mở **sau** khi bảng chọn đóng,
+    // không phải chồng lên nó: chồng hai bảng thì đóng cái trên lại lộ ra cái
+    // dưới, và bố mẹ tưởng thao tác của mình không ăn.
+    const tuNhap = -2;
     final chosen = await showModalBottomSheet<int>(
       context: context,
       builder: (sheetContext) => SafeArea(
@@ -694,15 +703,40 @@ class _ExchangeRateTile extends ConsumerWidget {
                       : null,
                   onTap: () => Navigator.pop(sheetContext, rate),
                 ),
+              ListTile(
+                leading: const Icon(Icons.edit_rounded),
+                title: const Text('Tự nhập số khác'),
+                // Mức đang đặt mà không nằm trong sáu lối tắt thì nó phải hiện
+                // **ở đây**, kèm dấu tích. Không hiện thì bảng chọn trông như
+                // nhà này chưa đặt gì, trong khi tỷ giá vẫn đang chạy.
+                subtitle: current != null && !_choices.contains(current)
+                    ? Text('Đang đặt: $current xu = 1.000 đ')
+                    : null,
+                trailing: current != null && !_choices.contains(current)
+                    ? Icon(Icons.check_circle, color: context.colors.primary)
+                    : const Icon(Icons.chevron_right_rounded),
+                onTap: () => Navigator.pop(sheetContext, tuNhap),
+              ),
             ],
           ),
         ),
       ),
     );
     if (chosen == null) return;
+
+    var rate = chosen;
+    if (rate == tuNhap) {
+      if (!context.mounted) return;
+      final soNhap = await showTyGiaSheet(context, dangDat: current);
+      // Đóng bảng nhập mà không lưu thì **không đổi gì cả** — kể cả không tắt
+      // quy đổi. Bố mẹ mới chỉ bấm "Tự nhập số khác", chưa nói ra số nào.
+      if (soNhap == null) return;
+      rate = soNhap;
+    }
+
     await ref
         .read(memberRepositoryProvider)
-        .setExchangeRate(familyId, chosen == off ? null : chosen);
+        .setExchangeRate(familyId, rate == off ? null : rate);
   }
 }
 

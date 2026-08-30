@@ -203,7 +203,9 @@ Từng việc riêng có thể đặt khác cả nhà, ở ô "Bỏ việc này 
 ## 8. Quy đổi ra tiền thật
 
 **Mặc định tắt** (ảnh `15`). Bật lên thì con thấy số xu của mình đáng bao nhiêu tiền,
-theo tỷ lệ bạn chọn (1 xu = 1.000đ, 10 xu = 1.000đ…).
+theo tỷ lệ bạn chọn (1 xu = 1.000đ, 10 xu = 1.000đ…). Sáu mức có sẵn chỉ là lối tắt —
+nhà bạn đặt số nào cũng được: chọn **Tự nhập số khác** ở cuối bảng rồi gõ thẳng con số,
+app cho xem trước 100 xu của con đáng bao nhiêu tiền trước khi lưu.
 
 Đây **chỉ là hiển thị**. App không nối ví điện tử, không chuyển tiền, không giữ thông
 tin thanh toán. Việc trả tiền là chuyện giữa bạn và con, ngoài app.

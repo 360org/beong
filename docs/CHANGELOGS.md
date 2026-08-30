@@ -4,6 +4,28 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.7.7+41 (2026-08-30) — Tự nhập tỷ giá quy đổi xu
+
+Chủ dự án: *"chỗ quy đổi xu phải có option cho người dùng chọn nhập số quy
+đổi."*
+
+Bảng **Quy đổi tiền thật** trước đây chỉ có sáu mức đóng: 1, 2, 5, 10, 20, 50
+xu ăn 1.000 đ. Nhà nào đặt 3, 15 hay 100 thì không có cách nào nói ra con số
+của mình. Nay cuối bảng có dòng **Tự nhập số khác** — gõ thẳng con số, và
+trước khi lưu app cho xem *"con có 100 xu thì ≈ bao nhiêu đồng"*, để bố mẹ
+thấy tỷ giá mình vừa đặt nghĩa là gì chứ không phải đoán.
+
+Số gõ vào được kiểm trước khi lưu: nhận số có dấu chấm ngăn nghìn theo lối
+viết tiếng Việt (`1.000`), từ chối số 0, số âm, chữ và số vượt 100.000. Riêng
+số 0 là quan trọng nhất — tỷ giá nằm dưới mẫu của phép chia, nên một số 0 lọt
+qua làm hỏng mọi màn có hiện tiền.
+
+Sửa kèm: mức đang đặt mà không nằm trong sáu lối tắt thì bảng chọn không đánh
+dấu ở đâu cả, trông như nhà này chưa đặt gì trong khi tỷ giá vẫn đang chạy.
+Nay nó hiện ngay trên dòng tự nhập, kèm dấu tích.
+
+---
+
 ## v0.7.6+40 (2026-08-30) — Bỏ màn quản lý hũ trong Cài đặt
 
 Chủ dự án: *"phần cấu hình các hũ trong Cài đặt → Các hũ bỏ đi vì đã cấu hình
