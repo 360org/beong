@@ -13,6 +13,7 @@ import 'package:beong/core/widgets/icon_picker.dart';
 import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
 import 'package:beong/core/widgets/sheet_header.dart';
+import 'package:beong/core/widgets/thong_bao.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/presets.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
@@ -556,6 +557,45 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
         ? RepeatType.daily
         : _repeat;
 
+    try {
+      await _ghiViec(
+        id: id,
+        title: title,
+        points: points,
+        routineId: routineId,
+        effectiveRepeat: effectiveRepeat,
+      );
+    } on TaskTrungTenException {
+      // Nói thẳng lý do. Đóng bảng im lặng thì bố mẹ tưởng đã tạo xong và đi
+      // tìm việc vừa tạo — không thấy, rồi tạo lại lần nữa.
+      if (mounted) {
+        hienThongBao(
+          context,
+          'Buổi này đã có việc tên "$title" rồi.',
+        );
+      }
+      return;
+    }
+
+    // Sinh ngay instance cho hôm nay để việc mới phản ánh ngay trên hồ sơ con
+    final today = FamilyClock(
+      timeZoneOffset: DateTime.now().timeZoneOffset,
+    ).today();
+    await widget.taskDao.generateInstances(
+      familyId: widget.familyId,
+      today: today,
+    );
+
+    if (mounted) Navigator.pop(context);
+  }
+
+  Future<void> _ghiViec({
+    required String id,
+    required String title,
+    required int points,
+    required String routineId,
+    required RepeatType effectiveRepeat,
+  }) async {
     await widget.taskDao.createTask(
       TasksCompanion.insert(
         id: id,
@@ -587,17 +627,6 @@ class _AddTaskSheetState extends State<_AddTaskSheet> {
       // đọc — đúng loại dữ liệu chết dự án đã dọn nhiều lần.
       const [],
     );
-
-    // Sinh ngay instance cho hôm nay để việc mới phản ánh ngay trên hồ sơ con
-    final today = FamilyClock(
-      timeZoneOffset: DateTime.now().timeZoneOffset,
-    ).today();
-    await widget.taskDao.generateInstances(
-      familyId: widget.familyId,
-      today: today,
-    );
-
-    if (mounted) Navigator.pop(context);
   }
 
   @override

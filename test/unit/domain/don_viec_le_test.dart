@@ -240,4 +240,179 @@ void main() {
       );
     });
   });
+
+  group('chặn và dọn việc trùng tên trong cùng một buổi', () {
+    // Chủ dự án 30/08/2026: buổi "nữa đêm" có "Mặc đồ ngủ" **hai lần** — con
+    // phải bấm hai lần và xu cộng gấp đôi cho cùng một hành động.
+
+    test('createTask từ chối việc trùng tên trong cùng buổi', () async {
+      await expectLater(
+        taskDao.createTask(
+          TasksCompanion.insert(
+            id: 'trung-1',
+            familyId: familyId,
+            title: 'Đánh răng buổi sáng',
+            routineId: const Value(routineId),
+          ),
+          const [],
+        ),
+        throwsA(isA<TaskTrungTenException>()),
+      );
+    });
+
+    test('so tên bỏ qua hoa thường và khoảng trắng thừa', () async {
+      await expectLater(
+        taskDao.createTask(
+          TasksCompanion.insert(
+            id: 'trung-2',
+            familyId: familyId,
+            title: '  ĐÁNH   RĂNG buổi sáng ',
+            routineId: const Value(routineId),
+          ),
+          const [],
+        ),
+        throwsA(isA<TaskTrungTenException>()),
+        reason: 'gõ lệch khoảng trắng vẫn là cùng một việc với con',
+      );
+    });
+
+    test('cùng tên nhưng KHÁC buổi thì vẫn tạo được', () async {
+      await taskDao.createRoutine(
+        routine: RoutinesCompanion.insert(
+          id: 'routine-toi',
+          familyId: familyId,
+          title: 'Buổi tối',
+        ),
+        assigneeIds: [simba],
+        routineTasks: const [],
+      );
+
+      await expectLater(
+        taskDao.createTask(
+          TasksCompanion.insert(
+            id: 'khac-buoi',
+            familyId: familyId,
+            title: 'Đánh răng buổi sáng',
+            routineId: const Value('routine-toi'),
+          ),
+          const [],
+        ),
+        completes,
+        reason: 'hai bé đánh răng ở hai buổi khác nhau không phải bản sao',
+      );
+    });
+
+    test(
+      'createRoutine bỏ qua việc trùng trong danh sách truyền vào',
+      () async {
+        await taskDao.createRoutine(
+          routine: RoutinesCompanion.insert(
+            id: 'routine-trung',
+            familyId: familyId,
+            title: 'nữa đêm',
+          ),
+          assigneeIds: [neo],
+          routineTasks: [
+            TasksCompanion.insert(
+              id: 'nd-1',
+              familyId: familyId,
+              title: 'Mặc đồ ngủ',
+              routineId: const Value('routine-trung'),
+            ),
+            TasksCompanion.insert(
+              id: 'nd-2',
+              familyId: familyId,
+              title: 'mặc đồ ngủ',
+              routineId: const Value('routine-trung'),
+            ),
+          ],
+        );
+
+        final trong = (await taskDao.activeTasks(
+          familyId,
+        )).where((t) => t.routineId == 'routine-trung');
+        expect(
+          trong,
+          hasLength(1),
+          reason:
+              'đường này chèn thẳng vào bảng, không đi qua createTask — không '
+              'lọc ở đây thì buổi vừa tạo đã có sẵn hai việc y hệt',
+        );
+      },
+    );
+
+    test('donTrungTrongBuoi tắt bản trùng, GIỮ cái tạo trước', () async {
+      // Dựng đúng đống dữ liệu cũ: hai việc y hệt trong một buổi, sinh ra từ
+      // trước khi có chặn. Chèn thẳng qua DB để vượt qua chính cái chặn đó.
+      await db
+          .into(db.tasks)
+          .insert(
+            TasksCompanion.insert(
+              id: 'cu',
+              familyId: familyId,
+              title: 'Mặc đồ ngủ',
+              routineId: const Value(routineId),
+              createdAt: Value(DateTime(2026)),
+            ),
+          );
+      await db
+          .into(db.tasks)
+          .insert(
+            TasksCompanion.insert(
+              id: 'moi',
+              familyId: familyId,
+              title: 'Mặc đồ ngủ',
+              routineId: const Value(routineId),
+              // Rõ ràng sau cái 'cu', để "tạo trước / tạo sau" là khẳng định
+              // chắc chắn chứ không phụ thuộc đồng hồ lúc chạy test.
+              createdAt: Value(DateTime(2030)),
+            ),
+          );
+
+      final daTat = await don.donTrungTrongBuoi(familyId);
+
+      expect(daTat, 1);
+      final conSong = (await taskDao.activeTasks(
+        familyId,
+      )).map((t) => t.id).toSet();
+      expect(
+        conSong,
+        contains('cu'),
+        reason:
+            'giữ cái tạo trước: lượt việc và sổ cái đã trỏ vào nó lâu hơn, tắt '
+            'nó đi là làm "Sổ của con" mất nhiều hơn',
+      );
+      expect(conSong, isNot(contains('moi')));
+    });
+
+    test(
+      'donTrungTrongBuoi KHÔNG xoá, chỉ tắt — sổ cái trỏ tới task_id',
+      () async {
+        await db
+            .into(db.tasks)
+            .insert(
+              TasksCompanion.insert(
+                id: 'ban-sao',
+                familyId: familyId,
+                title: 'Đánh răng buổi sáng',
+                routineId: const Value(routineId),
+                createdAt: Value(DateTime(2030)),
+              ),
+            );
+
+        await don.donTrungTrongBuoi(familyId);
+
+        final van = await (db.select(
+          db.tasks,
+        )..where((t) => t.id.equals('ban-sao'))).getSingleOrNull();
+        expect(van, isNotNull, reason: 'ADR-005: sổ cái chỉ ghi thêm');
+        expect(van!.active, isFalse);
+      },
+    );
+
+    test('không có gì trùng thì không đụng vào việc nào', () async {
+      final daTat = await don.donTrungTrongBuoi(familyId);
+      expect(daTat, 0);
+    });
+  });
 }

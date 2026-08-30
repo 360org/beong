@@ -9,6 +9,15 @@ import 'package:drift/drift.dart';
 
 part 'task_dao.g.dart';
 
+/// Ném ra khi tạo một việc trùng tên với việc đã có trong **cùng buổi**.
+class TaskTrungTenException implements Exception {
+  const TaskTrungTenException(this.title);
+  final String title;
+
+  @override
+  String toString() => 'TaskTrungTenException: $title';
+}
+
 @DriftAccessor(
   tables: [
     Tasks,
@@ -396,8 +405,49 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
   }
 
   /// Tạo task mới.
+  /// Chuẩn hoá tên việc để so trùng: bỏ khoảng trắng thừa, không phân biệt
+  /// hoa thường. "Mặc đồ ngủ" và " mặc đồ ngủ " là **một** việc.
+  static String khoaTen(String title) =>
+      title.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+
+  /// Trong buổi này đã có việc nào cùng tên chưa (chỉ xét việc đang dùng).
+  ///
+  /// [boQuaTaskId] để khi **sửa** một việc thì chính nó không tự tính là trùng.
+  Future<bool> coViecTrungTen({
+    required String routineId,
+    required String title,
+    String? boQuaTaskId,
+  }) async {
+    final trong =
+        await (select(tasks)..where(
+              (t) => t.routineId.equals(routineId) & t.active.equals(true),
+            ))
+            .get();
+    final khoa = khoaTen(title);
+    return trong.any((t) => t.id != boQuaTaskId && khoaTen(t.title) == khoa);
+  }
+
+  /// Tạo một việc.
+  ///
+  /// **Chặn trùng tên trong cùng một buổi.** Chủ dự án gặp "Mặc đồ ngủ" hai
+  /// lần trong buổi "nữa đêm" (30/08/2026): hai việc y hệt, con phải bấm hai
+  /// lần và xu cộng gấp đôi cho cùng một hành động. Chặn ở đây chứ không ở
+  /// từng màn hình, vì có **bốn** đường tạo việc (bảng thêm việc, bảng tạo
+  /// buổi, việc con tự thêm, onboarding) — vá từng chỗ thì chỗ thứ năm lại
+  /// quên.
+  ///
+  /// Chỉ xét trong **cùng một buổi**: hai bé cùng phải đánh răng là hai việc
+  /// khác nhau nằm ở hai buổi khác nhau, không phải bản sao.
   Future<void> createTask(TasksCompanion task, List<String> assigneeIds) {
     return transaction(() async {
+      final routineId = task.routineId.value;
+      if (routineId != null &&
+          await coViecTrungTen(
+            routineId: routineId,
+            title: task.title.value,
+          )) {
+        throw TaskTrungTenException(task.title.value);
+      }
       await into(tasks).insert(task);
       for (final memberId in assigneeIds) {
         await into(taskAssignees).insert(
@@ -411,6 +461,15 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
   }
 
   /// Tạo routine mới kèm tasks.
+  ///
+  /// Việc trùng tên **trong danh sách truyền vào** bị bỏ qua, giữ cái đầu
+  /// tiên. Đường này chèn thẳng vào bảng chứ không đi qua [createTask], nên
+  /// nếu không lọc ở đây thì buổi vừa tạo đã có sẵn hai việc y hệt — đúng thứ
+  /// [createTask] chặn.
+  ///
+  /// Bỏ qua chứ không ném lỗi: người dùng không gõ ra danh sách này, nó đến từ
+  /// mẫu onboarding hoặc từ bảng tạo buổi. Dừng cả việc tạo buổi vì một dòng
+  /// thừa là phạt sai người.
   Future<void> createRoutine({
     required RoutinesCompanion routine,
     required List<String> assigneeIds,
@@ -426,7 +485,9 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
           ),
         );
       }
+      final daCo = <String>{};
       for (final task in routineTasks) {
+        if (!daCo.add(khoaTen(task.title.value))) continue;
         await into(tasks).insert(task);
       }
     });

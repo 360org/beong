@@ -99,6 +99,10 @@ class DayStartService {
     // đó biến mất khỏi mọi màn hình trong khi vẫn nằm trong DB.
     await donViecLe.nhanNuoi(familyId);
 
+    // Và tắt việc trùng tên trong cùng một buổi. `TaskDao.createTask` đã chặn
+    // từ đây về sau; bước này lo đống sinh ra trước khi có chặn.
+    await donViecLe.donTrungTrongBuoi(familyId);
+
     // Bù icon cho việc tạo bằng sheet cũ (chưa có ô chọn hình). Cùng lý do với
     // gieo hũ ở trên: sửa dữ liệu một lần thay vì vá chỗ hiển thị.
     await _tasks.backfillMissingIcons(familyId);

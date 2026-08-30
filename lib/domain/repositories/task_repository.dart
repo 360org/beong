@@ -10,6 +10,8 @@ import 'package:beong/domain/services/family_clock.dart';
 // lib/data" giữ được (`test/unit/kien_truc_test.dart`).
 export 'package:beong/data/local/database.dart'
     show Routine, RoutinesCompanion, Task, TaskInstance, TasksCompanion;
+// Lỗi tầng UI cần bắt được: tạo việc trùng tên trong cùng một buổi.
+export 'package:beong/data/local/task_dao.dart' show TaskTrungTenException;
 
 /// Việc nhà, thói quen, và lượt việc theo ngày.
 abstract interface class TaskRepository {

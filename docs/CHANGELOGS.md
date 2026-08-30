@@ -4,6 +4,34 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.6.0+30 (2026-08-30) — Không còn việc trùng tên trong một buổi
+
+Buổi "nữa đêm" của một bé đang có **"Mặc đồ ngủ" hai lần**: hai việc y hệt,
+con phải bấm hai lần, và xu cộng gấp đôi cho cùng một hành động. Bản này chặn
+cả hai đầu.
+
+### Chặn từ chỗ tạo
+
+Tạo một việc trùng tên với việc đã có **trong cùng buổi** sẽ bị từ chối, kèm
+câu nói rõ lý do — không im lặng đóng bảng, vì im lặng thì bố mẹ tưởng đã tạo
+xong, đi tìm không thấy, rồi tạo lại lần nữa.
+
+Chặn nằm ở tầng dữ liệu chứ không ở từng màn hình: app có **bốn** đường tạo
+việc, vá từng chỗ thì chỗ thứ năm lại quên. So tên bỏ qua hoa thường và khoảng
+trắng thừa — "Mặc đồ ngủ" và " mặc đồ ngủ " là một việc.
+
+Chỉ xét trong cùng một buổi: hai bé cùng phải đánh răng ở hai buổi khác nhau
+là hai việc khác nhau, không phải bản sao.
+
+### Dọn đống đã có
+
+Mỗi lần mở app, việc trùng tên trong cùng một buổi được tắt bớt, **giữ cái tạo
+trước** — lượt việc và các dòng trong "Sổ của con" đã trỏ vào nó lâu hơn. Bản
+trùng bị **tắt chứ không xoá**: xoá đi thì lịch sử mất tên việc, con nhìn lại
+chỉ thấy một dòng cộng xu không rõ từ đâu.
+
+---
+
 ## v0.5.4+29 (2026-08-30) — Nút "+" mở thẳng bảng thêm việc
 
 Bấm "+" ở tab Nhiệm vụ trước đây hỏi *"Thêm gì?"* — thêm việc hay thêm buổi.

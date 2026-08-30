@@ -132,6 +132,44 @@ class DonViecLe {
     return _gomVaoBuoi(familyId, vietLe);
   }
 
+  /// Tắt việc trùng tên **trong cùng một buổi**, giữ cái tạo trước.
+  ///
+  /// Chạy mỗi lần mở app, cùng chỗ với [nhanNuoi]. Chặn ở [TaskDao.createTask]
+  /// lo được từ đây về sau; bước này lo đống đã có — chủ dự án đang thấy "Mặc
+  /// đồ ngủ" hai lần trong buổi "nữa đêm" (30/08/2026), sinh ra từ trước khi
+  /// có chặn.
+  ///
+  /// Giữ **cái tạo trước** chứ không phải cái mới: lượt việc và các dòng sổ
+  /// cái đã trỏ vào nó lâu hơn, nên tắt nó đi là làm "Sổ của con" mất nhiều
+  /// hơn. Và **tắt chứ không xoá** — ADR-005.
+  ///
+  /// Chỉ so trong cùng một buổi: hai bé cùng phải đánh răng là hai việc khác
+  /// nhau nằm ở hai buổi khác nhau, không phải bản sao.
+  Future<int> donTrungTrongBuoi(String familyId) async {
+    final tatCa = await taskDao.activeTasks(familyId);
+    final theoBuoi = <String, List<Task>>{};
+    for (final task in tatCa) {
+      final routineId = task.routineId;
+      if (routineId == null) continue;
+      theoBuoi.putIfAbsent(routineId, () => []).add(task);
+    }
+
+    var daTat = 0;
+    for (final trongBuoi in theoBuoi.values) {
+      final giu = <String>{};
+      // Sắp theo `createdAt` để "cái tạo trước" là một khái niệm xác định, chứ
+      // không phụ thuộc thứ tự truy vấn trả về.
+      final theoThuTu = List.of(trongBuoi)
+        ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      for (final task in theoThuTu) {
+        if (giu.add(TaskDao.khoaTen(task.title))) continue;
+        await taskDao.setTaskActive(taskId: task.id, active: false);
+        daTat++;
+      }
+    }
+    return daTat;
+  }
+
   Future<KetQuaDon> _gomVaoBuoi(String familyId, List<Task> conLai) async {
     final theoNhom = <String, List<Task>>{};
     final nguoiNhanCuaNhom = <String, List<String>>{};
