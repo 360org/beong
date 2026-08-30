@@ -4,6 +4,61 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.5.0+25 (2026-08-30) — Mỗi bé một bộ hũ, và những lối ra bị bịt
+
+Bản này gỡ đúng những chỗ người dùng bị **kẹt**: bảng trượt không có nút tắt,
+thông báo nằm lì che nội dung, nút LƯU bị đẩy khỏi màn hình. Cộng thêm một
+tính năng đã hứa từ v0.4.0 mà lúc đó chưa làm được.
+
+### ✨ Mới
+
+- **Mỗi bé một bộ hũ riêng.** Bảng "Thêm hũ mới" có mục *"Hũ này của ai"* —
+  Cả nhà, hoặc một bé cụ thể. Một bé để dành mua xe đạp trong khi bé kia để
+  dành mua sách; ép cả nhà dùng chung một bộ hũ là ép hai đứa trẻ tiết kiệm
+  cho cùng một thứ. (Schema v9. Đây là giới hạn đã ghi rõ trong changelog
+  v0.4.0 là *chưa làm được, cần chủ dự án chốt hướng*.)
+- **Dòng "Tạo thêm thói quen"** ở cuối danh sách buổi trong tab Nhiệm vụ. Bảng
+  tạo buổi nay **thêm việc được luôn** — tên, hình, xu — thay vì tạo buổi
+  trống rồi đi tìm chỗ khác để thêm việc.
+- **Chạm tên con ở Trang chính để gập/mở danh sách việc.** Thẻ một bé có thể
+  dài tới 37 việc; nhân với số con thì phần "chờ duyệt" ở trên bị đẩy khỏi
+  tầm mắt.
+
+### 🔧 Đổi
+
+- **Mọi bảng trượt lên đều có nút tắt.** 30 chỗ, 21 file, mỗi chỗ trước đây tự
+  dựng đầu trang một kiểu. Nay đi chung qua một `SheetHeader`. Ngoại lệ duy
+  nhất: đặt mật khẩu lần đầu ở onboarding — ADR-027 nói không hồ sơ nào được
+  để trống mật khẩu.
+- **Thông báo tự tắt sau 3 giây** thay vì 4, và thông báo mới đẩy cái cũ đi
+  thay vì xếp hàng. Bấm nhanh ba nút mà xếp hàng thì thanh cuối còn nằm đó sau
+  chín giây.
+- **Vuốt ngang trên thẻ con để xem lịch sử**; bỏ biểu tượng lịch.
+- Bỏ mục "Chưa xếp buổi" khỏi tab Nhiệm vụ. Việc rơi ra khỏi buổi giờ được tự
+  nhận về buổi "Việc khác" mỗi lần mở app.
+- Nhiều bảng chọn ở Cài đặt lần đầu có tiêu đề ("Giờ đổi ngày", "Múi giờ",
+  "Giao diện", "Chọn hồ sơ") — trước chỉ có một đoạn mô tả trôi nổi.
+
+### 🐛 Sửa
+
+- **Nút LƯU ở "Sửa thói quen" không bấm được.** Kho 125 hình đổ thẳng vào một
+  cột không cuộn, đẩy nút xuống dưới mép màn hình. Sửa xong không có cách nào
+  lưu. Bảng nay cuộn được, nút dính đáy, lưới hình rút gọn.
+- **Bỏ một việc khỏi thói quen làm việc đó mất người nhận.** Việc trong buổi
+  lấy người nhận từ buổi; tách ra mà không chép sang thì nó thành việc không
+  giao cho ai — không sinh lượt cho bé nào và không màn hình nào hiện ra.
+- CI đỏ bảy lần liền vì một dòng dài quá 80 cột: máy lập trình analyze sạch
+  nhưng CI format trước rồi mới analyze. Hook pre-commit nay làm đúng thứ tự
+  của CI.
+
+### 🛡️ Chốt chặn mới
+
+Ba ràng buộc trên đều có test canh, vì rà tay một lượt thì được, giữ đúng qua
+từng màn hình mới thì không: mọi bảng trượt phải đi qua `SheetHeader`; không
+file nào tự dựng `SnackBar`; hook pre-commit phải format trước khi analyze.
+
+---
+
 ## v0.4.0+24 (2026-08-29) — Việc nhà về đúng một chỗ
 
 Bản này sửa gốc một chuyện đã âm thầm làm hỏng trải nghiệm: **cùng một việc bị
