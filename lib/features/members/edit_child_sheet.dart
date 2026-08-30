@@ -5,6 +5,7 @@ import 'package:beong/core/providers/database_provider.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
+import 'package:beong/core/widgets/thong_bao.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/services/jar_splitter.dart';
 import 'package:beong/features/members/child_profile_form.dart';
@@ -167,12 +168,9 @@ class _EditChildSheetState extends ConsumerState<_EditChildSheet> {
       await ref.read(matKhauHoSoProvider).boMatKhau(widget.child.id);
       setState(() => _hasPin = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Đã tắt mật khẩu hồ sơ của ${widget.child.displayName}',
-            ),
-          ),
+        hienThongBao(
+          context,
+          'Đã tắt mật khẩu hồ sơ của ${widget.child.displayName}',
         );
       }
     }

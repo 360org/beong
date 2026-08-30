@@ -17,6 +17,7 @@ import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/progress_ring.dart';
 import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/core/widgets/task_card.dart';
+import 'package:beong/core/widgets/thong_bao.dart';
 import 'package:beong/domain/entities/badge_def.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/repositories/jar_repository.dart';
@@ -215,11 +216,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
           proofUrl = picked.path;
         } on Exception {
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Không thể chụp ảnh, vui lòng thử lại'),
-            ),
-          );
+          hienThongBao(context, 'Không thể chụp ảnh, vui lòng thử lại');
           return;
         }
       }
@@ -238,17 +235,16 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
     // và không bật dialog che màn hình, mà hạ xuống SnackBar kèm nút xem (audit 18 §1).
     if (!_currentScale.celebrateOnTap) {
       final names = ketQua.huyHieuMoi.map((b) => b.title).join(', ');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const AppIcon('star', size: 20),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(child: Text('Huy hiệu mới: $names')),
-            ],
-          ),
-          behavior: SnackBarBehavior.floating,
+      hienThongBaoTuyChinh(
+        context,
+        Row(
+          children: [
+            const AppIcon('star', size: 20),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(child: Text('Huy hiệu mới: $names')),
+          ],
         ),
+        noi: true,
       );
       return;
     }
@@ -800,18 +796,16 @@ class _DashboardCard extends StatelessWidget {
                             BeeMood.sleepy =>
                               'Chào con! Bắt đầu làm việc nhà hôm nay nhé!',
                           };
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Row(
-                                children: [
-                                  const AppIcon('star', size: 18),
-                                  const SizedBox(width: AppSpacing.sm),
-                                  Expanded(child: Text(msg)),
-                                ],
-                              ),
-                              duration: const Duration(seconds: 3),
-                              behavior: SnackBarBehavior.floating,
+                          hienThongBaoTuyChinh(
+                            context,
+                            Row(
+                              children: [
+                                const AppIcon('star', size: 18),
+                                const SizedBox(width: AppSpacing.sm),
+                                Expanded(child: Text(msg)),
+                              ],
                             ),
+                            noi: true,
                           );
                         },
                       )

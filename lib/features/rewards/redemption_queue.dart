@@ -5,6 +5,7 @@ import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/thong_bao.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/repositories/reward_repository.dart';
@@ -132,9 +133,7 @@ class _RedemptionCardState extends ConsumerState<_RedemptionCard> {
       resolvedBy: widget.reviewerId,
     );
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Đã duyệt. Con nhận được phiếu.')),
-    );
+    hienThongBao(context, 'Đã duyệt. Con nhận được phiếu.');
   }
 
   Future<void> _reject() async {
@@ -145,9 +144,7 @@ class _RedemptionCardState extends ConsumerState<_RedemptionCard> {
     if (!mounted) return;
     // Nói rõ đã hoàn bao nhiêu xu: bản cũ từ chối mà **không hoàn xu**, con mất
     // xu cho một phần thưởng không được nhận.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Đã từ chối. Hoàn lại $refunded xu cho con.')),
-    );
+    hienThongBao(context, 'Đã từ chối. Hoàn lại $refunded xu cho con.');
   }
 
   @override

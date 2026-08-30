@@ -8,6 +8,7 @@ import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/utils/ngay_viet.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/sheet_header.dart';
+import 'package:beong/core/widgets/thong_bao.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/repositories/task_repository.dart';
@@ -213,15 +214,14 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
   Future<void> _detach(Task task) async {
     await ref.read(taskRepositoryProvider).detachTaskFromRoutine(task.id);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Đã bỏ "${task.title}" khỏi thói quen'),
-        action: SnackBarAction(
-          // Bỏ nhầm là chuyện thường; hoàn tác rẻ hơn nhiều so với hỏi xác nhận
-          // mỗi lần bỏ.
-          label: 'Hoàn tác',
-          onPressed: () => unawaited(_attach(task)),
-        ),
+    hienThongBao(
+      context,
+      'Đã bỏ "${task.title}" khỏi thói quen',
+      hanhDong: SnackBarAction(
+        // Bỏ nhầm là chuyện thường; hoàn tác rẻ hơn nhiều so với hỏi xác nhận
+        // mỗi lần bỏ.
+        label: 'Hoàn tác',
+        onPressed: () => unawaited(_attach(task)),
       ),
     );
     await _load();

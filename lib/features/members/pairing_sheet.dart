@@ -4,6 +4,7 @@ import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/widgets/sheet_header.dart';
+import 'package:beong/core/widgets/thong_bao.dart';
 import 'package:beong/domain/services/pairing_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -218,11 +219,7 @@ class _PairingCodeSheetState extends State<_PairingCodeSheet> {
             OutlinedButton.icon(
               onPressed: () {
                 unawaited(Clipboard.setData(ClipboardData(text: _uri)));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Đã sao chép liên kết ghép cặp!'),
-                  ),
-                );
+                hienThongBao(context, 'Đã sao chép liên kết ghép cặp!');
               },
               icon: const Icon(Icons.copy_rounded),
               label: const Text('Sao chép liên kết'),

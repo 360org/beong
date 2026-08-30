@@ -12,6 +12,7 @@ import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/bee_mascot.dart';
 import 'package:beong/core/widgets/responsive_scaffold.dart';
+import 'package:beong/core/widgets/thong_bao.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/presets.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
@@ -345,13 +346,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   onPressed: () async {
                     final code = await showScanPairingDialog(context);
                     if (code != null && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Đã nhận mã: ${code.substring(0, 8).toUpperCase()}. '
-                            'Tính năng đồng bộ qua mạng đang được hoàn thiện.',
-                          ),
-                        ),
+                      hienThongBao(
+                        context,
+                        'Đã nhận mã: ${code.substring(0, 8).toUpperCase()}. '
+                        'Tính năng đồng bộ qua mạng đang được hoàn thiện.',
                       );
                     }
                   },

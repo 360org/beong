@@ -6,6 +6,7 @@ import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/icon_picker.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
 import 'package:beong/core/widgets/sheet_header.dart';
+import 'package:beong/core/widgets/thong_bao.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/presets.dart';
@@ -131,13 +132,10 @@ class _ChildTaskSheetState extends ConsumerState<_ChildTaskSheet> {
 
     if (mounted) {
       Navigator.of(context).pop(true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Đã gửi việc "$title" ($_suggestedPoints xu) để bố mẹ duyệt khen con!',
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
+      hienThongBao(
+        context,
+        'Đã gửi việc "$title" ($_suggestedPoints xu) để bố mẹ duyệt khen con!',
+        noi: true,
       );
     }
   }

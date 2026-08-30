@@ -103,6 +103,23 @@ Không lục giác hoá nút bấm, avatar hay ô nhập — vùng chạm phải
 - Đổ bóng: chỉ 1 mức, `0 4 16 rgba(27,16,70,0.08)`. Không dùng bóng đậm.
 - Vùng chạm tối thiểu 48×48.
 
+### Thông báo tự tắt sau 3 giây
+
+Chủ dự án nêu 30/08/2026: *"Notification phải tự mất sau 2-3 giây, không nằm
+mãi ở đó."* Mặc định của Material là **4 giây** — không phải mãi mãi, nhưng đủ
+lâu để thanh đen che mất mục ngay dưới nó (ảnh chụp: thanh "Đã bỏ ... khỏi thói
+quen" đè lên tiêu đề "Việc khác").
+
+Cách giữ: `hienThongBao` / `hienThongBaoTuyChinh`
+(`lib/core/widgets/thong_bao.dart`). Thời lượng nằm ở **một chỗ**, nên đổi ý
+một lần là đổi cả app. Hàm cũng đẩy thông báo cũ đi thay vì xếp hàng: bấm nhanh
+ba nút mà xếp hàng thì thanh cuối còn nằm đó sau chín giây — đúng cái cảm giác
+"nằm mãi".
+
+`test/unit/thong_bao_test.dart` canh ba điều: thời lượng nằm trong khoảng 2–3
+giây, không file nào trong `lib/` tự dựng `SnackBar`, và thông báo thật sự biến
+mất khi hết giờ.
+
 ### Mọi bảng trượt lên đều phải có nút đóng
 
 Chủ dự án nêu 30/08/2026. Flutter đã cho vuốt xuống và bấm ra ngoài, nhưng cả
@@ -131,6 +148,7 @@ ngoại lệ này là phải sửa test một cách tường minh.
 | `PointStepper` | `−` / gem + số / `+`; nhấn giữ để tăng nhanh; bước 5; kèm nút `i` mở giải thích |
 | `SegmentedPills` | Hàng 2–3 lựa chọn (Once/Daily/Custom, Morning/Afternoon/Evening) |
 | `SheetHeader` | Đầu mọi bảng trượt lên: tiêu đề, mô tả phụ, **nút đóng góc phải** |
+| `hienThongBao` | Thanh thông báo đáy màn hình, tự tắt sau 3 giây |
 | `PrimaryButton` | Full-width, cao 56, bo tròn, chữ VIẾT HOA 16/800 |
 | `TaskCard` | Icon tròn màu · tên · điểm · checkbox lớn; vuốt trái = sửa, phải = xong |
 | `KidHeader` | Avatar + tên + số dư gem + vòng tiến độ ngày |

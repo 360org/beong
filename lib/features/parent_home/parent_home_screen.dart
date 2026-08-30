@@ -11,6 +11,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/loi_man_hinh.dart';
+import 'package:beong/core/widgets/thong_bao.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
@@ -242,9 +243,7 @@ class _PendingReviewSectionState extends State<_PendingReviewSection> {
       reviewerId: widget.reviewerId,
     );
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Đã duyệt $done việc.')));
+    hienThongBao(context, 'Đã duyệt $done việc.');
     await _load();
   }
 
@@ -393,14 +392,11 @@ class _PendingCardState extends State<_PendingCard> {
 
     // Nói rõ đã trừ bao nhiêu. Xu biến mất mà không ai giải thích là đúng thứ
     // làm trẻ mất niềm tin vào app.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          result.xuDeducted > 0
-              ? 'Đã mở lại việc. Trừ ${result.xuDeducted} xu.'
-              : 'Đã mở lại việc cho con làm lại.',
-        ),
-      ),
+    hienThongBao(
+      context,
+      result.xuDeducted > 0
+          ? 'Đã mở lại việc. Trừ ${result.xuDeducted} xu.'
+          : 'Đã mở lại việc cho con làm lại.',
     );
     widget.onActioned();
   }
@@ -882,14 +878,11 @@ class _DoneRowState extends State<_DoneRow> {
       reviewerId: widget.reviewerId,
     );
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          result.xuDeducted > 0
-              ? 'Đã mở lại việc. Trừ ${result.xuDeducted} xu.'
-              : 'Đã mở lại việc cho con làm lại.',
-        ),
-      ),
+    hienThongBao(
+      context,
+      result.xuDeducted > 0
+          ? 'Đã mở lại việc. Trừ ${result.xuDeducted} xu.'
+          : 'Đã mở lại việc cho con làm lại.',
     );
   }
 

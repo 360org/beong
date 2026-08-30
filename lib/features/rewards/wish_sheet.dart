@@ -4,6 +4,7 @@ import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/icon_picker.dart';
 import 'package:beong/core/widgets/sheet_header.dart';
+import 'package:beong/core/widgets/thong_bao.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/repositories/reward_repository.dart';
@@ -99,12 +100,7 @@ class _WishSheetState extends ConsumerState<_WishSheet> {
 
     if (mounted) {
       Navigator.of(context).pop(true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Đã gửi điều ước "$title" đến bố mẹ!'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      hienThongBao(context, 'Đã gửi điều ước "$title" đến bố mẹ!', noi: true);
     }
   }
 

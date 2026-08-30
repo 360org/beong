@@ -12,6 +12,7 @@ import 'package:beong/core/widgets/icon_picker.dart';
 import 'package:beong/core/widgets/loi_man_hinh.dart';
 import 'package:beong/core/widgets/preset_chip.dart';
 import 'package:beong/core/widgets/sheet_header.dart';
+import 'package:beong/core/widgets/thong_bao.dart';
 import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
@@ -807,25 +808,18 @@ class _RedeemButtonState extends State<_RedeemButton> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Đã gửi yêu cầu đổi "${widget.reward.title}". Chờ bố mẹ duyệt.',
-            ),
-          ),
+        hienThongBao(
+          context,
+          'Đã gửi yêu cầu đổi "${widget.reward.title}". Chờ bố mẹ duyệt.',
         );
       }
     } on RedemptionException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message)),
-        );
+        hienThongBao(context, e.message);
       }
     } on WalletException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message)),
-        );
+        hienThongBao(context, e.message);
       }
     } finally {
       if (mounted) setState(() => _loading = false);
