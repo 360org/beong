@@ -266,7 +266,6 @@ class _ParentStats extends ConsumerWidget {
       jarDao: ref.read(jarRepositoryProvider),
       familyId: session.familyId,
       children: children,
-      onMoQuanLyHu: () => context.go(Routes.jarSettings),
     );
   }
 

@@ -148,8 +148,10 @@ Mỗi lần con kiếm được xu, số xu đó được chia vào các **hũ**
 | 💝 Cho đi | 10% | Dành để tặng, giúp người khác |
 
 Đây là mô hình *spend / save / give* trong giáo dục tài chính trẻ em. Sửa tỷ lệ,
-đổi tên, đổi emoji hoặc thêm hũ mới ở **Cài đặt → Các hũ**. Tổng phải đủ 100%, app
-báo ngay nếu thiếu hoặc thừa.
+đổi tên, đổi emoji hoặc ngừng dùng một hũ: bấm thẳng vào hũ đó ở **Thống kê**.
+Thêm hũ mới: nút **THÊM HŨ** cũng ở màn đó. Mỗi bé có bộ hũ riêng, nên sửa hũ
+của bé này không đụng tới bé kia. Tổng luôn được cân về đủ 100% — app cho xem
+trước hũ nào thành bao nhiêu trước khi bố mẹ bấm lưu.
 
 ### Con tự chia xu
 

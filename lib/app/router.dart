@@ -7,7 +7,6 @@ import 'package:beong/features/members/vao_app_screen.dart';
 import 'package:beong/features/onboarding/onboarding_screen.dart';
 import 'package:beong/features/parent_home/parent_home_screen.dart';
 import 'package:beong/features/rewards/rewards_screen.dart';
-import 'package:beong/features/settings/jar_settings_screen.dart';
 import 'package:beong/features/settings/penalty_settings_screen.dart';
 import 'package:beong/features/settings/settings_screen.dart';
 import 'package:beong/features/stats/badges_screen.dart';
@@ -29,7 +28,6 @@ abstract final class Routes {
 
   /// Trang con của Cài đặt — cấu hình trừ xu (ADR-022).
   static const penaltySettings = '/settings/penalty';
-  static const jarSettings = '/settings/jars';
 
   /// Sửa một thói quen. Nhận `routineId` qua đường dẫn.
   static String routineEditor(String routineId) => '/tasks/routine/$routineId';
@@ -208,10 +206,6 @@ GoRouter createRouter({
                   GoRoute(
                     path: 'penalty',
                     builder: (context, state) => const PenaltySettingsScreen(),
-                  ),
-                  GoRoute(
-                    path: 'jars',
-                    builder: (context, state) => const JarSettingsScreen(),
                   ),
                 ],
               ),

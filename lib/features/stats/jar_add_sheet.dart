@@ -15,15 +15,19 @@ import 'package:flutter/material.dart';
 ///
 /// Chủ dự án chốt 26/08/2026: *"thêm hũ mới thì có option để điều chỉnh — tuỳ
 /// chọn điều chỉnh riêng hoặc nguyên tắc chung — miễn sao số hũ trong 1 profile
-/// có tổng = 100%."* Nên có đúng hai cách, và cách nào cũng phải về 100%:
+/// có tổng = 100%."* Hũ mới lấy N%, phần thiếu trừ vào các hũ đang có **theo
+/// tỷ lệ hiện tại của chúng** — bố mẹ không phải tính nhẩm, và bảng xem trước
+/// nói rõ hũ nào sẽ thành bao nhiêu trước khi bấm lưu.
 ///
-/// - **Trừ đều các hũ khác** — hũ mới lấy N%, phần thiếu chia đều cho các hũ
-///   đang có theo tỷ lệ hiện tại của chúng. Không ai phải tính nhẩm.
-/// - **Tự chỉnh** — tạo hũ với 0% rồi mở màn quản lý hũ để bố mẹ tự phân.
+/// Không có cách "cứ tạo rồi tính sau": hũ tổng khác 100% thì tầng chia xu rơi
+/// về kế hoạch mặc định (`wallet_dao.dart:243`) và mọi con số bố mẹ vừa đặt
+/// biến mất không một lời báo.
 ///
-/// Không có cách thứ ba là "cứ tạo rồi tính sau": hũ tổng khác 100% thì tầng
-/// chia xu rơi về kế hoạch mặc định (`wallet_dao.dart:243`) và mọi con số bố mẹ
-/// vừa đặt biến mất không một lời báo.
+/// Muốn một tỷ lệ khác thì sửa từng hũ bằng nút bút chì ở màn Thống kê — mỗi
+/// lần sửa cũng tự cân lại phần còn lại về đúng 100%. Trước đây chỗ này còn
+/// lựa chọn *"Tự chỉnh"*: tạo hũ 0% rồi nhảy sang màn quản lý hũ ở Cài đặt.
+/// Màn đó đã bỏ ngày 30/08/2026 (chủ dự án: cấu hình hũ đã nằm ngay trong màn
+/// Thống kê rồi), nên lựa chọn ấy chỉ còn tạo ra một hũ 0% không có chỗ sửa.
 ///
 /// ## Chọn hồ sơ (30/08/2026)
 ///
@@ -40,7 +44,6 @@ Future<bool?> showJarAddSheet(
   required JarRepository jarDao,
   required String familyId,
   required List<Member> children,
-  required VoidCallback onMoQuanLyHu,
 }) {
   return showModalBottomSheet<bool>(
     context: context,
@@ -53,7 +56,6 @@ Future<bool?> showJarAddSheet(
         jarDao: jarDao,
         familyId: familyId,
         children: children,
-        onMoQuanLyHu: onMoQuanLyHu,
       ),
     ),
   );
@@ -88,20 +90,16 @@ Map<String, int> chiaLaiTyLeHu(List<JarDef> huDangCo, int pctHuMoi) {
   return moi;
 }
 
-enum _CachChinh { truDeu, tuChinh }
-
 class _JarAddSheet extends StatefulWidget {
   const _JarAddSheet({
     required this.jarDao,
     required this.familyId,
     required this.children,
-    required this.onMoQuanLyHu,
   });
 
   final JarRepository jarDao;
   final String familyId;
   final List<Member> children;
-  final VoidCallback onMoQuanLyHu;
 
   @override
   State<_JarAddSheet> createState() => _JarAddSheetState();
@@ -111,7 +109,6 @@ class _JarAddSheetState extends State<_JarAddSheet> {
   final _titleController = TextEditingController();
   String _emoji = kJarEmojis.first;
   int _pct = 10;
-  _CachChinh _cach = _CachChinh.truDeu;
   bool _busy = false;
   List<JarDef> _huDangCo = const [];
 
@@ -162,37 +159,30 @@ class _JarAddSheetState extends State<_JarAddSheet> {
     if (title.isEmpty) return;
     setState(() => _busy = true);
 
-    final tuChinh = _cach == _CachChinh.tuChinh;
     await widget.jarDao.addJar(
       familyId: widget.familyId,
       title: title,
       emoji: _emoji,
-      pct: tuChinh ? 0 : _pct,
+      pct: _pct,
       memberId: _hoSo,
     );
 
-    if (!tuChinh) {
-      final moi = _tinhLaiTyLe();
-      for (final entry in moi.entries) {
-        await widget.jarDao.updateJar(
-          familyId: widget.familyId,
-          jarKey: entry.key,
-          pct: entry.value,
-          memberId: _hoSo,
-        );
-      }
+    for (final entry in _tinhLaiTyLe().entries) {
+      await widget.jarDao.updateJar(
+        familyId: widget.familyId,
+        jarKey: entry.key,
+        pct: entry.value,
+        memberId: _hoSo,
+      );
     }
 
     if (!mounted) return;
     Navigator.of(context).pop(true);
-    if (tuChinh) widget.onMoQuanLyHu();
   }
 
   @override
   Widget build(BuildContext context) {
-    final tyLeMoi = _cach == _CachChinh.truDeu
-        ? _tinhLaiTyLe()
-        : const <String, int>{};
+    final tyLeMoi = _tinhLaiTyLe();
     final coTheLuu = !_busy && _titleController.text.trim().isNotEmpty;
 
     return SafeArea(
@@ -280,94 +270,65 @@ class _JarAddSheetState extends State<_JarAddSheet> {
             ),
 
             const SizedBox(height: AppSpacing.lg),
-            Text('Chỉnh tỷ lệ thế nào', style: context.text.titleSmall),
-            const SizedBox(height: AppSpacing.sm),
-            SegmentedButton<_CachChinh>(
-              segments: const [
-                ButtonSegment(
-                  value: _CachChinh.truDeu,
-                  label: Text('Trừ đều hũ khác'),
-                ),
-                ButtonSegment(
-                  value: _CachChinh.tuChinh,
-                  label: Text('Tự chỉnh'),
-                ),
-              ],
-              selected: {_cach},
-              onSelectionChanged: (chon) => setState(() => _cach = chon.first),
+            Text('Hũ mới nhận $_pct%', style: context.text.titleSmall),
+            Slider(
+              value: _pct.toDouble(),
+              max: 90,
+              divisions: 18,
+              label: '$_pct%',
+              onChanged: (v) => setState(() => _pct = v.round()),
             ),
-
-            if (_cach == _CachChinh.truDeu) ...[
-              const SizedBox(height: AppSpacing.lg),
-              Text('Hũ mới nhận $_pct%', style: context.text.titleSmall),
-              Slider(
-                value: _pct.toDouble(),
-                max: 90,
-                divisions: 18,
-                label: '$_pct%',
-                onChanged: (v) => setState(() => _pct = v.round()),
+            const SizedBox(height: AppSpacing.sm),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: context.colors.surfaceContainerHighest.withValues(
+                  alpha: 0.5,
+                ),
+                borderRadius: BorderRadius.circular(AppRadius.field),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: context.colors.surfaceContainerHighest.withValues(
-                    alpha: 0.5,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Các hũ đang có sẽ thành:',
+                    style: context.text.bodySmall?.copyWith(
+                      color: context.semantic.onSurfaceMuted,
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(AppRadius.field),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Các hũ đang có sẽ thành:',
-                      style: context.text.bodySmall?.copyWith(
-                        color: context.semantic.onSurfaceMuted,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    for (final hu in _huDangCo)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Row(
-                          children: [
-                            Expanded(child: Text(hu.title)),
-                            Text(
-                              '${hu.pct}% → ${tyLeMoi[hu.key] ?? hu.pct}%',
-                              style: context.text.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
+                  const SizedBox(height: AppSpacing.xs),
+                  for (final hu in _huDangCo)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Row(
+                        children: [
+                          Expanded(child: Text(hu.title)),
+                          Text(
+                            '${hu.pct}% → ${tyLeMoi[hu.key] ?? hu.pct}%',
+                            style: context.text.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w700,
                             ),
-                          ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  const Divider(),
+                  Row(
+                    children: [
+                      const Expanded(child: Text('Tổng')),
+                      Text(
+                        '${tyLeMoi.values.fold(_pct, (t, v) => t + v)}%',
+                        style: context.text.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: context.semantic.success,
                         ),
                       ),
-                    const Divider(),
-                    Row(
-                      children: [
-                        const Expanded(child: Text('Tổng')),
-                        Text(
-                          '${tyLeMoi.values.fold(_pct, (t, v) => t + v)}%',
-                          style: context.text.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: context.semantic.success,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ),
-            ] else ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'Hũ mới tạo với 0%. Màn quản lý hũ mở ra ngay sau đó để bố mẹ '
-                'tự phân — nhớ để tổng đủ 100%.',
-                style: context.text.bodySmall?.copyWith(
-                  color: context.semantic.onSurfaceMuted,
-                ),
-              ),
-            ],
+            ),
 
             const SizedBox(height: AppSpacing.xl),
             SizedBox(

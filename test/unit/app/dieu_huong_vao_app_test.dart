@@ -133,7 +133,6 @@ void main() {
       for (final viTri in [
         Routes.settings,
         Routes.penaltySettings,
-        Routes.jarSettings,
       ]) {
         expect(
           diemDenDauTien(

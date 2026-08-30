@@ -28,7 +28,6 @@ Cách dựng môi trường chụp nằm ở `.claude/skills/flutter-8-buoc/SKIL
 | `09-parent-caidat-cuon.png` | Cài đặt (cuộn xuống hết) |
 | `10-caidat-giaodien.png` | Chọn giao diện Sáng / Tối / Theo hệ thống |
 | `11-caidat-pin.png` | Đặt PIN phụ huynh |
-| `12-caidat-cachu.png` | Các hũ — tên, emoji, tỷ lệ, thêm hũ mới |
 | `13-caidat-truxu.png` | Trừ xu — mặc định **tắt**, kèm phần cảnh báo |
 | `14-caidat-gio-doi-ngay.png` | Giờ đổi ngày (rollover) |
 | `15-caidat-quy-doi-tien.png` | Quy đổi ra tiền thật — mặc định **tắt** |

@@ -4,6 +4,28 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.7.6+40 (2026-08-30) — Bỏ màn quản lý hũ trong Cài đặt
+
+Chủ dự án: *"phần cấu hình các hũ trong Cài đặt → Các hũ bỏ đi vì đã cấu hình
+ngay trong màn hình Thống kê rồi."*
+
+Cả việc thêm, sửa tên, đổi hình, chỉnh tỷ lệ và ngừng dùng hũ nay chỉ còn một
+chỗ: màn **Thống kê**. Bấm thẳng vào hũ để sửa, nút **THÊM HŨ** để thêm. Bộ hũ
+ở đó là bộ **riêng của từng bé**, đúng thứ bố mẹ đang nhìn khi bấm vào.
+
+Vì sao bỏ hẳn chứ không để cả hai: màn cũ làm việc với bộ hũ **chung của cả
+nhà**, còn màn Thống kê làm việc với bộ của từng bé. Hai màn tên giống nhau,
+sửa hai thứ khác nhau, không màn nào nói ra điều đó — sửa ở màn này rồi không
+thấy đổi ở màn kia là chuyện sớm muộn.
+
+Bảng "Thêm hũ mới" bỏ theo lựa chọn **"Tự chỉnh"**: nó tạo hũ 0% rồi mở màn
+quản lý hũ để bố mẹ tự phân, mà màn đó nay không còn — để lại thì nó tạo ra
+một hũ 0% không có chỗ nào sửa. Hũ mới luôn nhận phần trăm chọn trên thanh
+trượt và các hũ khác tự trừ theo tỷ lệ, có bảng xem trước; muốn tỷ lệ khác thì
+sửa từng hũ, mỗi lần sửa cũng tự cân lại về đúng 100%.
+
+---
+
 ## v0.7.5+39 (2026-08-30) — Hai vạch kéo/thả chỉ hiện lúc đang kéo
 
 Màn Nhiệm vụ: mỗi thẻ buổi trước đây đeo sẵn một cái tay kéo ở mép phải, lúc

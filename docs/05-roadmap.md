@@ -210,8 +210,8 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 - [x] Ẩn tab Cài đặt với vai con, thêm đường đổi người dùng ở avatar
 - [x] **Con tự chia xu** (ADR-024) — công tắc trong Cài đặt, hũ chờ (`Jar.inbox`), banner trên màn
       con, màn "Chia xu vào hũ". Tổng điểm tính cả hũ chờ.
-- [x] **Hũ do bố mẹ tự lập** (ADR-024) — xong: `JarDao`, màn Cài đặt → Các hũ (thêm/sửa/emoji/tỷ
-      lệ/xếp lại), chia tự động đọc bảng `jars`, màn chia xu và Sổ của con hiện mọi hũ. Sửa kèm một
+- [x] **Hũ do bố mẹ tự lập** (ADR-024) — xong: `JarDao`, thêm/sửa/emoji/tỷ lệ/ngừng dùng ngay trên
+      màn Thống kê (màn Cài đặt → Các hũ đã bỏ 30/08/2026), chia tự động đọc bảng `jars`, màn chia xu và Sổ của con hiện mọi hũ. Sửa kèm một
       lỗi mất xu có sẵn: `WalletBalance` chỉ đếm bốn khoá cứng nên xu trong hũ tự lập không hiện ở
       đâu cả dù vẫn nằm trong sổ cái.
 - [x] ~~Đổi tên `JarTrio`~~ — **không cần nữa**: widget đó chưa từng được viết, chỗ hiện các hũ là
