@@ -4,6 +4,31 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.5.2+27 (2026-08-30) — Vuốt ngang xem lịch sử, lần này vuốt thật sự ăn
+
+Tính năng "vuốt ngang trên thẻ con để xem lịch sử" đã được báo là làm xong ở
+bản 0.5.0, nhưng trên máy thật **vuốt không ăn**. Hai nguyên nhân, cả hai đều
+là lỗi của cách làm chứ không phải của ý tưởng:
+
+- **Cử chỉ chỉ gắn vào dải chữ tên con** — một dải cao chừng 40px. Vuốt qua
+  thân thẻ, nơi có danh sách việc và chiếm gần hết diện tích, thì không chỗ
+  nào nhận. Nay cả thẻ nhận cú vuốt.
+- **Chỉ nhận cú vẩy nhanh.** Vuốt chậm mà dứt khoát — kéo từ từ sang phải rồi
+  nhấc tay — bị bỏ qua. Nay nhận *hoặc* đi đủ xa *hoặc* vẩy đủ nhanh.
+
+Ngưỡng vẫn đủ cao để cuộn danh sách hơi chéo tay không làm bật lịch sử lên;
+điều đó có bài kiểm riêng, vì ngưỡng quá thấp còn phiền hơn là thiếu tính
+năng.
+
+### Ghi lại cho lần sau
+
+Phần "cử chỉ gắn nhầm chỗ" **không bài kiểm tự động nào bắt được** — nó chỉ
+lộ ra khi vuốt trên app thật. Phần ngưỡng thì kiểm được, và nay đã có 6 bài
+kiểm. Lần này đã vuốt thử trên app thật ở cả hai kiểu: vuốt chậm giữa thân
+thẻ (mở đúng lịch sử) và cuộn dọc hơi chéo tay (không bật gì).
+
+---
+
 ## v0.5.1+26 (2026-08-30) — Sửa màn hình trắng khi nâng cấp từ bản cũ
 
 **Bản 0.5.0 không mở được trên máy đã cài bản trước đó.** Máy cài mới thì chạy

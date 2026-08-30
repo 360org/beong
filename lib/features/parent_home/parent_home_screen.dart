@@ -598,6 +598,26 @@ class _PendingCardState extends State<_PendingCard> {
   }
 }
 
+/// Quãng đường tối thiểu (dp) để một cú kéo ngang được tính là "vuốt".
+///
+/// 48dp = đúng vùng chạm tối thiểu của dự án: ngắn hơn thì không phân biệt được
+/// với tay hơi lệch khi cuộn dọc.
+const kQuangDuongVuot = 48.0;
+
+/// Vận tốc tối thiểu (dp/giây) để một cú **vẩy** nhanh được tính là "vuốt",
+/// kể cả khi ngón tay đi chưa đủ [kQuangDuongVuot].
+const kVanTocVuot = 200.0;
+
+/// Cú kéo ngang vừa rồi có phải là một cú vuốt có chủ ý không.
+///
+/// Nhận **hoặc** đi đủ xa **hoặc** vẩy đủ nhanh. Bản trước chỉ xét vận tốc, nên
+/// một cú vuốt chậm mà dứt khoát — kiểu người lớn kéo từ từ sang phải rồi nhấc
+/// tay — không được tính, và nhìn từ ngoài là "vuốt không ăn". Đây là nửa còn
+/// lại của lỗi chủ dự án báo ngày 30/08/2026; nửa kia là cử chỉ chỉ gắn vào dải
+/// chữ tên con.
+bool laVuotNgangThatSu({required double quangDuong, required double vanToc}) =>
+    quangDuong.abs() >= kQuangDuongVuot || vanToc.abs() >= kVanTocVuot;
+
 class _ChildSummaryCard extends ConsumerStatefulWidget {
   const _ChildSummaryCard({
     required this.child,
@@ -625,6 +645,21 @@ class _ChildSummaryCardState extends ConsumerState<_ChildSummaryCard> {
   /// con cả — mất đúng thứ màn hình này sinh ra để cho xem.
   bool _moRong = true;
 
+  /// Tổng quãng đường ngón tay đã đi ngang trong cú kéo đang diễn ra.
+  double _keoNgang = 0;
+
+  void _moLichSu(CalendarDate today) {
+    unawaited(
+      ChildHistoryModal.show(
+        context,
+        child: widget.child,
+        taskDao: widget.taskDao,
+        walletDao: widget.walletDao,
+        initialDate: today,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final child = widget.child;
@@ -638,138 +673,140 @@ class _ChildSummaryCardState extends ConsumerState<_ChildSummaryCard> {
             .today();
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                // Bấm avatar: chuyển hẳn sang màn hình của con
-                GestureDetector(
-                  onTap: widget.onTapProfile,
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.18),
-                      shape: BoxShape.circle,
-                    ),
-                    child: AppIcon(
-                      iconKeyForEmoji(avatarForKey(child.avatarKey)),
-                      size: 28,
+      // Cử chỉ vuốt đặt ở **cả thẻ**, không chỉ ở dải chữ tên con.
+      //
+      // Bản trước gắn nó vào đúng cái `Expanded` bọc tên + dòng "x/y việc":
+      // một dải cao chừng 40px. Bố mẹ vuốt ngang qua thân thẻ — nơi có danh
+      // sách việc, tức gần như toàn bộ diện tích — thì không widget nào nhận
+      // cú vuốt đó. Nhìn từ ngoài y hệt "vuốt không ăn".
+      child: GestureDetector(
+        // Kéo bắt đầu từ vùng đệm trắng cũng phải tính.
+        behavior: HitTestBehavior.opaque,
+        onHorizontalDragStart: (_) => _keoNgang = 0,
+        onHorizontalDragUpdate: (chiTiet) => _keoNgang += chiTiet.delta.dx,
+        onHorizontalDragEnd: (chiTiet) {
+          if (laVuotNgangThatSu(
+            quangDuong: _keoNgang,
+            vanToc: chiTiet.primaryVelocity ?? 0,
+          )) {
+            _moLichSu(today);
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  // Bấm avatar: chuyển hẳn sang màn hình của con
+                  GestureDetector(
+                    onTap: widget.onTapProfile,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.18),
+                        shape: BoxShape.circle,
+                      ),
+                      child: AppIcon(
+                        iconKeyForEmoji(avatarForKey(child.avatarKey)),
+                        size: 28,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.lg),
-                // Bấm tên/header: gập hoặc mở danh sách việc của con.
-                // Trước đây cú bấm này mở luôn lịch sử; chủ dự án đổi ngày
-                // 30/08/2026 sau khi thấy thẻ của NEO dài 37 việc — màn hình
-                // nhiều con thì cuộn mãi không hết.
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _moRong = !_moRong),
-                    // Vuốt ngang mở lịch sử — cử chỉ chủ dự án yêu cầu
-                    // (docs/22 mục 2.2). Giờ đây đó là **đường duy nhất** tới
-                    // lịch sử từ thẻ này: biểu tượng lịch đã bỏ theo yêu cầu
-                    // ngày 30/08/2026.
-                    onHorizontalDragEnd: (chiTiet) {
-                      // Chỉ nhận cú vuốt dứt khoát. Ngưỡng thấp quá thì cuộn
-                      // danh sách hơi chéo tay cũng bật modal lên.
-                      if ((chiTiet.primaryVelocity ?? 0).abs() < 200) return;
-                      unawaited(
-                        ChildHistoryModal.show(
-                          context,
-                          child: child,
-                          taskDao: taskDao,
-                          walletDao: walletDao,
-                          initialDate: today,
-                        ),
-                      );
-                    },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              child.displayName,
-                              style: context.text.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w800,
+                  const SizedBox(width: AppSpacing.lg),
+                  // Bấm tên/header: gập hoặc mở danh sách việc của con.
+                  // Trước đây cú bấm này mở luôn lịch sử; chủ dự án đổi ngày
+                  // 30/08/2026 sau khi thấy thẻ của NEO dài 37 việc — màn hình
+                  // nhiều con thì cuộn mãi không hết.
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _moRong = !_moRong),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                child.displayName,
+                                style: context.text.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: AppSpacing.xs),
-                            // Mũi tên là thứ duy nhất trên thẻ cho thấy nó
-                            // bấm được. Bỏ nốt thì cú chạm gập/mở cũng thành
-                            // cử chỉ vô hình y như cú vuốt.
-                            Icon(
-                              _moRong
-                                  ? Icons.expand_less_rounded
-                                  : Icons.expand_more_rounded,
-                              size: 20,
-                              color: context.semantic.onSurfaceMuted,
-                              semanticLabel: _moRong
-                                  ? 'Thu gọn danh sách việc'
-                                  : 'Mở danh sách việc',
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        StreamBuilder<List<TaskInstance>>(
-                          stream: taskDao.watchInstancesForMember(
-                            memberId: child.id,
-                            date: today,
-                          ),
-                          builder: (context, snap) {
-                            final instances = snap.data ?? [];
-                            final done = instances
-                                .where(
-                                  (i) =>
-                                      i.status ==
-                                          InstanceStatus.approved.name ||
-                                      i.status ==
-                                          InstanceStatus.pendingReview.name,
-                                )
-                                .length;
-                            return Text(
-                              '$done / ${instances.length} việc hôm nay',
-                              style: context.text.bodySmall?.copyWith(
+                              const SizedBox(width: AppSpacing.xs),
+                              // Mũi tên là thứ duy nhất trên thẻ cho thấy nó
+                              // bấm được. Bỏ nốt thì cú chạm gập/mở cũng thành
+                              // cử chỉ vô hình y như cú vuốt.
+                              Icon(
+                                _moRong
+                                    ? Icons.expand_less_rounded
+                                    : Icons.expand_more_rounded,
+                                size: 20,
                                 color: context.semantic.onSurfaceMuted,
+                                semanticLabel: _moRong
+                                    ? 'Thu gọn danh sách việc'
+                                    : 'Mở danh sách việc',
                               ),
-                            );
-                          },
-                        ),
-                      ],
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          StreamBuilder<List<TaskInstance>>(
+                            stream: taskDao.watchInstancesForMember(
+                              memberId: child.id,
+                              date: today,
+                            ),
+                            builder: (context, snap) {
+                              final instances = snap.data ?? [];
+                              final done = instances
+                                  .where(
+                                    (i) =>
+                                        i.status ==
+                                            InstanceStatus.approved.name ||
+                                        i.status ==
+                                            InstanceStatus.pendingReview.name,
+                                  )
+                                  .length;
+                              return Text(
+                                '$done / ${instances.length} việc hôm nay',
+                                style: context.text.bodySmall?.copyWith(
+                                  color: context.semantic.onSurfaceMuted,
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
+                  StreamBuilder<WalletBalance>(
+                    stream: walletDao.watchBalance(child.id),
+                    builder: (context, snap) {
+                      final balance = snap.data ?? WalletBalance.zero;
+                      return XuBadge(amount: balance.total);
+                    },
+                  ),
+                ],
+              ),
+              if (_moRong) ...[
+                const SizedBox(height: AppSpacing.xs),
+                ChildDayGroups(
+                  memberId: child.id,
+                  familyId: child.familyId,
+                  date: today,
+                  taskDao: taskDao,
                 ),
-                StreamBuilder<WalletBalance>(
-                  stream: walletDao.watchBalance(child.id),
-                  builder: (context, snap) {
-                    final balance = snap.data ?? WalletBalance.zero;
-                    return XuBadge(amount: balance.total);
-                  },
+                _DoneTodayList(
+                  memberId: child.id,
+                  date: today,
+                  taskDao: taskDao,
+                  reviewService: widget.reviewService,
+                  reviewerId: widget.reviewerId,
                 ),
               ],
-            ),
-            if (_moRong) ...[
-              const SizedBox(height: AppSpacing.xs),
-              ChildDayGroups(
-                memberId: child.id,
-                familyId: child.familyId,
-                date: today,
-                taskDao: taskDao,
-              ),
-              _DoneTodayList(
-                memberId: child.id,
-                date: today,
-                taskDao: taskDao,
-                reviewService: widget.reviewService,
-                reviewerId: widget.reviewerId,
-              ),
             ],
-          ],
+          ),
         ),
       ),
     );

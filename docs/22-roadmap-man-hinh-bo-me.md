@@ -235,7 +235,7 @@ bỏ nó **sau** khi tab Nhiệm vụ làm được cả hai việc đó.
 | 1.4 · Sửa việc | ✅ | `task_edit_sheet.dart`, kèm đường ngừng dùng |
 | Ảnh 5 · Bỏ việc mẫu khỏi hồ sơ | ✅ | Gỡ cả giao diện lẫn đoạn tạo việc |
 | 2.1 · Nhóm theo buổi | ✅ | `ChildDayGroups`, có đã xong/tổng |
-| 2.2 · Vuốt ngang xem lịch sử | ✅ | Bỏ nút lịch ngày 30/08 theo yêu cầu; vuốt là đường duy nhất |
+| 2.2 · Vuốt ngang xem lịch sử | ✅ | Bỏ nút lịch; cử chỉ đặt ở **cả thẻ**, nhận cả vuốt chậm (sửa 30/08 sau khi chủ dự án báo vuốt không ăn) |
 | 2.4 · Chạm header gập/mở | ✅ | Mặc định mở; mũi tên là chỉ dấu bấm được |
 | 2.5 · Bỏ mục "Chưa xếp buổi" | ✅ | `DonViecLe.nhanNuoi` chạy mỗi lần mở app thay cho nó |
 | 2.6 · Dòng "Tạo thêm thói quen" | ✅ | Cuối danh sách buổi; popup thêm được việc luôn |
