@@ -149,6 +149,7 @@ ngoại lệ này là phải sửa test một cách tường minh.
 | `SegmentedPills` | Hàng 2–3 lựa chọn (Once/Daily/Custom, Morning/Afternoon/Evening) |
 | `SheetHeader` | Đầu mọi bảng trượt lên: tiêu đề, mô tả phụ, **nút đóng góc phải** |
 | `hienThongBao` | Thanh thông báo đáy màn hình, tự tắt sau 3 giây |
+| `DongLienKet` | Địa chỉ web / thư bấm được: gạch chân, mũi tên chéo, cao tối thiểu 48dp. **Địa chỉ không bao giờ để trần trong đoạn văn** — trông như link mà bấm không ra gì thì coi như trang đó không tồn tại. Mở hụt thì chép địa chỉ và báo, không im lặng |
 | `PrimaryButton` | Full-width, cao 56, bo tròn, chữ VIẾT HOA 16/800 |
 | `TaskCard` | Icon tròn màu · tên · điểm · checkbox lớn; vuốt trái = sửa, phải = xong |
 | `KidHeader` | Avatar + tên + số dư gem + vòng tiến độ ngày |

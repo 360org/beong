@@ -10,6 +10,7 @@ import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/app_theme.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/widgets/app_icon.dart';
+import 'package:beong/core/widgets/lien_ket_ngoai.dart';
 import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/entities/jar_def.dart';
@@ -25,6 +26,53 @@ import 'package:beong/features/settings/ty_gia_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+/// Trang quyền riêng tư bản đầy đủ.
+final Uri kTrangQuyenRiengTu = Uri.parse(
+  'https://beong.net/quyen-rieng-tu.html',
+);
+
+/// Trang điều khoản sử dụng bản đầy đủ.
+final Uri kTrangDieuKhoan = Uri.parse('https://beong.net/dieu-khoan.html');
+
+/// Hộp thư hỗ trợ.
+final Uri kThuHoTro = Uri.parse('mailto:info@beong.net');
+
+/// Hộp thoại tóm tắt một trang chính sách, kèm **đường dẫn bấm được**.
+///
+/// Chủ dự án nêu 30/08/2026: *"link điều khoản / riêng tư không click được."*
+/// Trước đó địa chỉ nằm lẫn trong đoạn văn dưới dạng chữ thường — trông như
+/// link mà bấm không ra gì. Nay nó là một dòng riêng, có gạch chân, có mũi tên
+/// chéo, và cao đủ 48dp để ngón tay trúng.
+Future<void> _moHopThoaiTrang(
+  BuildContext context, {
+  required String tieuDe,
+  required String noiDung,
+  required String nhanLienKet,
+  required Uri diaChi,
+}) {
+  return showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(tieuDe),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(noiDung),
+          const SizedBox(height: AppSpacing.md),
+          DongLienKet(nhan: nhanLienKet, diaChi: diaChi),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(),
+          child: const Text('ĐÓNG'),
+        ),
+      ],
+    ),
+  );
+}
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -182,23 +230,16 @@ class SettingsScreen extends ConsumerWidget {
                     title: 'Chính sách quyền riêng tư',
                     subtitle: 'beong.net/quyen-rieng-tu.html',
                     onTap: () => unawaited(
-                      showDialog<void>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: const Text('Quyền riêng tư'),
-                          content: const Text(
-                            'Bé Ong là ứng dụng offline-first, tôn trọng tuyệt đối dữ liệu của gia đình.\n\n'
+                      _moHopThoaiTrang(
+                        context,
+                        tieuDe: 'Quyền riêng tư',
+                        noiDung:
+                            'Bé Ong là ứng dụng offline-first, tôn trọng '
+                            'tuyệt đối dữ liệu của gia đình.\n\n'
                             '• Không thu thập thông tin cá nhân của trẻ\n'
-                            '• Dữ liệu lưu trữ an toàn trên thiết bị của bạn\n'
-                            '• Chi tiết tại: https://beong.net/quyen-rieng-tu.html',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(ctx).pop(),
-                              child: const Text('ĐÓNG'),
-                            ),
-                          ],
-                        ),
+                            '• Dữ liệu lưu trữ an toàn trên thiết bị của bạn',
+                        nhanLienKet: 'Đọc bản đầy đủ trên beong.net',
+                        diaChi: kTrangQuyenRiengTu,
                       ),
                     ),
                   ),
@@ -207,22 +248,15 @@ class SettingsScreen extends ConsumerWidget {
                     title: 'Điều khoản sử dụng',
                     subtitle: 'beong.net/dieu-khoan.html',
                     onTap: () => unawaited(
-                      showDialog<void>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: const Text('Điều khoản sử dụng'),
-                          content: const Text(
-                            'Bé Ong được phát triển phi lợi nhuận vì cộng đồng bởi 360 CORP.\n\n'
-                            '• Miễn phí 100% không quảng cáo\n'
-                            '• Xem đầy đủ tại: https://beong.net/dieu-khoan.html',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(ctx).pop(),
-                              child: const Text('ĐÓNG'),
-                            ),
-                          ],
-                        ),
+                      _moHopThoaiTrang(
+                        context,
+                        tieuDe: 'Điều khoản sử dụng',
+                        noiDung:
+                            'Bé Ong được phát triển phi lợi nhuận vì cộng '
+                            'đồng bởi 360 CORP.\n\n'
+                            '• Miễn phí 100% không quảng cáo',
+                        nhanLienKet: 'Đọc bản đầy đủ trên beong.net',
+                        diaChi: kTrangDieuKhoan,
                       ),
                     ),
                   ),
@@ -230,7 +264,9 @@ class SettingsScreen extends ConsumerWidget {
                     icon: Icons.mail_outline_rounded,
                     title: 'Liên hệ hỗ trợ',
                     subtitle: 'info@beong.net',
-                    onTap: () {},
+                    // Cùng một lỗi với hai dòng trên: một địa chỉ thư hiện ra
+                    // rồi bấm vào không có gì xảy ra. Mở thẳng app thư.
+                    onTap: () => unawaited(moLienKetNgoai(context, kThuHoTro)),
                   ),
                   _SettingsTile(
                     icon: Icons.bug_report_outlined,

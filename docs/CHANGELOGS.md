@@ -4,6 +4,25 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.7.8+42 (2026-08-30) — Link điều khoản / quyền riêng tư bấm được
+
+Chủ dự án: *"link điều khoản / riêng tư không click được."*
+
+Đúng vậy — địa chỉ trong hai hộp thoại ấy chỉ là **chữ nằm lẫn trong đoạn
+văn**: trông như link, đọc như link, bấm vào không có gì xảy ra. Với một địa
+chỉ dài kiểu `beong.net/quyen-rieng-tu.html` thì không ai chép tay sang trình
+duyệt, nghĩa là hai trang đó coi như không tồn tại với người dùng.
+
+Nay mỗi hộp thoại có một dòng riêng — gạch chân, mũi tên chéo, cao đủ 48dp —
+bấm vào là mở trình duyệt. Dòng **Liên hệ hỗ trợ** cũng vậy: trước đây
+`info@beong.net` hiện ra rồi bấm không ra gì, nay mở thẳng app thư.
+
+Mở hụt thì app **nói ra**, kèm nguyên địa chỉ và chép sẵn vào bộ nhớ tạm. Máy
+không có trình duyệt mặc định, hoặc không có app thư nào, là chuyện có thật;
+bấm mà không thấy gì thì người dùng bấm lại vài lần rồi kết luận app hỏng.
+
+---
+
 ## v0.7.7+41 (2026-08-30) — Tự nhập tỷ giá quy đổi xu
 
 Chủ dự án: *"chỗ quy đổi xu phải có option cho người dùng chọn nhập số quy
