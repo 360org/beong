@@ -4,6 +4,30 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.7.0+34 (2026-08-30) — Thẻ con ở Trang chính chính là màn lịch sử
+
+Mở một thẻ con ở Trang chính, bố mẹ nay thấy **đúng thứ** màn lịch sử chi tiết
+vẫn hiện: thẻ tóm tắt *Tổng việc / Đã hoàn thành / Tỷ lệ*, rồi việc chia theo
+Buổi Sáng, Buổi Trưa / Chiều, Buổi Tối, Cả Ngày & Thói Quen.
+
+Không phải "trông giống" — hai chỗ nay dùng **chung một** thành phần. Dựng lại
+cùng một bố cục bằng hai đoạn mã khác nhau là cách chắc chắn để chúng lệch
+nhau sau vài lần sửa, và bố mẹ thì phải học hai giao diện cho cùng một thứ.
+
+### Vuốt trái / phải để đi giữa các ngày
+
+Vuốt phải lùi về hôm qua, vuốt trái quay lại. Nội dung ngày cũ trượt ra, ngày
+mới trượt vào **từ đúng phía ngón tay vừa đi tới** rồi hiện dần — một cú hé
+sang ngày bên cạnh, không phải một cú chuyển màn. Không có hoạt ảnh thì nội
+dung nhảy một cái và người dùng không kịp nhận ra mình vừa sang ngày khác hay
+app vừa tải lại.
+
+Nút mở lại một việc đã xong chuyển vào đúng hàng của việc đó, thay cho mục
+"Đã xong hôm nay" gập lại ở cuối thẻ — mục đó đi cùng bố cục cũ, giữ lại là
+hiện việc đã xong hai lần trên cùng một thẻ.
+
+---
+
 ## v0.6.3+33 (2026-08-30) — Màn hình của con chia việc theo buổi
 
 Con đang thấy một danh sách phẳng: *"Cần làm 22"* rồi 22 thẻ nối nhau, không

@@ -5,12 +5,11 @@ import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/core/utils/ngay_viet.dart';
 import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/sheet_header.dart';
-import 'package:beong/core/widgets/xu_badge.dart';
-import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/repositories/task_repository.dart';
 import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/domain/services/family_clock.dart';
+import 'package:beong/features/parent_home/ngay_cua_con.dart';
 import 'package:flutter/material.dart';
 
 /// Modal chi tiết thống kê và lịch sử vuốt ngang theo ngày/tuần phân theo 4 buổi.
@@ -179,269 +178,22 @@ class _ChildHistoryModalState extends State<ChildHistoryModal> {
             ),
           ),
 
-          // Nội dung công việc theo 4 buổi trong ngày được chọn
+          // Nội dung một ngày — **cùng một widget** với thẻ con ở Trang
+          // chính. Hai chỗ dựng lại cùng bố cục bằng hai đoạn code khác nhau
+          // là cách chắc chắn để chúng lệch nhau sau vài lần sửa.
           Expanded(
-            child: StreamBuilder<List<TaskInstance>>(
-              stream: widget.taskDao.watchInstancesForMember(
-                memberId: widget.child.id,
-                date: _selectedDate,
-              ),
-              builder: (context, snap) {
-                final instances = snap.data ?? [];
-                if (instances.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'Không có công việc nào trong ngày này',
-                      style: context.text.bodyMedium?.copyWith(
-                        color: context.semantic.onSurfaceMuted,
-                      ),
-                    ),
-                  );
-                }
-
-                return StreamBuilder<List<Task>>(
-                  stream: widget.taskDao.watchActiveTasks(
-                    widget.child.familyId,
-                  ),
-                  builder: (context, taskSnap) {
-                    final allTasks = taskSnap.data ?? [];
-                    final taskMap = {for (final t in allTasks) t.id: t};
-
-                    // Phân nhóm việc theo buổi
-                    final morningList = <TaskInstance>[];
-                    final afternoonList = <TaskInstance>[];
-                    final eveningList = <TaskInstance>[];
-                    final anytimeList = <TaskInstance>[];
-
-                    for (final inst in instances) {
-                      final task = taskMap[inst.taskId];
-                      final part = task?.dayPart;
-                      if (part == 'morning') {
-                        morningList.add(inst);
-                      } else if (part == 'afternoon') {
-                        afternoonList.add(inst);
-                      } else if (part == 'evening') {
-                        eveningList.add(inst);
-                      } else {
-                        anytimeList.add(inst);
-                      }
-                    }
-
-                    final doneCount = instances
-                        .where(
-                          (i) =>
-                              i.status == InstanceStatus.approved.name ||
-                              i.status == InstanceStatus.pendingReview.name,
-                        )
-                        .length;
-
-                    return ListView(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      children: [
-                        // Thẻ tóm tắt ngày
-                        Container(
-                          padding: const EdgeInsets.all(AppSpacing.md),
-                          decoration: BoxDecoration(
-                            color: context.colors.primaryContainer.withValues(
-                              alpha: 0.4,
-                            ),
-                            borderRadius: BorderRadius.circular(AppRadius.card),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              _SummaryStat(
-                                label: 'Tổng việc',
-                                value: '${instances.length}',
-                                color: context.colors.primary,
-                              ),
-                              _SummaryStat(
-                                label: 'Đã hoàn thành',
-                                value: '$doneCount',
-                                color: context.semantic.success,
-                              ),
-                              _SummaryStat(
-                                label: 'Tỷ lệ',
-                                value:
-                                    '${instances.isNotEmpty ? (doneCount * 100 ~/ instances.length) : 0}%',
-                                color: context.colors.secondary,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-
-                        if (morningList.isNotEmpty)
-                          _SessionSection(
-                            title: '🌅 Buổi Sáng',
-                            instances: morningList,
-                            taskMap: taskMap,
-                          ),
-                        if (afternoonList.isNotEmpty)
-                          _SessionSection(
-                            title: '☀️ Buổi Trưa / Chiều',
-                            instances: afternoonList,
-                            taskMap: taskMap,
-                          ),
-                        if (eveningList.isNotEmpty)
-                          _SessionSection(
-                            title: '🌙 Buổi Tối',
-                            instances: eveningList,
-                            taskMap: taskMap,
-                          ),
-                        if (anytimeList.isNotEmpty)
-                          _SessionSection(
-                            title: '🔄 Cả Ngày & Thói Quen',
-                            instances: anytimeList,
-                            taskMap: taskMap,
-                          ),
-                      ],
-                    );
-                  },
-                );
-              },
+            child: ListView(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              children: [
+                NgayCuaCon(
+                  memberId: widget.child.id,
+                  familyId: widget.child.familyId,
+                  date: _selectedDate,
+                  taskDao: widget.taskDao,
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SummaryStat extends StatelessWidget {
-  const _SummaryStat({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  final String label;
-  final String value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: context.text.titleLarge?.copyWith(
-            fontWeight: FontWeight.w900,
-            color: color,
-          ),
-        ),
-        Text(
-          label,
-          style: context.text.bodySmall?.copyWith(
-            color: context.semantic.onSurfaceMuted,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SessionSection extends StatelessWidget {
-  const _SessionSection({
-    required this.title,
-    required this.instances,
-    required this.taskMap,
-  });
-
-  final String title;
-  final List<TaskInstance> instances;
-  final Map<String, Task> taskMap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.md),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: context.colors.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(AppRadius.field),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: context.text.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          for (final inst in instances) ...[
-            _TaskInstanceRow(
-              instance: inst,
-              task: taskMap[inst.taskId],
-            ),
-            const SizedBox(height: 4),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _TaskInstanceRow extends StatelessWidget {
-  const _TaskInstanceRow({
-    required this.instance,
-    required this.task,
-  });
-
-  final TaskInstance instance;
-  final Task? task;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDone = instance.status == InstanceStatus.approved.name;
-    final isPending = instance.status == InstanceStatus.pendingReview.name;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: isDone
-            ? context.semantic.success.withValues(alpha: 0.15)
-            : context.colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.field),
-      ),
-      child: Row(
-        children: [
-          AppIcon.task(task?.iconKey ?? 'star', size: 20),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              task?.title ?? 'Nhiệm vụ',
-              style: context.text.bodyMedium?.copyWith(
-                fontWeight: isDone ? FontWeight.w700 : FontWeight.w500,
-                decoration: isDone ? TextDecoration.lineThrough : null,
-              ),
-            ),
-          ),
-          if (isDone)
-            const Icon(
-              Icons.check_circle_rounded,
-              color: Colors.green,
-              size: 20,
-            )
-          else if (isPending)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: const Text(
-                'Chờ duyệt',
-                style: TextStyle(fontSize: 11, color: Colors.amber),
-              ),
-            )
-          else
-            XuBadge(amount: instance.pointsSnapshot, pill: true),
         ],
       ),
     );

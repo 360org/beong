@@ -1,8 +1,9 @@
 import 'package:beong/domain/entities/enums.dart';
-import 'package:beong/features/parent_home/child_day_groups.dart';
+import 'package:beong/features/parent_home/ngay_cua_con.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Canh cách đếm "đã xong" trên thẻ con ở Trang chính.
+/// Canh cách đếm "đã xong" — dùng ở cả thẻ con Trang chính lẫn màn lịch sử,
+/// vì hai chỗ đó nay là **một** widget (`NgayCuaCon`).
 ///
 /// Vì sao có file này: bản trước lấy **"khác `scheduled`" là xong**, nên việc
 /// bỏ lỡ và việc bị từ chối cũng được đếm là xong. Lỗi nằm im chừng nào thẻ
@@ -36,31 +37,6 @@ void main() {
 
     test('chưa tới lượt thì chưa xong', () {
       expect(daLamXong(InstanceStatus.scheduled.name), isFalse);
-    });
-  });
-
-  group('phân biệt việc hỏng với việc chưa làm', () {
-    test('bỏ lỡ và bị từ chối là "hỏng"', () {
-      expect(daHongViec(InstanceStatus.missed.name), isTrue);
-      expect(daHongViec(InstanceStatus.rejected.name), isTrue);
-    });
-
-    test('việc chưa tới lượt KHÔNG phải hỏng', () {
-      expect(
-        daHongViec(InstanceStatus.scheduled.name),
-        isFalse,
-        reason: 'gạch ngang một việc con vẫn còn cơ hội làm là nói dối con',
-      );
-    });
-
-    test('không trạng thái nào vừa xong vừa hỏng', () {
-      for (final s in InstanceStatus.values) {
-        expect(
-          daLamXong(s.name) && daHongViec(s.name),
-          isFalse,
-          reason: '${s.name} không thể vừa xong vừa hỏng',
-        );
-      }
     });
   });
 }

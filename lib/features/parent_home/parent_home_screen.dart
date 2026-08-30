@@ -21,8 +21,8 @@ import 'package:beong/domain/repositories/wallet_repository.dart';
 import 'package:beong/domain/services/family_clock.dart';
 import 'package:beong/domain/services/task_review_service.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
-import 'package:beong/features/parent_home/child_day_groups.dart';
 import 'package:beong/features/parent_home/child_history_sheet.dart';
+import 'package:beong/features/parent_home/ngay_cua_con.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -663,6 +663,11 @@ class _ChildSummaryCardState extends ConsumerState<_ChildSummaryCard> {
   /// Tổng quãng đường ngón tay đã đi ngang trong cú kéo đang diễn ra.
   double _keoNgang = 0;
 
+  /// Hướng cú vuốt gần nhất: `1` = đang đi về quá khứ, `-1` = quay lại hôm
+  /// nay. Chỉ dùng để hoạt ảnh trượt **đúng chiều tay vừa đi** — trượt ngược
+  /// chiều thì cảm giác như app cãi lại ngón tay.
+  int _huongVao = 1;
+
   /// Đang xem lùi bao nhiêu ngày. 0 = hôm nay.
   ///
   /// Vuốt ngang **đổi thẳng nội dung thẻ**, không mở hộp thoại: chủ dự án nêu
@@ -680,14 +685,39 @@ class _ChildSummaryCardState extends ConsumerState<_ChildSummaryCard> {
     if (!laVuotNgangThatSu(quangDuong: _keoNgang, vanToc: vanToc)) return;
     // Vuốt sang **phải** (dx dương) = lùi về quá khứ, giống lật ngược một cuốn
     // sổ. Vuốt trái quay lại phía hôm nay.
+    final moi = luiNgaySauVuot(
+      hienTai: _luiNgay,
+      quangDuong: _keoNgang,
+      vanToc: vanToc,
+      toiDa: _luiToiDa,
+    );
+    if (moi == _luiNgay) return;
     setState(() {
-      _luiNgay = luiNgaySauVuot(
-        hienTai: _luiNgay,
-        quangDuong: _keoNgang,
-        vanToc: vanToc,
-        toiDa: _luiToiDa,
-      );
+      _huongVao = moi > _luiNgay ? 1 : -1;
+      _luiNgay = moi;
     });
+  }
+
+  /// Cho con làm lại một việc đã duyệt.
+  ///
+  /// Trước đây nằm trong mục "Đã xong hôm nay" gập lại ở cuối thẻ. Mục đó đi
+  /// cùng bố cục cũ; giữ nó lại bên cạnh `NgayCuaCon` là hiện việc đã xong
+  /// **hai lần** trên cùng một thẻ. Nên nút mở lại chuyển vào đúng hàng của
+  /// việc đó.
+  Future<void> _moLaiViec(TaskInstance luot) async {
+    final ketQua = await widget.reviewService.reopen(
+      instanceId: luot.id,
+      reviewerId: widget.reviewerId,
+    );
+    if (!mounted) return;
+    // Nói rõ đã trừ bao nhiêu. Xu biến mất mà không ai giải thích là đúng thứ
+    // làm trẻ mất niềm tin vào app.
+    hienThongBao(
+      context,
+      ketQua.xuDeducted > 0
+          ? 'Đã mở lại việc. Trừ ${ketQua.xuDeducted} xu.'
+          : 'Đã mở lại việc cho con làm lại.',
+    );
   }
 
   String _nhanNgay(CalendarDate ngay) => switch (_luiNgay) {
@@ -835,26 +865,56 @@ class _ChildSummaryCardState extends ConsumerState<_ChildSummaryCard> {
                       ),
                     ),
                   ),
-                const SizedBox(height: AppSpacing.xs),
-                ChildDayGroups(
-                  memberId: child.id,
-                  familyId: child.familyId,
-                  date: ngayXem,
-                  taskDao: taskDao,
-                ),
-                _DoneTodayList(
-                  memberId: child.id,
-                  date: ngayXem,
-                  taskDao: taskDao,
-                  reviewService: widget.reviewService,
-                  reviewerId: widget.reviewerId,
-                ),
-                if (_luiNgay > 0)
-                  _KhongCoViec(
-                    memberId: child.id,
-                    date: ngayXem,
-                    taskDao: taskDao,
+                const SizedBox(height: AppSpacing.md),
+                // Thân thẻ **chính là** màn lịch sử chi tiết — cùng một widget
+                // `NgayCuaCon`, nên bố mẹ thấy đúng một bố cục ở cả hai chỗ
+                // (chủ dự án chốt 30/08/2026).
+                //
+                // `AnimatedSwitcher` cho cú vuốt một hiệu ứng: ngày cũ trượt
+                // ra, ngày mới trượt vào từ phía ngón tay vừa đi tới, kèm mờ
+                // dần. Không có hoạt ảnh thì nội dung **nhảy** một cái — người
+                // dùng không kịp thấy là mình vừa đi sang ngày khác hay app
+                // vừa tải lại.
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 260),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  // Đo theo widget mới, không phải cái to nhất: giữ kích thước
+                  // của ngày nhiều việc trong lúc chuyển sang ngày ít việc để
+                  // lại một khoảng trắng lớn dưới thẻ.
+                  layoutBuilder: (hienTai, truoc) => Stack(
+                    alignment: Alignment.topCenter,
+                    children: [...truoc, ?hienTai],
                   ),
+                  transitionBuilder: (child, hoatAnh) {
+                    final vaoTuPhai = child.key == ValueKey(_luiNgay)
+                        ? _huongVao
+                        : -_huongVao;
+                    return FadeTransition(
+                      opacity: hoatAnh,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          // 0.12 chứ không phải 1.0: đây là một cú **hé** sang
+                          // ngày bên cạnh, không phải chuyển màn. Trượt trọn
+                          // một bề ngang trong một cái thẻ trông giật cục.
+                          begin: Offset(0.12 * vaoTuPhai, 0),
+                          end: Offset.zero,
+                        ).animate(hoatAnh),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: KeyedSubtree(
+                    key: ValueKey(_luiNgay),
+                    child: NgayCuaCon(
+                      memberId: child.id,
+                      familyId: child.familyId,
+                      date: ngayXem,
+                      taskDao: taskDao,
+                      onMoLai: _moLaiViec,
+                    ),
+                  ),
+                ),
               ],
             ],
           ),
@@ -916,175 +976,3 @@ class _ThanhNgayLui extends StatelessWidget {
 ///
 /// Thẻ rỗng trơn thì không phân biệt được "hôm đó con không có việc" với "app
 /// chưa tải xong".
-class _KhongCoViec extends StatelessWidget {
-  const _KhongCoViec({
-    required this.memberId,
-    required this.date,
-    required this.taskDao,
-  });
-
-  final String memberId;
-  final CalendarDate date;
-  final TaskRepository taskDao;
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<List<TaskInstance>>(
-      stream: taskDao.watchInstancesForMember(memberId: memberId, date: date),
-      builder: (context, snap) {
-        if (snap.data == null || snap.data!.isNotEmpty) {
-          return const SizedBox.shrink();
-        }
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-          child: Text(
-            'Ngày này chưa có việc nào.',
-            style: context.text.bodySmall?.copyWith(
-              color: context.semantic.onSurfaceMuted,
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// Việc con đã xong hôm nay, thu gọn lại, mỗi việc có nút mở lại.
-class _DoneTodayList extends StatelessWidget {
-  const _DoneTodayList({
-    required this.memberId,
-    required this.date,
-    required this.taskDao,
-    required this.reviewService,
-    required this.reviewerId,
-  });
-
-  final String memberId;
-  final CalendarDate date;
-  final TaskRepository taskDao;
-  final TaskReviewService reviewService;
-  final String reviewerId;
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<List<TaskInstance>>(
-      stream: taskDao.watchApprovedForMember(memberId: memberId, date: date),
-      builder: (context, snap) {
-        final done = snap.data ?? const <TaskInstance>[];
-        if (done.isEmpty) return const SizedBox.shrink();
-
-        return Theme(
-          // Bỏ đường kẻ của ExpansionTile để nó không cắt ngang thẻ.
-          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-          child: ExpansionTile(
-            tilePadding: EdgeInsets.zero,
-            childrenPadding: EdgeInsets.zero,
-            title: Text(
-              'Đã xong hôm nay (${done.length})',
-              style: context.text.bodySmall?.copyWith(
-                color: context.semantic.onSurfaceMuted,
-              ),
-            ),
-            children: done
-                .map(
-                  (instance) => _DoneRow(
-                    // Cùng lý do với hàng đợi duyệt: thiếu key thì State bị
-                    // tái dùng theo vị trí và hàng hiện tên việc cũ.
-                    key: ValueKey(instance.id),
-                    instance: instance,
-                    taskDao: taskDao,
-                    reviewService: reviewService,
-                    reviewerId: reviewerId,
-                  ),
-                )
-                .toList(),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _DoneRow extends StatefulWidget {
-  const _DoneRow({
-    required this.instance,
-    required this.taskDao,
-    required this.reviewService,
-    required this.reviewerId,
-    super.key,
-  });
-
-  final TaskInstance instance;
-  final TaskRepository taskDao;
-  final TaskReviewService reviewService;
-  final String reviewerId;
-
-  @override
-  State<_DoneRow> createState() => _DoneRowState();
-}
-
-class _DoneRowState extends State<_DoneRow> {
-  Task? _task;
-
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_loadTask());
-  }
-
-  @override
-  void didUpdateWidget(_DoneRow oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.instance.taskId != widget.instance.taskId) {
-      unawaited(_loadTask());
-    }
-  }
-
-  Future<void> _loadTask() async {
-    final task = await widget.taskDao.getTaskById(widget.instance.taskId);
-    if (mounted) setState(() => _task = task);
-  }
-
-  Future<void> _reopen() async {
-    final result = await widget.reviewService.reopen(
-      instanceId: widget.instance.id,
-      reviewerId: widget.reviewerId,
-    );
-    if (!mounted) return;
-    hienThongBao(
-      context,
-      result.xuDeducted > 0
-          ? 'Đã mở lại việc. Trừ ${result.xuDeducted} xu.'
-          : 'Đã mở lại việc cho con làm lại.',
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final task = _task;
-    if (task == null) return const SizedBox.shrink();
-
-    return Row(
-      children: [
-        AppIcon.task(task.iconKey, size: 20),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(child: Text(task.title, style: context.text.bodyMedium)),
-        if (widget.instance.reopenCount > 0)
-          Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.xs),
-            child: Text(
-              'làm lại ${widget.instance.reopenCount}x',
-              style: context.text.labelSmall?.copyWith(
-                color: context.semantic.warning,
-              ),
-            ),
-          ),
-        IconButton(
-          onPressed: _reopen,
-          icon: Icon(Icons.replay_rounded, color: context.semantic.warning),
-          tooltip: 'Chưa làm — mở lại',
-        ),
-      ],
-    );
-  }
-}
