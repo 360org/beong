@@ -493,5 +493,114 @@ void main() {
 
       expect(lan2, hasLength(lan1.length));
     });
+    group('sửa hũ khi bé CHƯA có bộ riêng', () {
+      // Chủ dự án 30/08/2026: đổi tên hũ, bấm LƯU, tên cũ quay lại. Gốc: bé
+      // chưa có bộ riêng nên cái hũ bố mẹ đang nhìn là **hàng chung của nhà**,
+      // và câu UPDATE lọc theo `member_id = bé` không khớp hàng nào — ghi vào
+      // hư không, không một lời báo.
+
+      test('đổi tên có hiệu lực với bé đó', () async {
+        expect(await jarDao.coHuRieng(childId), isFalse);
+
+        await jarDao.updateJar(
+          familyId: familyId,
+          jarKey: kJarSave,
+          title: 'Mua xe đạp',
+          memberId: childId,
+        );
+
+        final cua = await jarDao.activeJars(familyId, memberId: childId);
+        expect(
+          cua.firstWhere((j) => j.key == kJarSave).title,
+          'Mua xe đạp',
+          reason: 'đây chính là lỗi đã gặp: bấm LƯU xong tên cũ quay lại',
+        );
+      });
+
+      test('bộ chung của nhà KHÔNG đổi theo', () async {
+        await jarDao.updateJar(
+          familyId: familyId,
+          jarKey: kJarSave,
+          title: 'Mua xe đạp',
+          memberId: childId,
+        );
+
+        final chung = await jarDao.activeJars(familyId);
+        expect(
+          chung.firstWhere((j) => j.key == kJarSave).title,
+          isNot('Mua xe đạp'),
+          reason: 'bảng sửa nói "các bé khác không đổi" — phải đúng như vậy',
+        );
+      });
+
+      test('bé kia cũng không đổi theo', () async {
+        await jarDao.updateJar(
+          familyId: familyId,
+          jarKey: kJarSave,
+          title: 'Mua xe đạp',
+          memberId: childId,
+        );
+
+        final cuaSimba = await jarDao.activeJars(familyId, memberId: beKia);
+        expect(
+          cuaSimba.firstWhere((j) => j.key == kJarSave).title,
+          isNot('Mua xe đạp'),
+        );
+      });
+
+      test('sửa xong thì bé có đủ cả bộ, không mất hũ nào', () async {
+        final truoc = await jarDao.activeJars(familyId);
+
+        await jarDao.updateJar(
+          familyId: familyId,
+          jarKey: kJarSave,
+          title: 'Mua xe đạp',
+          memberId: childId,
+        );
+
+        final sau = await jarDao.activeJars(familyId, memberId: childId);
+        expect(
+          sau.map((j) => j.key),
+          containsAll(truoc.map((j) => j.key)),
+          reason: 'tách bộ mà rơi mất hũ thì tổng không còn 100%',
+        );
+      });
+
+      test('ngừng dùng hũ cũng phải ăn ngay lần đầu', () async {
+        await jarDao.setArchived(
+          familyId: familyId,
+          jarKey: kJarGive,
+          archived: true,
+          memberId: childId,
+        );
+
+        final cua = await jarDao.activeJars(familyId, memberId: childId);
+        expect(cua.map((j) => j.key), isNot(contains(kJarGive)));
+        // Nhà vẫn còn đủ ba hũ.
+        expect(
+          (await jarDao.activeJars(familyId)).map((j) => j.key),
+          contains(kJarGive),
+        );
+      });
+
+      test('sửa hũ CHUNG (không truyền bé) vẫn đổi bộ chung như cũ', () async {
+        await jarDao.updateJar(
+          familyId: familyId,
+          jarKey: kJarSave,
+          title: 'Để dành chung',
+        );
+
+        final chung = await jarDao.activeJars(familyId);
+        expect(
+          chung.firstWhere((j) => j.key == kJarSave).title,
+          'Để dành chung',
+        );
+        expect(
+          await jarDao.coHuRieng(childId),
+          isFalse,
+          reason: 'sửa bộ chung không được lôi bé nào ra thành bộ riêng',
+        );
+      });
+    });
   });
 }

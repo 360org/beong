@@ -4,6 +4,25 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.7.4+38 (2026-08-30) — Sửa lỗi đổi tên hũ không lưu được
+
+Đổi tên một hũ rồi bấm LƯU, tên cũ quay lại. Không có thông báo lỗi nào — bảng
+đóng lại như thể đã lưu xong.
+
+**Nguyên nhân:** bé chưa có bộ hũ riêng thì cái hũ bố mẹ đang nhìn là hàng
+**chung của cả nhà**, trong khi lệnh ghi lại tìm hàng thuộc riêng bé đó. Không
+có hàng nào khớp, nên lệnh ghi thành công vào... không gì cả. Im lặng — kiểu
+hỏng khó nhận ra nhất, vì mọi thứ trông như đã chạy.
+
+Nay lần đầu sửa hũ cho một bé, cả bộ chung được sao chép sang cho bé đó rồi
+mới sửa — đúng như khi thêm hũ mới. Bảng sửa nói *"Hũ của NEO, các bé khác
+không đổi"*, và giờ nó đúng như vậy thật.
+
+Cùng lỗi ấy cũng làm nút **Ngừng dùng hũ** không ăn ở lần bấm đầu; đã sửa
+chung.
+
+---
+
 ## v0.7.3+37 (2026-08-30) — Trả việc lại cho con, ngay trên hàng của nó
 
 Con bấm xong nhưng chưa xong thật — nay bố mẹ xử lý ngay tại hàng việc đó,

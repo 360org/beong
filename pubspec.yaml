@@ -3,7 +3,7 @@ description: "Ứng dụng việc nhà và phần thưởng hằng ngày cho gia
 publish_to: "none"
 
 # <phiên bản hiển thị>+<build number>
-version: 0.7.3+37
+version: 0.7.4+38
 
 environment:
   sdk: ^3.12.0

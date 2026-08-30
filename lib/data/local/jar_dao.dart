@@ -253,6 +253,17 @@ class JarDao extends DatabaseAccessor<AppDatabase> with _$JarDaoMixin {
       throw const JarException('Tỷ lệ phải trong khoảng 0–100%');
     }
 
+    // Bé chưa có bộ riêng thì cái hũ bố mẹ đang nhìn là **hàng chung của
+    // nhà**, và câu `UPDATE` dưới đây lọc theo `member_id = bé` sẽ không khớp
+    // hàng nào — ghi vào hư không, không một lời báo. Chủ dự án gặp đúng cảnh
+    // đó ngày 30/08/2026: đổi tên hũ, bấm LƯU, tên cũ quay lại.
+    //
+    // Tách bộ trước rồi mới sửa: bảng sửa nói "Hũ của NEO, các bé khác không
+    // đổi", nên sửa phải rơi vào bộ của NEO chứ không phải bộ chung.
+    if (memberId != null) {
+      await tachBoRieng(familyId: familyId, memberId: memberId);
+    }
+
     // Lọc cả `member_id`: sau v9, cùng một `jar_key` tồn tại ở bộ chung **và**
     // ở bản sao của từng bé. Thiếu vế này thì sửa tỷ lệ hũ của Neo cũng sửa
     // luôn hũ cùng tên của Simba và của cả nhà.
@@ -289,6 +300,12 @@ class JarDao extends DatabaseAccessor<AppDatabase> with _$JarDaoMixin {
       if (remaining.length <= 1) {
         throw const JarException('Phải còn ít nhất một hũ');
       }
+    }
+
+    // Cùng lý do với [updateJar]: không tách bộ trước thì câu ghi dưới đây
+    // không khớp hàng nào và hũ vẫn nằm nguyên đó.
+    if (memberId != null) {
+      await tachBoRieng(familyId: familyId, memberId: memberId);
     }
 
     await (update(jars)..where(
