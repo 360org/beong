@@ -4,6 +4,32 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.5.1+26 (2026-08-30) — Sửa màn hình trắng khi nâng cấp từ bản cũ
+
+**Bản 0.5.0 không mở được trên máy đã cài bản trước đó.** Máy cài mới thì chạy
+bình thường, nên lỗi lọt qua toàn bộ khâu kiểm.
+
+### Chuyện gì xảy ra
+
+Bản 0.5.0 đổi cấu trúc bảng hũ để mỗi bé có bộ riêng. Bước nâng cấp cơ sở dữ
+liệu bảo hệ thống chép dữ liệu cũ sang bảng mới — nhưng chép **cả cột vừa mới
+thêm**, cột chưa từng tồn tại ở bản cũ. Cơ sở dữ liệu từ chối, app chết ngay
+lúc mở, trước khi kịp vẽ bất cứ thứ gì. Người dùng thấy một màn hình trắng
+không có lấy một dòng thông báo.
+
+### Vì sao khâu kiểm không bắt được
+
+Hàm dựng "cơ sở dữ liệu phiên bản cũ" trong bộ kiểm thử thiếu đúng một bước:
+nó không gỡ cột mới xuống, nên bảng "phiên bản cũ" giả vẫn có sẵn cột đó. Câu
+lệnh chép chạy được trong phòng thí nghiệm và chỉ hỏng ngoài đời. Bộ kiểm thử
+nay dựng lại đúng bảng của bản cũ, và có thêm hai bài kiểm riêng cho đúng bước
+nâng cấp này — đã thử gỡ bản sửa ra để chắc chúng đỏ thật.
+
+Dữ liệu **không mất**: lỗi xảy ra trước khi ghi bất cứ thứ gì. Cài đè bản này
+lên là mở lại được như cũ.
+
+---
+
 ## v0.5.0+25 (2026-08-30) — Mỗi bé một bộ hũ, và những lối ra bị bịt
 
 Bản này gỡ đúng những chỗ người dùng bị **kẹt**: bảng trượt không có nút tắt,

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:beong/data/local/database.dart';
+import 'package:beong/data/local/jar_dao.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
@@ -36,6 +37,32 @@ void main() {
         .insert(FamiliesCompanion.insert(id: 'fam-1', name: 'Nhà mình'));
 
     // Bỏ dần những gì phiên bản sau đã thêm, từ mới nhất về cũ nhất.
+    if (version < 9) {
+      // Thiếu đúng bước này ngày 30/08/2026 là mọi test migration vẫn xanh
+      // trong khi app thật **hỏng ngay lúc mở** trên máy đã cài bản cũ: bảng
+      // `jars` "phiên bản 8" giả vẫn có sẵn `member_id`, nên câu chép dữ liệu
+      // của `alterTable` chạy được ở test mà không chạy được ngoài đời.
+      //
+      // Phải dựng lại cả bảng chứ không `DROP COLUMN` được: `member_id` nằm
+      // trong ràng buộc UNIQUE, và SQLite từ chối bỏ cột như thế. DDL dưới đây
+      // chép nguyên văn từ một máy đang chạy v8 thật.
+      await db.customStatement('DROP TABLE jars');
+      await db.customStatement('''
+CREATE TABLE "jars" (
+  "id" TEXT NOT NULL,
+  "family_id" TEXT NOT NULL,
+  "created_at" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)),
+  "updated_at" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)),
+  "jar_key" TEXT NOT NULL,
+  "title" TEXT NOT NULL,
+  "emoji" TEXT NOT NULL,
+  "pct" INTEGER NOT NULL DEFAULT 0,
+  "order_index" INTEGER NOT NULL DEFAULT 0,
+  "is_archived" INTEGER NOT NULL DEFAULT 0 CHECK ("is_archived" IN (0, 1)),
+  PRIMARY KEY ("id"),
+  UNIQUE ("family_id", "jar_key")
+)''');
+    }
     if (version < 8) {
       await db.customStatement(
         'ALTER TABLE tasks DROP COLUMN missed_penalty_pct',
@@ -195,6 +222,44 @@ void main() {
 
     final goal = await db.select(db.savingsGoals).getSingle();
     expect(goal.iconKey, isNull, reason: 'mục tiêu cũ hiện icon mặc định');
+  });
+
+  test('v8 -> v9 thêm hũ riêng cho bé, hũ cũ thành hũ chung', () async {
+    await seedAtVersion(8);
+
+    // Ba hũ mặc định như một nhà đang dùng thật.
+    final db = await openCurrent();
+    final jarDao = JarDao(db);
+    await jarDao.seedDefaults('fam-1');
+    final truoc = await jarDao.activeJars('fam-1');
+    expect(truoc, hasLength(3));
+    final sau = await jarDao.activeJars('fam-1');
+
+    expect(
+      sau.map((j) => j.key),
+      truoc.map((j) => j.key),
+      reason: 'nâng cấp không được làm mất hũ nào',
+    );
+
+    final rows = await db.select(db.jars).get();
+    expect(
+      rows.every((r) => r.memberId == null),
+      isTrue,
+      reason:
+          'hũ có từ trước v9 là hũ **chung của nhà** — đúng ý nghĩa chúng vẫn '
+          'đang mang, nâng cấp không đổi hành vi nhà nào',
+    );
+  });
+
+  test('v8 -> v9 mở được DB cũ, không chết ở bước chép dữ liệu', () async {
+    // Test riêng cho đúng cú ngã ngày 30/08/2026: `TableMigration(jars)` thiếu
+    // `newColumns` thì drift sinh `INSERT INTO tmp SELECT ..., "member_id" ...
+    // FROM jars` — đọc cột chưa tồn tại ở bảng cũ. App chết lúc mở DB, trước
+    // khi vẽ được gì: người dùng thấy **màn hình trắng**, không có thông báo.
+    await seedAtVersion(8);
+
+    final db = await openCurrent();
+    await expectLater(db.select(db.jars).get(), completes);
   });
 
   test('v4 -> v5 tạo bảng hũ và giữ mặc định chia tự động', () async {

@@ -66,7 +66,19 @@ class AppDatabase extends _$AppDatabase {
       // `createTable(jars)` ở khối v4 -> v5 dựng thẳng bảng theo định nghĩa
       // hiện tại, đã có sẵn `member_id`.
       if (from < 9 && from >= 5) {
-        await m.alterTable(TableMigration(jars));
+        // `newColumns` là bắt buộc, không phải trang trí. Thiếu nó thì drift
+        // dựng câu chép dữ liệu `INSERT INTO tmp SELECT ..., "member_id", ...
+        // FROM jars` — đọc `member_id` từ **bảng cũ**, nơi cột đó chưa tồn
+        // tại. App hỏng ngay lúc mở DB, trước khi vẽ được gì: màn hình trắng.
+        await m.alterTable(
+          TableMigration(
+            jars,
+            // Cột mới, nullable, không có giá trị suy ra được từ dữ liệu cũ:
+            // mọi hàng sẵn có là hũ **chung của nhà**, đúng ý nghĩa chúng vẫn
+            // đang mang. `newColumns` là đủ — drift để NULL cho chúng.
+            newColumns: [jars.memberId],
+          ),
+        );
       }
       // v7 -> v8: mức trừ xu riêng theo từng việc (ADR-022). Cả hai cột đều
       // nullable, NULL = theo mức chung của gia đình — nâng cấp không đổi hành
