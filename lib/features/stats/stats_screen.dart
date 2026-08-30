@@ -257,6 +257,18 @@ class _ParentStats extends ConsumerWidget {
   final MemberRepository memberDao;
   final WalletRepository walletDao;
 
+  Future<void> _moThemHu(BuildContext context, WidgetRef ref) async {
+    final children = await memberDao.children(session.familyId);
+    if (!context.mounted) return;
+    await showJarAddSheet(
+      context,
+      jarDao: ref.read(jarRepositoryProvider),
+      familyId: session.familyId,
+      children: children,
+      onMoQuanLyHu: () => context.go(Routes.jarSettings),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
@@ -264,17 +276,13 @@ class _ParentStats extends ConsumerWidget {
         title: Text('Thống kê', style: context.text.titleLarge),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        tooltip: 'Thêm hũ cho cả nhà',
+        tooltip: 'Thêm hũ',
         icon: const Icon(Icons.add),
         label: const Text('THÊM HŨ'),
-        onPressed: () => unawaited(
-          showJarAddSheet(
-            context,
-            jarDao: ref.read(jarRepositoryProvider),
-            familyId: session.familyId,
-            onMoQuanLyHu: () => context.go(Routes.jarSettings),
-          ),
-        ),
+        // Nạp danh sách bé ngay trước khi mở bảng, chứ không đọc từ
+        // `StreamBuilder` phía dưới: nút nổi nằm **ngoài** cây con đó nên
+        // không với tới biến của nó.
+        onPressed: () => unawaited(_moThemHu(context, ref)),
       ),
       body: StreamBuilder<List<Member>>(
         stream: memberDao.watchMembers(session.familyId),
@@ -637,7 +645,9 @@ class _JarOverview extends ConsumerWidget {
     final jarDao = ref.watch(jarRepositoryProvider);
 
     return StreamBuilder<List<JarDef>>(
-      stream: jarDao.watchActiveJars(familyId),
+      // Bộ hũ **của bé này**, không phải bộ chung: từ v9 mỗi bé có thể có bộ
+      // riêng, và thẻ hũ ở đây chính là chỗ bố mẹ trông chờ thấy điều đó.
+      stream: jarDao.watchActiveJars(familyId, memberId: memberId),
       builder: (context, snap) {
         final jars = snap.data ?? kDefaultJars;
 

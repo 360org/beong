@@ -199,9 +199,12 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
   /// Kế hoạch chia của một trẻ — các hũ của gia đình kèm tỷ lệ (ADR-024).
   ///
   /// Thứ tự ưu tiên:
-  /// 1. `members.jar_split_override` — tỷ lệ riêng của trẻ, vẫn theo ba hũ cũ.
-  /// 2. Bảng `jars` của gia đình.
-  /// 3. Ba hũ mặc định, cho gia đình tạo trước schema v5.
+  /// 1. **Bộ hũ riêng của trẻ** (`jars.member_id = trẻ`) — từ v9. Đứng trước
+  ///    `jar_split_override` vì nó mới hơn và diễn tả được nhiều hơn: override
+  ///    chỉ nói được ba hũ cũ, bộ riêng nói được n hũ tuỳ ý.
+  /// 2. `members.jar_split_override` — tỷ lệ riêng của trẻ, vẫn theo ba hũ cũ.
+  /// 3. Bảng `jars` của gia đình (hàng `member_id IS NULL`).
+  /// 4. Ba hũ mặc định, cho gia đình tạo trước schema v5.
   ///
   /// Tổng tỷ lệ **không bằng 100** thì cũng rơi về mặc định chứ không ném lỗi:
   /// bố mẹ đang sửa dở tỷ lệ giữa lúc con làm xong việc là chuyện có thật, và
@@ -212,6 +215,25 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     )..where((m) => m.id.equals(memberId))).getSingleOrNull();
     if (member == null) {
       throw WalletException('Không tìm thấy hồ sơ $memberId');
+    }
+
+    final rieng =
+        await (select(jars)
+              ..where((j) => j.memberId.equals(memberId) & j.isArchived.not())
+              ..orderBy([(j) => OrderingTerm(expression: j.orderIndex)]))
+            .get();
+    if (rieng.isNotEmpty) {
+      final planRieng = JarPlan([
+        for (final row in rieng)
+          JarDef(
+            key: row.jarKey,
+            title: row.title,
+            emoji: row.emoji,
+            pct: row.pct,
+            orderIndex: row.orderIndex,
+          ),
+      ]);
+      if (planRieng.isValid) return planRieng;
     }
 
     final override = member.jarSplitOverride;
@@ -225,7 +247,10 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
     final rows =
         await (select(jars)
               ..where(
-                (j) => j.familyId.equals(member.familyId) & j.isArchived.not(),
+                (j) =>
+                    j.familyId.equals(member.familyId) &
+                    j.memberId.isNull() &
+                    j.isArchived.not(),
               )
               ..orderBy([(j) => OrderingTerm(expression: j.orderIndex)]))
             .get();

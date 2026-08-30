@@ -7,9 +7,11 @@ import 'package:beong/core/widgets/app_icon.dart';
 import 'package:beong/core/widgets/sheet_header.dart';
 import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/repositories/jar_repository.dart';
+import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:flutter/material.dart';
 
-/// Thêm một hũ mới cho cả nhà, và chỉnh lại tỷ lệ cho tổng vẫn bằng 100%.
+/// Thêm một hũ mới — cho cả nhà hoặc cho riêng một bé — và chỉnh lại tỷ lệ cho
+/// tổng vẫn bằng 100%.
 ///
 /// Chủ dự án chốt 26/08/2026: *"thêm hũ mới thì có option để điều chỉnh — tuỳ
 /// chọn điều chỉnh riêng hoặc nguyên tắc chung — miễn sao số hũ trong 1 profile
@@ -22,10 +24,22 @@ import 'package:flutter/material.dart';
 /// Không có cách thứ ba là "cứ tạo rồi tính sau": hũ tổng khác 100% thì tầng
 /// chia xu rơi về kế hoạch mặc định (`wallet_dao.dart:243`) và mọi con số bố mẹ
 /// vừa đặt biến mất không một lời báo.
+///
+/// ## Chọn hồ sơ (30/08/2026)
+///
+/// Chủ dự án: *"các hũ cho mỗi bé là khác nhau"*. Một bé để dành mua xe đạp
+/// trong khi bé kia để dành mua sách — ép cả nhà dùng chung một bộ hũ là ép hai
+/// đứa trẻ tiết kiệm cho cùng một thứ.
+///
+/// Chọn một bé thì hũ mới vào **bộ riêng của bé đó**, và lần đầu làm vậy cả bộ
+/// chung được sao chép sang cho bé (`JarDao.tachBoRieng`) rồi mới sửa. Không
+/// sao chép thì bé có đúng một hũ N%, còn 100−N% không có chỗ nào chứa. Và tỷ
+/// lệ trừ đi cũng chỉ trừ trong bộ của bé đó — hũ của bé kia không suy suyển.
 Future<bool?> showJarAddSheet(
   BuildContext context, {
   required JarRepository jarDao,
   required String familyId,
+  required List<Member> children,
   required VoidCallback onMoQuanLyHu,
 }) {
   return showModalBottomSheet<bool>(
@@ -38,6 +52,7 @@ Future<bool?> showJarAddSheet(
       child: _JarAddSheet(
         jarDao: jarDao,
         familyId: familyId,
+        children: children,
         onMoQuanLyHu: onMoQuanLyHu,
       ),
     ),
@@ -79,11 +94,13 @@ class _JarAddSheet extends StatefulWidget {
   const _JarAddSheet({
     required this.jarDao,
     required this.familyId,
+    required this.children,
     required this.onMoQuanLyHu,
   });
 
   final JarRepository jarDao;
   final String familyId;
+  final List<Member> children;
   final VoidCallback onMoQuanLyHu;
 
   @override
@@ -98,6 +115,10 @@ class _JarAddSheetState extends State<_JarAddSheet> {
   bool _busy = false;
   List<JarDef> _huDangCo = const [];
 
+  /// `null` = hũ chung cả nhà. Mặc định là chung: đó là hành vi cũ, và phần
+  /// lớn hũ (Tiêu / Để dành / Cho đi) đúng là dùng chung thật.
+  String? _hoSo;
+
   @override
   void initState() {
     super.initState();
@@ -105,7 +126,12 @@ class _JarAddSheetState extends State<_JarAddSheet> {
   }
 
   Future<void> _napHu() async {
-    final hu = await widget.jarDao.activeJars(widget.familyId);
+    // Đọc theo đúng hồ sơ đang chọn: bảng xem trước phải cho thấy tỷ lệ **của
+    // bé đó** sẽ đổi thế nào, không phải tỷ lệ của nhà.
+    final hu = await widget.jarDao.activeJars(
+      widget.familyId,
+      memberId: _hoSo,
+    );
     if (mounted) setState(() => _huDangCo = hu);
   }
 
@@ -116,6 +142,20 @@ class _JarAddSheetState extends State<_JarAddSheet> {
   }
 
   Map<String, int> _tinhLaiTyLe() => chiaLaiTyLeHu(_huDangCo, _pct);
+
+  String _tenBe(String memberId) => widget.children
+      .firstWhere(
+        (m) => m.id == memberId,
+        orElse: () => widget.children.first,
+      )
+      .displayName;
+
+  void _doiHoSo(String? memberId) {
+    setState(() => _hoSo = memberId);
+    // Nạp lại: bảng xem trước phải cho thấy tỷ lệ của **bộ vừa chọn**, không
+    // phải bộ trước đó.
+    unawaited(_napHu());
+  }
 
   Future<void> _luu() async {
     final title = _titleController.text.trim();
@@ -128,6 +168,7 @@ class _JarAddSheetState extends State<_JarAddSheet> {
       title: title,
       emoji: _emoji,
       pct: tuChinh ? 0 : _pct,
+      memberId: _hoSo,
     );
 
     if (!tuChinh) {
@@ -137,6 +178,7 @@ class _JarAddSheetState extends State<_JarAddSheet> {
           familyId: widget.familyId,
           jarKey: entry.key,
           pct: entry.value,
+          memberId: _hoSo,
         );
       }
     }
@@ -174,6 +216,42 @@ class _JarAddSheetState extends State<_JarAddSheet> {
               ),
               onChanged: (_) => setState(() {}),
             ),
+
+            if (widget.children.isNotEmpty) ...[
+              Text('Hũ này của ai', style: context.text.titleSmall),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                _hoSo == null
+                    ? 'Hũ chung: mọi bé đều có hũ này.'
+                    : 'Chỉ ${_tenBe(_hoSo!)} có hũ này. Các bé khác không đổi.',
+                style: context.text.bodySmall?.copyWith(
+                  color: context.semantic.onSurfaceMuted,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  ChoiceChip(
+                    label: const Text('Cả nhà'),
+                    selected: _hoSo == null,
+                    onSelected: (chon) {
+                      if (chon) _doiHoSo(null);
+                    },
+                  ),
+                  for (final child in widget.children)
+                    ChoiceChip(
+                      label: Text(child.displayName),
+                      selected: _hoSo == child.id,
+                      onSelected: (chon) {
+                        if (chon) _doiHoSo(child.id);
+                      },
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+            ],
 
             Text('Chọn hình', style: context.text.titleSmall),
             const SizedBox(height: AppSpacing.sm),

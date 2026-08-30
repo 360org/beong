@@ -1192,7 +1192,7 @@ Future<void> _openAllocateSheet({
 }) async {
   // Đọc hũ **trước khi** mở sheet: mở rồi mới đọc thì con thấy một khung trống
   // nháy lên, và trên máy chậm thì đủ lâu để bấm vào chỗ chưa có gì.
-  final jars = await jarDao.activeJars(familyId);
+  final jars = await jarDao.activeJars(familyId, memberId: memberId);
   if (!context.mounted) return;
 
   await showModalBottomSheet<void>(

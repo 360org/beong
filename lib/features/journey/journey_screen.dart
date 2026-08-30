@@ -63,7 +63,10 @@ class JourneyScreen extends ConsumerWidget {
                   final balance = balanceSnap.data ?? WalletBalance.zero;
 
                   return StreamBuilder<List<JarDef>>(
-                    stream: jarDao.watchActiveJars(familyId),
+                    stream: jarDao.watchActiveJars(
+                      familyId,
+                      memberId: memberId,
+                    ),
                     builder: (context, jarSnap) {
                       final hasSaveJar =
                           jarSnap.data?.any((j) => j.key == kJarSave) ?? true;

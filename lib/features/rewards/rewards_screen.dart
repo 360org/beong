@@ -111,7 +111,10 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
                     final balance = balSnap.data ?? WalletBalance.zero;
 
                     return StreamBuilder<List<JarDef>>(
-                      stream: jarDao.watchActiveJars(session.familyId),
+                      stream: jarDao.watchActiveJars(
+                        session.familyId,
+                        memberId: session.activeMemberId,
+                      ),
                       builder: (context, jarsSnap) {
                         final jars = jarsSnap.data ?? const <JarDef>[];
 
@@ -287,7 +290,7 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
     required WalletRepository walletDao,
     required JarRepository jarDao,
   }) async {
-    final activeJars = await jarDao.activeJars(familyId);
+    final activeJars = await jarDao.activeJars(familyId, memberId: memberId);
     if (!context.mounted) return;
     await showModalBottomSheet<void>(
       context: context,

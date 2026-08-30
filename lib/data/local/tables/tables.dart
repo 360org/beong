@@ -423,6 +423,19 @@ class Jars extends Table with FamilyScoped {
   /// giao dịch — đổi là làm hỏng lịch sử.
   TextColumn get jarKey => text()();
 
+  /// Hũ này của riêng bé nào. `NULL` = hũ chung của cả nhà.
+  ///
+  /// Chủ dự án nêu 30/08/2026: *"các hũ cho mỗi bé là khác nhau"*. Một bé có
+  /// thể để dành mua xe đạp trong khi bé kia để dành mua sách, và ép cả nhà
+  /// dùng chung một bộ hũ là ép hai đứa trẻ tiết kiệm cho cùng một thứ.
+  ///
+  /// Bộ hũ của một bé là **tất cả hoặc không**: bé nào chưa có hàng riêng thì
+  /// dùng bộ chung của nhà; lần đầu tạo hũ riêng, cả bộ chung được sao chép
+  /// sang cho bé đó rồi mới sửa. Trộn nửa chung nửa riêng thì đổi tỷ lệ một hũ
+  /// chung sẽ âm thầm đổi tổng của mọi bé — mà tổng phải luôn đúng 100%.
+  TextColumn get memberId =>
+      text().nullable().references(Members, #id, onDelete: KeyAction.cascade)();
+
   TextColumn get title => text().withLength(min: 1, max: 40)();
 
   /// Emoji. Hũ phải có mặt ngộ nghĩnh để trẻ nhớ được hũ nào là hũ nào.
@@ -442,8 +455,15 @@ class Jars extends Table with FamilyScoped {
   @override
   Set<Column<Object>> get primaryKey => {id};
 
+  /// Khoá hũ chỉ độc nhất **trong phạm vi chủ của nó**: nhà có hũ `save` và bé
+  /// Neo cũng có hũ `save` riêng là đúng — sổ cái khoá theo `(member_id, jar)`
+  /// nên hai hàng này không lẫn nhau.
+  ///
+  /// SQLite coi mọi `NULL` là khác nhau, nên ràng buộc này **không** chặn được
+  /// hai hàng chung cùng `jar_key`. Chỗ đó do chỉ mục riêng phần
+  /// `ux_jars_family_key` trong `_createIndexes` giữ.
   @override
   List<Set<Column<Object>>> get uniqueKeys => [
-    {familyId, jarKey},
+    {familyId, memberId, jarKey},
   ];
 }

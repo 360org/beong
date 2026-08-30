@@ -74,7 +74,7 @@ class GoalSection extends ConsumerWidget {
             return StreamBuilder<List<JarDef>>(
               stream: ref
                   .watch(jarRepositoryProvider)
-                  .watchActiveJars(goal.familyId),
+                  .watchActiveJars(goal.familyId, memberId: memberId),
               builder: (context, jarSnap) {
                 // Chưa biết danh sách hũ thì coi như còn hũ Để dành
                 final hasSaveJar =

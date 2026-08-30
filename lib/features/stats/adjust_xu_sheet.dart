@@ -182,6 +182,7 @@ class _AdjustSheetState extends ConsumerState<_AdjustSheet> {
           const SizedBox(height: AppSpacing.sm),
           _JarPicker(
             familyId: widget.familyId,
+            memberId: widget.memberId,
             selected: _jarKey,
             onSelected: (key) => setState(() {
               _jarKey = key;
@@ -229,18 +230,25 @@ class _AdjustSheetState extends ConsumerState<_AdjustSheet> {
 class _JarPicker extends ConsumerWidget {
   const _JarPicker({
     required this.familyId,
+    required this.memberId,
     required this.selected,
     required this.onSelected,
   });
 
   final String familyId;
+
+  /// Hũ của **bé đang được sửa xu**, không phải bộ chung: cộng/trừ vào một hũ
+  /// bé không có là ghi vào một chỗ không màn hình nào của bé hiện ra.
+  final String memberId;
   final String selected;
   final ValueChanged<String> onSelected;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StreamBuilder<List<JarDef>>(
-      stream: ref.watch(jarRepositoryProvider).watchActiveJars(familyId),
+      stream: ref
+          .watch(jarRepositoryProvider)
+          .watchActiveJars(familyId, memberId: memberId),
       builder: (context, snap) {
         final jars = snap.data ?? kDefaultJars;
         return Wrap(

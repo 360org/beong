@@ -38,7 +38,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -51,6 +51,23 @@ class AppDatabase extends _$AppDatabase {
       await customStatement('PRAGMA foreign_keys = ON');
     },
     onUpgrade: (m, from, to) async {
+      // v8 -> v9: hũ riêng cho từng bé. Cột `member_id` nullable, NULL = hũ
+      // chung của cả nhà — nhà đang dùng bản cũ nâng lên **không đổi gì**: mọi
+      // hàng sẵn có thành hũ chung, đúng ý nghĩa chúng vẫn đang mang.
+      //
+      // Phải `alterTable` chứ không `addColumn` được: ràng buộc UNIQUE đổi từ
+      // `(family_id, jar_key)` sang `(family_id, member_id, jar_key)`, mà
+      // SQLite không sửa được ràng buộc tại chỗ — drift dựng bảng mới rồi chép
+      // dữ liệu sang.
+      //
+      // `from >= 5` là bắt buộc: các khối dưới đây chạy **sau** khối này, nên
+      // với nhà nâng từ trước v5 thì bảng `jars` còn chưa tồn tại lúc này —
+      // `alterTable` sẽ hỏng ở câu chép dữ liệu. Nhà đó không cần bước này:
+      // `createTable(jars)` ở khối v4 -> v5 dựng thẳng bảng theo định nghĩa
+      // hiện tại, đã có sẵn `member_id`.
+      if (from < 9 && from >= 5) {
+        await m.alterTable(TableMigration(jars));
+      }
       // v7 -> v8: mức trừ xu riêng theo từng việc (ADR-022). Cả hai cột đều
       // nullable, NULL = theo mức chung của gia đình — nâng cấp không đổi hành
       // vi của nhà nào.
@@ -93,6 +110,11 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(taskInstances, taskInstances.reopenCount);
         await m.addColumn(taskInstances, taskInstances.missedPenaltyAt);
       }
+
+      // Cuối cùng, sau khi mọi bảng đã có mặt. Mọi câu đều `IF NOT EXISTS` nên
+      // chạy lại vô hại; đặt ở đây thay vì trong từng khối để chỉ mục mới
+      // không phụ thuộc vào việc nhà đó nâng từ phiên bản nào.
+      await _createIndexes();
     },
     // Mỗi lần tăng schemaVersion phải thêm một bước ở đây kèm test dựng DB
     // phiên bản cũ rồi migrate — xem docs/03 §6.
@@ -107,6 +129,11 @@ class AppDatabase extends _$AppDatabase {
       'CREATE INDEX IF NOT EXISTS idx_tx_member_jar ON point_transactions (member_id, jar)',
       'CREATE INDEX IF NOT EXISTS idx_redemptions_family_status ON redemptions (family_id, status)',
       'CREATE INDEX IF NOT EXISTS idx_tasks_routine_order ON tasks (routine_id, order_index)',
+      'CREATE INDEX IF NOT EXISTS idx_jars_member ON jars (member_id)',
+      // Ràng buộc UNIQUE của bảng không chặn được hai hàng hũ **chung** trùng
+      // `jar_key`, vì SQLite coi mọi NULL là khác nhau. Chỉ mục riêng phần này
+      // giữ đúng chỗ đó.
+      'CREATE UNIQUE INDEX IF NOT EXISTS ux_jars_family_key ON jars (family_id, jar_key) WHERE member_id IS NULL',
     ];
     for (final sql in statements) {
       await customStatement(sql);

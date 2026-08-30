@@ -241,7 +241,7 @@ bỏ nó **sau** khi tab Nhiệm vụ làm được cả hai việc đó.
 | 2.6 · Dòng "Tạo thêm thói quen" | ✅ | Cuối danh sách buổi; popup thêm được việc luôn |
 | 2.7 · Nút LƯU ở Sửa thói quen | ✅ | Bảng cuộn được, nút dính đáy — trước bị 125 hình đẩy khỏi màn hình |
 | 2.3 · Áp cho mọi hồ sơ | ✅ | Dùng chung thẻ con |
-| 4.1 · Nút thêm hũ | ⚠️ | Xong phần cả nhà — xem giới hạn bên dưới |
+| 4.1 · Nút thêm hũ | ✅ | Xong cả phần gán riêng cho từng bé (v9, 30/08/2026) |
 
 ### ⚠️ Giới hạn của 4.1: chưa gán hũ riêng cho từng bé được
 

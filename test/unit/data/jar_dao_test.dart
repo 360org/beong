@@ -348,4 +348,150 @@ void main() {
       expect(balance.save, 40);
     });
   });
+
+  group('hũ riêng cho từng bé (v9)', () {
+    // Chủ dự án 30/08/2026: "các hũ cho mỗi bé là khác nhau". Một bé để dành
+    // mua xe đạp trong khi bé kia để dành mua sách.
+    const beKia = 'con-2';
+
+    setUp(() async {
+      await memberDao.addMember(
+        MembersCompanion.insert(
+          id: beKia,
+          familyId: familyId,
+          kind: MemberKind.child.name,
+          displayName: 'Simba',
+        ),
+      );
+      await jarDao.seedDefaults(familyId);
+    });
+
+    test('bé chưa có bộ riêng thì dùng bộ chung của nhà', () async {
+      final cua = await jarDao.activeJars(familyId, memberId: childId);
+      final chung = await jarDao.activeJars(familyId);
+
+      expect(cua.map((j) => j.key), chung.map((j) => j.key));
+      expect(await jarDao.coHuRieng(childId), isFalse);
+    });
+
+    test('thêm hũ cho một bé thì bé kia KHÔNG có hũ đó', () async {
+      await jarDao.addJar(
+        familyId: familyId,
+        title: 'Mua xe đạp',
+        emoji: '🚲',
+        pct: 10,
+        memberId: childId,
+      );
+
+      final cuaMinh = await jarDao.activeJars(familyId, memberId: childId);
+      final cuaSimba = await jarDao.activeJars(familyId, memberId: beKia);
+      final cuaNha = await jarDao.activeJars(familyId);
+
+      expect(cuaMinh.map((j) => j.title), contains('Mua xe đạp'));
+      expect(
+        cuaSimba.map((j) => j.title),
+        isNot(contains('Mua xe đạp')),
+        reason: 'hũ riêng của Minh rò sang Simba là hỏng đúng thứ đang làm',
+      );
+      expect(cuaNha.map((j) => j.title), isNot(contains('Mua xe đạp')));
+    });
+
+    test(
+      'thêm hũ riêng thì bé được sao chép cả bộ chung, không mất hũ nào',
+      () async {
+        final truoc = await jarDao.activeJars(familyId);
+
+        await jarDao.addJar(
+          familyId: familyId,
+          title: 'Mua sách',
+          emoji: '📚',
+          memberId: childId,
+        );
+
+        final sau = await jarDao.activeJars(familyId, memberId: childId);
+        expect(
+          sau.map((j) => j.key),
+          containsAll(truoc.map((j) => j.key)),
+          reason:
+              'không sao chép bộ chung thì bé chỉ còn đúng một hũ, và 100% xu '
+              'không biết chảy đi đâu',
+        );
+        expect(sau, hasLength(truoc.length + 1));
+      },
+    );
+
+    test('sửa tỷ lệ hũ của một bé không đụng tới bé kia', () async {
+      await jarDao.tachBoRieng(familyId: familyId, memberId: childId);
+
+      await jarDao.updateJar(
+        familyId: familyId,
+        jarKey: kJarSave,
+        pct: 90,
+        memberId: childId,
+      );
+
+      final cuaMinh = await jarDao.activeJars(familyId, memberId: childId);
+      final cuaNha = await jarDao.activeJars(familyId);
+
+      expect(cuaMinh.firstWhere((j) => j.key == kJarSave).pct, 90);
+      expect(
+        cuaNha.firstWhere((j) => j.key == kJarSave).pct,
+        isNot(90),
+        reason: 'thiếu vế member_id ở câu UPDATE là sửa một bé sửa luôn cả nhà',
+      );
+    });
+
+    test('xu của bé chảy theo bộ hũ riêng, không theo bộ chung', () async {
+      await jarDao.tachBoRieng(familyId: familyId, memberId: childId);
+      // Minh dồn hết vào Để dành; nhà vẫn 50/40/10.
+      await jarDao.updateJar(
+        familyId: familyId,
+        jarKey: kJarSpend,
+        pct: 0,
+        memberId: childId,
+      );
+      await jarDao.updateJar(
+        familyId: familyId,
+        jarKey: kJarSave,
+        pct: 100,
+        memberId: childId,
+      );
+      await jarDao.updateJar(
+        familyId: familyId,
+        jarKey: kJarGive,
+        pct: 0,
+        memberId: childId,
+      );
+
+      await walletDao.credit(
+        familyId: familyId,
+        memberId: childId,
+        amount: 100,
+        reason: TxReason.taskApproved,
+        clientOpId: 'test:hu-rieng-minh',
+      );
+      await walletDao.credit(
+        familyId: familyId,
+        memberId: beKia,
+        amount: 100,
+        reason: TxReason.taskApproved,
+        clientOpId: 'test:hu-chung-simba',
+      );
+
+      final cuaMinh = await walletDao.balanceOf(childId);
+      final cuaSimba = await walletDao.balanceOf(beKia);
+
+      expect(cuaMinh.save, 100, reason: 'Minh dùng bộ riêng 0/100/0');
+      expect(cuaSimba.save, 40, reason: 'Simba vẫn theo bộ chung 50/40/10');
+    });
+
+    test('tách bộ riêng hai lần không nhân đôi hũ', () async {
+      await jarDao.tachBoRieng(familyId: familyId, memberId: childId);
+      final lan1 = await jarDao.activeJars(familyId, memberId: childId);
+      await jarDao.tachBoRieng(familyId: familyId, memberId: childId);
+      final lan2 = await jarDao.activeJars(familyId, memberId: childId);
+
+      expect(lan2, hasLength(lan1.length));
+    });
+  });
 }

@@ -190,7 +190,20 @@ Unique `(member_id, badge_key)` — huy hiệu chỉ nhận một lần.
 `id, op, entity, entity_id, payload_json, client_op_id, created_at, retry_count, last_error`
 
 ### jars
-`id, family_id, jar_key, title, emoji, pct, order_index, is_archived, created_at, updated_at`
+`id, family_id, member_id, jar_key, title, emoji, pct, order_index, is_archived, created_at, updated_at`
+
+**`member_id` NULL = hũ chung của cả nhà; có giá trị = hũ riêng của đúng bé đó** (v9,
+30/08/2026). Bộ hũ của một bé là *tất cả hoặc không*: bé chưa có hàng riêng thì dùng bộ chung;
+lần đầu tạo hũ riêng, cả bộ chung được **sao chép** sang cho bé (`JarDao.tachBoRieng`) rồi mới
+sửa. Trộn nửa chung nửa riêng thì đổi tỷ lệ một hũ chung sẽ âm thầm đổi tổng của mọi bé — mà
+tổng phải luôn đúng 100%.
+
+Bản sao giữ nguyên `jar_key`: sổ cái ghi `(member_id, jar)` nên đổi khoá là số dư đang có của bé
+rơi vào một hũ không còn ai hiển thị.
+
+UNIQUE là `(family_id, member_id, jar_key)`. SQLite coi mọi NULL là khác nhau nên ràng buộc đó
+**không** chặn được hai hàng chung trùng khoá — chỗ đó do chỉ mục riêng phần
+`ux_jars_family_key ... WHERE member_id IS NULL` giữ.
 
 Hũ do bố mẹ lập — ADR-024. **`jar_key` là thứ đi vào `point_transactions.jar`**, không phải `id`:
 ba hũ mặc định dùng đúng khoá cũ (`spend`/`save`/`give`) nên sổ cái đã ghi không phải di trú.
@@ -301,7 +314,7 @@ create policy tasks_rw on tasks
 
 - Drift: `schemaVersion` tăng dần, mỗi bước có test dựng DB phiên bản cũ rồi migrate.
   Test: `test/unit/data/migration_test.dart`.
-  Phiên bản hiện tại: **6**.
+  Phiên bản hiện tại: **9**.
   - v1 → v2: thêm `device_settings` (lưu session + khoá "đã chạy đầu ngày").
   - v2 → v3: thêm `families.missed_penalty_pct`, `families.reopen_penalty_pct`,
     `task_instances.reopen_count`, `task_instances.missed_penalty_at` (ADR-022). Mọi cột có
@@ -313,5 +326,13 @@ create policy tasks_rw on tasks
   - v5 → v6: thêm `point_transactions.op_group_id` — nhóm các dòng của cùng một thao tác để
     "Sổ của con" hiện một việc thành **một** mục. Dòng cũ để NULL, tầng hiển thị lấy `id` làm nhóm;
     **không backfill** vì suy ngược từ `client_op_id` không đáng tin.
+  - v6 → v7: `savings_goals.icon_key` (nullable, mục tiêu cũ hiện icon mặc định).
+  - v7 → v8: `tasks.missed_penalty_pct`, `task_instances.missed_penalty_pct` (ADR-022). Cả hai
+    nullable, NULL = theo mức chung của gia đình — nâng cấp không đổi hành vi nhà nào.
+  - v8 → v9: `jars.member_id` (nullable) — hũ riêng cho từng bé. Mọi hàng sẵn có thành hũ chung,
+    đúng ý nghĩa chúng vẫn đang mang, nên nâng cấp **không đổi gì**. Phải `alterTable` chứ không
+    `addColumn` được: ràng buộc UNIQUE đổi, mà SQLite không sửa ràng buộc tại chỗ. Bước này chỉ
+    chạy khi `from >= 5` — nhà nâng từ trước v5 chưa có bảng `jars`, và `createTable` ở bước
+    v4 → v5 dựng thẳng bảng theo định nghĩa hiện tại.
 - Supabase: file SQL đánh số trong `supabase/migrations/`, chạy qua CLI trong CI.
 - Quy tắc: chỉ thêm cột nullable hoặc có default; đổi tên = thêm mới + backfill + xóa ở release sau.
