@@ -583,6 +583,63 @@ void main() {
         );
       });
 
+      test('luồng theo dõi cũng bỏ hũ vừa ngừng dùng ngay lập tức', () async {
+        // Màn Thống kê đọc bằng **stream**, không phải bằng `activeJars`.
+        // Chủ dự án 30/08/2026: *"anh đã chọn ngừng dùng hũ, xong màn hình vẫn
+        // hiển thị 6 hũ."* Một câu ghi đúng mà luồng đọc không phát lại thì
+        // với người dùng vẫn y hệt như không ghi được.
+        final luot = <List<String>>[];
+        final theoDoi = jarDao
+            .watchActiveJars(familyId, memberId: childId)
+            .listen((ds) => luot.add([for (final j in ds) j.key]));
+        addTearDown(theoDoi.cancel);
+        await pumpEventQueue();
+        expect(luot.last, contains(kJarGive));
+
+        await jarDao.setArchived(
+          familyId: familyId,
+          jarKey: kJarGive,
+          archived: true,
+          memberId: childId,
+        );
+        await pumpEventQueue();
+
+        expect(luot.last, isNot(contains(kJarGive)));
+      });
+
+      test(
+        'ngừng dùng hũ vừa thêm riêng cho bé cũng biến mất khỏi luồng',
+        () async {
+          // Đúng cảnh trong ảnh chủ dự án gửi: hũ "test" do bố mẹ tự thêm cho
+          // riêng một bé, ngừng dùng rồi vẫn còn trên màn.
+          final them = await jarDao.addJar(
+            familyId: familyId,
+            title: 'test',
+            emoji: '🛍️',
+            pct: 5,
+            memberId: childId,
+          );
+
+          final luot = <List<String>>[];
+          final theoDoi = jarDao
+              .watchActiveJars(familyId, memberId: childId)
+              .listen((ds) => luot.add([for (final j in ds) j.key]));
+          addTearDown(theoDoi.cancel);
+          await pumpEventQueue();
+          expect(luot.last, contains(them.key));
+
+          await jarDao.setArchived(
+            familyId: familyId,
+            jarKey: them.key,
+            archived: true,
+            memberId: childId,
+          );
+          await pumpEventQueue();
+
+          expect(luot.last, isNot(contains(them.key)));
+        },
+      );
+
       test('sửa hũ CHUNG (không truyền bé) vẫn đổi bộ chung như cũ', () async {
         await jarDao.updateJar(
           familyId: familyId,
