@@ -73,6 +73,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
   KidScale _currentScale = KidScale.middle;
   late Stream<List<TaskInstance>> _luongLuotViec;
   late Stream<List<Task>> _luongViec;
+  late Stream<List<Routine>> _luongBuoi;
   late Stream<Member> _luongThanhVien;
   late Stream<WalletBalance> _luongVi;
   late Stream<Streak?> _luongChuoi;
@@ -95,6 +96,7 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
       date: today,
     );
     _luongViec = tasks.watchActiveTasks(familyId);
+    _luongBuoi = tasks.watchActiveRoutines(familyId);
     _luongThanhVien = members.watchMember(memberId);
     _luongChuoi = members.watchStreak(memberId);
     _luongVi = wallet.watchBalance(memberId);
@@ -438,9 +440,18 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
                           for (final t in taskSnap.data ?? const <Task>[])
                             t.id: t,
                         };
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: _buildTaskSections(instances, byId),
+                        return StreamBuilder<List<Routine>>(
+                          stream: _luongBuoi,
+                          builder: (context, buoiSnap) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: _buildTaskSections(
+                                instances,
+                                byId,
+                                buoiSnap.data ?? const <Routine>[],
+                              ),
+                            );
+                          },
                         );
                       },
                     ),
@@ -453,9 +464,79 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
     );
   }
 
+  /// Nhóm việc cần làm theo buổi, xếp buổi theo thứ tự trong ngày.
+  ///
+  /// Buổi không đặt `dayPart` xếp sau ba buổi có giờ; việc không thuộc buổi
+  /// nào xếp cuối cùng. Thứ tự này để danh sách đọc xuôi theo một ngày, thay
+  /// vì theo thứ tự bản ghi trong DB.
+  List<Widget> _nhomTheoBuoi(
+    List<TaskInstance> canLam,
+    Map<String, Task> byId,
+    List<Routine> buoi,
+  ) {
+    const khongBuoi = '__khong_buoi__';
+    final buoiTheoId = {for (final r in buoi) r.id: r};
+
+    final theoBuoi = <String, List<TaskInstance>>{};
+    for (final i in canLam) {
+      theoBuoi
+          .putIfAbsent(byId[i.taskId]?.routineId ?? khongBuoi, () => [])
+          .add(i);
+    }
+
+    int thuTu(String routineId) {
+      if (routineId == khongBuoi) return 99;
+      return switch (buoiTheoId[routineId]?.dayPart) {
+        'morning' => 0,
+        'afternoon' => 1,
+        'evening' => 2,
+        _ => 3,
+      };
+    }
+
+    final khoa = theoBuoi.keys.toList()
+      ..sort((a, b) {
+        final c = thuTu(a).compareTo(thuTu(b));
+        if (c != 0) return c;
+        return (buoiTheoId[a]?.title ?? '').compareTo(
+          buoiTheoId[b]?.title ?? '',
+        );
+      });
+
+    // Nhà chỉ có đúng một buổi thì tiêu đề buổi không nói thêm được gì — nó
+    // chỉ lặp lại "Cần làm" ở ngay trên. Đổ thẳng danh sách.
+    final hienTieuDe = khoa.length > 1;
+
+    return [
+      for (final id in khoa) ...[
+        if (hienTieuDe)
+          _TieuDeBuoi(
+            ten: buoiTheoId[id]?.title ?? 'Việc khác',
+            iconKey: buoiTheoId[id]?.iconKey,
+            soViec: theoBuoi[id]!.length,
+          ),
+        for (final instance in theoBuoi[id]!)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: _InstanceCard(
+              // Key theo id: không có key, Flutter tái dùng State theo vị trí
+              // khi việc chuyển mục và thẻ hiện tên của việc cũ.
+              key: ValueKey(instance.id),
+              instance: instance,
+              task: byId[instance.taskId],
+              onCompleted: _celebrateOnce,
+              onComplete: _hoanThanhViec,
+            ),
+          ),
+        if (hienTieuDe) const SizedBox(height: AppSpacing.md),
+      ],
+    ];
+  }
+
   List<Widget> _buildTaskSections(
     List<TaskInstance> instances,
     Map<String, Task> byId,
+    List<Routine> buoi,
   ) {
     final scheduled = instances
         .where((i) => i.status == InstanceStatus.scheduled.name)
@@ -478,20 +559,14 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
       if (scheduled.isNotEmpty) ...[
         _SectionHeader(title: 'Cần làm', count: scheduled.length),
         const SizedBox(height: AppSpacing.sm),
-        ...scheduled.map(
-          (instance) => Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: _InstanceCard(
-              // Key theo id: không có key, Flutter tái dùng State theo
-              // vị trí khi việc chuyển mục và thẻ hiện tên của việc cũ.
-              key: ValueKey(instance.id),
-              instance: instance,
-              task: byId[instance.taskId],
-              onCompleted: _celebrateOnce,
-              onComplete: _hoanThanhViec,
-            ),
-          ),
-        ),
+        // Chia theo **buổi**, không đổ một danh sách phẳng 22 việc.
+        //
+        // Chủ dự án nêu 30/08/2026: "màn hình của trẻ thiếu session theo
+        // buổi". Bố mẹ đã thấy việc nhóm theo buổi từ Trang chính; con nhìn
+        // cùng một ngày lại thấy một dải dài không đầu không cuối. Với đứa trẻ
+        // chưa đọc trôi chảy, "còn 22 việc" là một con số làm nản; "buổi sáng
+        // còn 3 việc" là một việc làm được.
+        ..._nhomTheoBuoi(scheduled, byId, buoi),
         const SizedBox(height: AppSpacing.xl),
       ],
       if (choDuyet.isNotEmpty) ...[
@@ -1038,6 +1113,54 @@ class XuBadgeStat extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Tiêu đề một buổi trong danh sách việc của con.
+///
+/// Nhỏ hơn `_SectionHeader` một bậc: "Cần làm" là mục, buổi là nhóm bên trong
+/// mục đó. Cùng cỡ chữ thì con không đọc ra được cái nào chứa cái nào.
+class _TieuDeBuoi extends StatelessWidget {
+  const _TieuDeBuoi({
+    required this.ten,
+    required this.iconKey,
+    required this.soViec,
+  });
+
+  final String ten;
+  final String? iconKey;
+  final int soViec;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        bottom: AppSpacing.sm,
+        left: AppSpacing.xs,
+      ),
+      child: Row(
+        children: [
+          AppIcon.task(iconKey, size: 22),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              ten,
+              style: context.text.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          // Con số của **buổi này**, không phải của cả ngày: "buổi sáng còn 3
+          // việc" là một việc làm được, "còn 22 việc" là một con số làm nản.
+          Text(
+            '$soViec việc',
+            style: context.text.bodySmall?.copyWith(
+              color: context.semantic.onSurfaceMuted,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

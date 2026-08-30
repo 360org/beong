@@ -4,6 +4,24 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.6.3+33 (2026-08-30) — Màn hình của con chia việc theo buổi
+
+Con đang thấy một danh sách phẳng: *"Cần làm 22"* rồi 22 thẻ nối nhau, không
+đầu không cuối. Bố mẹ nhìn cùng một ngày ở Trang chính thì đã thấy việc nhóm
+theo buổi từ lâu.
+
+Nay việc của con cũng chia theo buổi, xếp đúng thứ tự trong ngày: sáng, trưa /
+chiều, tối, rồi tới các buổi không đặt giờ, cuối cùng là việc chưa thuộc buổi
+nào. Mỗi buổi có tên, hình và số việc **của riêng buổi đó**.
+
+Lý do không chỉ là gọn mắt: với đứa trẻ chưa đọc trôi chảy, *"còn 22 việc"* là
+một con số làm nản, còn *"buổi sáng còn 3 việc"* là một việc làm được.
+
+Nhà chỉ có đúng một buổi thì không hiện tiêu đề buổi — nó chỉ lặp lại chữ
+"Cần làm" ngay phía trên.
+
+---
+
 ## v0.6.2+32 (2026-08-30) — Sửa và ngừng dùng hũ ngay trên màn Thống kê
 
 Bấm vào một thẻ hũ ở màn Thống kê để đổi tên, đổi hình, đổi tỷ lệ, hoặc ngừng
