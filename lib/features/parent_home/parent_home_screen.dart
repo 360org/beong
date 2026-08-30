@@ -84,6 +84,7 @@ class ParentHomeScreen extends ConsumerWidget {
             children: [
               _PendingReviewSection(
                 familyId: session.familyId,
+                children: children,
                 taskDao: taskDao,
                 walletDao: walletDao,
                 reviewService: reviewService,
@@ -186,9 +187,53 @@ class _PendingRedemptionBanner extends ConsumerWidget {
   }
 }
 
+/// Câu mô tả hàng chờ trước khi bố mẹ bấm "Duyệt hết".
+///
+/// Cùng lý do với [beCuaLuot]: nút này cộng xu cho **nhiều bé cùng lúc**, nên
+/// câu xác nhận phải nói ra là những bé nào. "5 việc sẽ được duyệt và cộng xu
+/// cho con" ở nhà hai bé là một câu không xác nhận được điều gì.
+///
+/// Tên bé theo đúng thứ tự trong danh sách nhà, không theo thứ tự hàng chờ:
+/// mở hộp thoại hai lần mà thứ tự tên đổi chỗ thì bố mẹ phải đọc lại từ đầu.
+String moTaDuyetHet({
+  required List<TaskInstance> hangCho,
+  required List<Member> children,
+}) {
+  final soViec = hangCho.length;
+  if (children.length <= 1) {
+    return '$soViec việc sẽ được duyệt và cộng xu cho con.';
+  }
+  final coViec = {for (final i in hangCho) i.memberId};
+  final ten = [
+    for (final c in children)
+      if (coViec.contains(c.id)) c.displayName,
+  ];
+  if (ten.isEmpty) return '$soViec việc sẽ được duyệt và cộng xu.';
+  return '$soViec việc của ${ten.join(', ')} sẽ được duyệt và cộng xu.';
+}
+
+/// Bé đứng sau một lượt việc trong hàng chờ duyệt.
+///
+/// Chủ dự án nêu 30/08/2026: *"phần approve công việc không hiển thị là duyệt
+/// cho profile nào?"* Nhà hai bé mà thẻ chỉ ghi "Cất đồ chơi +5 xu" thì bố mẹ
+/// đang duyệt mù — cộng xu cho một đứa trẻ mà không biết là đứa nào.
+///
+/// Trả `null` khi nhà **chỉ có một bé**: lúc đó tên bé lặp lại một điều đã
+/// hiển nhiên, và một dòng chữ không mang tin nào là một dòng người đọc học
+/// cách bỏ qua. Cũng trả `null` khi không tra ra bé — hồ sơ đã xoá chẳng hạn;
+/// thà thiếu tên còn hơn hiện một cái tên đoán bừa.
+Member? beCuaLuot(String memberId, List<Member> children) {
+  if (children.length <= 1) return null;
+  for (final c in children) {
+    if (c.id == memberId) return c;
+  }
+  return null;
+}
+
 class _PendingReviewSection extends StatefulWidget {
   const _PendingReviewSection({
     required this.familyId,
+    required this.children,
     required this.taskDao,
     required this.walletDao,
     required this.reviewService,
@@ -196,6 +241,10 @@ class _PendingReviewSection extends StatefulWidget {
   });
 
   final String familyId;
+
+  /// Các bé trong nhà — để mỗi thẻ nói được nó là việc của ai.
+  final List<Member> children;
+
   final TaskRepository taskDao;
   final WalletRepository walletDao;
   final TaskReviewService reviewService;
@@ -218,12 +267,13 @@ class _PendingReviewSectionState extends State<_PendingReviewSection> {
   /// Duyệt cả hàng đợi. Xác nhận trước vì đây là thao tác cộng xu cho nhiều
   /// việc cùng lúc và không có nút hoàn tác.
   Future<void> _approveAll() async {
-    final count = _pending.length;
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Duyệt tất cả?'),
-        content: Text('$count việc sẽ được duyệt và cộng xu cho con.'),
+        content: Text(
+          moTaDuyetHet(hangCho: _pending, children: widget.children),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -324,6 +374,7 @@ class _PendingReviewSectionState extends State<_PendingReviewSection> {
               // khi hàng đợi duyệt ngắn lại và thẻ hiện tên của việc cũ.
               key: ValueKey(instance.id),
               instance: instance,
+              be: beCuaLuot(instance.memberId, widget.children),
               taskDao: widget.taskDao,
               walletDao: widget.walletDao,
               reviewService: widget.reviewService,
@@ -340,6 +391,7 @@ class _PendingReviewSectionState extends State<_PendingReviewSection> {
 class _PendingCard extends StatefulWidget {
   const _PendingCard({
     required this.instance,
+    required this.be,
     required this.taskDao,
     required this.walletDao,
     required this.reviewService,
@@ -349,6 +401,10 @@ class _PendingCard extends StatefulWidget {
   });
 
   final TaskInstance instance;
+
+  /// Bé đã báo xong việc này. `null` = nhà chỉ có một bé, không cần nói ra.
+  final Member? be;
+
   final TaskRepository taskDao;
   final WalletRepository walletDao;
   final TaskReviewService reviewService;
@@ -405,6 +461,7 @@ class _PendingCardState extends State<_PendingCard> {
   Widget build(BuildContext context) {
     final task = _task;
     if (task == null) return const SizedBox.shrink();
+    final be = widget.be;
 
     final proofUrl = widget.instance.proofUrl;
     final proofNote = widget.instance.proofNote;
@@ -421,6 +478,31 @@ class _PendingCardState extends State<_PendingCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Tên bé đứng **trên** tên việc, không nhét vào dòng phụ
+                      // bên dưới: câu hỏi đầu tiên khi nhìn hàng chờ duyệt là
+                      // "của đứa nào", trả lời nó rồi mới tới "việc gì".
+                      if (be != null) ...[
+                        Row(
+                          children: [
+                            AppIcon(
+                              iconKeyForEmoji(avatarForKey(be.avatarKey)),
+                              size: 18,
+                            ),
+                            const SizedBox(width: AppSpacing.xs),
+                            Flexible(
+                              child: Text(
+                                be.displayName,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.text.labelMedium?.copyWith(
+                                  color: context.colors.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                      ],
                       Text(task.title, style: context.text.bodyLarge),
                       const SizedBox(height: AppSpacing.xs),
                       Text(

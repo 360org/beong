@@ -4,6 +4,26 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.7.9+43 (2026-08-30) — Hàng chờ duyệt nói rõ là việc của bé nào
+
+Chủ dự án: *"phần approve công việc không hiển thị là duyệt cho profile
+nào?"*
+
+Nhà hai bé mà thẻ chờ duyệt chỉ ghi *"Cất đồ chơi +5 xu"* thì bố mẹ đang duyệt
+mù — cộng xu cho một đứa trẻ mà không có cách nào biết là đứa nào. Nay tên và
+hình đại diện của bé đứng **trên** tên việc: câu hỏi đầu tiên khi nhìn hàng chờ
+là "của đứa nào", trả lời nó rồi mới tới "việc gì".
+
+Nhà chỉ có một bé thì không hiện tên — nó lặp lại một điều đã hiển nhiên, và
+một dòng chữ không mang tin nào là một dòng người đọc học cách bỏ qua.
+
+Sửa kèm cùng lỗ hổng ở chỗ nguy hơn: nút **Duyệt hết** cộng xu cho nhiều bé
+cùng lúc và không có hoàn tác, nhưng câu xác nhận chỉ ghi *"5 việc sẽ được
+duyệt và cộng xu cho con"*. Nay nó gọi tên đúng những bé đang có việc chờ —
+và chỉ những bé đó, không gọi tên bé không làm gì.
+
+---
+
 ## v0.7.8+42 (2026-08-30) — Link điều khoản / quyền riêng tư bấm được
 
 Chủ dự án: *"link điều khoản / riêng tư không click được."*
