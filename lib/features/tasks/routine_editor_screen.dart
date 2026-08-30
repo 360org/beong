@@ -14,6 +14,7 @@ import 'package:beong/core/widgets/xu_badge.dart';
 import 'package:beong/domain/entities/enums.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/repositories/task_repository.dart';
+import 'package:beong/domain/services/family_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -284,6 +285,7 @@ class _RoutineEditorScreenState extends ConsumerState<RoutineEditorScreen> {
           routine: routine,
           taskDao: ref.read(taskRepositoryProvider),
           children: children,
+          familyId: session.familyId,
           onNgungDung: () => unawaited(_confirmArchive(routine)),
         ),
       ),
@@ -419,12 +421,16 @@ class _RoutineInfoSheet extends StatefulWidget {
     required this.routine,
     required this.taskDao,
     required this.children,
+    required this.familyId,
     required this.onNgungDung,
   });
 
   final Routine routine;
   final TaskRepository taskDao;
   final List<Member> children;
+
+  /// Cần để sinh lại lượt việc ngay sau khi đổi người nhận.
+  final String familyId;
 
   /// Mở hộp xác nhận ngừng dùng. Nằm ở màn cha vì sau khi ngừng dùng thì phải
   /// **thoát cả màn**, không chỉ đóng bảng này.
@@ -491,6 +497,23 @@ class _RoutineInfoSheetState extends State<_RoutineInfoSheet> {
       await widget.taskDao.setRoutineAssignees(
         routineId: widget.routine.id,
         memberIds: nguoiNhan.toList(),
+      );
+      // Sinh lượt ngay, đừng chờ tới ngày mai.
+      //
+      // Chủ dự án nêu 30/08/2026: gán buổi cho "Tất cả" rồi mà hồ sơ bé mới
+      // vẫn rỗng. Gốc: bộ sinh lượt chạy **một lần mỗi ngày**
+      // (`DayStartService`, khoá `rollover.last_run_date`), nên đổi người
+      // nhận giữa ngày thì bé mới không có lượt nào cho tới hôm sau — trong
+      // khi màn Nhiệm vụ đã ghi "Tất cả" rồi. Bố mẹ thấy hai màn nói ngược
+      // nhau và không có cách nào biết ai đúng.
+      //
+      // `generateInstances` bỏ qua lượt đã có (khoá `task:member:date`) nên
+      // gọi thừa vô hại; các bé cũ không bị đụng tới.
+      await widget.taskDao.generateInstances(
+        familyId: widget.familyId,
+        today: FamilyClock(
+          timeZoneOffset: DateTime.now().timeZoneOffset,
+        ).today(),
       );
     }
     if (mounted) Navigator.of(context).pop();

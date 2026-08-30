@@ -4,6 +4,26 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.7.11+45 (2026-08-30) — Gán buổi cho bé thì bé có việc ngay
+
+Chủ dự án: *"trong tab tasks đã chọn session cho tất cả rồi nhưng trong
+profile của bé mới vẫn empty."*
+
+Gán một buổi cho thêm một bé thì **toàn bộ việc trong buổi đó** về tay bé,
+hiện ngay trên hồ sơ — không phải chờ tới hôm sau nữa.
+
+Gốc không nằm ở chỗ ghi người nhận: chỗ đó vẫn ghi đúng, và màn Nhiệm vụ hiện
+"Tất cả" cũng đúng. Nó nằm ở chỗ bộ sinh lượt việc chạy **một lần mỗi ngày**.
+Đổi người nhận giữa ngày thì bé mới không có lượt nào cho tới hôm sau, trong
+khi màn Nhiệm vụ đã ghi tên bé vào buổi rồi — hai màn nói ngược nhau và bố mẹ
+không có cách nào biết ai đúng.
+
+Việc này cũng vá luôn cảnh cũ hơn: bé được gán vào buổi từ trước nhưng chưa
+từng có lượt nào sinh ra. Chạy thử trên dữ liệu thật, một bé đang "0 / 0 việc
+hôm nay" nhận đủ 8 việc ngay sau khi lưu.
+
+---
+
 ## v0.7.10+44 (2026-08-30) — Tổng xu của con nằm ngay cạnh tên
 
 Chủ dự án: *"phần thống kê trên header profile nên show total xu."*
