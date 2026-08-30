@@ -25,6 +25,7 @@ import 'package:beong/features/goals/goal_sheet.dart';
 import 'package:beong/features/rewards/allocate_xu_sheet.dart';
 import 'package:beong/features/stats/adjust_xu_sheet.dart';
 import 'package:beong/features/stats/jar_add_sheet.dart';
+import 'package:beong/features/stats/jar_edit_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -385,6 +386,8 @@ class _ChildStatsCard extends ConsumerWidget {
               balance: balance,
               familyId: child.familyId,
               memberId: child.id,
+              tenBe: child.displayName,
+              choPhepSua: true,
             );
           },
         ),
@@ -633,11 +636,20 @@ class _JarOverview extends ConsumerWidget {
     required this.balance,
     required this.familyId,
     this.memberId,
+    this.tenBe,
+    this.choPhepSua = false,
   });
 
   final WalletBalance balance;
   final String familyId;
   final String? memberId;
+
+  /// Tên bé, để bảng sửa nói rõ đang sửa hũ của ai.
+  final String? tenBe;
+
+  /// Bấm vào thẻ hũ để sửa / ngừng dùng. Chỉ bật ở màn của **bố mẹ**: con xem
+  /// được số dư của mình nhưng không tự đổi luật chia xu.
+  final bool choPhepSua;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -657,6 +669,19 @@ class _JarOverview extends ConsumerWidget {
               label: jar.title,
               iconKey: iconKeyForEmoji(jar.emoji),
               amount: balance.ofKey(jar.key),
+              onTap: choPhepSua && memberId != null
+                  ? () => unawaited(
+                      showJarEditSheet(
+                        context,
+                        jarDao: jarDao,
+                        familyId: familyId,
+                        memberId: memberId!,
+                        tenBe: tenBe ?? 'bé',
+                        hu: jar,
+                        tatCaHu: jars,
+                      ),
+                    )
+                  : null,
             ),
         ];
 
@@ -811,6 +836,7 @@ class _JarCard extends StatelessWidget {
     required this.label,
     required this.amount,
     required this.iconKey,
+    this.onTap,
   });
 
   final String label;
@@ -818,6 +844,9 @@ class _JarCard extends StatelessWidget {
 
   /// Khoá icon của hũ, suy từ emoji bố mẹ đã chọn.
   final String iconKey;
+
+  /// Mở bảng sửa hũ. `null` với vai con — thẻ vẫn hiện nhưng không bấm được.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -842,7 +871,14 @@ class _JarCard extends StatelessWidget {
     // Chỉ còn hũ **thật** đi qua đây. Xu chưa chia nay là `_UnallocatedBanner`
     // riêng phía trên (audit §12), nên nhánh `pending` cũ bỏ hẳn thay vì để
     // lại một cờ không ai truyền — đúng loại code chết dự án dọn nhiều lần.
-    return Card(child: body);
+    if (onTap == null) return Card(child: body);
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: const BorderRadius.all(Radius.circular(AppRadius.card)),
+        child: body,
+      ),
+    );
   }
 }
 

@@ -4,6 +4,34 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.6.2+32 (2026-08-30) — Sửa và ngừng dùng hũ ngay trên màn Thống kê
+
+Bấm vào một thẻ hũ ở màn Thống kê để đổi tên, đổi hình, đổi tỷ lệ, hoặc ngừng
+dùng hũ đó. Trước đây không có đường nào: màn quản lý hũ ở Cài đặt vẫn còn,
+nhưng nó làm việc với bộ hũ **chung của cả nhà** — mà từ bản 0.5.0 mỗi bé có
+bộ riêng, nên nó không với tới được cái hũ bố mẹ đang nhìn.
+
+Chỉ bố mẹ bấm được. Con xem được số dư của mình nhưng không tự đổi luật chia
+xu.
+
+### Tổng luôn được giữ đúng 100%
+
+Đây là ràng buộc chi phối cả màn này, vì tổng khác 100% thì tầng chia xu lặng
+lẽ quay về tỷ lệ mặc định và mọi con số bố mẹ vừa đặt biến mất không một lời
+báo.
+
+- Đổi tỷ lệ hũ này ⇒ các hũ còn lại tự chia nhau phần thiếu, kèm bảng
+  "trước → sau" và một dòng tổng để bố mẹ thấy con số tự đổi chứ không phải
+  đoán.
+- Ngừng dùng hũ ⇒ phần trăm của nó chia lại cho các hũ còn lại. Không trả về
+  đâu cả là để lại một lỗ thủng đúng bằng tỷ lệ nó từng giữ.
+- Hũ cuối cùng không ngừng dùng được, và thanh tỷ lệ của nó bị khoá: không còn
+  ai nhận phần còn lại.
+
+Hũ chỉ **ngừng dùng**, không xoá — số xu đang có và lịch sử vẫn còn nguyên.
+
+---
+
 ## v0.6.1+31 (2026-08-30) — Vuốt ngang đổi ngày ngay trên thẻ
 
 Vuốt ngang trên thẻ con ở Trang chính trước đây mở một **hộp thoại** phủ lên
