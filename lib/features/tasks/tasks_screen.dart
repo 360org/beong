@@ -374,31 +374,43 @@ class _TaskListState extends State<_TaskList> {
           ReorderableListView(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            buildDefaultDragHandles: widget.isParent,
+            // Không có tay kéo cố định. Chủ dự án nêu 30/08/2026: hai vạch chỉ
+            // được hiện **khi đang giữ và kéo**. Một cái tay kéo nằm sẵn trên
+            // mọi thẻ là thêm một thứ để nhìn trên màn hình mà mười lần mở app
+            // thì chín lần không ai đụng tới.
+            buildDefaultDragHandles: false,
+            proxyDecorator: _theDangKeo,
             onReorderItem: (tu, den) => unawaited(
               _xepLaiBuoi(theoThuTu, tu, den),
             ),
             children: [
-              for (final r in theoThuTu)
-                Padding(
+              for (final (i, r) in theoThuTu.indexed)
+                // Giữ lâu ở **bất cứ đâu trên thẻ** là kéo được, không phải
+                // ngắm đúng một cái tay nhỏ ở mép phải. Chạm nhanh vẫn rơi
+                // xuống các nút bên dưới — cử chỉ này chỉ nhận giữ-rồi-kéo.
+                ReorderableDelayedDragStartListener(
                   // Key theo id buổi: `ReorderableListView` bắt buộc, và cũng
                   // là thứ giữ cho thẻ không đội tên nhau khi đổi chỗ.
                   key: ValueKey(r.id),
-                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                  child: _RoutineGroupCard(
-                    title: buoiTheoId[r.id]?.title ?? r.id,
-                    iconKey: buoiTheoId[r.id]?.iconKey,
-                    tasks: routineTasks[r.id] ?? const [],
-                    nguoiNhan: nhanNguoiNhan(
-                      nguoiNhanTheoBuoi[r.id] ?? const [],
-                      children,
+                  index: i,
+                  enabled: widget.isParent,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: _RoutineGroupCard(
+                      title: buoiTheoId[r.id]?.title ?? r.id,
+                      iconKey: buoiTheoId[r.id]?.iconKey,
+                      tasks: routineTasks[r.id] ?? const [],
+                      nguoiNhan: nhanNguoiNhan(
+                        nguoiNhanTheoBuoi[r.id] ?? const [],
+                        children,
+                      ),
+                      // Chỉ bố mẹ sửa được thói quen; con chỉ xem.
+                      onEdit: widget.isParent
+                          ? () => context.go(Routes.routineEditor(r.id))
+                          : null,
+                      onEditTask: widget.isParent ? _suaViec : null,
+                      onPointsChanged: widget.isParent ? _doiXu : null,
                     ),
-                    // Chỉ bố mẹ sửa được thói quen; con chỉ xem.
-                    onEdit: widget.isParent
-                        ? () => context.go(Routes.routineEditor(r.id))
-                        : null,
-                    onEditTask: widget.isParent ? _suaViec : null,
-                    onPointsChanged: widget.isParent ? _doiXu : null,
                   ),
                 ),
             ],
@@ -413,6 +425,61 @@ class _TaskListState extends State<_TaskList> {
       ],
     );
   }
+}
+
+/// Thẻ buổi **trong lúc đang được nhấc lên và kéo**.
+///
+/// Chủ dự án nêu 30/08/2026: *"chỉ khi nhấn giữ & kéo thả session lên/xuống
+/// mới xuất hiện 2 gạch kẻ"*. Nên hai vạch nằm ở đây — trong lớp phủ chỉ tồn
+/// tại suốt cú kéo — chứ không nằm trong `_RoutineGroupCard`. Ở trạng thái
+/// nghỉ, danh sách không có một dấu vết nào của việc sắp xếp.
+///
+/// [animation] chạy 0 → 1 khi thẻ được nhấc và 1 → 0 khi thả. Nhấc và hạ đều
+/// có thời gian, nên hai vạch mờ dần vào rồi mờ dần ra cùng cái bóng, thay vì
+/// nháy xuất hiện.
+Widget _theDangKeo(Widget child, int index, Animation<double> animation) {
+  return AnimatedBuilder(
+    animation: animation,
+    child: child,
+    builder: (context, con) {
+      final t = Curves.easeOut.transform(animation.value);
+      return Transform.scale(
+        // Nhấc nhẹ thôi: thẻ to lên quá thì nó che mất hai thẻ hàng xóm, đúng
+        // lúc bố mẹ cần nhìn để biết mình đang thả vào đâu.
+        scale: 1 + 0.03 * t,
+        child: Material(
+          type: MaterialType.transparency,
+          elevation: 10 * t,
+          shadowColor: context.colors.shadow,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          child: Stack(
+            alignment: Alignment.centerRight,
+            children: [
+              ?con,
+              Positioned(
+                right: AppSpacing.sm,
+                child: Opacity(
+                  opacity: t,
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.xs),
+                    decoration: BoxDecoration(
+                      color: context.colors.primaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.drag_handle_rounded,
+                      size: 20,
+                      color: context.colors.onPrimaryContainer,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
 
 /// Dòng "Tạo thêm thói quen" đóng danh sách buổi.

@@ -4,6 +4,21 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.7.5+39 (2026-08-30) — Hai vạch kéo/thả chỉ hiện lúc đang kéo
+
+Màn Nhiệm vụ: mỗi thẻ buổi trước đây đeo sẵn một cái tay kéo ở mép phải, lúc
+nào cũng có. Nay danh sách ở trạng thái nghỉ sạch hoàn toàn — hai vạch chỉ
+hiện ra **trong lúc bố mẹ giữ và kéo** một buổi, rồi mờ đi khi thả.
+
+Kéo vẫn dễ hơn trước chứ không khó hơn: giữ lâu ở **bất cứ đâu trên thẻ** là
+nhấc được, không phải ngắm trúng một cái tay nhỏ ở mép. Chạm nhanh vẫn rơi
+xuống các nút trong thẻ như thường, nên bấm +/− không thành kéo nhầm.
+
+Thẻ đang kéo nhấc nhẹ lên 3% kèm bóng đổ, đủ để thấy nó rời khỏi danh sách mà
+không che mất hai thẻ hàng xóm — chỗ bố mẹ đang nhắm để thả vào.
+
+---
+
 ## v0.7.4+38 (2026-08-30) — Sửa lỗi đổi tên hũ không lưu được
 
 Đổi tên một hũ rồi bấm LƯU, tên cũ quay lại. Không có thông báo lỗi nào — bảng
