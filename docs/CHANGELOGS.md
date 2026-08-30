@@ -4,6 +4,21 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.7.2+36 (2026-08-30) — Mỗi buổi nói rõ đang giao cho bé nào
+
+Thẻ buổi ở tab Nhiệm vụ nay có một dòng dưới tên: *"Sau giờ học · Tất cả"*,
+*"Buổi sáng · NEO"*.
+
+Không có dòng đó thì hai buổi trông y hệt nhau trong khi một buổi chỉ của một
+bé và buổi kia của cả nhà. Tệ hơn: buổi **chưa giao cho ai** cũng trông y hệt,
+dù không bé nào nhìn thấy việc trong đó — nay nó hiện *"Chưa giao cho bé nào"*
+bằng màu cảnh báo.
+
+Nhà chỉ có một bé thì không hiện dòng này: cùng một cái tên lặp trên mọi thẻ
+mà không nói thêm được gì.
+
+---
+
 ## v0.7.1+35 (2026-08-30) — Kéo thả để sắp xếp buổi thói quen
 
 Ở tab Nhiệm vụ, giữ và kéo một buổi để đổi chỗ. Thứ tự được ghi lại và giữ

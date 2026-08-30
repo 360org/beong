@@ -158,6 +158,29 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
     });
   }
 
+  /// Người nhận của **mọi** buổi trong nhà, một lần đọc.
+  ///
+  /// Đọc gộp thay vì gọi [routineAssigneesOf] cho từng buổi: màn Nhiệm vụ hiện
+  /// tên bé trên từng thẻ, mà một truy vấn cho mỗi thẻ là đúng cái lỗi giật
+  /// cục bản 0.2.5 đã phải sửa.
+  Stream<Map<String, List<String>>> watchRoutineAssignees(String familyId) {
+    final q = select(routineAssignees).join([
+      innerJoin(
+        routines,
+        routines.id.equalsExp(routineAssignees.routineId) &
+            routines.familyId.equals(familyId),
+      ),
+    ]);
+    return q.watch().map((rows) {
+      final theoBuoi = <String, List<String>>{};
+      for (final row in rows) {
+        final a = row.readTable(routineAssignees);
+        theoBuoi.putIfAbsent(a.routineId, () => []).add(a.memberId);
+      }
+      return theoBuoi;
+    });
+  }
+
   /// Hạng kế tiếp cho một buổi mới.
   Future<int> hangBuoiKeTiep(String familyId) async {
     final all = await activeRoutines(familyId);

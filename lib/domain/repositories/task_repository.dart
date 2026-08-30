@@ -41,6 +41,7 @@ abstract interface class TaskRepository {
   });
   Future<void> detachTaskFromRoutine(String taskId);
   Future<int> hangBuoiKeTiep(String familyId);
+  Stream<Map<String, List<String>>> watchRoutineAssignees(String familyId);
   Future<void> reorderRoutines({
     required String familyId,
     required List<String> routineIds,
@@ -157,6 +158,10 @@ final class LocalTaskRepository implements TaskRepository {
 
   @override
   Future<int> hangBuoiKeTiep(String familyId) => _dao.hangBuoiKeTiep(familyId);
+
+  @override
+  Stream<Map<String, List<String>>> watchRoutineAssignees(String familyId) =>
+      _dao.watchRoutineAssignees(familyId);
 
   @override
   Future<void> reorderRoutines({

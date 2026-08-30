@@ -88,6 +88,38 @@ class TasksScreen extends ConsumerWidget {
   }
 }
 
+/// Nhãn "buổi này giao cho ai" hiện trên thẻ.
+///
+/// Chủ dự án 30/08/2026: *"mỗi session phải thể hiện đang apply cho profile
+/// trẻ nào."* Không có nhãn này thì hai buổi trông y hệt nhau trong khi một
+/// buổi chỉ của Simba và buổi kia của cả nhà — và buổi **không giao cho ai**
+/// thì trông cũng y hệt, dù không bé nào thấy việc trong đó
+/// (`schedule.dart:148`).
+///
+/// Nhà có một bé thì tên bé không nói thêm được gì — trả rỗng, khỏi lặp lại
+/// cùng một cái tên trên mọi thẻ.
+({String nhan, bool canhBao})? nhanNguoiNhan(
+  List<String> ids,
+  List<Member> children,
+) {
+  if (ids.isEmpty) {
+    return (nhan: 'Chưa giao cho bé nào', canhBao: true);
+  }
+  if (children.length <= 1) return null;
+  // Kiểm **từng bé**, không so số lượng: `ids` có thể còn giữ một bé đã rời
+  // nhà, và khi đó số lượng bằng nhau trong khi tập hợp thì không — nhãn sẽ
+  // ghi "Tất cả" trong lúc một bé thật sự không có trong buổi.
+  if (children.every((c) => ids.contains(c.id))) {
+    return (nhan: 'Tất cả', canhBao: false);
+  }
+
+  final ten = [
+    for (final c in children)
+      if (ids.contains(c.id)) c.displayName,
+  ];
+  return (nhan: ten.join(', '), canhBao: false);
+}
+
 class _TaskList extends StatefulWidget {
   const _TaskList({
     required this.familyId,
@@ -114,6 +146,16 @@ class _TaskListState extends State<_TaskList> {
   );
   late final Stream<List<Routine>> _routineStream = widget.taskDao
       .watchActiveRoutines(widget.familyId);
+  late final Stream<Map<String, List<String>>> _assigneeStream = widget.taskDao
+      .watchRoutineAssignees(widget.familyId);
+
+  /// Chỉ các bé, lọc từ `watchMembers` — không có stream riêng cho trẻ, và
+  /// thêm một stream nữa ở tầng DAO chỉ để lọc một trường là thừa.
+  late final Stream<List<Member>> _childStream = widget.memberDao
+      .watchMembers(widget.familyId)
+      .map(
+        (ds) => ds.where((m) => m.kind == MemberKind.child.name).toList(),
+      );
 
   /// Chỉnh xu ngay tại dòng việc.
   ///
@@ -208,10 +250,19 @@ class _TaskListState extends State<_TaskList> {
         }
         return StreamBuilder<List<Routine>>(
           stream: _routineStream,
-          builder: (context, routineSnap) => _buildList(
-            context,
-            taskSnap.data!,
-            routineSnap.data ?? const <Routine>[],
+          builder: (context, routineSnap) => StreamBuilder<List<Member>>(
+            stream: _childStream,
+            builder: (context, childSnap) =>
+                StreamBuilder<Map<String, List<String>>>(
+                  stream: _assigneeStream,
+                  builder: (context, assigneeSnap) => _buildList(
+                    context,
+                    taskSnap.data!,
+                    routineSnap.data ?? const <Routine>[],
+                    childSnap.data ?? const <Member>[],
+                    assigneeSnap.data ?? const <String, List<String>>{},
+                  ),
+                ),
           ),
         );
       },
@@ -222,6 +273,8 @@ class _TaskListState extends State<_TaskList> {
     BuildContext context,
     List<Task> allTasks,
     List<Routine> buoi,
+    List<Member> children,
+    Map<String, List<String>> nguoiNhanTheoBuoi,
   ) {
     if (allTasks.isEmpty) {
       return Center(
@@ -336,6 +389,10 @@ class _TaskListState extends State<_TaskList> {
                     title: buoiTheoId[r.id]?.title ?? r.id,
                     iconKey: buoiTheoId[r.id]?.iconKey,
                     tasks: routineTasks[r.id] ?? const [],
+                    nguoiNhan: nhanNguoiNhan(
+                      nguoiNhanTheoBuoi[r.id] ?? const [],
+                      children,
+                    ),
                     // Chỉ bố mẹ sửa được thói quen; con chỉ xem.
                     onEdit: widget.isParent
                         ? () => context.go(Routes.routineEditor(r.id))
@@ -410,11 +467,16 @@ class _RoutineGroupCard extends StatelessWidget {
     required this.onEdit,
     required this.onEditTask,
     required this.onPointsChanged,
+    this.nguoiNhan,
   });
 
   final String title;
   final List<Task> tasks;
   final String? iconKey;
+
+  /// Nhãn "giao cho ai" dưới tên buổi. `null` thì không hiện — nhà một bé thì
+  /// tên bé lặp trên mọi thẻ mà không nói thêm được gì.
+  final ({String nhan, bool canhBao})? nguoiNhan;
 
   /// `null` với vai con — thẻ vẫn hiện nhưng không bấm vào sửa được.
   final VoidCallback? onEdit;
@@ -456,11 +518,40 @@ class _RoutineGroupCard extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
-                    child: Text(
-                      title,
-                      style: context.text.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: context.text.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        if (nguoiNhan != null)
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.person_outline_rounded,
+                                size: 14,
+                                color: nguoiNhan!.canhBao
+                                    ? context.semantic.danger
+                                    : context.semantic.onSurfaceMuted,
+                              ),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  nguoiNhan!.nhan,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: context.text.bodySmall?.copyWith(
+                                    color: nguoiNhan!.canhBao
+                                        ? context.semantic.danger
+                                        : context.semantic.onSurfaceMuted,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
                     ),
                   ),
                   Container(
