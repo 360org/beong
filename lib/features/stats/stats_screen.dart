@@ -355,38 +355,59 @@ class _ChildStatsCard extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(child.displayName, style: context.text.titleMedium),
-            ),
-            if (session != null)
-              TextButton.icon(
-                onPressed: () => unawaited(
-                  showAdjustXuSheet(
-                    context,
-                    familyId: child.familyId,
-                    memberId: child.id,
-                    childName: child.displayName,
-                    reviewerId: session.activeMemberId,
-                  ),
-                ),
-                icon: const Icon(Icons.edit_rounded, size: 18),
-                label: const Text('Sửa xu'),
-              ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
+        // Một luồng số dư cho **cả** dòng tên lẫn các ô hũ. Mở hai luồng thì
+        // có khoảnh khắc tổng ở trên và các hũ ở dưới không cộng ra nhau.
         StreamBuilder<WalletBalance>(
           stream: walletDao.watchBalance(child.id),
           builder: (context, snap) {
             final balance = snap.data ?? WalletBalance.zero;
-            return _JarOverview(
-              balance: balance,
-              familyId: child.familyId,
-              memberId: child.id,
-              tenBe: child.displayName,
-              choPhepSua: true,
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        child.displayName,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.text.titleMedium,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    // Tổng xu đứng ngay cạnh tên. Chủ dự án nêu 30/08/2026:
+                    // *"phần thống kê trên header profile nên show total xu."*
+                    // Trước đó con số này chỉ hiện ở dòng quy đổi tiền — mà
+                    // dòng đó **ẩn hẳn** khi nhà tắt quy đổi (mặc định là
+                    // tắt), nên tổng xu của con không hiện ở đâu cả: bố mẹ
+                    // phải tự cộng nhẩm 5 ô hũ.
+                    XuBadge(amount: balance.total),
+                    const Spacer(),
+                    if (session != null)
+                      TextButton.icon(
+                        onPressed: () => unawaited(
+                          showAdjustXuSheet(
+                            context,
+                            familyId: child.familyId,
+                            memberId: child.id,
+                            childName: child.displayName,
+                            reviewerId: session.activeMemberId,
+                          ),
+                        ),
+                        icon: const Icon(Icons.edit_rounded, size: 18),
+                        label: const Text('Sửa xu'),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _JarOverview(
+                  balance: balance,
+                  familyId: child.familyId,
+                  memberId: child.id,
+                  tenBe: child.displayName,
+                  choPhepSua: true,
+                  hienDongTong: false,
+                ),
+              ],
             );
           },
         ),
@@ -637,6 +658,7 @@ class _JarOverview extends ConsumerWidget {
     this.memberId,
     this.tenBe,
     this.choPhepSua = false,
+    this.hienDongTong = true,
   });
 
   final WalletBalance balance;
@@ -649,6 +671,11 @@ class _JarOverview extends ConsumerWidget {
   /// Bấm vào thẻ hũ để sửa / ngừng dùng. Chỉ bật ở màn của **bố mẹ**: con xem
   /// được số dư của mình nhưng không tự đổi luật chia xu.
   final bool choPhepSua;
+
+  /// Hiện dòng tổng dưới các ô hũ. Tắt ở màn bố mẹ vì tổng đã nằm ngay cạnh
+  /// tên bé trên đầu — cùng một con số in hai lần cách nhau nửa gang tay thì
+  /// người đọc phải dừng lại kiểm xem có phải hai thứ khác nhau không.
+  final bool hienDongTong;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -726,7 +753,7 @@ class _JarOverview extends ConsumerWidget {
                 );
               },
             ),
-            _MoneyValue(familyId: familyId, xu: balance.total),
+            if (hienDongTong) _DongTong(familyId: familyId, xu: balance.total),
           ],
         );
       },
@@ -799,12 +826,25 @@ class _UnallocatedBanner extends StatelessWidget {
   }
 }
 
-/// Giá trị tiền thật của cả ví — ADR-017, chỉ hiện khi nhà đã bật quy đổi.
+/// Dòng tổng dưới các ô hũ, kèm giá trị tiền thật khi nhà đã bật quy đổi
+/// (ADR-017).
 ///
-/// Đặt dưới **tổng** chứ không gắn vào từng hũ: bốn ô mỗi ô hai con số thì màn
-/// hình thành bảng kế toán, mà đây là màn hình cho trẻ con đọc.
-class _MoneyValue extends ConsumerWidget {
-  const _MoneyValue({required this.familyId, required this.xu});
+/// Tổng **luôn** hiện. Trước 30/08/2026 cả dòng này ẩn khi tắt quy đổi — mà
+/// quy đổi mặc định tắt — nên tổng xu của con không hiện ở đâu cả, và muốn
+/// biết thì phải tự cộng nhẩm năm ô hũ. Giá trị tiền mới là phần tuỳ chọn,
+/// không phải cái tổng.
+///
+/// Tiền đặt dưới **tổng** chứ không gắn vào từng hũ: năm ô mỗi ô hai con số
+/// thì màn hình thành bảng kế toán, mà đây là màn hình cho trẻ con đọc.
+/// Chữ của dòng tổng. `null` [tien] = nhà chưa bật quy đổi.
+///
+/// Tách ra để kiểm được điều quan trọng nhất ở đây: **tổng không bao giờ biến
+/// mất**. Lỗi cũ là cả dòng ẩn đi khi tắt quy đổi, mà quy đổi mặc định tắt.
+String dongTongXu(int xu, String? tien) =>
+    tien == null ? 'Tổng $xu xu' : 'Tổng $xu xu  $tien';
+
+class _DongTong extends ConsumerWidget {
+  const _DongTong({required this.familyId, required this.xu});
 
   final String familyId;
   final int xu;
@@ -814,12 +854,11 @@ class _MoneyValue extends ConsumerWidget {
     return StreamBuilder<MoneyExchange>(
       stream: ref.watch(memberRepositoryProvider).watchExchangeRate(familyId),
       builder: (context, snap) {
-        final label = snap.data?.labelFor(xu);
-        if (label == null) return const SizedBox.shrink();
+        final tien = snap.data?.labelFor(xu);
         return Padding(
           padding: const EdgeInsets.only(top: AppSpacing.sm),
           child: Text(
-            'Tổng $xu xu  $label',
+            dongTongXu(xu, tien),
             style: context.text.bodySmall?.copyWith(
               color: context.semantic.onSurfaceMuted,
             ),

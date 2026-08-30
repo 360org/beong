@@ -4,6 +4,28 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.7.10+44 (2026-08-30) — Tổng xu của con nằm ngay cạnh tên
+
+Chủ dự án: *"phần thống kê trên header profile nên show total xu."*
+
+Nay tổng xu đứng ngay sau tên bé ở màn **Thống kê**, cập nhật cùng lúc với
+các ô hũ.
+
+Đi tìm thì hoá ra tổng **đã có** — nhưng nằm chung một dòng với giá trị quy
+đổi tiền, và cả dòng ấy ẩn đi khi nhà tắt quy đổi. Quy đổi mặc định tắt, nên
+với hầu hết các nhà tổng xu không hiện ở đâu cả: muốn biết con có bao nhiêu
+thì phải tự cộng nhẩm năm ô hũ. Nay tổng luôn hiện; giá trị tiền mới là phần
+tuỳ chọn đi kèm, không phải cái quyết định tổng có được thấy hay không.
+
+Việc này cũng vá luôn màn **Sổ của con**: chính con cũng không thấy được tổng
+xu của mình khi nhà chưa bật quy đổi.
+
+Ở màn bố mẹ, dòng tổng dưới các ô hũ được bỏ đi vì tổng đã nằm trên đầu — cùng
+một con số in hai lần cách nhau nửa gang tay thì người đọc phải dừng lại kiểm
+xem có phải hai thứ khác nhau không.
+
+---
+
 ## v0.7.9+43 (2026-08-30) — Hàng chờ duyệt nói rõ là việc của bé nào
 
 Chủ dự án: *"phần approve công việc không hiển thị là duyệt cho profile
