@@ -4,6 +4,18 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.5.4+29 (2026-08-30) — Nút "+" mở thẳng bảng thêm việc
+
+Bấm "+" ở tab Nhiệm vụ trước đây hỏi *"Thêm gì?"* — thêm việc hay thêm buổi.
+Câu hỏi đó có lý khi nút này là đường duy nhất tạo được cả hai. Nay đường tạo
+buổi đã có chỗ riêng ở cuối danh sách buổi, nên hỏi lại là bắt bố mẹ trả lời
+một câu họ vừa trả lời bằng chính cú bấm của mình.
+
+Nút "+" giờ mở thẳng bảng thêm việc. Tạo buổi vẫn ở dòng "Tạo thêm thói quen"
+cuối danh sách.
+
+---
+
 ## v0.5.3+28 (2026-08-30) — Sửa buổi thói quen: giao cho bé, và ngừng dùng
 
 Bảng "Sửa thói quen" trước đây chỉ đổi được tên, hình và mức thưởng trọn bộ.

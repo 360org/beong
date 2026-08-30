@@ -53,28 +53,17 @@ class TasksScreen extends ConsumerWidget {
       ),
       floatingActionButton: session.isParent
           ? FloatingActionButton(
-              tooltip: 'Thêm việc hoặc buổi thói quen',
+              tooltip: 'Thêm việc',
+              // Nút "+" mở thẳng bảng thêm việc, không hỏi "thêm gì?" nữa.
+              //
+              // Bản trước hỏi vì nút này làm được hai thứ. Nhưng từ khi có
+              // dòng "Tạo thêm thói quen" ở cuối danh sách buổi, đường tạo
+              // buổi đã đứng đúng chỗ của nó — giữ thêm một câu hỏi ở đây là
+              // bắt bố mẹ trả lời một câu họ đã trả lời bằng cách bấm vào đâu
+              // (chủ dự án nêu 30/08/2026).
               onPressed: () async {
                 final children = await memberDao.children(session.familyId);
                 if (!context.mounted) return;
-                // Hai thứ tạo được từ đây, nên phải hỏi trước chứ không đoán:
-                // một **việc**, hay một **buổi** để gom việc vào.
-                final chon = await showModalBottomSheet<_ThemGi>(
-                  context: context,
-                  builder: (context) => const _ThemGiSheet(),
-                );
-                if (chon == null || !context.mounted) return;
-
-                if (chon == _ThemGi.buoi) {
-                  await showRoutineCreateSheet(
-                    context,
-                    taskDao: taskDao,
-                    familyId: session.familyId,
-                    children: children,
-                  );
-                  return;
-                }
-
                 final routines = await taskDao.activeRoutines(
                   session.familyId,
                 );
@@ -94,49 +83,6 @@ class TasksScreen extends ConsumerWidget {
               child: const Icon(Icons.add),
             )
           : null,
-    );
-  }
-}
-
-enum _ThemGi { viec, buoi }
-
-/// Hỏi bố mẹ muốn thêm **việc** hay thêm **buổi**.
-///
-/// Trước đây nút "+" chỉ làm được một việc, nên không phải hỏi. Nay nó làm được
-/// hai, và đoán hộ người dùng thì một trong hai đường sẽ không ai tìm ra.
-class _ThemGiSheet extends StatelessWidget {
-  const _ThemGiSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              AppSpacing.md,
-              AppSpacing.sm,
-              0,
-            ),
-            child: SheetHeader(title: 'Thêm gì?'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.check_circle_outline_rounded),
-            title: Text('Thêm việc', style: context.text.titleSmall),
-            subtitle: const Text('Một việc nhà, xếp vào một buổi'),
-            onTap: () => Navigator.of(context).pop(_ThemGi.viec),
-          ),
-          ListTile(
-            leading: const Icon(Icons.schedule_rounded),
-            title: Text('Thêm buổi thói quen', style: context.text.titleSmall),
-            subtitle: const Text('Buổi sáng, sau giờ học, buổi tối...'),
-            onTap: () => Navigator.of(context).pop(_ThemGi.buoi),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-        ],
-      ),
     );
   }
 }
