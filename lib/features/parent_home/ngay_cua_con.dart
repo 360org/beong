@@ -24,6 +24,8 @@ class NgayCuaCon extends StatelessWidget {
     required this.taskDao,
     super.key,
     this.onMoLai,
+    this.onDuyet,
+    this.onTraLai,
   });
 
   final String memberId;
@@ -31,9 +33,17 @@ class NgayCuaCon extends StatelessWidget {
   final CalendarDate date;
   final TaskRepository taskDao;
 
-  /// Mở lại một việc đã xong. `null` thì hàng chỉ để đọc — màn lịch sử dùng
-  /// kiểu đó, thẻ ở Trang chính thì truyền vào để bố mẹ sửa được ngay tại chỗ.
+  /// Cho con làm lại một việc **đã duyệt**. `null` thì hàng chỉ để đọc — màn
+  /// lịch sử dùng kiểu đó, thẻ ở Trang chính thì truyền vào để bố mẹ sửa được
+  /// ngay tại chỗ.
   final void Function(TaskInstance instance)? onMoLai;
+
+  /// Duyệt một việc con vừa báo xong.
+  final void Function(TaskInstance instance)? onDuyet;
+
+  /// Trả lại một việc con báo xong **nhưng chưa xong**. Khác [onMoLai]: việc
+  /// này chưa được duyệt nên chưa có xu nào để trừ.
+  final void Function(TaskInstance instance)? onTraLai;
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +117,8 @@ class NgayCuaCon extends StatelessWidget {
                       luot: ds,
                       taskMap: taskMap,
                       onMoLai: onMoLai,
+                      onDuyet: onDuyet,
+                      onTraLai: onTraLai,
                     ),
               ],
             );
@@ -199,12 +211,16 @@ class _KhoiBuoi extends StatelessWidget {
     required this.luot,
     required this.taskMap,
     required this.onMoLai,
+    required this.onDuyet,
+    required this.onTraLai,
   });
 
   final String ten;
   final List<TaskInstance> luot;
   final Map<String, Task> taskMap;
   final void Function(TaskInstance instance)? onMoLai;
+  final void Function(TaskInstance instance)? onDuyet;
+  final void Function(TaskInstance instance)? onTraLai;
 
   @override
   Widget build(BuildContext context) {
@@ -234,6 +250,8 @@ class _KhoiBuoi extends StatelessWidget {
               luot: i,
               viec: taskMap[i.taskId],
               onMoLai: onMoLai,
+              onDuyet: onDuyet,
+              onTraLai: onTraLai,
             ),
             const SizedBox(height: 4),
           ],
@@ -248,12 +266,16 @@ class _DongLuot extends StatelessWidget {
     required this.luot,
     required this.viec,
     required this.onMoLai,
+    required this.onDuyet,
+    required this.onTraLai,
     super.key,
   });
 
   final TaskInstance luot;
   final Task? viec;
   final void Function(TaskInstance instance)? onMoLai;
+  final void Function(TaskInstance instance)? onDuyet;
+  final void Function(TaskInstance instance)? onTraLai;
 
   @override
   Widget build(BuildContext context) {
@@ -297,24 +319,42 @@ class _DongLuot extends StatelessWidget {
             if (onMoLai != null)
               IconButton(
                 icon: const Icon(Icons.refresh_rounded, size: 18),
-                tooltip: 'Cho con làm lại',
+                tooltip: 'Cho con làm lại — có thể bị trừ xu',
                 onPressed: () => onMoLai!(luot),
               ),
-          ] else if (choDuyet)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: context.semantic.warning.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                'Chờ duyệt',
-                style: context.text.bodySmall?.copyWith(
-                  color: context.semantic.warning,
+          ] else if (choDuyet) ...[
+            if (onDuyet == null && onTraLai == null)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: context.semantic.warning.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'Chờ duyệt',
+                  style: context.text.bodySmall?.copyWith(
+                    color: context.semantic.warning,
+                  ),
                 ),
               ),
-            )
-          else if (boLo)
+            // Hai nút đứng ngay cạnh việc đang nói tới. Trước đây bố mẹ phải
+            // lên hàng đợi ở đầu màn hình mới duyệt hay trả lại được — nhìn
+            // thấy việc ở đây mà phải đi chỗ khác để xử lý nó.
+            if (onTraLai != null)
+              IconButton(
+                icon: const Icon(Icons.undo_rounded, size: 18),
+                tooltip: 'Trả lại — con chưa làm xong',
+                color: context.semantic.danger,
+                onPressed: () => onTraLai!(luot),
+              ),
+            if (onDuyet != null)
+              IconButton(
+                icon: const Icon(Icons.check_circle_outline_rounded, size: 20),
+                tooltip: 'Duyệt',
+                color: context.semantic.success,
+                onPressed: () => onDuyet!(luot),
+              ),
+          ] else if (boLo)
             Icon(
               Icons.cancel_rounded,
               size: 20,

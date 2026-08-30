@@ -720,6 +720,30 @@ class _ChildSummaryCardState extends ConsumerState<_ChildSummaryCard> {
     );
   }
 
+  /// Duyệt một việc con vừa báo xong, ngay trên hàng của nó.
+  Future<void> _duyetViec(TaskInstance luot) async {
+    await widget.reviewService.approve(
+      instanceId: luot.id,
+      reviewerId: widget.reviewerId,
+    );
+    if (mounted) hienThongBao(context, 'Đã duyệt.');
+  }
+
+  /// Trả lại một việc con báo xong **nhưng chưa xong**.
+  ///
+  /// Khác [_moLaiViec]: việc này chưa được duyệt nên **chưa có xu nào** để
+  /// trừ. Nói rõ điều đó ra, vì "trả lại" và "làm lại" nghe giống nhau mà hậu
+  /// quả về xu thì khác hẳn.
+  Future<void> _traLaiViec(TaskInstance luot) async {
+    await widget.reviewService.reject(
+      instanceId: luot.id,
+      reviewerId: widget.reviewerId,
+    );
+    if (mounted) {
+      hienThongBao(context, 'Đã trả lại. Chưa cộng xu nên không trừ gì cả.');
+    }
+  }
+
   String _nhanNgay(CalendarDate ngay) => switch (_luiNgay) {
     0 => 'Hôm nay',
     1 => 'Hôm qua',
@@ -912,6 +936,8 @@ class _ChildSummaryCardState extends ConsumerState<_ChildSummaryCard> {
                       date: ngayXem,
                       taskDao: taskDao,
                       onMoLai: _moLaiViec,
+                      onDuyet: _duyetViec,
+                      onTraLai: _traLaiViec,
                     ),
                   ),
                 ),

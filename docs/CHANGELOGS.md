@@ -4,6 +4,34 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.7.3+37 (2026-08-30) — Trả việc lại cho con, ngay trên hàng của nó
+
+Con bấm xong nhưng chưa xong thật — nay bố mẹ xử lý ngay tại hàng việc đó,
+không phải đi lên hàng đợi ở đầu màn hình.
+
+Có **hai** đường, và hậu quả về xu khác hẳn nhau:
+
+- **Trả lại** một việc đang *chờ duyệt*: chưa cộng xu nên **không trừ gì**.
+  App nói thẳng điều đó ra sau khi bấm.
+- **Cho làm lại** một việc *đã duyệt*: xu đã vào túi con rồi, nên có trừ theo
+  mức gia đình đặt trong Cài đặt → Trừ xu. Mặc định là 0% — không nhà nào bị
+  bật tính năng trừ xu mà không tự chọn.
+
+### Đã kiểm những gì
+
+Bảy bài kiểm mới đi qua đúng cái cửa mà nút bấm gọi, không phải gọi tắt xuống
+tầng dưới:
+
+- trả lại việc chờ duyệt **không** trừ xu, kể cả khi mức trừ đang bật 50%;
+- bật 50% thì cho làm lại một việc 20 xu mất đúng 10;
+- trừ theo số xu **của lượt đó**, không theo giá việc hiện tại — tăng giá một
+  việc không được trừ ngược vào xu con đã kiếm;
+- làm lại hai lần thì trừ hai lần;
+- **không bao giờ trừ xuống âm**: số dư âm là thứ không giải thích được cho
+  một đứa trẻ.
+
+---
+
 ## v0.7.2+36 (2026-08-30) — Mỗi buổi nói rõ đang giao cho bé nào
 
 Thẻ buổi ở tab Nhiệm vụ nay có một dòng dưới tên: *"Sau giờ học · Tất cả"*,
