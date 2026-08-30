@@ -4,6 +4,39 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.7.12+46 (2026-08-30) — Chọn hũ cho bé mới, và thêm được ông bà
+
+Hai việc chủ dự án nêu 30/08/2026.
+
+### Chọn bé mới dùng những hũ nào
+
+*"Khi tạo profile cho trẻ phải có option để chọn bao nhiêu hũ — ví dụ tổng hũ
+đã tạo có 8 hũ, chọn 3 hũ cho profile cần tạo."*
+
+Bảng **Thêm bé** nay liệt kê toàn bộ hũ của nhà kèm ô tick. Bỏ bớt hũ bé chưa
+cần thì phần trăm của các hũ còn lại **tự chia cho đủ 100%**, xem trước được
+từng con số trước khi lưu. Nhà có 8 hũ cho bé lớn thì bé ba tuổi không cần cả
+8 — 8 ô hũ trên màn của bé chỉ làm loãng thứ bé thật sự hiểu.
+
+Giữ nguyên cả bộ thì **không** tách bộ riêng: bé dùng chung bộ của nhà, đúng
+như trước. Ô cuối cùng bị khoá lại — phải còn ít nhất một hũ, nếu không xu của
+bé không có chỗ nào chứa.
+
+### Thêm người lớn cùng quản lý
+
+*"Có thể tạo thêm profile cùng quản lý parent, ví dụ: bố / mẹ / ông / bà."*
+
+**Cài đặt → Thêm người lớn**, đứng ngay cạnh "Thêm bé". Có sẵn chip điền nhanh
+Bố / Mẹ / Ông / Bà, và gõ tay được cho nhà gọi khác đi ("Bà ngoại", "Cậu").
+
+Mọi hồ sơ người lớn có **cùng quyền** — không có bậc "chủ nhà". Phân quyền
+giữa những người lớn trong cùng một nhà là thứ app này không nên đứng ra phân
+xử. Hồ sơ người lớn bắt buộc có mật khẩu (ADR-027): nó duyệt việc và cộng xu
+được, nên để trống là mở cửa cho bất kỳ ai cầm máy — kể cả chính đứa trẻ đang
+chờ được duyệt.
+
+---
+
 ## v0.7.11+45 (2026-08-30) — Gán buổi cho bé thì bé có việc ngay
 
 Chủ dự án: *"trong tab tasks đã chọn session cho tất cả rồi nhưng trong

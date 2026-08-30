@@ -18,6 +18,7 @@ import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/services/money_exchange.dart';
 import 'package:beong/domain/services/penalty_policy.dart';
 import 'package:beong/features/members/add_child_sheet.dart';
+import 'package:beong/features/members/add_parent_sheet.dart';
 import 'package:beong/features/members/edit_child_sheet.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
 import 'package:beong/features/members/pairing_sheet.dart';
@@ -179,19 +180,30 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: () => unawaited(
-                    showAddChildSheet(
-                      context,
-                      familyId: session.familyId,
-                      nextColorIndex: nextFreeColorIndex(members),
+              Row(
+                children: [
+                  TextButton.icon(
+                    onPressed: () => unawaited(
+                      showAddChildSheet(
+                        context,
+                        familyId: session.familyId,
+                        nextColorIndex: nextFreeColorIndex(members),
+                      ),
                     ),
+                    icon: const Icon(Icons.person_add_alt_rounded),
+                    label: const Text('Thêm bé'),
                   ),
-                  icon: const Icon(Icons.person_add_alt_rounded),
-                  label: const Text('Thêm bé'),
-                ),
+                  // Đứng cạnh "Thêm bé", không giấu trong menu: chủ dự án nêu
+                  // 30/08/2026 rằng nhà cần thêm được ông bà cùng quản lý, và
+                  // trước đó không có đường nào ngoài onboarding.
+                  TextButton.icon(
+                    onPressed: () => unawaited(
+                      showAddParentSheet(context, familyId: session.familyId),
+                    ),
+                    icon: const Icon(Icons.group_add_outlined),
+                    label: const Text('Thêm người lớn'),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.md),
               _SettingsSection(

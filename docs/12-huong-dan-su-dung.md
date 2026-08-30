@@ -253,13 +253,31 @@ vì việc buổi tối hay xong trễ, mà tính bỏ lỡ lúc 0h01 thì oan c
 
 ---
 
-## 12. Nhiều con
+## 12. Nhiều con, nhiều người lớn
 
 **Cài đặt → Thêm bé** (ảnh `17`). Mỗi con có sổ xu, hũ, huy hiệu, mục tiêu riêng —
 không nhìn thấy của nhau.
 
 Khi tạo việc, ô **Giao cho** quyết định con nào phải làm. Không chọn thì cả nhà cùng
 làm, mỗi con một lượt riêng.
+
+### Chọn hũ cho bé mới
+
+Trong bảng **Thêm bé**, mục *"Bé này dùng hũ nào"* liệt kê toàn bộ hũ của nhà. Bỏ
+tick những hũ bé chưa cần — phần trăm của các hũ còn lại **tự chia cho đủ 100%**, và
+bảng cho xem trước từng con số trước khi bạn bấm lưu.
+
+Nhà có 8 hũ cho bé lớn thì bé ba tuổi không cần cả 8. Giữ 2–3 hũ bé thật sự hiểu.
+Thêm hũ lại sau bất cứ lúc nào ở tab **Thống kê**; phải giữ ít nhất một hũ.
+
+### Thêm người lớn
+
+**Cài đặt → Thêm người lớn**. Ông bà, bố mẹ — ai cùng trông các bé thì có hồ sơ
+riêng, và **mọi hồ sơ người lớn có cùng quyền**: duyệt việc, sửa thói quen, đổi cài
+đặt. App không đặt ra bậc "chủ nhà".
+
+Hồ sơ người lớn **bắt buộc có mật khẩu** (4 số): nó duyệt việc và cộng xu được, nên
+để trống là mở cửa cho bất kỳ ai cầm máy — kể cả chính đứa trẻ đang chờ được duyệt.
 
 ---
 

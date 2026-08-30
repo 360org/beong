@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:beong/core/providers/database_provider.dart';
@@ -5,9 +6,11 @@ import 'package:beong/core/theme/app_colors.dart';
 import 'package:beong/core/theme/app_spacing.dart';
 import 'package:beong/core/theme/task_icons.dart';
 import 'package:beong/domain/entities/enums.dart';
+import 'package:beong/domain/entities/jar_def.dart';
 import 'package:beong/domain/repositories/member_repository.dart';
 import 'package:beong/domain/services/jar_splitter.dart';
 import 'package:beong/features/members/child_profile_form.dart';
+import 'package:beong/features/members/chon_hu_cho_be.dart';
 import 'package:beong/features/members/mat_khau_sheet.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
@@ -65,10 +68,27 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
   Set<String> _selectedPresets = <String>{};
   Map<String, int> _presetPoints = <String, int>{};
 
+  /// Bộ hũ của nhà và những hũ bé mới sẽ dùng. Mặc định dùng cả bộ — đó là
+  /// hành vi cũ, và bố mẹ không chọn gì thì không có gì đổi.
+  List<JarDef> _huCuaNha = const [];
+  Set<String> _huDaChon = <String>{};
+
   @override
   void initState() {
     super.initState();
     _name.addListener(_onNameChanged);
+    unawaited(_napHu());
+  }
+
+  Future<void> _napHu() async {
+    final hu = await ref
+        .read(jarRepositoryProvider)
+        .activeJars(widget.familyId);
+    if (!mounted) return;
+    setState(() {
+      _huCuaNha = hu;
+      _huDaChon = {for (final j in hu) j.key};
+    });
   }
 
   void _onNameChanged() => setState(() {});
@@ -111,6 +131,8 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
           ),
         );
 
+    await _dungBoHuRieng(childId);
+
     if (!mounted) return;
 
     if (_enablePin) {
@@ -126,6 +148,39 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
     }
 
     if (mounted) Navigator.of(context).pop(true);
+  }
+
+  /// Dựng bộ hũ riêng cho bé khi bố mẹ bỏ bớt hũ.
+  ///
+  /// Chọn cả bộ thì **không** tách: bé dùng chung bộ của nhà, đúng như trước.
+  /// Tách khi không cần là sinh ra một bản sao rồi từ đó hai bộ trôi khỏi nhau
+  /// mà không ai yêu cầu.
+  Future<void> _dungBoHuRieng(String childId) async {
+    if (_huDaChon.length >= _huCuaNha.length) return;
+
+    final jarDao = ref.read(jarRepositoryProvider);
+    await jarDao.tachBoRieng(familyId: widget.familyId, memberId: childId);
+
+    // Chia lại **trước** khi xếp hũ bỏ đi: xếp trước rồi mới chia thì có một
+    // khoảnh khắc tổng khác 100, và tầng chia xu đọc đúng lúc đó sẽ rơi về kế
+    // hoạch mặc định.
+    for (final entry in tyLeSauKhiChon(_huCuaNha, _huDaChon).entries) {
+      await jarDao.updateJar(
+        familyId: widget.familyId,
+        memberId: childId,
+        jarKey: entry.key,
+        pct: entry.value,
+      );
+    }
+    for (final hu in _huCuaNha) {
+      if (_huDaChon.contains(hu.key)) continue;
+      await jarDao.setArchived(
+        familyId: widget.familyId,
+        memberId: childId,
+        jarKey: hu.key,
+        archived: true,
+      );
+    }
   }
 
   @override
@@ -162,6 +217,11 @@ class _AddChildSheetState extends ConsumerState<_AddChildSheet> {
             onPresetsChanged: (keys) => setState(() => _selectedPresets = keys),
             presetPoints: _presetPoints,
             onPresetPointsChanged: (pts) => setState(() => _presetPoints = pts),
+          ),
+          ChonHuChoBe(
+            huCuaNha: _huCuaNha,
+            dangChon: _huDaChon,
+            onDoi: (chon) => setState(() => _huDaChon = chon),
           ),
           const SizedBox(height: AppSpacing.xxl),
           SizedBox(
