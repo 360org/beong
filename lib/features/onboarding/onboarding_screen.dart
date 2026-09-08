@@ -58,11 +58,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   void _nextPage() {
     if (_currentPage < 2) {
-      unawaited(
-        _pageController.nextPage(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        ),
+      // Không bọc `unawaited`: `nextPage` là `@awaitNotRequired`.
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
       );
       setState(() => _currentPage++);
     }

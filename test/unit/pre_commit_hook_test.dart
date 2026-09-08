@@ -12,6 +12,20 @@ import 'package:flutter_test/flutter_test.dart';
 /// Test này không kiểm hook có chạy hay không — nó kiểm hook **còn tồn tại và
 /// còn chạy đúng lệnh**. Một chốt chặn có thể bị xoá trong im lặng thì không
 /// phải chốt chặn.
+/// Lý do bỏ qua test "đã được cài", hoặc `null` nếu phải chạy thật.
+///
+/// Trả về chuỗi thay vì `bool` để lúc bỏ qua thì trình chạy in ra **vì sao**,
+/// không lẳng lặng nuốt mất một test.
+String? _boQuaVi() {
+  if (Platform.environment.containsKey('CI')) {
+    return 'CI không commit nên không cần hook — chính CI là lớp chặn cuối';
+  }
+  if (!Directory('.git').existsSync()) {
+    return 'thư mục này không phải bản làm việc git (không có .git)';
+  }
+  return null;
+}
+
 void main() {
   group('hook pre-commit', () {
     final hook = File('.githooks/pre-commit');
@@ -72,5 +86,39 @@ void main() {
         reason: 'chmod +x .githooks/pre-commit',
       );
     });
+
+    // Ba test trên kiểm hook **có tồn tại và viết đúng**. Không test nào kiểm
+    // hook **có được cài** — và đó đúng là chỗ đã lọt.
+    //
+    // Ngày 08/09/2026, bốn lỗi `unnecessary_unawaited` ở bee_mascot /
+    // celebration / onboarding quay lại **lần thứ tư**, dù hook đã có từ
+    // 26/08 và ba test trên vẫn xanh suốt. Lý do: `git config core.hooksPath`
+    // là cấu hình **của từng máy**, không đi theo repo. Máy này chưa từng chạy
+    // câu đó, nên hook nằm trong repo mà git chưa gọi nó lần nào.
+    //
+    // Một chốt chặn chưa được cắm điện thì không phải chốt chặn, và ba test
+    // trên không phân biệt được hai trạng thái đó.
+    test('đã được cài trên máy này (core.hooksPath)', () {
+      final ketQua = Process.runSync('git', [
+        'config',
+        '--get',
+        'core.hooksPath',
+      ]);
+      final duongDan = (ketQua.stdout as String).trim();
+
+      expect(
+        duongDan,
+        '.githooks',
+        reason:
+            'Hook có trong repo nhưng git chưa được trỏ vào đó, nên nó chưa '
+            'chạy lần nào. Chạy một lần cho mỗi máy:\n'
+            '    git config core.hooksPath .githooks\n'
+            'Đây chính là chỗ đã để lọt bốn lỗi analyzer lần thứ tư ngày '
+            '08/09/2026.',
+      );
+      // Chỉ áp cho **máy lập trình**. Bỏ qua ở CI và ở mọi bản chép không có
+      // `.git`: CI không commit nên không cần hook — chính CI mới là lớp chặn
+      // cuối. Bắt CI cài hook là canh nhầm chỗ và làm đỏ một việc không sai.
+    }, skip: _boQuaVi());
   });
 }
