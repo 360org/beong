@@ -173,7 +173,10 @@ Hai việc trong danh sách này **đã xong** và tài liệu ghi sai từ đó
       - Máy con đã mở sẵn app có thể quét trực tiếp qua camera native (`mobile_scanner`) hoặc dán mã.
 - [ ] Credential phạm vi hẹp + **RLS theo hàng** cho máy con
 - [ ] Nhiều hồ sơ con trên cùng một máy + nút chuyển; danh sách thiết bị + thu hồi
-- [ ] Mời phụ huynh thứ hai vào gia đình (dùng lại hạ tầng QR, cấp vai `parent`)
+- [ ] Mời phụ huynh thứ hai vào gia đình (dùng lại hạ tầng QR, cấp vai `parent`) — **phần trên
+      một máy đã xong**: Cài đặt → "Thêm người lớn" tạo hồ sơ Bố/Mẹ/Ông/Bà cùng quyền
+      (`add_parent_sheet.dart`). Còn thiếu đúng phần *liên gia đình*: mời người ở **máy khác**,
+      cái này chờ backend như mọi mục Sprint 3 khác
 
 **Sync:**
 - [ ] Outbox + SyncEngine (Đã viết logic hàng đợi local, unit test đầy đủ; đang chờ tích hợp client Supabase ở runtime)
@@ -333,7 +336,13 @@ hoặc không bao giờ chạy. Danh sách các lần trước ở Sprint 2, kh�
 > chưa từng chạy lần nào nên mang một lỗi không ai biết (`reject_build_waiting_for_review` — tên
 > tuỳ chọn không tồn tại); đã sửa. Chốt chặn còn lại **không phải mã** — xem đầu
 > [`08-release-cicd.md`](08-release-cicd.md).
-- [ ] Icon app, splash, ảnh chụp store (bộ ảnh nội bộ đã có 90 tấm ở `screenshot/`, chưa cắt theo cỡ store)
+- [x] **Icon app** — bộ icon thương hiệu đã thay từ `d6c2648` (cả iOS lẫn Android), và đã gỡ kênh
+      alpha ở `0a2863e` sau khi Apple từ chối lỗi 90717. `test/unit/icon_ios_test.dart` canh lại
+      để lỗi đó không quay về
+- [ ] **Splash** — `ios/Runner/Assets.xcassets/LaunchImage.imageset/` vẫn là ba tấm trắng mặc
+      định của `flutter create` (68 byte/tấm), Android vẫn `launch_background.xml` gốc
+- [ ] **Ảnh chụp store** — 90 tấm nội bộ nằm ở `docs/screenshot/` (không phải `screenshot/` như
+      ghi trước đây), chưa cắt theo cỡ `iphone65` / `ipadPro129` mà App Store đòi
 - [ ] 🔴 **Hồ sơ App Store chưa điền** — chặn cứng đường ra công khai. Binary lên được App Store
       Connect nhưng `submit_for_review` hỏng vì thiếu: ảnh chụp (`iphone65`, `ipadPro129`), mô tả,
       từ khoá, URL hỗ trợ, URL chính sách, **toàn bộ bảng phân loại độ tuổi**, khai báo thu thập
@@ -434,6 +443,11 @@ theo vai) xếp sau, thứ tự đề nghị ghi trong chính tài liệu đó.
 - [x] **Link điều khoản / quyền riêng tư / thư hỗ trợ bấm được** — `settings_screen.dart:243,261`
 - [x] Thông báo tự tắt sau 3 giây, không nằm lại che nội dung
 - [x] Pre-commit hook + CI format trước analyze — `.githooks/`, `pre_commit_hook_test.dart`
+- [x] **Thêm hồ sơ người lớn** (Bố / Mẹ / Ông / Bà) — `add_parent_sheet.dart`, mọi hồ sơ người
+      lớn cùng quyền. Trả một phần cho mục "mời phụ huynh thứ hai" ở Sprint 3
+- [x] **Chọn hũ nào cho bé mới** ngay lúc tạo hồ sơ, phần trăm tự chia lại cho đủ 100%
+- [x] **Bánh cóc chặn nợ đa ngôn ngữ** — `chuoi_cung_test.dart` khoá số chuỗi cứng ở 897, đi một
+      chiều
 - [x] Sửa migration v9 làm app chết lúc mở trên máy đã cài bản cũ (`e731617`) — đúng loại lỗi
       chỉ lộ khi chạy trên máy thật, không lộ qua test
 
