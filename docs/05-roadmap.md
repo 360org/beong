@@ -5,27 +5,39 @@ một người UI).
 
 ## Trạng thái hiện tại
 
-*Soát lần cuối: 23/08/2026, bản `v0.2.6+11`.*
+*Soát lần cuối: 08/09/2026, bản `v0.7.12+46`. Kiểm bằng `flutter analyze` + `flutter test`
+(654 test xanh) và đọc code từng mục.*
 
 Cập nhật bằng cách **đọc code**, không tick theo cảm giác — xem quy trình ở
 `.claude/skills/flutter-8-buoc`.
 
 | Sprint | Trạng thái | Ghi chú |
 |---|---|---|
-| 0 — Nền móng | ✅ Xong | Còn pre-commit hook, cố ý hoãn |
-| 1 — Dữ liệu local | ✅ Xong | Gồm cả **tầng repository** — 7 interface + bản `Local...`, có test kiến trúc canh |
+| 0 — Nền móng | ✅ Xong | Pre-commit hook nay **đã có** (`.githooks/`, canh bằng `test/unit/pre_commit_hook_test.dart`) |
+| 1 — Dữ liệu local | ✅ Xong | Gồm cả **tầng repository** — 7 interface + bản `Local...`, có test kiến trúc canh. Schema nay ở **v10** |
 | 2 — Luồng UI cốt lõi | ✅ Xong | Mật khẩu **từng hồ sơ** ✅ (ADR-027), chọn vai lần mở đầu ✅, integration test ✅, Task Editor đủ 8 khối gồm proof_mode ✅, CRUD hồ sơ con & xoá gia đình ✅, xem việc chưa xong hôm nay trên Home bố mẹ ✅ |
-| 3 — Backend & ghép cặp | 🟡 Đang làm | **Pha 0 xong 4/4**; migration SQL & RLS policy Supabase ✅ (`supabase/migrations/`); QR scanner camera native & QR code ✅; chờ kết nối client |
-| 4 — Phần thưởng & tài chính | ✅ Xong | Đổi thưởng + duyệt + hoàn xu, trừ xu (chung + riêng theo việc), con tự chia xu linh hoạt dở dang, hũ tự lập, huy hiệu + streak, mục tiêu tiết kiệm, tỷ giá tiền thật, sửa xu tay, CRUD sửa phần thưởng |
-| 5 — Thông báo & hoàn thiện | 🟡 Đang làm | Báo lỗi trong app ✅; từ điển i18n app_vi/app_en mở rộng ✅; dải tuổi 3–15 tính động từ birthYear ✅; chờ FCM push |
-| 6 — Phát hành v1.0 | 🟡 Đang chạy | **Đã lên TestFlight thật** (`0.2.6+11`). Chặn còn lại **không phải mã**: hồ sơ App Store chưa điền, secret Play Console chưa hợp lệ |
+| 3 — Backend & ghép cặp | 🟡 Đang làm | **Pha 0 xong 4/4**; migration SQL & RLS policy Supabase ✅; QR scanner + `PairingService` ✅. **Chặn còn lại:** auth Apple/Google, sync engine chưa nối client Supabase lúc chạy |
+| 4 — Phần thưởng & tài chính | ✅ Xong | Đổi thưởng + duyệt + hoàn xu, trừ xu (chung + riêng theo việc), **hũ riêng từng bé** (schema v9), con tự chia xu, huy hiệu + streak, mục tiêu tiết kiệm, **tỷ giá bố mẹ tự nhập**, sửa xu tay, CRUD sửa phần thưởng |
+| 5 — Thông báo & hoàn thiện | 🟡 Đang làm | Báo lỗi trong app ✅; `NotificationService` có logic + test ✅; **`push_notification_service.dart` đã dựng, chờ nối FCM native**. Đa ngôn ngữ vẫn là nợ lớn nhất — xem `24-roadmap-da-ngon-ngu.md` |
+| 6 — Phát hành v1.0 | 🟡 Đang chạy | **Đã lên TestFlight thật**. Chặn còn lại **không phải mã**: hồ sơ App Store chưa điền, secret Play Console chưa hợp lệ |
 
 **Hai lỗi 🔴 chặn phát hành tìm ra ngày 22/08 đã sửa xong**, cộng hai lỗi nữa lộ ra sau đó khi
-chạy app thật — xem mục *Chặn phát hành* bên dưới. Còn đúng một mục để mở, và cố ý: dấu vết chẩn
-đoán lúc khởi động, vì hiện tượng của nó chưa dựng lại được lần nào.
+chạy app thật — xem mục *Chặn phát hành* bên dưới.
 
 **Chặn lớn nhất:** chưa có backend nên chưa ghép cặp được máy con — mà "mỗi bé một máy" là điểm bán
 chính (ADR-021). Mọi thứ khác đang chạy được trên **một** thiết bị.
+
+### Nợ kỹ thuật đang mở (audit 08/09/2026)
+
+| Mã | Mức | Việc |
+|---|---|---|
+| B-001 | 🔴 High | **Toolchain `rflutter` làm hỏng codegen.** `flutter`/`dart` là wrapper chạy remote qua ssh: rsync đẩy code lên máy chủ, chạy ở đó, **nhưng không kéo kết quả về**. `*.g.dart` bị gitignore nên máy lập trình giữ bản cũ → analyze báo lỗi ảo (`memberId`, `orderIndex` undefined). Sửa: thêm bước rsync ngược kéo `*.g.dart` sau khi build |
+| B-002 | 🔴 High | **Rsync thiếu `--delete` để lại file mồ côi.** `jar_settings_screen.dart` xoá ở `b5b1240` vẫn nằm trên máy chủ → test guard `sheet_co_nut_dong_test.dart` fail vì quét thấy file ma. Sửa: thêm `--delete` vào rsync trong `rflutter` |
+| B-003 | 🟡 Medium | **4 lỗi `unnecessary_unawaited` quay lại lần thứ tư** — `bee_mascot.dart:85,110`, `celebration.dart:99`, `onboarding_screen.dart:61`. Đã sửa ở v0.3.1, commit sau lại đưa vào. Chốt chặn dựng ở `09a56d0` không giữ được |
+| B-004 | 🟡 Medium | **GitLab lệch 39 commit** — các đợt làm gần đây chỉ push GitHub, trái policy ưu tiên GitLab private |
+
+Bài học lặp lại của dự án: **thứ nào không có test canh thì sẽ trôi lại.** B-003 là lần thứ tư
+đúng bốn dòng đó quay về.
 
 **Đã làm nhiều hơn kế hoạch ở Sprint 4** vì chủ dự án yêu cầu theo thứ tự khác: trừ xu, duyệt tuỳ
 chọn, đổi thưởng, con tự chia xu đều đã xong trước khi Sprint 3 bắt đầu.
@@ -38,7 +50,10 @@ chọn, đổi thưởng, con tự chia xu đều đã xong trước khi Sprint 
 - [x] go_router + `StatefulShellRoute` (mỗi tab giữ lịch sử riêng)
 - [x] `ResponsiveScaffold` + test 3 breakpoint
 - [x] CI: analyze + format + test + build 5 nền tảng
-- [ ] Pre-commit hook (hoãn — CI đã chặn đủ, thêm sau nếu thấy cần)
+- [x] Pre-commit hook — hoãn lâu vì "CI đã chặn đủ", nhưng chặn ở CI nghĩa là biết mình sai sau
+      bốn phút build. Nay ở `.githooks/`, chạy format **trước** analyze (thứ tự này chốt ở
+      `478beca`: format sau analyze thì format lại làm analyze sai), canh bằng
+      `test/unit/pre_commit_hook_test.dart`
 
 **Ghi chú:** thêm Linux ngoài kế hoạch vì build/test được ngay trong CI (Ubuntu runner
 rẻ và nhanh hơn macOS/Windows) — không phải nền tảng phát hành.
@@ -255,6 +270,13 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
 
       Nói cách khác đây **không** phải việc một buổi. Việc thật cần làm trước là đưa chuỗi vào
       ARB theo từng màn; ô chọn ngôn ngữ chỉ là phần ngọn.
+
+      **Đo lại 08/09/2026 (`v0.7.12`): nợ này đang phình ra, không co lại.** `L10n.of` nay gọi
+      **18** lần (+3 sau ba tuần làm tính năng), còn `Text('...')` tiếng Việt viết cứng lên
+      **146** chuỗi (+48). Mỗi màn hình mới thêm chữ cứng nhanh hơn tốc độ đưa chữ cũ vào ARB.
+      Lộ trình chi tiết ở [`24-roadmap-da-ngon-ngu.md`](24-roadmap-da-ngon-ngu.md); nên có một
+      test canh **không thêm chuỗi cứng mới** trước khi bắt đầu dịch, nếu không dịch xong đợt này
+      thì đợt sau lại đầy.
 - [ ] Cài đặt: âm thanh — hoãn có chủ ý. App chưa phát âm thanh nào; một công tắc không điều
       khiển gì là cờ chết, đúng thứ dự án này đã phải đi dọn năm lần.
 - [x] Trang trống ✅ (đã có sẵn ở mọi màn chính) và **trạng thái lỗi** — `LoiManHinh` +
@@ -356,44 +378,65 @@ theo vai) xếp sau, thứ tự đề nghị ghi trong chính tài liệu đó.
 
 ## Sau v1.0
 
-## Kế hoạch Nâng cấp Toàn diện (v0.3.0) — Gamification & Trải nghiệm Bé / Phụ Huynh
+## Kế hoạch Nâng cấp Toàn diện (v0.3.0) — Gamification & Trải nghiệm Bé / Phụ Huynh ✅ XONG
 
-*Ngày cập nhật: 27/08/2026.*
+*Đặt ra 27/08/2026, soát lại bằng code 08/09/2026 — **cả 6 trụ đã xong**, phát hành rải từ
+`v0.3.0` tới `v0.7.x`.*
 
-### 1. Cấu hình Profile Bé & Quản lý Việc theo Buổi
-- [ ] Phân nhóm việc mẫu thành 4 buổi/loại (Sáng, Trưa/Chiều, Tối, Thói quen & Giúp đỡ) trong `ChildProfileForm`.
-- [ ] Nút `+ Xem thêm (X việc)` cho từng buổi để form ngắn gọn, không tràn màn hình.
-- [ ] Nhớ trạng thái đã chọn khi mở lại chỉnh sửa hồ sơ con và đổi style chip nổi bật.
-- [ ] Cho phép tuỳ chỉnh `[-] [Số xu] [+]` trực tiếp cho từng việc mẫu đã chọn.
-- [ ] Màn hình Tasks của bố mẹ: nhóm template theo buổi, gọn khối chọn nhanh + nút mở rộng.
+### 1. Cấu hình Profile Bé & Quản lý Việc theo Buổi ✅
+- [x] Phân nhóm việc mẫu thành 4 buổi/loại trong `ChildProfileForm` — `child_profile_form.dart:14`
+- [x] Nút `+ Xem thêm (X việc)` cho từng buổi
+- [x] Nhớ trạng thái đã chọn khi mở lại chỉnh sửa hồ sơ con
+- [x] Tuỳ chỉnh `[-] [Số xu] [+]` trực tiếp cho từng việc mẫu
+- [x] Màn Tasks bố mẹ nhóm theo buổi — làm rộng hơn kế hoạch: `TaskRow` dùng chung cho việc lẻ và
+      việc trong thói quen, kéo thả sắp xếp buổi (**schema v10**), chặn việc trùng tên trong cùng
+      buổi, gán buổi cho từng bé
 
-### 2. Thư viện Icon Đạt chuẩn 100+ Icons (`IconPicker`)
-- [ ] Bổ sung kho 100+ Fluent 3D Emoji Icons chất lượng cao.
-- [ ] Phân loại 6 Danh mục (Tabs): Việc nhà, Học tập, Ăn uống/Sức khoẻ, Thể thao/Vui chơi, Thú cưng/Thiên nhiên, Cảm xúc/Thói quen tốt.
+### 2. Thư viện Icon Đạt chuẩn 100+ Icons (`IconPicker`) ✅
+- [x] Kho icon Fluent 3D — thực tế **162 file** trong `assets/icons/`, nhiều hơn mốc 100
+- [x] Phân loại 6 danh mục tabs + tìm kiếm — `icon_picker.dart:8`
 
-### 3. Hệ thống Hũ Xu Riêng, Slider Thông minh & Con Tự Chia Xu
-- [ ] Chọn danh mục hũ riêng theo từng bé (Bé nhỏ 2–3 hũ, bé lớn 5–6 hũ).
-- [ ] Slider tỷ lệ thông minh có chốt khoá: thanh đã chỉnh đứng yên, các thanh còn lại tự bù trừ để tổng luôn = 100%.
-- [ ] Option "Cho phép con tự chia xu" đưa vào từng Profile bé riêng biệt.
-- [ ] Giao diện chia xu minh bạch số dư hiện tại và luỹ kế (`Đang có X xu + Y xu = Z xu`).
-- [ ] Quy tắc trừ/rút xu từ các hũ chuyên biệt (Học tập, Từ thiện, Tiết kiệm) kèm giao diện ghi nhận chi ở vai Bố Mẹ.
+### 3. Hệ thống Hũ Xu Riêng, Slider Thông minh & Con Tự Chia Xu ✅
+- [x] **Hũ riêng theo từng bé** — schema v9, cột `member_id` nullable (NULL = hũ chung cả nhà, nên
+      nhà nâng cấp không đổi gì). Chọn hũ ngay khi thêm bé mới
+- [x] Slider tỷ lệ có chốt khoá, tổng luôn = 100% — `child_profile_form.dart:93`
+- [x] Option "cho phép con tự chia xu" theo **từng bé** — `child_profile_form.dart:350`
+- [x] Giao diện chia xu hiện số dư hiện tại + luỹ kế — `allocate_xu_sheet.dart:55`
+- [x] Sửa/thêm/ngừng dùng hũ ngay trên màn Thống kê (màn Cài đặt → Các hũ đã bỏ 30/08)
 
-### 4. Chứng thực Hình ảnh (Photo Proof)
-- [ ] Màn hình con: Hiển thị nút "📷 Chụp ảnh xong việc" khi việc yêu cầu ảnh (`requiresPhoto == true`), chụp ảnh thực tế gửi kèm.
-- [ ] Màn hình bố mẹ: Xem ảnh thumbnail trên hàng đợi duyệt và bấm xem toàn màn hình trước khi duyệt.
+### 4. Chứng thực Hình ảnh (Photo Proof) ✅
+- [x] Màn con: nút chụp ảnh khi việc yêu cầu ảnh — `child_home_screen.dart`, dùng `image_picker`
+- [x] Màn bố mẹ: thumbnail trên hàng đợi duyệt + xem toàn màn hình trước khi duyệt
 
-### 5. Profile Con tại Home & Thống kê Vuốt theo Ngày/Tuần
-- [ ] Bấm Avatar bé tại Home bố mẹ ➔ Mở màn hình của con.
-- [ ] Bấm Tên / Header bé ➔ Mở chi tiết việc hôm nay theo buổi + Vuốt ngang xem lịch sử theo Ngày / Tuần (Biểu đồ cột 7 ngày, tổng việc, tổng xu).
+### 5. Profile Con tại Home & Thống kê Vuốt theo Ngày/Tuần ✅
+- [x] Bấm avatar bé ở Home bố mẹ mở màn hình của con
+- [x] Chạm header gập/mở việc của con theo buổi — `ngay_cua_con.dart`
+- [x] Vuốt ngang xem lịch sử theo Ngày/Tuần + biểu đồ cột 7 ngày — `child_history_sheet.dart`.
+      Sửa hai lần mới ăn: lần đầu vuốt bị dialog nuốt, lần sau vuốt thẳng trên thẻ
+- [x] Tổng xu của con nằm ngay cạnh tên ở màn Thống kê
+- [x] **Trả việc lại cho con ngay trên hàng việc**, kèm trừ xu — `parent_home_screen.dart:442`
 
-### 6. Tab Journey Bản đồ Leo Núi (Mountain Climbing Gamification)
-- [ ] Thiết kế bản đồ leo núi uốn lượn từ Chân Núi lên Đỉnh Vinh Quang (5 trạm dừng chân tương ứng các mốc xu).
-- [ ] Linh vật Bé Ong leo núi cắm cờ và đường mòn phát sáng tiến độ theo số xu thực tế của con.
+### 6. Tab Journey Bản đồ Leo Núi ✅
+- [x] Bản đồ leo núi 5 mốc từ chân núi lên đỉnh — `journey_screen.dart:353`
+- [x] Linh vật Bé Ong leo núi + đường mòn phát sáng theo xu thật
+
+### Làm thêm ngoài danh sách v0.3.0
+
+- [x] **Mọi bảng trượt lên đều có nút đóng** — `SheetHeader` dùng chung, canh bằng
+      `test/unit/sheet_co_nut_dong_test.dart` (30 chỗ gọi `showModalBottomSheet` rải 21 file; rà
+      tay một lượt thì được, giữ đúng qua từng lần thêm màn thì không)
+- [x] **Bố mẹ tự nhập tỷ giá quy đổi xu** — `settings_screen.dart`
+- [x] **Link điều khoản / quyền riêng tư / thư hỗ trợ bấm được** — `settings_screen.dart:243,261`
+- [x] Thông báo tự tắt sau 3 giây, không nằm lại che nội dung
+- [x] Pre-commit hook + CI format trước analyze — `.githooks/`, `pre_commit_hook_test.dart`
+- [x] Sửa migration v9 làm app chết lúc mở trên máy đã cài bản cũ (`e731617`) — đúng loại lỗi
+      chỉ lộ khi chạy trên máy thật, không lộ qua test
 
 | Phiên bản | Nội dung |
 |---|---|
-| v0.3.0 | Nâng cấp toàn diện 6 trụ cột UX/UI Profile, Hũ xu, Photo Proof, Stats & Journey Leo núi |
-| v1.1 | Level, thêm huy hiệu; bằng chứng ảnh/ghi chú; weekly goals; **lãi tượng trưng cho hũ Để dành** |
+| ~~v0.3.0~~ → **v0.7.12** | ✅ Xong 6 trụ cột UX/UI Profile, Hũ xu, Photo Proof, Stats & Journey Leo núi |
+| **v0.8 (kế tiếp)** | Trả nợ B-001→B-004; nối FCM push thật + màn mồi xin quyền; đa ngôn ngữ theo `24-roadmap-da-ngon-ngu.md` |
+| v1.1 | Level, thêm huy hiệu; ~~bằng chứng ảnh~~ (đã xong ở v0.3.x) / ghi chú; weekly goals; **lãi tượng trưng cho hũ Để dành** |
 | v1.2 | Thống kê tuần/tháng, xuất CSV/PDF; bảng thành tích in được |
 | v1.3 | Desktop 3 cột tối ưu, phím tắt; widget màn hình chính iOS/Android |
 | v1.4 | Nhiều gia đình / ly thân (trẻ ở 2 nhà); chia sẻ task giữa 2 hộ |
