@@ -36,6 +36,31 @@ flutter analyze          # phải sạch, CI chạy với --fatal-infos
 flutter test
 ```
 
+Ba lệnh trên đã nằm sẵn trong `.githooks/pre-commit`, nhưng git chỉ gọi hook khi
+được trỏ vào đó. Chạy **một lần cho mỗi máy**:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+`core.hooksPath` là cấu hình của từng máy, **không đi theo repo**. Bỏ qua câu này
+thì hook nằm trong repo mà chưa từng chạy — đúng chỗ đã để lọt bốn lỗi analyzer
+lần thứ tư ngày 08/09/2026. `test/unit/pre_commit_hook_test.dart` canh lại điều đó.
+
+## Nếu `flutter`/`dart` chạy từ xa
+
+Một số máy để `flutter`/`dart` là shim rsync mã nguồn sang máy build rồi chạy ở đó
+(ở máy hiện tại: `~/.local/bin/_rrun`). Không bắt buộc, nhưng nếu dùng thì shim
+phải làm đủ ba việc, thiếu việc nào cũng sinh ra lỗi **không có thật**:
+
+1. `rsync --delete` khi đẩy lên — thiếu thì file đã xoá còn nằm lại máy build và
+   làm đỏ các test quét thư mục.
+2. **Không** đẩy `*.g.dart` / `*.freezed.dart` lên — mã sinh tự động đi một chiều
+   máy build → máy này. Đẩy lên thì bản cũ ghi đè bản đúng, và `build_runner` băm
+   *đầu vào* nên thấy không đổi, báo "wrote 0 outputs" rồi để nguyên file hỏng.
+3. Kéo mã sinh tự động về sau khi chạy — thiếu thì `flutter analyze` tại chỗ báo
+   "undefined getter" cho những cột vừa thêm vào schema.
+
 ## Quy ước
 
 **Kiến trúc** — `docs/02-architecture.md` §3. Feature không import trực tiếp `data/`;
