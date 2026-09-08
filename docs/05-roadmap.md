@@ -5,8 +5,8 @@ một người UI).
 
 ## Trạng thái hiện tại
 
-*Soát lần cuối: 08/09/2026, bản `v0.7.12+46`. Kiểm bằng `flutter analyze` + `flutter test`
-(654 test xanh) và đọc code từng mục.*
+*Soát lần cuối: 08/09/2026, bản `v0.7.13+47`. Kiểm bằng `flutter analyze --fatal-infos`
+(sạch) + `flutter test` (655 xanh, 1 bỏ qua có lý do) và đọc code từng mục.*
 
 Cập nhật bằng cách **đọc code**, không tick theo cảm giác — xem quy trình ở
 `.claude/skills/flutter-8-buoc`.
@@ -27,17 +27,18 @@ chạy app thật — xem mục *Chặn phát hành* bên dưới.
 **Chặn lớn nhất:** chưa có backend nên chưa ghép cặp được máy con — mà "mỗi bé một máy" là điểm bán
 chính (ADR-021). Mọi thứ khác đang chạy được trên **một** thiết bị.
 
-### Nợ kỹ thuật đang mở (audit 08/09/2026)
+### Nợ kỹ thuật — đợt audit 08/09/2026 đã trả xong (`v0.7.13+47`)
 
-| Mã | Mức | Việc |
-|---|---|---|
-| B-001 | 🔴 High | **Toolchain `rflutter` làm hỏng codegen.** `flutter`/`dart` là wrapper chạy remote qua ssh: rsync đẩy code lên máy chủ, chạy ở đó, **nhưng không kéo kết quả về**. `*.g.dart` bị gitignore nên máy lập trình giữ bản cũ → analyze báo lỗi ảo (`memberId`, `orderIndex` undefined). Sửa: thêm bước rsync ngược kéo `*.g.dart` sau khi build |
-| B-002 | 🔴 High | **Rsync thiếu `--delete` để lại file mồ côi.** `jar_settings_screen.dart` xoá ở `b5b1240` vẫn nằm trên máy chủ → test guard `sheet_co_nut_dong_test.dart` fail vì quét thấy file ma. Sửa: thêm `--delete` vào rsync trong `rflutter` |
-| B-003 | 🟡 Medium | **4 lỗi `unnecessary_unawaited` quay lại lần thứ tư** — `bee_mascot.dart:85,110`, `celebration.dart:99`, `onboarding_screen.dart:61`. Đã sửa ở v0.3.1, commit sau lại đưa vào. Chốt chặn dựng ở `09a56d0` không giữ được |
-| B-004 | 🟡 Medium | **GitLab lệch 39 commit** — các đợt làm gần đây chỉ push GitHub, trái policy ưu tiên GitLab private |
+| Mã | Mức | Việc | Đã làm gì |
+|---|---|---|---|
+| B-001 | 🔴 High | **Toolchain `rflutter` làm hỏng codegen.** `flutter`/`dart` là wrapper chạy remote qua ssh: rsync đẩy code lên máy chủ, chạy ở đó, **nhưng không kéo kết quả về**. `*.g.dart` bị gitignore nên máy lập trình giữ bản cũ → analyze báo lỗi ảo (`memberId`, `orderIndex` undefined) | ✅ Gộp `rflutter`/`rdart` vào `~/.local/bin/_rrun`, thêm bước rsync kéo mã sinh tự động về. Mã sinh tự động nay đi **một chiều** máy chủ → máy này: đẩy ngược lên thì bản cũ ghi đè bản đúng, mà `build_runner` băm *đầu vào* nên báo "wrote 0 outputs" rồi giữ nguyên file hỏng — tầng lỗi này chỉ lộ ra sau khi vá xong tầng trên. Ghi trong `CONTRIBUTING.md` |
+| B-002 | 🔴 High | **Rsync thiếu `--delete` để lại file mồ côi.** `jar_settings_screen.dart` xoá ở `b5b1240` vẫn nằm trên máy chủ → test guard `sheet_co_nut_dong_test.dart` fail vì quét thấy file ma | ✅ Thêm `--delete` kèm `--filter='protect ...'` cho những thứ chỉ có ở máy chủ. Thử lại bằng cách trồng một file ma rồi chạy `flutter analyze` — file bị dọn |
+| B-003 | 🟡 Medium | **4 lỗi `unnecessary_unawaited` quay lại lần thứ tư** — `bee_mascot.dart:85,110`, `celebration.dart:99`, `onboarding_screen.dart:61`. Chốt chặn dựng ở `09a56d0` không giữ được | ✅ Nguyên nhân không phải ở mã: `git config core.hooksPath` là cấu hình **của từng máy**, máy này chưa từng chạy nên hook nằm trong repo mà git chưa gọi lần nào. Thêm test thứ năm canh đúng chỗ đó (`pre_commit_hook_test.dart:101`), tự bỏ qua ở CI kèm lý do in ra |
+| B-004 | 🟡 Medium | **GitLab lệch 39 commit** — các đợt làm gần đây chỉ push GitHub, trái policy ưu tiên GitLab private | ✅ Đã push cả nhánh lẫn tag; hai remote nay 0/0 |
 
-Bài học lặp lại của dự án: **thứ nào không có test canh thì sẽ trôi lại.** B-003 là lần thứ tư
-đúng bốn dòng đó quay về.
+Bài học lặp lại của dự án: **thứ nào không có test canh thì sẽ trôi lại.** B-003 là bản nâng cấp
+của bài học đó — có test canh vẫn trôi, vì bốn test cũ kiểm hook *có tồn tại và viết đúng*, không
+test nào kiểm hook *đã được cắm điện*. Chốt chặn chưa cắm điện thì không phải chốt chặn.
 
 **Đã làm nhiều hơn kế hoạch ở Sprint 4** vì chủ dự án yêu cầu theo thứ tự khác: trừ xu, duyệt tuỳ
 chọn, đổi thưởng, con tự chia xu đều đã xong trước khi Sprint 3 bắt đầu.
@@ -274,9 +275,13 @@ việc lúc mất mạng thì có mạng bố mẹ thấy.
       **Đo lại 08/09/2026 (`v0.7.12`): nợ này đang phình ra, không co lại.** `L10n.of` nay gọi
       **18** lần (+3 sau ba tuần làm tính năng), còn `Text('...')` tiếng Việt viết cứng lên
       **146** chuỗi (+48). Mỗi màn hình mới thêm chữ cứng nhanh hơn tốc độ đưa chữ cũ vào ARB.
-      Lộ trình chi tiết ở [`24-roadmap-da-ngon-ngu.md`](24-roadmap-da-ngon-ngu.md); nên có một
-      test canh **không thêm chuỗi cứng mới** trước khi bắt đầu dịch, nếu không dịch xong đợt này
-      thì đợt sau lại đầy.
+      Lộ trình chi tiết ở [`24-roadmap-da-ngon-ngu.md`](24-roadmap-da-ngon-ngu.md).
+
+      **Đã dựng chốt chặn ngày 08/09/2026** (`test/unit/chuoi_cung_test.dart`): đếm đủ mọi
+      literal có dấu tiếng Việt trong `lib/`, không chỉ trong `Text()` — ra **897**, tức con số
+      146 ở trên chỉ là phần nổi. Test khoá ngưỡng đó và đi **một chiều**: thêm chuỗi cứng mới
+      là đỏ, dọn bớt thì hạ ngưỡng xuống. Không đòi dọn nợ cũ trong một commit; chỉ không cho
+      nó lớn thêm trong lúc chờ dịch. Đã thử phá để chắc nó đỏ thật.
 - [ ] Cài đặt: âm thanh — hoãn có chủ ý. App chưa phát âm thanh nào; một công tắc không điều
       khiển gì là cờ chết, đúng thứ dự án này đã phải đi dọn năm lần.
 - [x] Trang trống ✅ (đã có sẵn ở mọi màn chính) và **trạng thái lỗi** — `LoiManHinh` +
@@ -435,7 +440,8 @@ theo vai) xếp sau, thứ tự đề nghị ghi trong chính tài liệu đó.
 | Phiên bản | Nội dung |
 |---|---|
 | ~~v0.3.0~~ → **v0.7.12** | ✅ Xong 6 trụ cột UX/UI Profile, Hũ xu, Photo Proof, Stats & Journey Leo núi |
-| **v0.8 (kế tiếp)** | Trả nợ B-001→B-004; nối FCM push thật + màn mồi xin quyền; đa ngôn ngữ theo `24-roadmap-da-ngon-ngu.md` |
+| **v0.7.13** | ✅ Trả xong nợ B-001→B-004 và khoá ngưỡng chuỗi cứng. Không đổi gì trên màn hình |
+| **v0.8 (kế tiếp)** | Nối FCM push thật + màn mồi xin quyền; đa ngôn ngữ theo `24-roadmap-da-ngon-ngu.md` (hạ dần ngưỡng 897 trong `chuoi_cung_test.dart`) |
 | v1.1 | Level, thêm huy hiệu; ~~bằng chứng ảnh~~ (đã xong ở v0.3.x) / ghi chú; weekly goals; **lãi tượng trưng cho hũ Để dành** |
 | v1.2 | Thống kê tuần/tháng, xuất CSV/PDF; bảng thành tích in được |
 | v1.3 | Desktop 3 cột tối ưu, phím tắt; widget màn hình chính iOS/Android |
