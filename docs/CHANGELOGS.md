@@ -4,6 +4,40 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ---
 
+## v0.7.13+47 (2026-09-08) — Vá chốt chặn, không vá tính năng
+
+Bản này **không đổi gì trên màn hình**. Toàn bộ nằm ở lớp canh chất lượng, sau
+khi bốn lỗi analyzer quay lại lần thứ tư dù đã có hook và bốn test canh.
+
+### Vì sao chốt chặn không chặn
+
+`.githooks/pre-commit` nằm trong repo từ 26/08, các test canh nó vẫn xanh, mà
+hook thì **chưa chạy lần nào**: `git config core.hooksPath` là cấu hình của
+từng máy, không đi theo repo, và máy này chưa từng chạy câu đó. Ba test cũ kiểm
+"hook có tồn tại và viết đúng", không test nào kiểm "hook đã được cắm điện".
+
+Thêm test thứ năm canh đúng chỗ đó, và ghi câu lệnh cài vào `CONTRIBUTING.md`.
+Test tự bỏ qua ở CI (CI không commit — chính nó là lớp chặn cuối) và ở mọi bản
+chép không có `.git`, kèm lý do in ra để không lẳng lặng nuốt mất một test.
+
+### Lỗi analyzer không có thật
+
+Máy này chạy `flutter`/`dart` từ xa qua shim rsync. Shim thiếu ba việc, và mỗi
+thiếu sót đẻ ra một loại lỗi **không tồn tại**: file đã xoá còn nằm lại máy
+build làm đỏ test quét thư mục; mã sinh tự động không được kéo về nên analyze
+báo "undefined getter" cho cột vừa thêm; và mã sinh tự động bị đẩy ngược lên
+khiến `build_runner` thấy đầu vào không đổi, báo "wrote 0 outputs" rồi giữ
+nguyên file hỏng. Đã vá cả ba và ghi lại trong `CONTRIBUTING.md`.
+
+### Bánh cóc chặn nợ đa ngôn ngữ
+
+Chuỗi tiếng Việt viết thẳng vào widget tăng ~50% trong ba tuần, trong khi số
+chỗ gọi `L10n.of` chỉ nhích 15 → 18. `chuoi_cung_test.dart` khoá con số ở mức
+hiện tại: thêm chuỗi cứng mới là đỏ, dọn bớt thì hạ ngưỡng xuống. Không đòi dọn
+nợ cũ — chỉ không cho nó lớn thêm.
+
+---
+
 ## v0.7.12+46 (2026-08-30) — Chọn hũ cho bé mới, và thêm được ông bà
 
 Hai việc chủ dự án nêu 30/08/2026.
