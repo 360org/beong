@@ -17,6 +17,8 @@ Tài liệu này tổng hợp toàn bộ các trường thông tin, câu trả l
 | **App Name (Tên ứng dụng)** | `Bé Ong — Con Tự Lập, Tích Xu` (vi) / `Bé Ong — Kids Habits & Chores` (en) |
 | **Subtitle (Phụ đề)** | `Bé Tự Lập & Nuôi Dưỡng Thói Quen` (vi) / `Independent Kids & Smart Habits` (en) |
 | **Bundle ID** | `net.beong.app` |
+| **Apple App Store URL** | `https://apps.apple.com/vn/app/b%C3%A9-ong/id6799691861` |
+| **Apple App ID** | `6799691861` |
 | **SKU** | `BEONG_IOS_APP` |
 | **Primary Category** | `Education` (Giáo dục) |
 | **Secondary Category** | `Lifestyle` (Phong cách sống) |

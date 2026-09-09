@@ -6,6 +6,10 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ## v0.7.13+47 (2026-09-08) — Vá chốt chặn, không vá tính năng
 
+### [RELEASE]
+- **Chính thức có mặt trên Apple App Store**: Ứng dụng đã được Apple kiểm duyệt và phát hành chính thức tại [App Store ID 6799691861](https://apps.apple.com/vn/app/b%C3%A9-ong/id6799691861).
+- **Cập nhật Website & Deep Link Pairing**: Đồng bộ toàn bộ liên kết App Store chính thức trên `https://beong.net`, trang giới thiệu và luồng quét mã QR ghép cặp máy.
+
 Bản này **không đổi gì trên màn hình**. Toàn bộ nằm ở lớp canh chất lượng, sau
 khi bốn lỗi analyzer quay lại lần thứ tư dù đã có hook và bốn test canh.
 
