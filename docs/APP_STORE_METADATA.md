@@ -19,6 +19,7 @@ Tài liệu này tổng hợp toàn bộ các trường thông tin, câu trả l
 | **Bundle ID** | `net.beong.app` |
 | **Apple App Store URL** | `https://apps.apple.com/vn/app/b%C3%A9-ong/id6799691861` |
 | **Apple App ID** | `6799691861` |
+| **Google Play URL** | `https://play.google.com/store/apps/details?id=net.beong.app` |
 | **SKU** | `BEONG_IOS_APP` |
 | **Primary Category** | `Education` (Giáo dục) |
 | **Secondary Category** | `Lifestyle` (Phong cách sống) |

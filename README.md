@@ -17,15 +17,16 @@ số trẻ hay số task.
 
 ## Trạng thái
 
-**`v0.2.12` — Đã chính thức có mặt trên Apple App Store.**
+**`v0.7.13+47` — Đã chính thức có mặt trên cả Apple App Store và Google Play.**
 
 - 🍏 **App Store**: [Bé Ong trên Apple App Store](https://apps.apple.com/vn/app/b%C3%A9-ong/id6799691861)
+- 🤖 **Google Play**: [Bé Ong trên Google Play](https://play.google.com/store/apps/details?id=net.beong.app)
 - 🌐 **Website**: [beong.net](https://beong.net)
 
 | | |
 |---|---|
-| Đã xong | Việc nhà, thói quen kéo thả, xu và mô hình 3 hũ xu, phần thưởng có duyệt, 16 huy hiệu gamification, mục tiêu để dành, điều ước, bản đồ hành trình phiêu lưu, nhiều con, mật khẩu riêng từng hồ sơ, giao diện Sáng/Tối, báo lỗi, đồng bộ nhiều máy quét QR, phát hành Apple App Store |
-| Đang làm | Phát hành Google Play Store, hoàn thiện closed testing |
+| Đã xong | Việc nhà, thói quen kéo thả, xu và mô hình 3 hũ xu, phần thưởng có duyệt, 16 huy hiệu gamification, mục tiêu để dành, điều ước, bản đồ hành trình phiêu lưu, nhiều con, mật khẩu riêng từng hồ sơ, giao diện Sáng/Tối, báo lỗi, đồng bộ nhiều máy quét QR, phát hành Apple App Store, phát hành Google Play Store |
+| Đang làm | Theo dõi phản hồi người dùng trên hai chợ ứng dụng, chuẩn bị bản cập nhật kế tiếp |
 | Kế hoạch | Bổ sung thêm các gói thử thách theo tuần và nâng cấp trải nghiệm tương tác âm thanh |
 
 Lộ trình đánh dấu từng mục: [`docs/05-roadmap.md`](docs/05-roadmap.md) ·

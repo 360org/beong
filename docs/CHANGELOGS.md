@@ -8,6 +8,7 @@ Toàn bộ lịch sử phát triển, nâng cấp tính năng, cải tiến giao
 
 ### [RELEASE]
 - **Chính thức có mặt trên Apple App Store**: Ứng dụng đã được Apple kiểm duyệt và phát hành chính thức tại [App Store ID 6799691861](https://apps.apple.com/vn/app/b%C3%A9-ong/id6799691861).
+- **Chính thức có mặt trên Google Play (2026-09-11)**: Bản Android cùng build đã được Google kiểm duyệt và phát hành công khai tại [Google Play — net.beong.app](https://play.google.com/store/apps/details?id=net.beong.app). Nút "Google Play" trên `beong.net` và trang giới thiệu đã trỏ về link chính thức (trước đó còn để `href="#"`).
 - **Cập nhật Website & Deep Link Pairing**: Đồng bộ toàn bộ liên kết App Store chính thức trên `https://beong.net`, trang giới thiệu và luồng quét mã QR ghép cặp máy.
 
 Bản này **không đổi gì trên màn hình**. Toàn bộ nằm ở lớp canh chất lượng, sau
